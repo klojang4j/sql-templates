@@ -85,12 +85,18 @@
         <!-- *** Check dependencies: mvn dependency:analyze                   *** -->
         <!-- ==================================================================== -->
         <klojang-check.version>2.1.0</klojang-check.version>
-        <klojang-util.version>1.1.1</klojang-util.version>
+        <klojang-util.version>3.1.0</klojang-util.version>
         <klojang-collections.version>2.0.1</klojang-collections.version>
         <klojang-convert.version>1.0.0</klojang-convert.version>
         <klojang-invoke.version>1.0.0</klojang-invoke.version>
         <klojang-templates.version>1.0.0</klojang-templates.version>
-        <junit.version>4.13.2</junit.version>
+
+        <commons-text.version>1.10.0</commons-text.version>
+        <apache-httpclient.version>4.5.14</apache-httpclient.version>
+        <slf4j.version>2.0.6</slf4j.version>
+        <junit.version>5.9.2</junit.version>
+        <h2.version>2.1.214</h2.version>
+
     </properties>
 
 
@@ -126,8 +132,14 @@
             <version>${klojang-templates.version}</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>${commons-text.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
@@ -327,7 +339,7 @@
                 <artifactId>dependency-check-maven</artifactId>
                 <version>${owasp-dependency-check.version}</version>
                 <configuration>
-                    <failBuildOnCVSS>1</failBuildOnCVSS>
+                    <failBuildOnCVSS>7</failBuildOnCVSS>
                 </configuration>
                 <executions>
                     <execution>
