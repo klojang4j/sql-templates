@@ -1,5 +1,7 @@
 module org.klojang.db {
 
+  exports org.klojang.db;
+
   requires java.sql;
 
   requires org.apache.commons.text;
