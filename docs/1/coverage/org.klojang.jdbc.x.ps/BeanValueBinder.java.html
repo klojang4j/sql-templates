@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BeanValueBinder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.ps</a> &gt; <span class="el_source">BeanValueBinder.java</span></div><h1>BeanValueBinder.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.ps;
+
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.NamedParameter;
+import org.klojang.invoke.Getter;
+import org.klojang.invoke.GetterFactory;
+import org.klojang.util.ClassMethods;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Binds a single value from a JavaBean into a PreparedStatement.
+ *
+ * @param &lt;FIELD_TYPE&gt;
+ * @param &lt;PARAM_TYPE&gt;
+ * @author Ayco Holleman
+ */
+class BeanValueBinder&lt;FIELD_TYPE, PARAM_TYPE&gt; {
+
+<span class="nc" id="L26">  private static final Logger LOG = LoggerFactory.getLogger(BeanValueBinder.class);</span>
+
+  static &lt;T&gt; void bindBean(PreparedStatement ps,
+      T bean,
+      BeanValueBinder&lt;?, ?&gt;[] binders) throws Throwable {
+<span class="nc" id="L31">    LOG.debug(&quot;Binding {} to PreparedStatement&quot;, bean.getClass().getSimpleName());</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">    for (BeanValueBinder&lt;?, ?&gt; binder : binders) {</span>
+<span class="nc" id="L33">      binder.bindValue(ps, bean);</span>
+    }
+<span class="nc" id="L35">  }</span>
+
+  static BeanValueBinder&lt;?, ?&gt;[] createBeanValueBinders(Class&lt;?&gt; beanClass,
+      List&lt;NamedParameter&gt; params,
+      BindInfo bindInfo,
+      Collection&lt;NamedParameter&gt; bound) {
+<span class="nc" id="L41">    ReceiverNegotiator negotiator = ReceiverNegotiator.getInstance();</span>
+<span class="nc" id="L42">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
+<span class="nc" id="L43">    List&lt;BeanValueBinder&lt;?, ?&gt;&gt; binders = new ArrayList&lt;&gt;(params.size());</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">    for (NamedParameter param : params) {</span>
+<span class="nc" id="L45">      Getter getter = getters.get(param.getName());</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">      if (getter == null) {</span>
+<span class="nc" id="L47">        continue;</span>
+      }
+<span class="nc" id="L49">      bound.add(param);</span>
+<span class="nc" id="L50">      String property = param.getName();</span>
+<span class="nc" id="L51">      Class&lt;?&gt; type = getter.getReturnType();</span>
+      Receiver&lt;?, ?&gt; receiver;
+<span class="nc bnc" id="L53" title="All 2 branches missed.">      if (ClassMethods.isSubtype(type, Enum.class)</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">          &amp;&amp; bindInfo.bindEnumUsingToString(property)) {</span>
+<span class="nc" id="L55">        receiver = EnumReceivers.ENUM_TO_STRING;</span>
+      } else {
+<span class="nc" id="L57">        Integer sqlType = bindInfo.getSqlType(property, type);</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (sqlType == null) {</span>
+<span class="nc" id="L59">          receiver = negotiator.getDefaultReceiver(type);</span>
+        } else {
+<span class="nc" id="L61">          receiver = negotiator.findReceiver(type, sqlType);</span>
+        }
+      }
+<span class="nc" id="L64">      binders.add(new BeanValueBinder&lt;&gt;(getter, receiver, param));</span>
+<span class="nc" id="L65">    }</span>
+<span class="nc" id="L66">    return binders.toArray(BeanValueBinder[]::new);</span>
+  }
+
+  private final Getter getter;
+  private final Receiver&lt;FIELD_TYPE, PARAM_TYPE&gt; receiver;
+  private final NamedParameter param;
+
+  private BeanValueBinder(Getter getter,
+      Receiver&lt;FIELD_TYPE, PARAM_TYPE&gt; receiver,
+<span class="nc" id="L75">      NamedParameter param) {</span>
+<span class="nc" id="L76">    this.getter = getter;</span>
+<span class="nc" id="L77">    this.receiver = receiver;</span>
+<span class="nc" id="L78">    this.param = param;</span>
+<span class="nc" id="L79">  }</span>
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private &lt;T&gt; void bindValue(PreparedStatement ps, T bean) throws Throwable {
+<span class="nc" id="L83">    FIELD_TYPE beanValue = (FIELD_TYPE) getter.read(bean);</span>
+<span class="nc" id="L84">    PARAM_TYPE paramValue = receiver.getParamValue(beanValue);</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">    if (beanValue == paramValue) { // No adapter defined</span>
+<span class="nc" id="L86">      LOG.debug(&quot;-&gt; Parameter \&quot;{}\&quot;: {}&quot;, getter.getProperty(), paramValue);</span>
+    } else {
+<span class="nc" id="L88">      String fmt = &quot;-&gt; Parameter \&quot;{}\&quot;: {} (bean value: {})&quot;;</span>
+<span class="nc" id="L89">      LOG.debug(fmt, param.getName(), paramValue, beanValue);</span>
+    }
+<span class="nc" id="L91">    param.getIndices().forEachThrowing(i -&gt; receiver.bind(ps, i, paramValue));</span>
+<span class="nc" id="L92">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

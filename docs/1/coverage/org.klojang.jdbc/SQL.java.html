@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQL.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQL.java</span></div><h1>SQL.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
+
+import org.klojang.check.Check;
+import org.klojang.templates.NameMapper;
+import org.klojang.templates.RenderSession;
+import org.klojang.templates.Template;
+import org.klojang.util.Tuple2;
+import org.klojang.util.collection.IntList;
+import org.klojang.jdbc.x.ps.BeanBinder;
+import org.klojang.jdbc.x.ps.MapBinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.klojang.check.CommonChecks.no;
+import static org.klojang.check.CommonChecks.notNull;
+import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.check.CommonExceptions.illegalState;
+import static org.klojang.util.ObjectMethods.ifNull;
+
+/**
+ * A factory for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate} instances. An {@code SQL}
+ * instance represents a single SQL statement that cannot be changed. The {statement can be
+ * parametrized in two ways:
+ *
+ * &lt;p&gt;
+ *
+ * &lt;ol&gt;
+ *   &lt;li&gt;Using named parameters for values in WHERE, HAVING and LIMIT clauses. Named parameters
+ *       start with a colon. For example: {@code :firstName}. Named parameters are not bound in the
+ *       {@code SQL} instance itself, but in the {@code SQLQuery}, {@code SQLInsert} or {@code
+ *       SQLUpdate} instance obtained from it.
+ *   &lt;li&gt;Using Klojang template variables for the other parts of a query. Although this basically
+ *       lets you parametrize whatever makes you happy, it is especially meant to parametrize the
+ *       sort column in the ORDER BY cluase - a common use case in web applications. Klojang
+ *       template variables must be set in the {@code SQL} instance itself.
+ * &lt;/ol&gt;
+ *
+ * &lt;p&gt;In other words, the SQL fed into an instance of this class might look like this:
+ *
+ * &lt;blockquote&gt;
+ *
+ * &lt;pre&gt;{@code
+ * SELECT *
+ *   FROM EMPLOYEE
+ *  WHERE FIRST_NAME = :firstName
+ *    AND LAST_NAME = :lastName
+ *  ORDER BY ~%sortColumn%
+ * }&lt;/pre&gt;
+ *
+ * &lt;/blockquote&gt;
+ *
+ * &lt;p&gt;You would then set the {@code age} and {@code salary} variables in the {@code SQL} instance,
+ * request a {@code SQLQuery} from it, and then bind the {@code firstName} and {@code lastName}
+ * parameters in the {@code SQLQuery} instance:
+ *
+ * &lt;p&gt;
+ *
+ * &lt;blockquote&gt;
+ *
+ * &lt;pre&gt;{@code
+ * SQL sql = SQL.create(theAboveSQL);
+ * sql.set(&quot;sortColumn&quot;, &quot;BIRTH_DATE&quot;);
+ * SQLQuery query = sql.prepareQuery(conn);
+ * List&lt;Employee&gt; employees =
+ * query
+ *  .bind(&quot;firstName&quot;, &quot;John&quot;)
+ *  .bind(&quot;lastName&quot;, &quot;Smith&quot;)
+ *  .getBeanifier(Employee.class)
+ *  .beanifyAll();
+ * }&lt;/pre&gt;
+ *
+ * &lt;/blockquote&gt;
+ *
+ * &lt;p&gt;If the SQL statement contains many named parameters and Klojang template variables, and is
+ * going to be executed often, you might want to cache the {@code SQL} instance (e.g. as a static
+ * final variable in your DAO class).
+ *
+ * @author Ayco Holleman
+ */
+public class SQL {
+
+<span class="fc" id="L91">  private static final Logger LOG = LoggerFactory.getLogger(SQL.class);</span>
+
+  private static final String ERR_LOCKED =
+      &quot;An SQLQuery, SQLInsert or SQLUpdate is still active. &quot;
+          + &quot;Did you forget to call close() on it?&quot;;
+  private static final String ERR_NO_JDBC_SQL =
+      &quot;No valid JDBC SQL has been generated yet. &quot;
+          + &quot;Call prepareQuery/prepareInsert/prepareUpdate first&quot;;
+
+  /**
+   * Creates an {@code SQL} instances from the specified SQL statement.
+   *
+   * @param sql The SQL
+   * @return an {@code SQL} instance
+   */
+  public static SQL create(String sql) {
+<span class="fc" id="L107">    return create(sql, new BindInfo() {});</span>
+  }
+
+  public static SQL create(String sql, BindInfo bindInfo) {
+<span class="fc" id="L111">    return new SQL(new SQLNormalizer(sql), bindInfo);</span>
+  }
+
+  public static SQLInsertBuilder prepareInsert() {
+<span class="nc" id="L115">    return new SQLInsertBuilder();</span>
+  }
+
+<span class="fc" id="L118">  private final ReentrantLock lock = new ReentrantLock();</span>
+
+  /* These maps are unlikely to grow beyond one, maybe two entries */
+<span class="fc" id="L121">  private final Map&lt;Class&lt;?&gt;, BeanBinder&lt;?&gt;&gt; beanBinders = new HashMap&lt;&gt;(4);</span>
+<span class="fc" id="L122">  private final Map&lt;Tuple2&lt;Class&lt;?&gt;, NameMapper&gt;, BeanifierFactory&lt;?&gt;&gt; beanifiers =</span>
+      new HashMap&lt;&gt;(4);
+<span class="fc" id="L124">  private final Map&lt;NameMapper, MappifierFactory&gt; mappifiers = new HashMap&lt;&gt;(4);</span>
+
+  private final SQLNormalizer normalizer;
+  private final BindInfo bindInfo;
+
+  private Template template;
+  private List&lt;Tuple2&lt;String, Object&gt;&gt; vars;
+  private String jdbcSQL;
+
+<span class="fc" id="L133">  private SQL(SQLNormalizer normalizer, BindInfo bindInfo) {</span>
+<span class="fc" id="L134">    this.normalizer = normalizer;</span>
+<span class="fc" id="L135">    this.bindInfo = bindInfo;</span>
+<span class="fc" id="L136">  }</span>
+
+  /**
+   * Sets the value of a Klojang template variable within the SQL.
+   *
+   * @param varName The name of the variable
+   * @param value The value to give it
+   * @return This {@code SQL} instance
+   */
+  public SQL set(String varName, Object value) {
+<span class="nc" id="L146">    Check.notNull(varName, &quot;varName&quot;);</span>
+<span class="nc" id="L147">    Check.that(value).is(notNull(), &quot;Value of %s must not be null&quot;, varName);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">    if (vars == null) {</span>
+<span class="nc" id="L149">      vars = new ArrayList&lt;&gt;();</span>
+    }
+<span class="nc" id="L151">    vars.add(Tuple2.of(varName, value));</span>
+<span class="nc" id="L152">    return this;</span>
+  }
+
+  /**
+   * If you decide to go along and parametrize the sort column using a variable named {@code
+   * ~%sortColumn%}, this method lets you set the value for that variable.
+   *
+   * @param sortColumn The column on which to sort
+   * @return This {@code SQL} instance
+   */
+  public SQL setSortColumn(Object sortColumn) {
+<span class="nc" id="L163">    return set(&quot;sortColumn&quot;, sortColumn);</span>
+  }
+
+  /**
+   * If you decide to go along and parametrize the sort order using a variable named {@code
+   * ~%sortOrder%}, this method lets you set the value for that variable. Calling {@code toString()}
+   * on the argument must yield &quot;ASC&quot;, &quot;DESC&quot; or an empty string. The argument may also be a {@code
+   * Boolean} with {@code false} being translated into &quot;ASC&quot; and {@code true} into &quot;DESC&quot;.
+   *
+   * @param sortOrder The sort order
+   * @return This {@code SQL} instance
+   */
+  public SQL setSortOrder(Object sortOrder) {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">    return (sortOrder instanceof Boolean)</span>
+<span class="nc" id="L177">        ? setDescending((Boolean) sortOrder)</span>
+<span class="nc" id="L178">        : set(&quot;sortOrder&quot;, sortOrder);</span>
+  }
+
+  /**
+   * Sets the value of the {@code ~%sortOrder%} variable to &quot;DESC&quot; if the argument equals {@code
+   * true} and to &quot;ASC&quot; if the argument equals {@code false}. This presumes (and requires) that you
+   * have that variable in the SQL statement.
+   *
+   * @param isDescending Whether to sort in descending order
+   * @return This {@code SQL} instance
+   */
+  public SQL setDescending(boolean isDescending) {
+<span class="nc bnc" id="L190" title="All 2 branches missed.">    return set(&quot;sortOrder&quot;, isDescending ? &quot;DESC&quot; : &quot;ASC&quot;);</span>
+  }
+
+  /**
+   * Sets the values of the values of the {@code ~%sortColumn%} and {@code ~%sortOrder%} variables.
+   * This presumes (and requires) that you have those variables in the SQL statement.
+   *
+   * @param sortColumn The column on which to sort
+   * @param sortOrder The sort order
+   * @return This {@code SQL} instance
+   */
+  public SQL setOrderBy(Object sortColumn, Object sortOrder) {
+<span class="nc" id="L202">    return setSortColumn(sortColumn).setSortOrder(sortOrder);</span>
+  }
+
+  /**
+   * Sets the values of the values of the {@code ~%sortColumn%} and {@code ~%sortOrder%} variables.
+   * This presumes (and requires) that you have those variables in the SQL statement.
+   *
+   * @param sortColumn
+   * @param isDescending
+   * @return This {@code SQL} instance
+   */
+  public SQL setOrderBy(Object sortColumn, boolean isDescending) {
+<span class="nc" id="L214">    return setSortColumn(sortColumn).setDescending(isDescending);</span>
+  }
+
+  /**
+   * Produces a {@link SQLQuery} instance from the SQL passed in through one of the {@link
+   * #create(String) create} methods. Calling this method for SQL that is not a SELECT statement has
+   * undefined consequences.
+   *
+   * @param con The database connection to use when executing the statement
+   * @return
+   */
+  public SQLQuery prepareQuery(Connection con) {
+<span class="nc" id="L226">    return prepare(con, SQLQuery::new);</span>
+  }
+
+  /**
+   * Produces a {@link SQLInsert} instance from the SQL passed in through one of the {@link
+   * #create(String) create} methods. Calling this method for SQL that is not an INSERT statement
+   * has undefined consequences.
+   *
+   * @param con The database connection to use when executing the statement
+   * @return
+   */
+  public SQLInsert prepareInsert(Connection con) {
+<span class="nc" id="L238">    return prepare(con, SQLInsert::new);</span>
+  }
+
+  /**
+   * Produces a {@link SQLInsert} instance from the SQL passed in through one of the {@link
+   * #create(String) create} methods. Calling this method for SQL that is not an UPDATE OR DELETE
+   * statement has undefined consequences.
+   *
+   * @param con The database connection to use when executing the statement
+   * @return
+   */
+  public SQLUpdate prepareUpdate(Connection con) {
+<span class="nc" id="L250">    return prepare(con, SQLUpdate::new);</span>
+  }
+
+  /**
+   * Returns the original, unparsed SQL, with all named parameters and Klojang template variables
+   * still in it.
+   *
+   * @return The original, unparsed SQL
+   */
+  public String getUnparsedSQL() {
+<span class="nc" id="L260">    return normalizer.getUnparsedSQL();</span>
+  }
+
+  /**
+   * Returns a SQL string in which all named parameters have been replaced with positional
+   * parameters (i&amp;#46;e&amp;#46; a question mark), but with the Klojang template variables still in it.
+   *
+   * @return A SQL string in which all named parameters have been replaced with positional
+   *     parameters
+   */
+  public String getNormalizedSQL() {
+<span class="fc" id="L271">    return normalizer.getNormalizedSQL();</span>
+  }
+
+  /**
+   * Returns fully JDBC-compliant, executable SQL.
+   *
+   * @return Fully JDBC-compliant, executable SQL
+   */
+  public String getJdbcSQL() {
+<span class="nc" id="L280">    return Check.that(jdbcSQL).is(notNull(), ERR_NO_JDBC_SQL).ok();</span>
+  }
+
+  /**
+   * Returns the named parameters that were extracted from the SQL passed in through the {@link
+   * #create(String) create} methods.
+   *
+   * @return The named parameters that were extracted from the SQL
+   */
+  public List&lt;NamedParameter&gt; getParameters() {
+<span class="fc" id="L290">    return normalizer.getNamedParameters();</span>
+  }
+
+  /**
+   * Returns a map that specifies for each named parameter at which positions it is found within the
+   * SQL.
+   *
+   * @return A map that specifies for each named parameter at which positions it is found within the
+   *     SQL
+   */
+  public Map&lt;String, IntList&gt; getParameterMap() {
+<span class="fc" id="L301">    return normalizer.getParameterMap();</span>
+  }
+
+  @Override
+  public String toString() {
+<span class="nc" id="L306">    return ifNull(jdbcSQL, getNormalizedSQL());</span>
+  }
+
+  void unlock() {
+<span class="nc" id="L310">    vars = null;</span>
+<span class="nc" id="L311">    jdbcSQL = null;</span>
+<span class="nc" id="L312">    lock.unlock();</span>
+<span class="nc" id="L313">  }</span>
+
+  MapBinder getMapBinder() {
+<span class="nc" id="L316">    return new MapBinder(getParameters(), bindInfo);</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  &lt;T&gt; BeanBinder&lt;T&gt; getBeanBinder(Class&lt;T&gt; beanClass) {
+<span class="nc" id="L321">    BeanBinder&lt;T&gt; bb = (BeanBinder&lt;T&gt;) beanBinders.get(beanClass);</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">    if (bb == null) {</span>
+<span class="nc" id="L323">      bb = new BeanBinder&lt;&gt;(beanClass, getParameters(), bindInfo);</span>
+<span class="nc" id="L324">      beanBinders.put(beanClass, bb);</span>
+    }
+<span class="nc" id="L326">    return bb;</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(Class&lt;T&gt; clazz, NameMapper mapper) {
+<span class="nc" id="L331">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
+<span class="nc" id="L332">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">    if (bf == null) {</span>
+<span class="nc" id="L334">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, mapper));</span>
+    }
+<span class="nc" id="L336">    return bf;</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(
+      Class&lt;T&gt; clazz, Supplier&lt;T&gt; supplier, NameMapper mapper) {
+<span class="nc" id="L342">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
+<span class="nc" id="L343">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">    if (bf == null) {</span>
+<span class="nc" id="L345">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, supplier, mapper));</span>
+    }
+<span class="nc" id="L347">    return bf;</span>
+  }
+
+  MappifierFactory getMappifierFactory(NameMapper mapper) {
+<span class="nc" id="L351">    return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);</span>
+  }
+
+  private &lt;T extends SQLStatement&lt;?&gt;&gt; T prepare(
+      Connection con, BiFunction&lt;Connection, SQL, T&gt; constructor) {
+<span class="nc" id="L356">    Check.on(STATE, lock.isHeldByCurrentThread()).is(no(), ERR_LOCKED);</span>
+<span class="nc" id="L357">    lock.lock();</span>
+    try {
+<span class="nc bnc" id="L359" title="All 2 branches missed.">      if (vars != null) {</span>
+<span class="nc" id="L360">        LOG.debug(&quot;Processing SQL template variables&quot;);</span>
+<span class="nc bnc" id="L361" title="All 2 branches missed.">        if (template == null) {</span>
+<span class="nc" id="L362">          template = Template.fromString(getNormalizedSQL());</span>
+        }
+<span class="nc" id="L364">        RenderSession session = template.newRenderSession();</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        for (Tuple2&lt;String, Object&gt; var : vars) {</span>
+<span class="nc" id="L366">          LOG.debug(&quot;** Variable \&quot;{}\&quot;: {}&quot;, var.first(), var.second());</span>
+<span class="nc" id="L367">          session.set(var.first(), var.second());</span>
+<span class="nc" id="L368">        }</span>
+<span class="nc" id="L369">        jdbcSQL = session.render();</span>
+<span class="nc" id="L370">      } else {</span>
+<span class="nc" id="L371">        jdbcSQL = getNormalizedSQL();</span>
+      }
+<span class="nc" id="L373">      return constructor.apply(con, this);</span>
+<span class="nc" id="L374">    } catch (Throwable t) {</span>
+<span class="nc" id="L375">      unlock();</span>
+<span class="nc" id="L376">      throw KJSQLException.wrap(t, this);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

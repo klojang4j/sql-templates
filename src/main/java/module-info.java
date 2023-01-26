@@ -1,6 +1,6 @@
 module org.klojang.db {
 
-  exports org.klojang.db;
+  exports org.klojang.jdbc;
 
   requires java.sql;
 

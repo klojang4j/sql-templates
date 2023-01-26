@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BeanifierFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">BeanifierFactory.java</span></div><h1>BeanifierFactory.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
+import org.klojang.check.Check;
+import org.klojang.templates.NameMapper;
+import org.klojang.util.ExceptionMethods;
+import org.klojang.jdbc.x.rs.BeanChannel;
+
+import static org.klojang.jdbc.x.rs.BeanChannel.createChannels;
+
+/**
+ * A factory for {@link ResultSetBeanifier} instances producing JavaBeans of type {@code &lt;T&gt;}. The
+ * {@link ResultSet result sets} passed to a {@code BeanifierFactory} in return for a beanifier
+ * instance cannot just be any arbitrary {@code ResultSet}; they must all be created from the same
+ * SQL query. The very first {@code ResultSet} passed to a {@code BeanifierFactory} is used to
+ * create and cache the objects needed to convert the {@code ResultSet} into a JavaBean. Subsequent
+ * calls to {@link #getBeanifier(ResultSet)} will use these objects, too. Hence, all result sets
+ * passed to {@code getBeanifier} must be &lt;i&gt;compatible&lt;/i&gt; with the first one: they must have at
+ * least as many columns and the column types must match those of the first result set. Column names
+ * do in fact no longer matter. The column-to-property mapping is set up and fixed after the first
+ * call to {@code getBeanifier}.
+ *
+ * @author Ayco Holleman
+ * @param &lt;T&gt; The type of JavaBeans that the {@code BeanifierFactory} will be catering for
+ */
+@SuppressWarnings(&quot;rawtypes&quot;)
+public class BeanifierFactory&lt;T&gt; {
+
+<span class="nc" id="L33">  private final AtomicReference&lt;BeanChannel[]&gt; ref = new AtomicReference&lt;&gt;();</span>
+
+  private final Class&lt;T&gt; beanClass;
+  private final Supplier&lt;T&gt; beanSupplier;
+  private final NameMapper mapper;
+
+  /**
+   * Creates a new {@code BeanifierFactory}. Column names will be mapped {@link NameMapper#AS_IS
+   * as-is} to property names. The JavaBeans will be created through {@code
+   * beanClass.getDeclaredConstructor().newInstance()}.
+   *
+   * @param beanClass The class of the JavaBeans that the {@code BeanifierFactory} will be catering
+   *     for
+   */
+  public BeanifierFactory(Class&lt;T&gt; beanClass) {
+<span class="nc" id="L48">    this(beanClass, () -&gt; newInstance(beanClass), NameMapper.AS_IS);</span>
+<span class="nc" id="L49">  }</span>
+
+  /**
+   * Creates a new {@code BeanifierFactory}. Column names will be mapped {@link NameMapper#AS_IS
+   * as-is} to property names.
+   *
+   * @param beanClass The class of the JavaBeans that the {@code BeanifierFactory} will be catering
+   *     for
+   * @param beanSupplier The supplier of the JavaBeans
+   */
+  public BeanifierFactory(Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier) {
+<span class="nc" id="L60">    this(beanClass, beanSupplier, NameMapper.AS_IS);</span>
+<span class="nc" id="L61">  }</span>
+
+  /**
+   * Creates a new {@code BeanifierFactory}. The JavaBeans will be created through {@code
+   * beanClass.getDeclaredConstructor().newInstance()}.
+   *
+   * @param beanClass The class of the JavaBeans that the {@code BeanifierFactory} will be catering
+   *     for
+   * @param columnToPropertyMapper A {@code NameMapper} mapping column names to property names
+   */
+  public BeanifierFactory(Class&lt;T&gt; beanClass, NameMapper columnToPropertyMapper) {
+<span class="nc" id="L72">    this(beanClass, () -&gt; newInstance(beanClass), columnToPropertyMapper);</span>
+<span class="nc" id="L73">  }</span>
+
+  /**
+   * Creates a new {@code BeanifierFactory}.
+   *
+   * @param beanClass The class of the JavaBean that the {@code BeanifierFactory} will be catering
+   *     for
+   * @param beanSupplier The supplier of the JavaBeans
+   * @param columnToPropertyMapper A {@code NameMapper} mapping column names to property names
+   */
+  public BeanifierFactory(
+<span class="nc" id="L84">      Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier, NameMapper columnToPropertyMapper) {</span>
+<span class="nc" id="L85">    this.beanClass = Check.notNull(beanClass, &quot;beanClass&quot;).ok();</span>
+<span class="nc" id="L86">    this.beanSupplier = Check.notNull(beanSupplier, &quot;beanSupplier&quot;).ok();</span>
+<span class="nc" id="L87">    this.mapper = Check.notNull(columnToPropertyMapper, &quot;columnToPropertyMapper&quot;).ok();</span>
+<span class="nc" id="L88">  }</span>
+
+  /**
+   * Returns a {@code ResultSetBeanifier} that will convert the rows in the specified {@code
+   * ResultSet} into JavaBeans of type {@code &lt;T&gt;}.
+   *
+   * @param rs The {@code ResultSet}
+   * @return A {@code ResultSetBeanifier} that will convert the rows in the specified {@code
+   *     ResultSet} into JavaBeans of type {@code &lt;T&gt;}
+   * @throws SQLException
+   */
+  public ResultSetBeanifier&lt;T&gt; getBeanifier(ResultSet rs) throws SQLException {
+<span class="nc bnc" id="L100" title="All 2 branches missed.">    if (!rs.next()) {</span>
+<span class="nc" id="L101">      return EmptyBeanifier.INSTANCE;</span>
+    }
+    BeanChannel[] channels;
+<span class="nc bnc" id="L104" title="All 2 branches missed.">    if ((channels = ref.getPlain()) == null) {</span>
+<span class="nc" id="L105">      synchronized (this) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (ref.get() == null) {</span>
+<span class="nc" id="L107">          ref.set(channels = createChannels(rs, beanClass, mapper));</span>
+        }
+<span class="nc" id="L109">      }</span>
+    }
+<span class="nc" id="L111">    return new DefaultBeanifier&lt;&gt;(rs, channels, beanSupplier);</span>
+  }
+
+  private static &lt;U&gt; U newInstance(Class&lt;U&gt; beanClass) {
+    try {
+<span class="nc" id="L116">      return beanClass.getDeclaredConstructor().newInstance();</span>
+<span class="nc" id="L117">    } catch (Exception e) {</span>
+<span class="nc" id="L118">      throw ExceptionMethods.uncheck(e);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExtractorNegotiator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">ExtractorNegotiator.java</span></div><h1>ExtractorNegotiator.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
+
+import org.klojang.check.Check;
+import org.klojang.collections.TypeMap;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import static org.klojang.check.CommonChecks.notNull;
+import static org.klojang.jdbc.SQLTypeNames.getTypeName;
+import static org.klojang.util.ClassMethods.className;
+
+/**
+ * Finds the most suitable of the {@code ResultSet.getXXX} methods for a given Java
+ * type. If no sure-fire match can be found, then an {@link Adapter} function can be
+ * specified that converts the result of the {@code getXXX} method to the required
+ * Java type. Therefore what actually gets negotiated is not so much the
+ * {@code getXXX} method per se, but an {@link RsExtractor}, which combines a
+ * {@code getXXX} method with an (optional) converter function.
+ */
+@SuppressWarnings(&quot;rawtypes&quot;)
+public class ExtractorNegotiator {
+
+  private static ExtractorNegotiator INSTANCE;
+
+  public static ExtractorNegotiator getInstance() {
+<span class="nc bnc" id="L28" title="All 2 branches missed.">    if (INSTANCE == null) {</span>
+<span class="nc" id="L29">      INSTANCE = new ExtractorNegotiator();</span>
+    }
+<span class="nc" id="L31">    return INSTANCE;</span>
+  }
+
+  private final Map&lt;Class&lt;?&gt;, Map&lt;Integer, RsExtractor&gt;&gt; all;
+
+<span class="nc" id="L36">  private ExtractorNegotiator() {</span>
+<span class="nc" id="L37">    all = configure();</span>
+<span class="nc" id="L38">  }</span>
+
+  @SuppressWarnings({&quot;unchecked&quot;})
+  public &lt;T, U&gt; RsExtractor&lt;T, U&gt; findExtractor(Class&lt;U&gt; fieldType, int sqlType) {
+    // This implicitly checks that the specified int is one of the
+    // static final int constants in the java.sql.Types class
+<span class="nc" id="L44">    String sqlTypeName = getTypeName(sqlType);</span>
+<span class="nc" id="L45">    Map&lt;Integer, RsExtractor&gt; extractors = Check.that(all.get(fieldType))</span>
+<span class="nc" id="L46">        .is(notNull(), &quot;Type not supported: %s&quot;, className(fieldType))</span>
+<span class="nc" id="L47">        .ok();</span>
+<span class="nc" id="L48">    return Check.that(extractors.get(sqlType))</span>
+<span class="nc" id="L49">        .is(notNull(), &quot;Cannot convert %s to %s&quot;, sqlTypeName, className(fieldType))</span>
+<span class="nc" id="L50">        .ok();</span>
+  }
+
+  private static Map configure() {
+<span class="nc" id="L54">    return TypeMap.nativeTypeMapBuilder()</span>
+<span class="nc" id="L55">        .autobox(true)</span>
+<span class="nc" id="L56">        .add(String.class, my(new StringExtractors()))</span>
+<span class="nc" id="L57">        .add(Integer.class, my(new IntExtractors()))</span>
+<span class="nc" id="L58">        .add(Double.class, my(new DoubleExtractors()))</span>
+<span class="nc" id="L59">        .add(Long.class, my(new LongExtractors()))</span>
+<span class="nc" id="L60">        .add(Float.class, my(new FloatExtractors()))</span>
+<span class="nc" id="L61">        .add(Short.class, my(new ShortExtractors()))</span>
+<span class="nc" id="L62">        .add(Byte.class, my(new ByteExtractors()))</span>
+<span class="nc" id="L63">        .add(Boolean.class, my(new BooleanExtractors()))</span>
+<span class="nc" id="L64">        .add(LocalDate.class, my(new LocalDateExtractors()))</span>
+<span class="nc" id="L65">        .add(LocalDateTime.class, my(new LocalDateTimeExtractors()))</span>
+<span class="nc" id="L66">        .add(Enum.class, my(new EnumExtractors()))</span>
+<span class="nc" id="L67">        .freeze();</span>
+  }
+
+  private static Map&lt;Integer, RsExtractor&gt; my(ExtractorLookup&lt;?&gt; src) {
+<span class="nc" id="L71">    return Map.copyOf(src);</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

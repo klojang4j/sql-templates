@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLQuery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLQuery.java</span></div><h1>SQLQuery.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import static org.klojang.check.CommonChecks.yes;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
+
+import org.klojang.check.Check;
+import org.klojang.templates.NameMapper;
+import org.klojang.jdbc.x.rs.ExtractorNegotiator;
+import org.klojang.jdbc.x.rs.RsExtractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
+
+<span class="nc" id="L23">  private static final Logger LOG = LoggerFactory.getLogger(SQLQuery.class);</span>
+
+<span class="nc" id="L25">  private NameMapper mapper = NameMapper.AS_IS;</span>
+
+  private PreparedStatement ps;
+  private ResultSet rs;
+
+  public SQLQuery(Connection con, SQL sql) {
+<span class="nc" id="L31">    super(con, sql);</span>
+<span class="nc" id="L32">  }</span>
+
+  /**
+   * Sets the {@code NameMapper} to be used when mapping column names to be bean properties or map
+   * keys. Beware of the direction of the mappings: &lt;i&gt;from&lt;/i&gt; column names &lt;i&gt;to&lt;/i&gt; bean
+   * properties (or map keys).
+   *
+   * @param columnMapper The {@code NameMapper} to be used when mapping column names to bean
+   *     properties or map keys.
+   * @return This {@code SQLQuery} instance
+   */
+  public SQLQuery withMapper(NameMapper columnMapper) {
+<span class="nc" id="L44">    this.mapper = Check.notNull(columnMapper).ok();</span>
+<span class="nc" id="L45">    return this;</span>
+  }
+
+  /**
+   * Executes the query and returns the {@link ResultSet} produced by the JDBC driver. If the query
+   * had already been executed, the initial {@link ResultSet} is returned.
+   *
+   * @return The {@code ResultSet} produced by the JDBC driver
+   */
+  public ResultSet getResultSet() {
+    try {
+<span class="nc" id="L56">      return rs();</span>
+<span class="nc" id="L57">    } catch (Throwable t) {</span>
+<span class="nc" id="L58">      throw KJSQLException.wrap(t, sql);</span>
+    }
+  }
+
+  /**
+   * Executes the query and returns the value of the first column in the first row. If the query had
+   * already been executed, you get the value from the second row, etc. Throws a {@link
+   * KJSQLException} if the query returned zero rows or if there are no more rows in the {@code
+   * ResultSet}.
+   *
+   * @param &lt;T&gt; The type of the value to be returned
+   * @param clazz The class of the value to be returned
+   * @return The value of the first column in the first row
+   * @throws KJSQLException If the query returned zero rows
+   */
+  public &lt;T&gt; T lookup(Class&lt;T&gt; clazz) {
+<span class="nc" id="L74">    ResultSet rs = executeAndNext();</span>
+    try {
+<span class="nc" id="L76">      int sqlType = rs.getMetaData().getColumnType(1);</span>
+<span class="nc" id="L77">      RsExtractor&lt;?, T&gt; emitter = ExtractorNegotiator.getInstance().findExtractor(clazz, sqlType);</span>
+<span class="nc" id="L78">      return emitter.getValue(rs, 1, clazz);</span>
+<span class="nc" id="L79">    } catch (Throwable t) {</span>
+<span class="nc" id="L80">      throw KJSQLException.wrap(t, sql);</span>
+    }
+  }
+
+  /**
+   * Executes the query and returns the value of the first column in the first row as an integer. If
+   * the query had already been executed, you get the value from the second row, etc. Throws a
+   * {@link KJSQLException} if the query returned zero rows or if there are no more rows in the
+   * {@code ResultSet}.
+   *
+   * @return The value of the first column in the first row as an integer
+   * @throws KJSQLException If the query returned zero rows
+   */
+  public int getInt() throws KJSQLException {
+    try {
+<span class="nc" id="L95">      return executeAndNext().getInt(1);</span>
+<span class="nc" id="L96">    } catch (SQLException e) {</span>
+<span class="nc" id="L97">      throw KJSQLException.wrap(e, sql);</span>
+    }
+  }
+
+  /**
+   * Returns the value of the first column of the first row as a {@code String}. If the query had
+   * already been executed, you get the value from the second row, etc. Throws a {@link
+   * KJSQLException} if the query returned zero rows or if there are no more rows in the {@code
+   * ResultSet}.
+   *
+   * @return The value of the first column of the first row as aa {@code String}
+   * @throws KJSQLException If the query returned zero rows
+   */
+  public String getString() throws KJSQLException {
+    try {
+<span class="nc" id="L112">      return executeAndNext().getString(1);</span>
+<span class="nc" id="L113">    } catch (SQLException e) {</span>
+<span class="nc" id="L114">      throw KJSQLException.wrap(e, sql);</span>
+    }
+  }
+
+  /**
+   * Returns a {@code List} of the all values in the first column. Equivalent to {@code
+   * getList(clazz, 10)}.
+   *
+   * @param &lt;T&gt; The desired type of the values
+   * @param clazz The desired class of the values
+   * @return A {@code List} of the values of the first column in the rows selected by the query
+   */
+  public &lt;T&gt; List&lt;T&gt; getList(Class&lt;T&gt; clazz) {
+<span class="nc" id="L127">    return getList(clazz, 10);</span>
+  }
+
+  /**
+   * Returns a {@code List} of the all values in the first column. In other words, this method will
+   * exhaust the {@link ResultSet}.
+   *
+   * @param &lt;T&gt; The desired type of the values
+   * @param clazz The desired class of the values
+   * @param expectedSize The expected number of rows
+   * @return A {@code List} of the values of the first column in the rows selected by the query
+   */
+  public &lt;T&gt; List&lt;T&gt; getList(Class&lt;T&gt; clazz, int expectedSize) {
+    try {
+<span class="nc" id="L141">      ResultSet rs = rs();</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">      if (!rs.next()) {</span>
+<span class="nc" id="L143">        return Collections.emptyList();</span>
+      }
+<span class="nc" id="L145">      int sqlType = rs.getMetaData().getColumnType(1);</span>
+<span class="nc" id="L146">      RsExtractor&lt;?, T&gt; extractor = ExtractorNegotiator.getInstance().findExtractor(clazz, sqlType);</span>
+<span class="nc" id="L147">      List&lt;T&gt; list = new ArrayList&lt;&gt;(expectedSize);</span>
+      do {
+<span class="nc" id="L149">        list.add(extractor.getValue(rs, 1, clazz));</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">      } while (rs.next());</span>
+<span class="nc" id="L151">      return list;</span>
+<span class="nc" id="L152">    } catch (Throwable t) {</span>
+<span class="nc" id="L153">      throw KJSQLException.wrap(t, sql);</span>
+    }
+  }
+
+  /**
+   * Executes the query and returns a {@code ResultSetMappifier} that you can use to convert the
+   * rows in the {@link ResultSet} into {@link Row} objects.
+   *
+   * @return A {@code ResultSetMappifier} that you can use to convert the rows in the {@link
+   *     ResultSet} into {@link Row} objects.
+   */
+  public ResultSetMappifier getMappifier() {
+    try {
+<span class="nc" id="L166">      return sql.getMappifierFactory(mapper).getMappifier(rs());</span>
+<span class="nc" id="L167">    } catch (Throwable t) {</span>
+<span class="nc" id="L168">      throw KJSQLException.wrap(t, sql);</span>
+    }
+  }
+
+  /**
+   * Executes the query and returns a {@code ResultSetBeanifier} that you can use to convert the
+   * rows in the {@link ResultSet} into JavaBeans.
+   *
+   * @param &lt;T&gt; The type of the JavaBeans
+   * @param beanClass The class of the JavaBeans
+   * @return A {@code ResultSetBeanifier} that you can use to convert the rows in the {@link
+   *     ResultSet} into JavaBeans.
+   */
+  public &lt;T&gt; ResultSetBeanifier&lt;T&gt; getBeanifier(Class&lt;T&gt; beanClass) {
+    try {
+<span class="nc" id="L183">      return sql.getBeanifierFactory(beanClass, mapper).getBeanifier(rs());</span>
+<span class="nc" id="L184">    } catch (Throwable t) {</span>
+<span class="nc" id="L185">      throw KJSQLException.wrap(t, sql);</span>
+    }
+  }
+
+  /**
+   * Executes the query and returns a {@code ResultSetBeanifier} that you can use to convert the
+   * rows in the {@link ResultSet} into JavaBeans.
+   *
+   * @param &lt;T&gt; The type of the JavaBeans
+   * @param beanClass The class of the JavaBeans
+   * @param beanSupplier The supplier of the JavaBean instances
+   * @return A {@code ResultSetBeanifier} that you can use to convert the rows in the {@link
+   *     ResultSet} into JavaBeans.
+   */
+  public &lt;T&gt; ResultSetBeanifier&lt;T&gt; getBeanifier(Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier) {
+    try {
+<span class="nc" id="L201">      return sql.getBeanifierFactory(beanClass, beanSupplier, mapper).getBeanifier(rs());</span>
+<span class="nc" id="L202">    } catch (Throwable t) {</span>
+<span class="nc" id="L203">      throw KJSQLException.wrap(t, sql);</span>
+    }
+  }
+
+  @Override
+  public void close() {
+<span class="nc" id="L209">    close(ps);</span>
+<span class="nc" id="L210">  }</span>
+
+  private ResultSet executeAndNext() {
+    ResultSet rs;
+    boolean hasRows;
+    try {
+<span class="nc" id="L216">      hasRows = (rs = rs()).next();</span>
+<span class="nc" id="L217">    } catch (Throwable t) {</span>
+<span class="nc" id="L218">      throw KJSQLException.wrap(t, sql);</span>
+<span class="nc" id="L219">    }</span>
+<span class="nc" id="L220">    Check.on(KJSQLException::new, hasRows).is(yes(), &quot;Query returned zero rows&quot;);</span>
+<span class="nc" id="L221">    return rs;</span>
+  }
+
+  private ResultSet rs() throws Throwable {
+<span class="nc bnc" id="L225" title="All 2 branches missed.">    if (rs == null) {</span>
+<span class="nc" id="L226">      LOG.trace(&quot;Executing query&quot;);</span>
+<span class="nc" id="L227">      rs = ps().executeQuery();</span>
+    }
+<span class="nc" id="L229">    return rs;</span>
+  }
+
+  private PreparedStatement ps() throws Throwable {
+<span class="nc bnc" id="L233" title="All 2 branches missed.">    if (ps == null) {</span>
+<span class="nc" id="L234">      ps = con.prepareStatement(sql.getJdbcSQL());</span>
+<span class="nc" id="L235">      applyBindings(ps);</span>
+    }
+<span class="nc" id="L237">    return ps;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

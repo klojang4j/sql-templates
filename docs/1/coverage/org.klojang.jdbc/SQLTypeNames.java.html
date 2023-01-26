@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLTypeNames.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLTypeNames.java</span></div><h1>SQLTypeNames.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import static org.klojang.check.CommonChecks.keyIn;
+
+import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.sql.Types;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.klojang.check.Check;
+import org.klojang.util.ExceptionMethods;
+
+public class SQLTypeNames {
+
+  private static SQLTypeNames instance;
+
+  public static String getTypeName(int sqlType) {
+<span class="fc bfc" id="L19" title="All 2 branches covered.">    if (instance == null) {</span>
+<span class="fc" id="L20">      instance = new SQLTypeNames();</span>
+    }
+<span class="fc" id="L22">    return Check.that((Integer) sqlType)</span>
+<span class="fc" id="L23">        .is(keyIn(), instance.map, &quot;No such constant in java.sql.Types: %d&quot;, sqlType)</span>
+<span class="fc" id="L24">        .ok(instance.map::get);</span>
+  }
+
+  public static void printAll(PrintStream out) {
+<span class="fc" id="L28">    Check.notNull(out);</span>
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">    if (instance == null) {</span>
+<span class="nc" id="L30">      instance = new SQLTypeNames();</span>
+    }
+<span class="fc" id="L32">    instance.map.forEach((k, v) -&gt; out.printf(&quot;%5d : %s%n&quot;, k, v));</span>
+<span class="fc" id="L33">  }</span>
+
+  private Map&lt;Integer, String&gt; map;
+
+<span class="fc" id="L37">  private SQLTypeNames() {</span>
+<span class="fc" id="L38">    Class&lt;Types&gt; clazz = Types.class;</span>
+<span class="fc" id="L39">    Field[] fields = clazz.getDeclaredFields();</span>
+<span class="fc" id="L40">    map = new TreeMap&lt;&gt;();</span>
+    try {
+<span class="fc bfc" id="L42" title="All 2 branches covered.">      for (Field f : fields) {</span>
+<span class="fc" id="L43">        map.put(f.getInt(null), f.getName());</span>
+      }
+<span class="nc" id="L45">    } catch (Exception e) {</span>
+<span class="nc" id="L46">      throw ExceptionMethods.uncheck(e);</span>
+<span class="fc" id="L47">    }</span>
+<span class="fc" id="L48">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

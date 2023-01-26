@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StringReceivers.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.ps</a> &gt; <span class="el_source">StringReceivers.java</span></div><h1>StringReceivers.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.ps;
+
+import org.klojang.convert.Bool;
+import org.klojang.convert.NumberMethods;
+
+import java.math.BigDecimal;
+
+import static java.sql.Types.*;
+
+class StringReceivers extends ReceiverLookup&lt;String&gt; {
+
+<span class="nc" id="L12">  static final Receiver&lt;String, String&gt; DEFAULT = new Receiver&lt;&gt;(PsSetter.SET_STRING);</span>
+
+<span class="nc" id="L14">  StringReceivers() {</span>
+<span class="nc" id="L15">    put(VARCHAR, DEFAULT);</span>
+<span class="nc" id="L16">    put(CHAR, DEFAULT);</span>
+<span class="nc" id="L17">    put(INTEGER, new Receiver&lt;String, Integer&gt;(PsSetter.SET_INT, NumberMethods::parse));</span>
+<span class="nc" id="L18">    put(SMALLINT, new Receiver&lt;String, Short&gt;(PsSetter.SET_SHORT, NumberMethods::parse));</span>
+<span class="nc" id="L19">    put(TINYINT, new Receiver&lt;String, Byte&gt;(PsSetter.SET_BYTE, NumberMethods::parse));</span>
+<span class="nc" id="L20">    put(BIGINT, new Receiver&lt;String, Long&gt;(PsSetter.SET_LONG, NumberMethods::parse));</span>
+<span class="nc" id="L21">    put(NUMERIC,</span>
+        new Receiver&lt;String, BigDecimal&gt;(PsSetter.SET_BIG_DECIMAL, NumberMethods::parse));
+<span class="nc" id="L23">    put(REAL, new Receiver&lt;String, Float&gt;(PsSetter.SET_FLOAT, NumberMethods::parse));</span>
+<span class="nc" id="L24">    put(FLOAT, new Receiver&lt;String, Double&gt;(PsSetter.SET_DOUBLE, NumberMethods::parse));</span>
+<span class="nc" id="L25">    put(DOUBLE, new Receiver&lt;String, Double&gt;(PsSetter.SET_DOUBLE, NumberMethods::parse));</span>
+<span class="nc" id="L26">    put(BOOLEAN, new Receiver&lt;String, Boolean&gt;(PsSetter.SET_BOOLEAN, Bool::from));</span>
+<span class="nc" id="L27">    put(BIT, new Receiver&lt;Integer, Boolean&gt;(PsSetter.SET_BOOLEAN, Bool::from));</span>
+<span class="nc" id="L28">  }</span>
+
+  @Override
+  Receiver&lt;String, ?&gt; getDefaultReceiver() {
+<span class="nc" id="L32">    return DEFAULT;</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

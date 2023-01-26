@@ -6,15 +6,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.klojang</groupId>
-    <artifactId>sql-templates</artifactId>
+    <artifactId>klojang-jdbc</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>SQL Templates</name>
     <description>
-        Builds on Klojang Templates to provide a thin, non-intrusive JDBC extensions library
+        Builds on Klojang Templates to provide a light-touch, non-intrusive JDBC extensions library
     </description>
-    <url>https://klojang4j.github.io/sql-templates/</url>
+    <url>https://klojang4j.github.io/klojng-jdbc/</url>
 
     <licenses>
         <license>
@@ -38,9 +38,9 @@
     </organization>
 
     <scm>
-        <connection>scm:git:https://github.com/klojang4j/sql-templates.git</connection>
-        <developerConnection>scm:git:https://github.com/klojang4j/sql-templates.git</developerConnection>
-        <url>https://github.com/klojang4j/sql-templates</url>
+        <connection>scm:git:https://github.com/klojang4j/klojng-jdbc.git</connection>
+        <developerConnection>scm:git:https://github.com/klojang4j/klojng-jdbc.git</developerConnection>
+        <url>https://github.com/klojang4j/klojng-jdbc</url>
     </scm>
 
     <distributionManagement>
@@ -141,6 +141,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -391,7 +397,7 @@
                         <id>attach-javadocs</id>
                         <configuration>
                             <windowtitle>SQL Templates</windowtitle>
-                            <excludePackageNames>org.klojang.db.x</excludePackageNames>
+                            <excludePackageNames>org.klojang.jdbc.x</excludePackageNames>
                         </configuration>
                         <goals>
                             <goal>jar</goal>
