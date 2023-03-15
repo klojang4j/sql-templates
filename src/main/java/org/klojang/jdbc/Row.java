@@ -16,7 +16,7 @@ import static org.klojang.util.ObjectMethods.ifNotNull;
  * A thin wrapper around a {@code Map<String,Object>} instance mimicking some of the
  * behaviour of the {@link ResultSet} class. {@code Row} objects are produced by a
  * {@link ResultSetMappifier} and can be quickly pushed up into the higher layers of
- * your application and then {@link RenderSession#insert(Object, String...) inserted}
+ * your application and then {@link SoloSession#insert(Object, String...) inserted}
  * into a Klojang template.
  *
  * <p>Note that it is not a primary goal of the {@code Row} class to behave exactly
