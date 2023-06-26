@@ -2,6 +2,7 @@ package org.klojang.jdbc.x.rs;
 
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
+import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.NameMapper;
 import org.klojang.util.ExceptionMethods;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
       throws Throwable {
     U bean = beanSupplier.get();
     for (BeanChannel channel : channels) {
-      channel.send(rs, bean);
+      channel.copy(rs, bean);
     }
     return bean;
   }
@@ -40,13 +41,13 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
       LOG.trace("Mapping ResultSet to {}", beanClass.getSimpleName());
       Comparator<String> cmp = Comparator.comparing(String::toLowerCase);
       Set<String> cols = new TreeSet<>(cmp);
-      cols.addAll(Arrays.asList(new RsStrongIdentifier(rs).getColumnNames()));
+      cols.addAll(Arrays.asList(JDBC.getColumnNames(rs)));
       Set<String> props = new TreeSet<>(cmp);
       props.addAll(setters.keySet());
       LOG.trace("Columns ......: {}", implode(cols));
       LOG.trace("Properties ...: {}", implode(props));
     }
-    ExtractorNegotiator negotiator = ExtractorNegotiator.getInstance();
+    ReaderNegotiator negotiator = ReaderNegotiator.getInstance();
     try {
       ResultSetMetaData rsmd = rs.getMetaData();
       int sz = rsmd.getColumnCount();
@@ -63,7 +64,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
           continue;
         }
         Class<?> javaType = setter.getParamType();
-        RsExtractor<?, ?> extractor = negotiator.findExtractor(javaType, sqlType);
+        ResultSetReader<?, ?> extractor = negotiator.findReader(javaType, sqlType);
         transporters.add(new BeanChannel<>(extractor, setter, jdbcIdx, sqlType));
       }
       return transporters.toArray(BeanChannel[]::new);
@@ -72,13 +73,13 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
     }
   }
 
-  private final RsExtractor<COLUMN_TYPE, FIELD_TYPE> extractor;
+  private final ResultSetReader<COLUMN_TYPE, FIELD_TYPE> extractor;
   private final Setter setter;
   private final int jdbcIdx;
   private final int sqlType;
 
   private BeanChannel(
-      RsExtractor<COLUMN_TYPE, FIELD_TYPE> extractor,
+      ResultSetReader<COLUMN_TYPE, FIELD_TYPE> extractor,
       Setter setter,
       int jdbcIdx,
       int sqlType) {
@@ -90,7 +91,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
 
   @Override
   @SuppressWarnings("unchecked")
-  public void send(ResultSet rs, Object bean) throws Throwable {
+  public void copy(ResultSet rs, Object bean) throws Throwable {
     FIELD_TYPE val = extractor.getValue(rs,
         jdbcIdx,
         (Class<FIELD_TYPE>) setter.getParamType());

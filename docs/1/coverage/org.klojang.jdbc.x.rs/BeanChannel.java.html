@@ -2,6 +2,7 @@
 
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
+import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.NameMapper;
 import org.klojang.util.ExceptionMethods;
 import org.slf4j.Logger;
@@ -18,88 +19,88 @@ import static org.klojang.util.CollectionMethods.implode;
 /* Transports a single value from a ResultSet to a bean */
 public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; implements Channel&lt;Object&gt; {
 
-<span class="nc" id="L21">  private static final Logger LOG = LoggerFactory.getLogger(BeanChannel.class);</span>
+<span class="nc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(BeanChannel.class);</span>
 
   @SuppressWarnings(&quot;rawtypes&quot;)
   public static &lt;U&gt; U toBean(ResultSet rs,
       Supplier&lt;U&gt; beanSupplier,
       BeanChannel[] channels)
       throws Throwable {
-<span class="nc" id="L28">    U bean = beanSupplier.get();</span>
-<span class="nc bnc" id="L29" title="All 2 branches missed.">    for (BeanChannel channel : channels) {</span>
-<span class="nc" id="L30">      channel.send(rs, bean);</span>
+<span class="nc" id="L29">    U bean = beanSupplier.get();</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">    for (BeanChannel channel : channels) {</span>
+<span class="nc" id="L31">      channel.copy(rs, bean);</span>
     }
-<span class="nc" id="L32">    return bean;</span>
+<span class="nc" id="L33">    return bean;</span>
   }
 
   @SuppressWarnings(&quot;rawtypes&quot;)
   public static BeanChannel[] createChannels(
       ResultSet rs, Class&lt;?&gt; beanClass, NameMapper nameMapper) {
-<span class="nc" id="L38">    Map&lt;String, Setter&gt; setters = SetterFactory.INSTANCE.getSetters(beanClass);</span>
-<span class="nc bnc" id="L39" title="All 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
-<span class="nc" id="L40">      LOG.trace(&quot;Mapping ResultSet to {}&quot;, beanClass.getSimpleName());</span>
-<span class="nc" id="L41">      Comparator&lt;String&gt; cmp = Comparator.comparing(String::toLowerCase);</span>
-<span class="nc" id="L42">      Set&lt;String&gt; cols = new TreeSet&lt;&gt;(cmp);</span>
-<span class="nc" id="L43">      cols.addAll(Arrays.asList(new RsStrongIdentifier(rs).getColumnNames()));</span>
-<span class="nc" id="L44">      Set&lt;String&gt; props = new TreeSet&lt;&gt;(cmp);</span>
-<span class="nc" id="L45">      props.addAll(setters.keySet());</span>
-<span class="nc" id="L46">      LOG.trace(&quot;Columns ......: {}&quot;, implode(cols));</span>
-<span class="nc" id="L47">      LOG.trace(&quot;Properties ...: {}&quot;, implode(props));</span>
+<span class="nc" id="L39">    Map&lt;String, Setter&gt; setters = SetterFactory.INSTANCE.getSetters(beanClass);</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
+<span class="nc" id="L41">      LOG.trace(&quot;Mapping ResultSet to {}&quot;, beanClass.getSimpleName());</span>
+<span class="nc" id="L42">      Comparator&lt;String&gt; cmp = Comparator.comparing(String::toLowerCase);</span>
+<span class="nc" id="L43">      Set&lt;String&gt; cols = new TreeSet&lt;&gt;(cmp);</span>
+<span class="nc" id="L44">      cols.addAll(Arrays.asList(JDBC.getColumnNames(rs)));</span>
+<span class="nc" id="L45">      Set&lt;String&gt; props = new TreeSet&lt;&gt;(cmp);</span>
+<span class="nc" id="L46">      props.addAll(setters.keySet());</span>
+<span class="nc" id="L47">      LOG.trace(&quot;Columns ......: {}&quot;, implode(cols));</span>
+<span class="nc" id="L48">      LOG.trace(&quot;Properties ...: {}&quot;, implode(props));</span>
     }
-<span class="nc" id="L49">    ExtractorNegotiator negotiator = ExtractorNegotiator.getInstance();</span>
+<span class="nc" id="L50">    ReaderNegotiator negotiator = ReaderNegotiator.getInstance();</span>
     try {
-<span class="nc" id="L51">      ResultSetMetaData rsmd = rs.getMetaData();</span>
-<span class="nc" id="L52">      int sz = rsmd.getColumnCount();</span>
-<span class="nc" id="L53">      List&lt;BeanChannel&lt;?, ?&gt;&gt; transporters = new ArrayList&lt;&gt;(sz);</span>
-<span class="nc bnc" id="L54" title="All 2 branches missed.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
-<span class="nc" id="L55">        int jdbcIdx = idx + 1; // JDBC is one-based</span>
-<span class="nc" id="L56">        int sqlType = rsmd.getColumnType(jdbcIdx);</span>
-<span class="nc" id="L57">        String label = rsmd.getColumnLabel(jdbcIdx);</span>
-<span class="nc" id="L58">        String property = nameMapper.map(label);</span>
-<span class="nc" id="L59">        Setter setter = setters.get(property);</span>
-<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (setter == null) {</span>
-<span class="nc" id="L61">          String fmt = &quot;Column {} cannot be mapped to a property of {}&quot;;</span>
-<span class="nc" id="L62">          LOG.warn(fmt, label, beanClass.getSimpleName());</span>
-<span class="nc" id="L63">          continue;</span>
+<span class="nc" id="L52">      ResultSetMetaData rsmd = rs.getMetaData();</span>
+<span class="nc" id="L53">      int sz = rsmd.getColumnCount();</span>
+<span class="nc" id="L54">      List&lt;BeanChannel&lt;?, ?&gt;&gt; transporters = new ArrayList&lt;&gt;(sz);</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
+<span class="nc" id="L56">        int jdbcIdx = idx + 1; // JDBC is one-based</span>
+<span class="nc" id="L57">        int sqlType = rsmd.getColumnType(jdbcIdx);</span>
+<span class="nc" id="L58">        String label = rsmd.getColumnLabel(jdbcIdx);</span>
+<span class="nc" id="L59">        String property = nameMapper.map(label);</span>
+<span class="nc" id="L60">        Setter setter = setters.get(property);</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        if (setter == null) {</span>
+<span class="nc" id="L62">          String fmt = &quot;Column {} cannot be mapped to a property of {}&quot;;</span>
+<span class="nc" id="L63">          LOG.warn(fmt, label, beanClass.getSimpleName());</span>
+<span class="nc" id="L64">          continue;</span>
         }
-<span class="nc" id="L65">        Class&lt;?&gt; javaType = setter.getParamType();</span>
-<span class="nc" id="L66">        RsExtractor&lt;?, ?&gt; extractor = negotiator.findExtractor(javaType, sqlType);</span>
-<span class="nc" id="L67">        transporters.add(new BeanChannel&lt;&gt;(extractor, setter, jdbcIdx, sqlType));</span>
+<span class="nc" id="L66">        Class&lt;?&gt; javaType = setter.getParamType();</span>
+<span class="nc" id="L67">        ResultSetReader&lt;?, ?&gt; extractor = negotiator.findReader(javaType, sqlType);</span>
+<span class="nc" id="L68">        transporters.add(new BeanChannel&lt;&gt;(extractor, setter, jdbcIdx, sqlType));</span>
       }
-<span class="nc" id="L69">      return transporters.toArray(BeanChannel[]::new);</span>
-<span class="nc" id="L70">    } catch (SQLException e) {</span>
-<span class="nc" id="L71">      throw ExceptionMethods.uncheck(e);</span>
+<span class="nc" id="L70">      return transporters.toArray(BeanChannel[]::new);</span>
+<span class="nc" id="L71">    } catch (SQLException e) {</span>
+<span class="nc" id="L72">      throw ExceptionMethods.uncheck(e);</span>
     }
   }
 
-  private final RsExtractor&lt;COLUMN_TYPE, FIELD_TYPE&gt; extractor;
+  private final ResultSetReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; extractor;
   private final Setter setter;
   private final int jdbcIdx;
   private final int sqlType;
 
   private BeanChannel(
-      RsExtractor&lt;COLUMN_TYPE, FIELD_TYPE&gt; extractor,
+      ResultSetReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; extractor,
       Setter setter,
       int jdbcIdx,
-<span class="nc" id="L84">      int sqlType) {</span>
-<span class="nc" id="L85">    this.extractor = extractor;</span>
-<span class="nc" id="L86">    this.setter = setter;</span>
-<span class="nc" id="L87">    this.jdbcIdx = jdbcIdx;</span>
-<span class="nc" id="L88">    this.sqlType = sqlType;</span>
-<span class="nc" id="L89">  }</span>
+<span class="nc" id="L85">      int sqlType) {</span>
+<span class="nc" id="L86">    this.extractor = extractor;</span>
+<span class="nc" id="L87">    this.setter = setter;</span>
+<span class="nc" id="L88">    this.jdbcIdx = jdbcIdx;</span>
+<span class="nc" id="L89">    this.sqlType = sqlType;</span>
+<span class="nc" id="L90">  }</span>
 
   @Override
   @SuppressWarnings(&quot;unchecked&quot;)
-  public void send(ResultSet rs, Object bean) throws Throwable {
-<span class="nc" id="L94">    FIELD_TYPE val = extractor.getValue(rs,</span>
+  public void copy(ResultSet rs, Object bean) throws Throwable {
+<span class="nc" id="L95">    FIELD_TYPE val = extractor.getValue(rs,</span>
         jdbcIdx,
-<span class="nc" id="L96">        (Class&lt;FIELD_TYPE&gt;) setter.getParamType());</span>
-<span class="nc" id="L97">    setter.write(bean, val);</span>
-<span class="nc" id="L98">  }</span>
+<span class="nc" id="L97">        (Class&lt;FIELD_TYPE&gt;) setter.getParamType());</span>
+<span class="nc" id="L98">    setter.write(bean, val);</span>
+<span class="nc" id="L99">  }</span>
 
   @Override
   public int getSqlType() {
-<span class="nc" id="L102">    return sqlType;</span>
+<span class="nc" id="L103">    return sqlType;</span>
   }
 
 }

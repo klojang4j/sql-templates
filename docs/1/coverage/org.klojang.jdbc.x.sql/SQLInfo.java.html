@@ -5,7 +5,7 @@ import org.klojang.util.collection.IntList;
 import java.util.List;
 import java.util.Map;
 
-<span class="nc" id="L8">public record SQLInfo(</span>
+<span class="pc" id="L8">public record SQLInfo(</span>
       String unparsedSQL,
       String normalizedSQL,
       String jdbcSQL,
@@ -13,12 +13,12 @@ import java.util.Map;
       Map&lt;String, IntList&gt; parameterPositions) {
 
   SQLInfo(String unparsedSQL, SQLNormalizer normalizer) {
-<span class="nc" id="L16">    this(unparsedSQL,</span>
-<span class="nc" id="L17">          normalizer.getNormalizedSQL(),</span>
-<span class="nc" id="L18">          normalizer.getNormalizedSQL(),</span>
-<span class="nc" id="L19">          normalizer.getParameters(),</span>
-<span class="nc" id="L20">          normalizer.getParameterPositions());</span>
-<span class="nc" id="L21">  }</span>
+<span class="fc" id="L16">    this(unparsedSQL,</span>
+<span class="fc" id="L17">          normalizer.getNormalizedSQL(),</span>
+<span class="fc" id="L18">          normalizer.getNormalizedSQL(),</span>
+<span class="fc" id="L19">          normalizer.getParameters(),</span>
+<span class="fc" id="L20">          normalizer.getParameterPositions());</span>
+<span class="fc" id="L21">  }</span>
 
   SQLInfo(String unparsedSQL, String jdbcSQL, SQLNormalizer normalizer) {
 <span class="nc" id="L24">    this(unparsedSQL,</span>

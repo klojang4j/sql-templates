@@ -14,7 +14,7 @@ public class RowChannel<COLUMN_TYPE> implements Channel<Row> {
   public static Row toRow(ResultSet rs, RowChannel[] channels) throws Throwable {
     Row row = new Row(channels.length);
     for (RowChannel channel : channels) {
-      channel.send(rs, row);
+      channel.copy(rs, row);
     }
     return row;
   }
@@ -28,7 +28,7 @@ public class RowChannel<COLUMN_TYPE> implements Channel<Row> {
       for (int idx = 0; idx < sz; ++idx) {
         int jdbcIdx = idx + 1; // JDBC is one-based
         int sqlType = rsmd.getColumnType(jdbcIdx);
-        RsMethod<?> method = methods.getMethod(sqlType);
+        ResultSetMethod<?> method = methods.getMethod(sqlType);
         String label = rsmd.getColumnLabel(jdbcIdx);
         String key = mapper.map(label);
         transporters[idx] = new RowChannel<>(method, jdbcIdx, sqlType, key);
@@ -39,12 +39,12 @@ public class RowChannel<COLUMN_TYPE> implements Channel<Row> {
     }
   }
 
-  private final RsMethod<COLUMN_TYPE> method;
+  private final ResultSetMethod<COLUMN_TYPE> method;
   private final int jdbcIdx;
   private final int sqlType;
   private final String key;
 
-  private RowChannel(RsMethod<COLUMN_TYPE> method, int jdbcIdx, int sqlType, String key) {
+  private RowChannel(ResultSetMethod<COLUMN_TYPE> method, int jdbcIdx, int sqlType, String key) {
     this.method = method;
     this.jdbcIdx = jdbcIdx;
     this.sqlType = sqlType;
@@ -52,8 +52,8 @@ public class RowChannel<COLUMN_TYPE> implements Channel<Row> {
   }
 
   @Override
-  public void send(ResultSet rs, Row row) throws Throwable {
-    row.addColumn(key, method.call(rs, jdbcIdx));
+  public void copy(ResultSet rs, Row row) throws Throwable {
+    row.addColumn(key, method.invoke(rs, jdbcIdx));
   }
 
   @Override

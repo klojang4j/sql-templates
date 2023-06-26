@@ -6,19 +6,19 @@ import java.util.function.Function;
 import static org.klojang.util.ObjectMethods.ifNotEmpty;
 
 /**
- * Binds a single value to a {@link PreparedStatement}, possibly after first converting it to the
+ * Binds a single value to a PreparedStatement, possibly after first converting it to the
  * appropriate type.
  *
- * @author Ayco Holleman
- * @param <FIELD_TYPE> The type of the incoming value, which may originate from a JavaBean field,
- *     but also, for example, from a {@code Map}
- * @param <PARAM_TYPE> The type to which the value is converted before being passed on to one of the
- *     {@code setXXX} methods of {@link PreparedStatement}
+ * @param <FIELD_TYPE> The type of the incoming value, which may originate from a JavaBean
+ * field, but also, for example, from a {@code Map}
+ * @param <PARAM_TYPE> The type to which the value is converted before being passed on to
+ * one of the {@code setXXX} methods of {@link PreparedStatement}
  */
 class Receiver<FIELD_TYPE, PARAM_TYPE> {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  static final Receiver<?, String> ANY_TO_STRING = new Receiver(PsSetter.SET_STRING, String::valueOf);
+  static final Receiver<?, String> ANY_TO_STRING = new Receiver(PsSetter.SET_STRING,
+        String::valueOf);
 
   private final PsSetter<PARAM_TYPE> setter;
   private final Adapter<FIELD_TYPE, PARAM_TYPE> adapter;
@@ -40,8 +40,8 @@ class Receiver<FIELD_TYPE, PARAM_TYPE> {
   @SuppressWarnings("unchecked")
   PARAM_TYPE getParamValue(FIELD_TYPE beanValue) {
     return adapter == null
-        ? (PARAM_TYPE) beanValue
-        : adapter.adapt(beanValue, setter.getParamType());
+          ? (PARAM_TYPE) beanValue
+          : adapter.adapt(beanValue, setter.getParamType());
   }
 
   void bind(PreparedStatement ps, int paramIndex, PARAM_TYPE value) throws Throwable {

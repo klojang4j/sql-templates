@@ -6,46 +6,46 @@ import java.util.function.Function;
 import static org.klojang.util.ObjectMethods.ifNotEmpty;
 
 /**
- * Binds a single value to a {@link PreparedStatement}, possibly after first converting it to the
+ * Binds a single value to a PreparedStatement, possibly after first converting it to the
  * appropriate type.
  *
- * @author Ayco Holleman
- * @param &lt;FIELD_TYPE&gt; The type of the incoming value, which may originate from a JavaBean field,
- *     but also, for example, from a {@code Map}
- * @param &lt;PARAM_TYPE&gt; The type to which the value is converted before being passed on to one of the
- *     {@code setXXX} methods of {@link PreparedStatement}
+ * @param &lt;FIELD_TYPE&gt; The type of the incoming value, which may originate from a JavaBean
+ * field, but also, for example, from a {@code Map}
+ * @param &lt;PARAM_TYPE&gt; The type to which the value is converted before being passed on to
+ * one of the {@code setXXX} methods of {@link PreparedStatement}
  */
 class Receiver&lt;FIELD_TYPE, PARAM_TYPE&gt; {
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
-<span class="nc" id="L21">  static final Receiver&lt;?, String&gt; ANY_TO_STRING = new Receiver(PsSetter.SET_STRING, String::valueOf);</span>
+<span class="fc" id="L20">  static final Receiver&lt;?, String&gt; ANY_TO_STRING = new Receiver(PsSetter.SET_STRING,</span>
+        String::valueOf);
 
   private final PsSetter&lt;PARAM_TYPE&gt; setter;
   private final Adapter&lt;FIELD_TYPE, PARAM_TYPE&gt; adapter;
 
-<span class="nc" id="L26">  Receiver(PsSetter&lt;PARAM_TYPE&gt; setter) {</span>
-<span class="nc" id="L27">    this.setter = setter;</span>
-<span class="nc" id="L28">    this.adapter = null;</span>
-<span class="nc" id="L29">  }</span>
+<span class="fc" id="L26">  Receiver(PsSetter&lt;PARAM_TYPE&gt; setter) {</span>
+<span class="fc" id="L27">    this.setter = setter;</span>
+<span class="fc" id="L28">    this.adapter = null;</span>
+<span class="fc" id="L29">  }</span>
 
   Receiver(PsSetter&lt;PARAM_TYPE&gt; setter, Function&lt;FIELD_TYPE, PARAM_TYPE&gt; adapter) {
-<span class="nc" id="L32">    this(setter, (x, y) -&gt; ifNotEmpty(x, adapter::apply));</span>
-<span class="nc" id="L33">  }</span>
+<span class="pc" id="L32">    this(setter, (x, y) -&gt; ifNotEmpty(x, adapter::apply));</span>
+<span class="fc" id="L33">  }</span>
 
-<span class="nc" id="L35">  Receiver(PsSetter&lt;PARAM_TYPE&gt; setter, Adapter&lt;FIELD_TYPE, PARAM_TYPE&gt; adapter) {</span>
-<span class="nc" id="L36">    this.setter = setter;</span>
-<span class="nc" id="L37">    this.adapter = adapter;</span>
-<span class="nc" id="L38">  }</span>
+<span class="fc" id="L35">  Receiver(PsSetter&lt;PARAM_TYPE&gt; setter, Adapter&lt;FIELD_TYPE, PARAM_TYPE&gt; adapter) {</span>
+<span class="fc" id="L36">    this.setter = setter;</span>
+<span class="fc" id="L37">    this.adapter = adapter;</span>
+<span class="fc" id="L38">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
   PARAM_TYPE getParamValue(FIELD_TYPE beanValue) {
-<span class="nc bnc" id="L42" title="All 2 branches missed.">    return adapter == null</span>
-<span class="nc" id="L43">        ? (PARAM_TYPE) beanValue</span>
-<span class="nc" id="L44">        : adapter.adapt(beanValue, setter.getParamType());</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">    return adapter == null</span>
+<span class="fc" id="L43">          ? (PARAM_TYPE) beanValue</span>
+<span class="nc" id="L44">          : adapter.adapt(beanValue, setter.getParamType());</span>
   }
 
   void bind(PreparedStatement ps, int paramIndex, PARAM_TYPE value) throws Throwable {
-<span class="nc" id="L48">    setter.bindValue(ps, paramIndex, value);</span>
-<span class="nc" id="L49">  }</span>
+<span class="fc" id="L48">    setter.bindValue(ps, paramIndex, value);</span>
+<span class="fc" id="L49">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

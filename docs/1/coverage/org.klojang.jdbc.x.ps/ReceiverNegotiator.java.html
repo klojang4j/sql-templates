@@ -16,22 +16,22 @@ class ReceiverNegotiator {
   private static ReceiverNegotiator INSTANCE;
 
   static ReceiverNegotiator getInstance() {
-<span class="nc bnc" id="L19" title="All 2 branches missed.">    if (INSTANCE == null) {</span>
-<span class="nc" id="L20">      INSTANCE = new ReceiverNegotiator();</span>
+<span class="fc bfc" id="L19" title="All 2 branches covered.">    if (INSTANCE == null) {</span>
+<span class="fc" id="L20">      INSTANCE = new ReceiverNegotiator();</span>
     }
-<span class="nc" id="L22">    return INSTANCE;</span>
+<span class="fc" id="L22">    return INSTANCE;</span>
   }
 
   private final Map&lt;Class&lt;?&gt;, Map&lt;Integer, Receiver&gt;&gt; all;
 
-<span class="nc" id="L27">  private ReceiverNegotiator() {</span>
-<span class="nc" id="L28">    Map tmp = createReceivers(); // to hell with generics</span>
-<span class="nc" id="L29">    all = (Map&lt;Class&lt;?&gt;, Map&lt;Integer, Receiver&gt;&gt;) tmp;</span>
-<span class="nc" id="L30">  }</span>
+<span class="fc" id="L27">  private ReceiverNegotiator() {</span>
+<span class="fc" id="L28">    Map tmp = createReceivers(); // to hell with generics</span>
+<span class="fc" id="L29">    all = (Map&lt;Class&lt;?&gt;, Map&lt;Integer, Receiver&gt;&gt;) tmp;</span>
+<span class="fc" id="L30">  }</span>
 
   &lt;T, U&gt; Receiver&lt;T, U&gt; getDefaultReceiver(Class&lt;T&gt; fieldType) {
-<span class="nc" id="L33">    Receiver receiver = DefaultReceivers.INSTANCE.getDefaultReceiver(fieldType);</span>
-<span class="nc" id="L34">    return Check.that(receiver).is(notNull(), &quot;Type not supported: {type}&quot;).ok();</span>
+<span class="fc" id="L33">    Receiver receiver = DefaultReceivers.INSTANCE.getDefaultReceiver(fieldType);</span>
+<span class="fc" id="L34">    return Check.that(receiver).is(notNull(), &quot;Type not supported: {type}&quot;).ok();</span>
   }
 
   &lt;T, U&gt; Receiver&lt;T, U&gt; findReceiver(Class&lt;T&gt; fieldType, int sqlType) {
@@ -46,24 +46,24 @@ class ReceiverNegotiator {
   }
 
   private static Map createReceivers() {
-<span class="nc" id="L49">    return TypeMap.nativeTypeMapBuilder()</span>
-<span class="nc" id="L50">        .autobox(true)</span>
-<span class="nc" id="L51">        .add(String.class, my(new StringReceivers()))</span>
-<span class="nc" id="L52">        .add(Integer.class, my(new IntReceivers()))</span>
-<span class="nc" id="L53">        .add(Long.class, my(new LongReceivers()))</span>
-<span class="nc" id="L54">        .add(Double.class, my(new DoubleReceivers()))</span>
-<span class="nc" id="L55">        .add(Float.class, my(new FloatReceivers()))</span>
-<span class="nc" id="L56">        .add(Short.class, my(new ShortReceivers()))</span>
-<span class="nc" id="L57">        .add(Byte.class, my(new ByteReceivers()))</span>
-<span class="nc" id="L58">        .add(Boolean.class, my(new BooleanReceivers()))</span>
-<span class="nc" id="L59">        .add(LocalDate.class, my(new LocalDateReceivers()))</span>
-<span class="nc" id="L60">        .add(LocalDateTime.class, my(new LocalDateTimeReceivers()))</span>
-<span class="nc" id="L61">        .add(Enum.class, my(new EnumReceivers()))</span>
-<span class="nc" id="L62">        .freeze();</span>
+<span class="fc" id="L49">    return TypeMap.nativeTypeMapBuilder()</span>
+<span class="fc" id="L50">        .autobox(true)</span>
+<span class="fc" id="L51">        .add(String.class, my(new StringReceivers()))</span>
+<span class="fc" id="L52">        .add(Integer.class, my(new IntReceivers()))</span>
+<span class="fc" id="L53">        .add(Long.class, my(new LongReceivers()))</span>
+<span class="fc" id="L54">        .add(Double.class, my(new DoubleReceivers()))</span>
+<span class="fc" id="L55">        .add(Float.class, my(new FloatReceivers()))</span>
+<span class="fc" id="L56">        .add(Short.class, my(new ShortReceivers()))</span>
+<span class="fc" id="L57">        .add(Byte.class, my(new ByteReceivers()))</span>
+<span class="fc" id="L58">        .add(Boolean.class, my(new BooleanReceivers()))</span>
+<span class="fc" id="L59">        .add(LocalDate.class, my(new LocalDateReceivers()))</span>
+<span class="fc" id="L60">        .add(LocalDateTime.class, my(new LocalDateTimeReceivers()))</span>
+<span class="fc" id="L61">        .add(Enum.class, my(new EnumReceivers()))</span>
+<span class="fc" id="L62">        .freeze();</span>
   }
 
   private static Map&lt;Integer, Receiver&gt; my(ReceiverLookup src) {
-<span class="nc" id="L66">    return Map.copyOf(src);</span>
+<span class="fc" id="L66">    return Map.copyOf(src);</span>
   }
 
 }

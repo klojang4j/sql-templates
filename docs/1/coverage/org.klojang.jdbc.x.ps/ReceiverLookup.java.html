@@ -5,11 +5,11 @@ import java.util.stream.IntStream;
 
 abstract class ReceiverLookup&lt;T&gt; extends HashMap&lt;Integer, Receiver&lt;?, ?&gt;&gt; {
 
-<span class="nc" id="L8">  ReceiverLookup() {}</span>
+<span class="fc" id="L8">  ReceiverLookup() {}</span>
 
   void putMultiple(Receiver&lt;T, ?&gt; receiver, int... sqlTypes) {
-<span class="nc" id="L11">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, receiver));</span>
-<span class="nc" id="L12">  }</span>
+<span class="fc" id="L11">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, receiver));</span>
+<span class="fc" id="L12">  }</span>
 
   abstract Receiver&lt;T, ?&gt; getDefaultReceiver();
 }

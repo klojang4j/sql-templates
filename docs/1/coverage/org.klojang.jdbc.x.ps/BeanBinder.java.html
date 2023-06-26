@@ -12,23 +12,23 @@ import java.util.List;
  */
 public final class BeanBinder&lt;T&gt; {
 
-<span class="nc" id="L15">  private final List&lt;NamedParameter&gt; bound = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L15">  private final List&lt;NamedParameter&gt; bound = new ArrayList&lt;&gt;();</span>
 
   private final BeanValueBinder&lt;?, ?&gt;[] binders;
 
   // Creates a BeanBinder capable binding JavaBeans of the specified type to a query
   // containing the specified named parameters.
-<span class="nc" id="L21">  public BeanBinder(Class&lt;T&gt; beanClass, List&lt;NamedParameter&gt; params, BindInfo bindInfo) {</span>
-<span class="nc" id="L22">    binders = BeanValueBinder.createBeanValueBinders(beanClass, params, bindInfo, bound);</span>
-<span class="nc" id="L23">  }</span>
+<span class="fc" id="L21">  public BeanBinder(Class&lt;T&gt; beanClass, List&lt;NamedParameter&gt; params, BindInfo bindInfo) {</span>
+<span class="fc" id="L22">    binders = BeanValueBinder.createBeanValueBinders(beanClass, params, bindInfo, bound);</span>
+<span class="fc" id="L23">  }</span>
 
   public void bind(T bean, PreparedStatement ps) throws Throwable {
-<span class="nc" id="L26">    BeanValueBinder.bindBean(ps, bean, binders);</span>
-<span class="nc" id="L27">  }</span>
+<span class="fc" id="L26">    BeanValueBinder.bindBean(ps, bean, binders);</span>
+<span class="fc" id="L27">  }</span>
 
   // Returns all parameters in the query string that can be bound by this BeanBinder.
   public List&lt;NamedParameter&gt; getBoundParameters() {
-<span class="nc" id="L31">    return List.copyOf(bound);</span>
+<span class="fc" id="L31">    return List.copyOf(bound);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

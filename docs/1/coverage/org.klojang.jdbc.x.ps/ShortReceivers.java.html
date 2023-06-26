@@ -8,21 +8,21 @@ import static org.klojang.jdbc.x.ps.PsSetter.*;
 
 class ShortReceivers extends ReceiverLookup&lt;Short&gt; {
 
-<span class="nc" id="L11">  static final Receiver&lt;Short, Short&gt; DEFAULT = new Receiver&lt;&gt;(SET_SHORT);</span>
+<span class="fc" id="L11">  static final Receiver&lt;Short, Short&gt; DEFAULT = new Receiver&lt;&gt;(SET_SHORT);</span>
 
-<span class="nc" id="L13">  ShortReceivers() {</span>
-<span class="nc" id="L14">    put(SMALLINT, DEFAULT);</span>
-<span class="nc" id="L15">    put(INTEGER, IntReceivers.DEFAULT);</span>
-<span class="nc" id="L16">    put(BIGINT, new Receiver&lt;&gt;(SET_LONG));</span>
-<span class="nc" id="L17">    put(REAL, new Receiver&lt;&gt;(SET_FLOAT));</span>
-<span class="nc" id="L18">    put(FLOAT, DoubleReceivers.DEFAULT);</span>
-<span class="nc" id="L19">    put(DOUBLE, DoubleReceivers.DEFAULT);</span>
-<span class="nc" id="L20">    putMultiple(new Receiver&lt;&gt;(SET_BIG_DECIMAL), NUMERIC, DECIMAL);</span>
-<span class="nc" id="L21">    put(TINYINT, new Receiver&lt;Short, Byte&gt;(SET_BYTE, NumberMethods::convert));</span>
-<span class="nc" id="L22">    putMultiple(new Receiver&lt;Short, Boolean&gt;(SET_BOOLEAN, Bool::from), BOOLEAN, BIT);</span>
-<span class="nc" id="L23">    put(VARCHAR, Receiver.ANY_TO_STRING);</span>
-<span class="nc" id="L24">    put(CHAR, Receiver.ANY_TO_STRING);</span>
-<span class="nc" id="L25">  }</span>
+<span class="fc" id="L13">  ShortReceivers() {</span>
+<span class="fc" id="L14">    put(SMALLINT, DEFAULT);</span>
+<span class="fc" id="L15">    put(INTEGER, IntReceivers.DEFAULT);</span>
+<span class="fc" id="L16">    put(BIGINT, new Receiver&lt;&gt;(SET_LONG));</span>
+<span class="fc" id="L17">    put(REAL, new Receiver&lt;&gt;(SET_FLOAT));</span>
+<span class="fc" id="L18">    put(FLOAT, DoubleReceivers.DEFAULT);</span>
+<span class="fc" id="L19">    put(DOUBLE, DoubleReceivers.DEFAULT);</span>
+<span class="fc" id="L20">    putMultiple(new Receiver&lt;&gt;(SET_BIG_DECIMAL), NUMERIC, DECIMAL);</span>
+<span class="fc" id="L21">    put(TINYINT, new Receiver&lt;Short, Byte&gt;(SET_BYTE, NumberMethods::convert));</span>
+<span class="fc" id="L22">    putMultiple(new Receiver&lt;Short, Boolean&gt;(SET_BOOLEAN, Bool::from), BOOLEAN, BIT);</span>
+<span class="fc" id="L23">    put(VARCHAR, Receiver.ANY_TO_STRING);</span>
+<span class="fc" id="L24">    put(CHAR, Receiver.ANY_TO_STRING);</span>
+<span class="fc" id="L25">  }</span>
 
   @Override
   Receiver&lt;Short, ?&gt; getDefaultReceiver() {

@@ -14,7 +14,7 @@ public class RowChannel&lt;COLUMN_TYPE&gt; implements Channel&lt;Row&gt; {
   public static Row toRow(ResultSet rs, RowChannel[] channels) throws Throwable {
 <span class="nc" id="L15">    Row row = new Row(channels.length);</span>
 <span class="nc bnc" id="L16" title="All 2 branches missed.">    for (RowChannel channel : channels) {</span>
-<span class="nc" id="L17">      channel.send(rs, row);</span>
+<span class="nc" id="L17">      channel.copy(rs, row);</span>
     }
 <span class="nc" id="L19">    return row;</span>
   }
@@ -28,7 +28,7 @@ public class RowChannel&lt;COLUMN_TYPE&gt; implements Channel&lt;Row&gt; {
 <span class="nc bnc" id="L28" title="All 2 branches missed.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
 <span class="nc" id="L29">        int jdbcIdx = idx + 1; // JDBC is one-based</span>
 <span class="nc" id="L30">        int sqlType = rsmd.getColumnType(jdbcIdx);</span>
-<span class="nc" id="L31">        RsMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
+<span class="nc" id="L31">        ResultSetMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
 <span class="nc" id="L32">        String label = rsmd.getColumnLabel(jdbcIdx);</span>
 <span class="nc" id="L33">        String key = mapper.map(label);</span>
 <span class="nc" id="L34">        transporters[idx] = new RowChannel&lt;&gt;(method, jdbcIdx, sqlType, key);</span>
@@ -39,12 +39,12 @@ public class RowChannel&lt;COLUMN_TYPE&gt; implements Channel&lt;Row&gt; {
     }
   }
 
-  private final RsMethod&lt;COLUMN_TYPE&gt; method;
+  private final ResultSetMethod&lt;COLUMN_TYPE&gt; method;
   private final int jdbcIdx;
   private final int sqlType;
   private final String key;
 
-<span class="nc" id="L47">  private RowChannel(RsMethod&lt;COLUMN_TYPE&gt; method, int jdbcIdx, int sqlType, String key) {</span>
+<span class="nc" id="L47">  private RowChannel(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int jdbcIdx, int sqlType, String key) {</span>
 <span class="nc" id="L48">    this.method = method;</span>
 <span class="nc" id="L49">    this.jdbcIdx = jdbcIdx;</span>
 <span class="nc" id="L50">    this.sqlType = sqlType;</span>
@@ -52,8 +52,8 @@ public class RowChannel&lt;COLUMN_TYPE&gt; implements Channel&lt;Row&gt; {
 <span class="nc" id="L52">  }</span>
 
   @Override
-  public void send(ResultSet rs, Row row) throws Throwable {
-<span class="nc" id="L56">    row.addColumn(key, method.call(rs, jdbcIdx));</span>
+  public void copy(ResultSet rs, Row row) throws Throwable {
+<span class="nc" id="L56">    row.addColumn(key, method.invoke(rs, jdbcIdx));</span>
 <span class="nc" id="L57">  }</span>
 
   @Override

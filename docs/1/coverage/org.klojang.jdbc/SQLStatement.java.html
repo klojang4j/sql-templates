@@ -24,13 +24,13 @@ public abstract class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt; implem
 
   private final Set&lt;NamedParameter&gt; bound;
 
-<span class="nc" id="L27">  SQLStatement(Connection con, AbstractSQL sql, SQLInfo sqlInfo) {</span>
-<span class="nc" id="L28">    this.con = con;</span>
-<span class="nc" id="L29">    this.sql = sql;</span>
-<span class="nc" id="L30">    this.sqlInfo = sqlInfo;</span>
-<span class="nc" id="L31">    this.bindables = new ArrayList&lt;&gt;(5);</span>
-<span class="nc" id="L32">    this.bound = HashSet.newHashSet(sqlInfo.parameters().size());</span>
-<span class="nc" id="L33">  }</span>
+<span class="fc" id="L27">  SQLStatement(Connection con, AbstractSQL sql, SQLInfo sqlInfo) {</span>
+<span class="fc" id="L28">    this.con = con;</span>
+<span class="fc" id="L29">    this.sql = sql;</span>
+<span class="fc" id="L30">    this.sqlInfo = sqlInfo;</span>
+<span class="fc" id="L31">    this.bindables = new ArrayList&lt;&gt;(5);</span>
+<span class="fc" id="L32">    this.bound = HashSet.newHashSet(sqlInfo.parameters().size());</span>
+<span class="fc" id="L33">  }</span>
 
   /**
    * Binds the values in the specified JavaBean to the named parameters within the SQL
@@ -49,14 +49,14 @@ public abstract class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt; implem
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public T bind(Object bean) {
-<span class="nc" id="L52">    Check.notNull(bean, &quot;bean&quot;).then(bindables::add);</span>
-<span class="nc" id="L53">    return (T) this;</span>
+<span class="fc" id="L52">    Check.notNull(bean, &quot;bean&quot;).then(bindables::add);</span>
+<span class="fc" id="L53">    return (T) this;</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
   public T bind(Map&lt;String, ?&gt; map) {
-<span class="nc" id="L58">    Check.notNull(map, &quot;map&quot;).then(bindables::add);</span>
-<span class="nc" id="L59">    return (T) this;</span>
+<span class="fc" id="L58">    Check.notNull(map, &quot;map&quot;).then(bindables::add);</span>
+<span class="fc" id="L59">    return (T) this;</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
@@ -70,36 +70,36 @@ public abstract class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt; implem
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   &lt;U&gt; void applyBindings(PreparedStatement ps) throws Throwable {
-<span class="nc bnc" id="L73" title="All 2 branches missed.">    for (Object obj : bindables) {</span>
-<span class="nc bnc" id="L74" title="All 2 branches missed.">      if (obj instanceof Map map) {</span>
-<span class="nc" id="L75">        MapBinder binder = new MapBinder(</span>
-<span class="nc" id="L76">              sqlInfo.parameters(),</span>
-<span class="nc" id="L77">              sql.getBindInfo());</span>
-<span class="nc" id="L78">        binder.bindMap(map, ps, bound);</span>
-<span class="nc" id="L79">      } else {</span>
-<span class="nc" id="L80">        BeanBinder binder = sql.getBeanBinder(obj.getClass(), sqlInfo);</span>
-<span class="nc" id="L81">        binder.bind(obj, ps);</span>
-<span class="nc" id="L82">        bound.addAll(binder.getBoundParameters());</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">    for (Object obj : bindables) {</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">      if (obj instanceof Map map) {</span>
+<span class="fc" id="L75">        MapBinder binder = new MapBinder(</span>
+<span class="fc" id="L76">              sqlInfo.parameters(),</span>
+<span class="fc" id="L77">              sql.getBindInfo());</span>
+<span class="fc" id="L78">        binder.bindMap(map, ps, bound);</span>
+<span class="fc" id="L79">      } else {</span>
+<span class="fc" id="L80">        BeanBinder binder = sql.getBeanBinder(obj.getClass(), sqlInfo);</span>
+<span class="fc" id="L81">        binder.bind(obj, ps);</span>
+<span class="fc" id="L82">        bound.addAll(binder.getBoundParameters());</span>
       }
-<span class="nc" id="L84">    }</span>
-<span class="nc bnc" id="L85" title="All 2 branches missed.">    if (bound.size() != sqlInfo.parameters().size()) {</span>
+<span class="fc" id="L84">    }</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">    if (bound.size() != sqlInfo.parameters().size()) {</span>
 <span class="nc" id="L86">      throw notExecutable();</span>
     }
-<span class="nc" id="L88">  }</span>
+<span class="fc" id="L88">  }</span>
 
   void close(PreparedStatement ps) {
     try {
-<span class="nc bnc" id="L92" title="All 2 branches missed.">      if (ps != null) {</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">      if (ps != null) {</span>
         try {
-<span class="nc" id="L94">          ps.close();</span>
+<span class="fc" id="L94">          ps.close();</span>
 <span class="nc" id="L95">        } catch (SQLException e) {</span>
 <span class="nc" id="L96">          throw KJSQLException.wrap(e, sqlInfo);</span>
-<span class="nc" id="L97">        }</span>
+<span class="fc" id="L97">        }</span>
       }
     } finally {
-<span class="nc" id="L100">      sql.unlock();</span>
+<span class="fc" id="L100">      sql.unlock();</span>
     }
-<span class="nc" id="L102">  }</span>
+<span class="fc" id="L102">  }</span>
 
   private KJSQLException notExecutable() {
 <span class="nc" id="L105">    Set&lt;NamedParameter&gt; params = HashSet.newHashSet(sqlInfo.parameters().size());</span>

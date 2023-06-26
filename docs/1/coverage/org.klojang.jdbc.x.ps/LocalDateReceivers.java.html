@@ -10,13 +10,13 @@ import static org.klojang.jdbc.x.ps.PsSetter.setObject;
 
 public class LocalDateReceivers extends ReceiverLookup&lt;LocalDate&gt; {
 
-<span class="nc" id="L13">  static final Receiver&lt;LocalDate, Date&gt; DEFAULT =</span>
+<span class="fc" id="L13">  static final Receiver&lt;LocalDate, Date&gt; DEFAULT =</span>
 <span class="nc" id="L14">      new Receiver&lt;&gt;(SET_DATE, d -&gt; ifNotNull(d, Date::valueOf));</span>
 
-<span class="nc" id="L16">  LocalDateReceivers() {</span>
-<span class="nc" id="L17">    put(DATE, DEFAULT);</span>
-<span class="nc" id="L18">    put(TIMESTAMP, new Receiver&lt;LocalDate, Object&gt;(setObject(TIMESTAMP)));</span>
-<span class="nc" id="L19">  }</span>
+<span class="fc" id="L16">  LocalDateReceivers() {</span>
+<span class="fc" id="L17">    put(DATE, DEFAULT);</span>
+<span class="fc" id="L18">    put(TIMESTAMP, new Receiver&lt;LocalDate, Object&gt;(setObject(TIMESTAMP)));</span>
+<span class="fc" id="L19">  }</span>
 
   @Override
   Receiver&lt;LocalDate, ?&gt; getDefaultReceiver() {

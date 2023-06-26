@@ -12,17 +12,17 @@ import java.util.Map;
 
 public final class MapBinder {
 
-<span class="nc" id="L15">  private static final Logger LOG = LoggerFactory.getLogger(MapBinder.class);</span>
+<span class="fc" id="L15">  private static final Logger LOG = LoggerFactory.getLogger(MapBinder.class);</span>
 
-<span class="nc" id="L17">  private static final Object ABSENT = new Object();</span>
+<span class="fc" id="L17">  private static final Object ABSENT = new Object();</span>
 
   private final List&lt;NamedParameter&gt; params;
   private final BindInfo bindInfo;
 
-<span class="nc" id="L22">  public MapBinder(List&lt;NamedParameter&gt; params, BindInfo bindInfo) {</span>
-<span class="nc" id="L23">    this.params = params;</span>
-<span class="nc" id="L24">    this.bindInfo = bindInfo;</span>
-<span class="nc" id="L25">  }</span>
+<span class="fc" id="L22">  public MapBinder(List&lt;NamedParameter&gt; params, BindInfo bindInfo) {</span>
+<span class="fc" id="L23">    this.params = params;</span>
+<span class="fc" id="L24">    this.bindInfo = bindInfo;</span>
+<span class="fc" id="L25">  }</span>
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   public void bindMap(
@@ -30,34 +30,34 @@ public final class MapBinder {
         PreparedStatement ps,
         Collection&lt;NamedParameter&gt; bound)
         throws Throwable {
-<span class="nc" id="L33">    ReceiverNegotiator negotiator = ReceiverNegotiator.getInstance();</span>
-<span class="nc bnc" id="L34" title="All 2 branches missed.">    for (NamedParameter param : params) {</span>
-<span class="nc" id="L35">      String key = param.getName();</span>
-<span class="nc bnc" id="L36" title="All 2 branches missed.">      if (!map.containsKey(key)) {</span>
+<span class="fc" id="L33">    ReceiverNegotiator negotiator = ReceiverNegotiator.getInstance();</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">    for (NamedParameter param : params) {</span>
+<span class="fc" id="L35">      String key = param.getName();</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">      if (!map.containsKey(key)) {</span>
 <span class="nc" id="L37">        continue;</span>
       }
-<span class="nc" id="L39">      bound.add(param);</span>
-<span class="nc" id="L40">      Object value = map.getOrDefault(key, ABSENT);</span>
-<span class="nc bnc" id="L41" title="All 2 branches missed.">      if (value == null) {</span>
+<span class="fc" id="L39">      bound.add(param);</span>
+<span class="fc" id="L40">      Object value = map.getOrDefault(key, ABSENT);</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">      if (value == null) {</span>
 <span class="nc" id="L42">        param.getIndices().forEachThrowing(i -&gt; ps.setString(i, null));</span>
-<span class="nc bnc" id="L43" title="All 2 branches missed.">      } else if (value != ABSENT) {</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">      } else if (value != ABSENT) {</span>
         Receiver receiver;
-<span class="nc bnc" id="L45" title="All 4 branches missed.">        if (value instanceof Enum &amp;&amp; bindInfo.bindEnumUsingToString(key)) {</span>
+<span class="pc bpc" id="L45" title="3 of 4 branches missed.">        if (value instanceof Enum &amp;&amp; bindInfo.bindEnumUsingToString(key)) {</span>
 <span class="nc" id="L46">          receiver = EnumReceivers.ENUM_TO_STRING;</span>
         } else {
-<span class="nc" id="L48">          receiver = negotiator.getDefaultReceiver(value.getClass());</span>
+<span class="fc" id="L48">          receiver = negotiator.getDefaultReceiver(value.getClass());</span>
         }
-<span class="nc" id="L50">        Object output = receiver.getParamValue(value);</span>
-<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (LOG.isDebugEnabled()) {</span>
+<span class="fc" id="L50">        Object output = receiver.getParamValue(value);</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (LOG.isDebugEnabled()) {</span>
 <span class="nc bnc" id="L52" title="All 2 branches missed.">          if (value == output) {</span>
 <span class="nc" id="L53">            LOG.debug(&quot;-&gt; Parameter \&quot;{}\&quot;: {}&quot;, key, output);</span>
           } else {
 <span class="nc" id="L55">            LOG.debug(&quot;-&gt; Parameter \&quot;{}\&quot;: {} (map value: {})&quot;, key, output, value);</span>
           }
         }
-<span class="nc" id="L58">        param.getIndices().forEachThrowing(i -&gt; receiver.bind(ps, i, output));</span>
+<span class="fc" id="L58">        param.getIndices().forEachThrowing(i -&gt; receiver.bind(ps, i, output));</span>
       }
-<span class="nc" id="L60">    }</span>
-<span class="nc" id="L61">  }</span>
+<span class="fc" id="L60">    }</span>
+<span class="fc" id="L61">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -11,9 +11,9 @@ public final class ParametrizedSQL extends AbstractSQL {
   private final SQLNormalizer normalizer;
 
   public ParametrizedSQL(String sql, BindInfo bindInfo) {
-<span class="nc" id="L14">    super(sql, bindInfo);</span>
-<span class="nc" id="L15">    this.normalizer = new SQLNormalizer(sql);</span>
-<span class="nc" id="L16">  }</span>
+<span class="fc" id="L14">    super(sql, bindInfo);</span>
+<span class="fc" id="L15">    this.normalizer = new SQLNormalizer(sql);</span>
+<span class="fc" id="L16">  }</span>
 
   @Override
   public SQL set(String varName, Object value) {
@@ -21,11 +21,11 @@ public final class ParametrizedSQL extends AbstractSQL {
   }
 
   @Override
-<span class="nc" id="L24">  public void unlock() {}</span>
+<span class="fc" id="L24">  public void unlock() {}</span>
 
   @Override
   &lt;T extends SQLStatement&lt;?&gt;&gt; T prepare(Connection con, StatementFactory&lt;T&gt; constructor) {
-<span class="nc" id="L28">    return constructor.create(con, this, new SQLInfo(sql, normalizer));</span>
+<span class="fc" id="L28">    return constructor.create(con, this, new SQLInfo(sql, normalizer));</span>
   }
 
 }

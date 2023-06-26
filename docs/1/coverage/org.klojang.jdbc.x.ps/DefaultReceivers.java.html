@@ -9,29 +9,29 @@ import org.klojang.collections.TypeMap;
 @SuppressWarnings(&quot;rawtypes&quot;)
 class DefaultReceivers {
 
-<span class="nc" id="L12">  static final DefaultReceivers INSTANCE = new DefaultReceivers();</span>
+<span class="fc" id="L12">  static final DefaultReceivers INSTANCE = new DefaultReceivers();</span>
 
   private Map&lt;Class&lt;?&gt;, Receiver&gt; defaults;
 
-<span class="nc" id="L16">  private DefaultReceivers() {</span>
-<span class="nc" id="L17">    defaults = TypeMap.&lt;Receiver&gt;fixedTypeMapBuilder()</span>
-<span class="nc" id="L18">        .autobox(true)</span>
-<span class="nc" id="L19">        .add(String.class, StringReceivers.DEFAULT)</span>
-<span class="nc" id="L20">        .add(Integer.class, IntReceivers.DEFAULT)</span>
-<span class="nc" id="L21">        .add(Boolean.class, BooleanReceivers.DEFAULT)</span>
-<span class="nc" id="L22">        .add(Double.class, DoubleReceivers.DEFAULT)</span>
-<span class="nc" id="L23">        .add(Long.class, LongReceivers.DEFAULT)</span>
-<span class="nc" id="L24">        .add(Float.class, FloatReceivers.DEFAULT)</span>
-<span class="nc" id="L25">        .add(Short.class, ShortReceivers.DEFAULT)</span>
-<span class="nc" id="L26">        .add(Byte.class, ByteReceivers.DEFAULT)</span>
-<span class="nc" id="L27">        .add(Enum.class, EnumReceivers.DEFAULT)</span>
-<span class="nc" id="L28">        .add(LocalDate.class, LocalDateReceivers.DEFAULT)</span>
-<span class="nc" id="L29">        .add(LocalDateTime.class, LocalDateTimeReceivers.DEFAULT)</span>
-<span class="nc" id="L30">        .freeze();</span>
-<span class="nc" id="L31">  }</span>
+<span class="fc" id="L16">  private DefaultReceivers() {</span>
+<span class="fc" id="L17">    defaults = TypeMap.&lt;Receiver&gt;fixedTypeMapBuilder()</span>
+<span class="fc" id="L18">        .autobox(true)</span>
+<span class="fc" id="L19">        .add(String.class, StringReceivers.DEFAULT)</span>
+<span class="fc" id="L20">        .add(Integer.class, IntReceivers.DEFAULT)</span>
+<span class="fc" id="L21">        .add(Boolean.class, BooleanReceivers.DEFAULT)</span>
+<span class="fc" id="L22">        .add(Double.class, DoubleReceivers.DEFAULT)</span>
+<span class="fc" id="L23">        .add(Long.class, LongReceivers.DEFAULT)</span>
+<span class="fc" id="L24">        .add(Float.class, FloatReceivers.DEFAULT)</span>
+<span class="fc" id="L25">        .add(Short.class, ShortReceivers.DEFAULT)</span>
+<span class="fc" id="L26">        .add(Byte.class, ByteReceivers.DEFAULT)</span>
+<span class="fc" id="L27">        .add(Enum.class, EnumReceivers.DEFAULT)</span>
+<span class="fc" id="L28">        .add(LocalDate.class, LocalDateReceivers.DEFAULT)</span>
+<span class="fc" id="L29">        .add(LocalDateTime.class, LocalDateTimeReceivers.DEFAULT)</span>
+<span class="fc" id="L30">        .freeze();</span>
+<span class="fc" id="L31">  }</span>
 
   Receiver getDefaultReceiver(Class&lt;?&gt; forType) {
-<span class="nc" id="L34">    return defaults.get(forType);</span>
+<span class="fc" id="L34">    return defaults.get(forType);</span>
   }
 
 }

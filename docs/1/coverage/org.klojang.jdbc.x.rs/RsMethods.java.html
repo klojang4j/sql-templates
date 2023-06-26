@@ -22,51 +22,51 @@ class RsMethods {
 <span class="nc" id="L22">    return INSTANCE;</span>
   }
 
-  private final Map&lt;Integer, RsMethod&lt;?&gt;&gt; cache;
+  private final Map&lt;Integer, ResultSetMethod&lt;?&gt;&gt; cache;
 
 <span class="nc" id="L27">  private RsMethods() {</span>
 <span class="nc" id="L28">    cache = createCache();</span>
 <span class="nc" id="L29">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
-  &lt;T&gt; RsMethod&lt;T&gt; getMethod(Integer sqlType) {
+  &lt;T&gt; ResultSetMethod&lt;T&gt; getMethod(Integer sqlType) {
     // This implicitly checks that the specified int is one of the
     // static final int constants in the java.sql.Types class
 <span class="nc" id="L35">    String typeName = SQLTypeNames.getTypeName(sqlType);</span>
 <span class="nc" id="L36">    Check.that(sqlType).is(keyIn(), cache, &quot;Unsupported SQL type: %s&quot;, typeName);</span>
-<span class="nc" id="L37">    return (RsMethod&lt;T&gt;) cache.get(sqlType);</span>
+<span class="nc" id="L37">    return (ResultSetMethod&lt;T&gt;) cache.get(sqlType);</span>
   }
 
-  private static Map&lt;Integer, RsMethod&lt;?&gt;&gt; createCache() {
-<span class="nc" id="L41">    Map&lt;Integer, RsMethod&lt;?&gt;&gt; tmp = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L42">    tmp.put(VARCHAR, RsMethod.GET_STRING);</span>
-<span class="nc" id="L43">    tmp.put(LONGVARCHAR, RsMethod.GET_STRING);</span>
-<span class="nc" id="L44">    tmp.put(NVARCHAR, RsMethod.GET_STRING);</span>
-<span class="nc" id="L45">    tmp.put(LONGNVARCHAR, RsMethod.GET_STRING);</span>
-<span class="nc" id="L46">    tmp.put(CHAR, RsMethod.GET_STRING);</span>
-<span class="nc" id="L47">    tmp.put(CLOB, RsMethod.GET_STRING);</span>
+  private static Map&lt;Integer, ResultSetMethod&lt;?&gt;&gt; createCache() {
+<span class="nc" id="L41">    Map&lt;Integer, ResultSetMethod&lt;?&gt;&gt; tmp = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L42">    tmp.put(VARCHAR, ResultSetMethod.GET_STRING);</span>
+<span class="nc" id="L43">    tmp.put(LONGVARCHAR, ResultSetMethod.GET_STRING);</span>
+<span class="nc" id="L44">    tmp.put(NVARCHAR, ResultSetMethod.GET_STRING);</span>
+<span class="nc" id="L45">    tmp.put(LONGNVARCHAR, ResultSetMethod.GET_STRING);</span>
+<span class="nc" id="L46">    tmp.put(CHAR, ResultSetMethod.GET_STRING);</span>
+<span class="nc" id="L47">    tmp.put(CLOB, ResultSetMethod.GET_STRING);</span>
 
-<span class="nc" id="L49">    tmp.put(INTEGER, RsMethod.GET_INT);</span>
-<span class="nc" id="L50">    tmp.put(SMALLINT, RsMethod.GET_SHORT);</span>
-<span class="nc" id="L51">    tmp.put(TINYINT, RsMethod.GET_BYTE);</span>
-<span class="nc" id="L52">    tmp.put(BIT, RsMethod.GET_BYTE);</span>
-<span class="nc" id="L53">    tmp.put(DOUBLE, RsMethod.GET_DOUBLE);</span>
-<span class="nc" id="L54">    tmp.put(REAL, RsMethod.GET_DOUBLE);</span>
-<span class="nc" id="L55">    tmp.put(FLOAT, RsMethod.GET_FLOAT);</span>
-<span class="nc" id="L56">    tmp.put(BIGINT, RsMethod.GET_LONG);</span>
+<span class="nc" id="L49">    tmp.put(INTEGER, ResultSetMethod.GET_INT);</span>
+<span class="nc" id="L50">    tmp.put(SMALLINT, ResultSetMethod.GET_SHORT);</span>
+<span class="nc" id="L51">    tmp.put(TINYINT, ResultSetMethod.GET_BYTE);</span>
+<span class="nc" id="L52">    tmp.put(BIT, ResultSetMethod.GET_BYTE);</span>
+<span class="nc" id="L53">    tmp.put(DOUBLE, ResultSetMethod.GET_DOUBLE);</span>
+<span class="nc" id="L54">    tmp.put(REAL, ResultSetMethod.GET_DOUBLE);</span>
+<span class="nc" id="L55">    tmp.put(FLOAT, ResultSetMethod.GET_FLOAT);</span>
+<span class="nc" id="L56">    tmp.put(BIGINT, ResultSetMethod.GET_LONG);</span>
 
-<span class="nc" id="L58">    tmp.put(BOOLEAN, RsMethod.GET_BOOLEAN);</span>
+<span class="nc" id="L58">    tmp.put(BOOLEAN, ResultSetMethod.GET_BOOLEAN);</span>
 
-<span class="nc" id="L60">    tmp.put(DATE, RsMethod.GET_DATE);</span>
-<span class="nc" id="L61">    tmp.put(TIME, RsMethod.GET_TIME);</span>
+<span class="nc" id="L60">    tmp.put(DATE, ResultSetMethod.GET_DATE);</span>
+<span class="nc" id="L61">    tmp.put(TIME, ResultSetMethod.GET_TIME);</span>
 
-<span class="nc" id="L63">    tmp.put(TIMESTAMP, RsMethod.objectGetter(LocalDateTime.class));</span>
-<span class="nc" id="L64">    tmp.put(TIMESTAMP_WITH_TIMEZONE, RsMethod.objectGetter(OffsetDateTime.class));</span>
+<span class="nc" id="L63">    tmp.put(TIMESTAMP, ResultSetMethod.objectGetter(LocalDateTime.class));</span>
+<span class="nc" id="L64">    tmp.put(TIMESTAMP_WITH_TIMEZONE, ResultSetMethod.objectGetter(OffsetDateTime.class));</span>
 
-<span class="nc" id="L66">    tmp.put(NUMERIC, RsMethod.GET_BIG_DECIMAL);</span>
-<span class="nc" id="L67">    tmp.put(DECIMAL, RsMethod.GET_BIG_DECIMAL);</span>
+<span class="nc" id="L66">    tmp.put(NUMERIC, ResultSetMethod.GET_BIG_DECIMAL);</span>
+<span class="nc" id="L67">    tmp.put(DECIMAL, ResultSetMethod.GET_BIG_DECIMAL);</span>
 
-<span class="nc" id="L69">    tmp.put(ARRAY, RsMethod.objectGetter(Object[].class));</span>
+<span class="nc" id="L69">    tmp.put(ARRAY, ResultSetMethod.objectGetter(Object[].class));</span>
 <span class="nc" id="L70">    return Map.copyOf(tmp);</span>
   }
 }

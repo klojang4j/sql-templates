@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BooleanReaders.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">BooleanReaders.java</span></div><h1>BooleanReaders.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
+
+import org.klojang.convert.Bool;
+
+import static java.sql.Types.*;
+
+final class BooleanReaders extends ReaderLookup&lt;Boolean&gt; {
+
+<span class="nc" id="L9">  BooleanReaders() {</span>
+<span class="nc" id="L10">    addMultiple(new ResultSetReader&lt;&gt;(ResultSetMethod.GET_BOOLEAN), BOOLEAN, BIT);</span>
+<span class="nc" id="L11">    add(INTEGER, new ResultSetReader&lt;&gt;(ResultSetMethod.GET_INT, Bool::from));</span>
+<span class="nc" id="L12">    add(SMALLINT, new ResultSetReader&lt;&gt;(ResultSetMethod.GET_SHORT, Bool::from));</span>
+<span class="nc" id="L13">    add(TINYINT, new ResultSetReader&lt;&gt;(ResultSetMethod.GET_BYTE, Bool::from));</span>
+<span class="nc" id="L14">    addMultiple(new ResultSetReader&lt;&gt;(ResultSetMethod.GET_DOUBLE, Bool::from),</span>
+          FLOAT,
+          DOUBLE);
+<span class="nc" id="L17">    put(BIGINT, new ResultSetReader&lt;Long, Boolean&gt;(ResultSetMethod.GET_LONG, Bool::from));</span>
+<span class="nc" id="L18">    put(REAL, new ResultSetReader&lt;Float, Boolean&gt;(ResultSetMethod.GET_FLOAT, Bool::from));</span>
+<span class="nc" id="L19">    addMultiple(new ResultSetReader&lt;&gt;(ResultSetMethod.GET_BIG_DECIMAL, Bool::from),</span>
+          NUMERIC,
+          DECIMAL);
+<span class="nc" id="L22">    addMultiple(new ResultSetReader&lt;&gt;(ResultSetMethod.GET_STRING, Bool::from),</span>
+          CHAR,
+          VARCHAR);
+<span class="nc" id="L25">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

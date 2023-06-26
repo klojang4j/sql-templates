@@ -1,8 +1,8 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.x.rs.ExtractorNegotiator;
-import org.klojang.jdbc.x.rs.RsExtractor;
+import org.klojang.jdbc.x.rs.ReaderNegotiator;
+import org.klojang.jdbc.x.rs.ResultSetReader;
 import org.klojang.jdbc.x.sql.AbstractSQL;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.NameMapper;
@@ -76,7 +76,7 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
     ResultSet rs = executeAndNext();
     try {
       int sqlType = rs.getMetaData().getColumnType(1);
-      RsExtractor<?, T> emitter = ExtractorNegotiator.getInstance().findExtractor(clazz,
+      ResultSetReader<?, T> emitter = ReaderNegotiator.getInstance().findReader(clazz,
             sqlType);
       return emitter.getValue(rs, 1, clazz);
     } catch (Throwable t) {
@@ -148,7 +148,7 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
         return Collections.emptyList();
       }
       int sqlType = rs.getMetaData().getColumnType(1);
-      RsExtractor<?, T> extractor = ExtractorNegotiator.getInstance().findExtractor(clazz,
+      ResultSetReader<?, T> extractor = ReaderNegotiator.getInstance().findReader(clazz,
             sqlType);
       List<T> list = new ArrayList<>(expectedSize);
       do {

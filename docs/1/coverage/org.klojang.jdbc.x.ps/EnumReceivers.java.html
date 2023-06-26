@@ -4,19 +4,19 @@ import static java.sql.Types.*;
 
 class EnumReceivers extends ReceiverLookup&lt;Enum&lt;?&gt;&gt; {
 
-<span class="nc" id="L7">  static final Receiver&lt;Enum&lt;?&gt;, Integer&gt; DEFAULT = new Receiver&lt;&gt;(PsSetter.SET_INT, Enum::ordinal);</span>
+<span class="fc" id="L7">  static final Receiver&lt;Enum&lt;?&gt;, Integer&gt; DEFAULT = new Receiver&lt;&gt;(PsSetter.SET_INT, Enum::ordinal);</span>
 
-<span class="nc" id="L9">  static final Receiver&lt;Enum&lt;?&gt;, String&gt; ENUM_TO_STRING =</span>
+<span class="fc" id="L9">  static final Receiver&lt;Enum&lt;?&gt;, String&gt; ENUM_TO_STRING =</span>
       new Receiver&lt;&gt;(PsSetter.SET_STRING, Object::toString);
 
-<span class="nc" id="L12">  EnumReceivers() {</span>
-<span class="nc" id="L13">    put(INTEGER, DEFAULT);</span>
-<span class="nc" id="L14">    put(BIGINT, new Receiver&lt;Enum&lt;?&gt;, Long&gt;(PsSetter.SET_LONG, e -&gt; (long) e.ordinal()));</span>
-<span class="nc" id="L15">    put(SMALLINT, new Receiver&lt;Enum&lt;?&gt;, Short&gt;(PsSetter.SET_SHORT, e -&gt; (short) e.ordinal()));</span>
-<span class="nc" id="L16">    put(TINYINT, new Receiver&lt;Enum&lt;?&gt;, Byte&gt;(PsSetter.SET_BYTE, e -&gt; (byte) e.ordinal()));</span>
-<span class="nc" id="L17">    put(VARCHAR, ENUM_TO_STRING);</span>
-<span class="nc" id="L18">    put(CHAR, ENUM_TO_STRING);</span>
-<span class="nc" id="L19">  }</span>
+<span class="fc" id="L12">  EnumReceivers() {</span>
+<span class="fc" id="L13">    put(INTEGER, DEFAULT);</span>
+<span class="pc" id="L14">    put(BIGINT, new Receiver&lt;Enum&lt;?&gt;, Long&gt;(PsSetter.SET_LONG, e -&gt; (long) e.ordinal()));</span>
+<span class="pc" id="L15">    put(SMALLINT, new Receiver&lt;Enum&lt;?&gt;, Short&gt;(PsSetter.SET_SHORT, e -&gt; (short) e.ordinal()));</span>
+<span class="pc" id="L16">    put(TINYINT, new Receiver&lt;Enum&lt;?&gt;, Byte&gt;(PsSetter.SET_BYTE, e -&gt; (byte) e.ordinal()));</span>
+<span class="fc" id="L17">    put(VARCHAR, ENUM_TO_STRING);</span>
+<span class="fc" id="L18">    put(CHAR, ENUM_TO_STRING);</span>
+<span class="fc" id="L19">  }</span>
 
   @Override
   Receiver&lt;Enum&lt;?&gt;, ?&gt; getDefaultReceiver() {

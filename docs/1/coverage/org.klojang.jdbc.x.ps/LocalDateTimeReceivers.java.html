@@ -8,12 +8,12 @@ import static org.klojang.jdbc.x.ps.PsSetter.SET_TIMESTAMP;
 
 public class LocalDateTimeReceivers extends ReceiverLookup&lt;LocalDateTime&gt; {
 
-<span class="nc" id="L11">  static final Receiver&lt;LocalDateTime, Timestamp&gt; DEFAULT =</span>
+<span class="fc" id="L11">  static final Receiver&lt;LocalDateTime, Timestamp&gt; DEFAULT =</span>
 <span class="nc" id="L12">      new Receiver&lt;&gt;(SET_TIMESTAMP, d -&gt; ifNotNull(d, Timestamp::valueOf));</span>
 
-<span class="nc" id="L14">  LocalDateTimeReceivers() {</span>
-<span class="nc" id="L15">    put(TIMESTAMP, DEFAULT);</span>
-<span class="nc" id="L16">  }</span>
+<span class="fc" id="L14">  LocalDateTimeReceivers() {</span>
+<span class="fc" id="L15">    put(TIMESTAMP, DEFAULT);</span>
+<span class="fc" id="L16">  }</span>
 
   @Override
   Receiver&lt;LocalDateTime, ?&gt; getDefaultReceiver() {

@@ -20,34 +20,34 @@ import static org.klojang.check.CommonExceptions.illegalState;
 
 public abstract sealed class AbstractSQL implements SQL
       permits ParametrizedSQL, SQLTemplate, DynamicSQL {
-<span class="nc" id="L23">  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQL.class);</span>
+<span class="fc" id="L23">  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQL.class);</span>
 
   interface StatementFactory&lt;T extends SQLStatement&gt; {
     T create(Connection con, AbstractSQL sql, SQLInfo sqlInfo);
   }
 
-<span class="nc" id="L29">  private final ReentrantLock lock = new ReentrantLock();</span>
+<span class="fc" id="L29">  private final ReentrantLock lock = new ReentrantLock();</span>
 
-<span class="nc" id="L31">  private final Map&lt;Class&lt;?&gt;, BeanBinder&lt;?&gt;&gt; beanBinders = new HashMap&lt;&gt;(4);</span>
-<span class="nc" id="L32">  private final Map&lt;Tuple2&lt;Class&lt;?&gt;, NameMapper&gt;, BeanifierFactory&lt;?&gt;&gt; beanifiers =</span>
+<span class="fc" id="L31">  private final Map&lt;Class&lt;?&gt;, BeanBinder&lt;?&gt;&gt; beanBinders = new HashMap&lt;&gt;(4);</span>
+<span class="fc" id="L32">  private final Map&lt;Tuple2&lt;Class&lt;?&gt;, NameMapper&gt;, BeanifierFactory&lt;?&gt;&gt; beanifiers =</span>
         new HashMap&lt;&gt;(4);
-<span class="nc" id="L34">  private final Map&lt;NameMapper, MappifierFactory&gt; mappifiers = new HashMap&lt;&gt;(4);</span>
+<span class="fc" id="L34">  private final Map&lt;NameMapper, MappifierFactory&gt; mappifiers = new HashMap&lt;&gt;(4);</span>
 
 
   final String sql;
   final BindInfo bindInfo;
 
-<span class="nc" id="L40">  public AbstractSQL(String sql, BindInfo bindInfo) {</span>
-<span class="nc" id="L41">    this.sql = Check.notNull(sql, &quot;sql&quot;).ok();</span>
-<span class="nc" id="L42">    this.bindInfo = Check.notNull(bindInfo, &quot;bindInfo&quot;).ok();</span>
-<span class="nc" id="L43">  }</span>
+<span class="fc" id="L40">  public AbstractSQL(String sql, BindInfo bindInfo) {</span>
+<span class="fc" id="L41">    this.sql = Check.notNull(sql, &quot;sql&quot;).ok();</span>
+<span class="fc" id="L42">    this.bindInfo = Check.notNull(bindInfo, &quot;bindInfo&quot;).ok();</span>
+<span class="fc" id="L43">  }</span>
 
   public SQLQuery prepareQuery(Connection con) {
 <span class="nc" id="L46">    return prepare(con, SQLQuery::new);</span>
   }
 
   public SQLInsert prepareInsert(Connection con) {
-<span class="nc" id="L50">    return prepare(con, SQLInsert::new);</span>
+<span class="fc" id="L50">    return prepare(con, SQLInsert::new);</span>
   }
 
   public SQLUpdate prepareUpdate(Connection con) {
@@ -55,16 +55,16 @@ public abstract sealed class AbstractSQL implements SQL
   }
 
   public BindInfo getBindInfo() {
-<span class="nc" id="L58">    return bindInfo;</span>
+<span class="fc" id="L58">    return bindInfo;</span>
   }
 
   public BeanBinder&lt;?&gt; getBeanBinder(Class&lt;?&gt; beanClass, SQLInfo sqlInfo) {
-<span class="nc" id="L62">    BeanBinder&lt;?&gt; binder = beanBinders.get(beanClass);</span>
-<span class="nc bnc" id="L63" title="All 2 branches missed.">    if (binder == null) {</span>
-<span class="nc" id="L64">      binder = new BeanBinder&lt;&gt;(beanClass, sqlInfo.parameters(), bindInfo);</span>
-<span class="nc" id="L65">      beanBinders.put(beanClass, binder);</span>
+<span class="fc" id="L62">    BeanBinder&lt;?&gt; binder = beanBinders.get(beanClass);</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">    if (binder == null) {</span>
+<span class="fc" id="L64">      binder = new BeanBinder&lt;&gt;(beanClass, sqlInfo.parameters(), bindInfo);</span>
+<span class="fc" id="L65">      beanBinders.put(beanClass, binder);</span>
     }
-<span class="nc" id="L67">    return binder;</span>
+<span class="fc" id="L67">    return binder;</span>
   }
 
 

@@ -24,20 +24,20 @@ import static org.klojang.util.StringMethods.lpad;
  */
 public class PsSetter&lt;PARAM_TYPE&gt; {
 
-<span class="nc" id="L27">  private static final Logger LOG = LoggerFactory.getLogger(PsSetter.class);</span>
+<span class="fc" id="L27">  private static final Logger LOG = LoggerFactory.getLogger(PsSetter.class);</span>
 
-<span class="nc" id="L29">  static PsSetter&lt;String&gt; SET_STRING = setter(&quot;setString&quot;, String.class);</span>
-<span class="nc" id="L30">  static PsSetter&lt;Integer&gt; SET_INT = setter(&quot;setInt&quot;, int.class);</span>
-<span class="nc" id="L31">  static PsSetter&lt;Double&gt; SET_DOUBLE = setter(&quot;setDouble&quot;, double.class);</span>
-<span class="nc" id="L32">  static PsSetter&lt;Long&gt; SET_LONG = setter(&quot;setLong&quot;, long.class);</span>
-<span class="nc" id="L33">  static PsSetter&lt;Float&gt; SET_FLOAT = setter(&quot;setFloat&quot;, float.class);</span>
-<span class="nc" id="L34">  static PsSetter&lt;Short&gt; SET_SHORT = setter(&quot;setShort&quot;, short.class);</span>
-<span class="nc" id="L35">  static PsSetter&lt;Byte&gt; SET_BYTE = setter(&quot;setByte&quot;, byte.class);</span>
-<span class="nc" id="L36">  static PsSetter&lt;Boolean&gt; SET_BOOLEAN = setter(&quot;setBoolean&quot;, boolean.class);</span>
-<span class="nc" id="L37">  static PsSetter&lt;BigDecimal&gt; SET_BIG_DECIMAL = setter(&quot;setBigDecimal&quot;, BigDecimal.class);</span>
-<span class="nc" id="L38">  static PsSetter&lt;Date&gt; SET_DATE = setter(&quot;setDate&quot;, Date.class);</span>
-<span class="nc" id="L39">  static PsSetter&lt;Time&gt; SET_TIME = setter(&quot;setTime&quot;, Time.class);</span>
-<span class="nc" id="L40">  static PsSetter&lt;Timestamp&gt; SET_TIMESTAMP = setter(&quot;setTimestamp&quot;, Timestamp.class);</span>
+<span class="fc" id="L29">  static PsSetter&lt;String&gt; SET_STRING = setter(&quot;setString&quot;, String.class);</span>
+<span class="fc" id="L30">  static PsSetter&lt;Integer&gt; SET_INT = setter(&quot;setInt&quot;, int.class);</span>
+<span class="fc" id="L31">  static PsSetter&lt;Double&gt; SET_DOUBLE = setter(&quot;setDouble&quot;, double.class);</span>
+<span class="fc" id="L32">  static PsSetter&lt;Long&gt; SET_LONG = setter(&quot;setLong&quot;, long.class);</span>
+<span class="fc" id="L33">  static PsSetter&lt;Float&gt; SET_FLOAT = setter(&quot;setFloat&quot;, float.class);</span>
+<span class="fc" id="L34">  static PsSetter&lt;Short&gt; SET_SHORT = setter(&quot;setShort&quot;, short.class);</span>
+<span class="fc" id="L35">  static PsSetter&lt;Byte&gt; SET_BYTE = setter(&quot;setByte&quot;, byte.class);</span>
+<span class="fc" id="L36">  static PsSetter&lt;Boolean&gt; SET_BOOLEAN = setter(&quot;setBoolean&quot;, boolean.class);</span>
+<span class="fc" id="L37">  static PsSetter&lt;BigDecimal&gt; SET_BIG_DECIMAL = setter(&quot;setBigDecimal&quot;, BigDecimal.class);</span>
+<span class="fc" id="L38">  static PsSetter&lt;Date&gt; SET_DATE = setter(&quot;setDate&quot;, Date.class);</span>
+<span class="fc" id="L39">  static PsSetter&lt;Time&gt; SET_TIME = setter(&quot;setTime&quot;, Time.class);</span>
+<span class="fc" id="L40">  static PsSetter&lt;Timestamp&gt; SET_TIMESTAMP = setter(&quot;setTimestamp&quot;, Timestamp.class);</span>
 
   private final String name;
   private final MethodHandle method;
@@ -45,16 +45,16 @@ public class PsSetter&lt;PARAM_TYPE&gt; {
   private final Integer targetSqlType;
 
   private PsSetter(String name, MethodHandle method, Class&lt;PARAM_TYPE&gt; paramType) {
-<span class="nc" id="L48">    this(name, method, paramType, null);</span>
-<span class="nc" id="L49">  }</span>
+<span class="fc" id="L48">    this(name, method, paramType, null);</span>
+<span class="fc" id="L49">  }</span>
 
   private PsSetter(
-<span class="nc" id="L52">      String name, MethodHandle method, Class&lt;PARAM_TYPE&gt; paramType, Integer targetSqlType) {</span>
-<span class="nc" id="L53">    this.name = name;</span>
-<span class="nc" id="L54">    this.method = method;</span>
-<span class="nc" id="L55">    this.paramType = paramType;</span>
-<span class="nc" id="L56">    this.targetSqlType = targetSqlType;</span>
-<span class="nc" id="L57">  }</span>
+<span class="fc" id="L52">      String name, MethodHandle method, Class&lt;PARAM_TYPE&gt; paramType, Integer targetSqlType) {</span>
+<span class="fc" id="L53">    this.name = name;</span>
+<span class="fc" id="L54">    this.method = method;</span>
+<span class="fc" id="L55">    this.paramType = paramType;</span>
+<span class="fc" id="L56">    this.targetSqlType = targetSqlType;</span>
+<span class="fc" id="L57">  }</span>
 
   String getName() {
 <span class="nc" id="L60">    return name;</span>
@@ -65,36 +65,36 @@ public class PsSetter&lt;PARAM_TYPE&gt; {
   }
 
   static PsSetter&lt;Object&gt; setObject(int targetSqlType) {
-<span class="nc" id="L68">    MethodType mt = MethodType.methodType(void.class, int.class, Object.class, int.class);</span>
+<span class="fc" id="L68">    MethodType mt = MethodType.methodType(void.class, int.class, Object.class, int.class);</span>
     MethodHandle mh;
     try {
-<span class="nc" id="L71">      mh = lookup().findVirtual(PreparedStatement.class, &quot;setObject&quot;, mt);</span>
+<span class="fc" id="L71">      mh = lookup().findVirtual(PreparedStatement.class, &quot;setObject&quot;, mt);</span>
 <span class="nc" id="L72">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
 <span class="nc" id="L73">      throw ExceptionMethods.uncheck(e);</span>
-<span class="nc" id="L74">    }</span>
-<span class="nc" id="L75">    return new PsSetter&lt;&gt;(&quot;setObject&quot;, mh, Object.class, targetSqlType);</span>
+<span class="fc" id="L74">    }</span>
+<span class="fc" id="L75">    return new PsSetter&lt;&gt;(&quot;setObject&quot;, mh, Object.class, targetSqlType);</span>
   }
 
   void bindValue(PreparedStatement ps, int paramIndex, PARAM_TYPE paramValue) throws Throwable {
-<span class="nc" id="L79">    LOG.trace(&quot;-----&gt; Parameter {}: {}&quot;, lpad(paramIndex, 2), paramValue);</span>
-<span class="nc bnc" id="L80" title="All 2 branches missed.">    if (paramValue == null) {</span>
+<span class="fc" id="L79">    LOG.trace(&quot;-----&gt; Parameter {}: {}&quot;, lpad(paramIndex, 2), paramValue);</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">    if (paramValue == null) {</span>
 <span class="nc" id="L81">      SET_STRING.method.invoke(ps, paramIndex, (String) null);</span>
-<span class="nc bnc" id="L82" title="All 2 branches missed.">    } else if (targetSqlType == null) {</span>
-<span class="nc" id="L83">      method.invoke(ps, paramIndex, paramValue);</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">    } else if (targetSqlType == null) {</span>
+<span class="fc" id="L83">      method.invoke(ps, paramIndex, paramValue);</span>
     } else {
 <span class="nc" id="L85">      method.invoke(ps, paramIndex, paramValue, targetSqlType);</span>
     }
-<span class="nc" id="L87">  }</span>
+<span class="fc" id="L87">  }</span>
 
   private static &lt;X&gt; PsSetter&lt;X&gt; setter(String methodName, Class&lt;X&gt; paramType) {
-<span class="nc" id="L90">    MethodType mt = MethodType.methodType(void.class, int.class, paramType);</span>
+<span class="fc" id="L90">    MethodType mt = MethodType.methodType(void.class, int.class, paramType);</span>
     MethodHandle mh;
     try {
-<span class="nc" id="L93">      mh = lookup().findVirtual(PreparedStatement.class, methodName, mt);</span>
+<span class="fc" id="L93">      mh = lookup().findVirtual(PreparedStatement.class, methodName, mt);</span>
 <span class="nc" id="L94">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
 <span class="nc" id="L95">      throw ExceptionMethods.uncheck(e);</span>
-<span class="nc" id="L96">    }</span>
-<span class="nc" id="L97">    return new PsSetter&lt;&gt;(methodName, mh, paramType);</span>
+<span class="fc" id="L96">    }</span>
+<span class="fc" id="L97">    return new PsSetter&lt;&gt;(methodName, mh, paramType);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
