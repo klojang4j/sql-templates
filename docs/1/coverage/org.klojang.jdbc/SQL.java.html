@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQL.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQL.java</span></div><h1>SQL.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.jdbc.x.sql.AbstractSQL;
+import org.klojang.jdbc.x.sql.DynamicSQL;
+import org.klojang.jdbc.x.sql.ParametrizedSQL;
+import org.klojang.jdbc.x.sql.SQLTemplate;
+
+import java.sql.Connection;
+
+public sealed interface SQL permits AbstractSQL {
+
+  static SQL parametrized(String sql) {
+<span class="nc" id="L13">    return parametrized(sql, new BindInfo() {});</span>
+  }
+
+  static SQL parametrized(String sql, BindInfo bindInfo) {
+<span class="nc" id="L17">    return new ParametrizedSQL(sql, bindInfo);</span>
+  }
+
+  static SQL template(String sql) {
+<span class="nc" id="L21">    return template(sql, new BindInfo() {});</span>
+  }
+
+  static SQL template(String sql, BindInfo bindInfo) {
+<span class="nc" id="L25">    return new SQLTemplate(sql, bindInfo);</span>
+  }
+
+  static SQL dynamic(String sql) {
+<span class="nc" id="L29">    return dynamic(sql, new BindInfo() {});</span>
+  }
+
+  static SQL dynamic(String sql, BindInfo bindInfo) {
+<span class="nc" id="L33">    return new DynamicSQL(sql, bindInfo);</span>
+  }
+
+  SQL set(String varName, Object value);
+
+  default SQL setSortColumn(Object sortColumn) {
+<span class="nc" id="L39">    return set(&quot;sortColumn&quot;, sortColumn);</span>
+  }
+
+  default SQL setSortOrder(Object sortOrder) {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">    return (sortOrder instanceof Boolean)</span>
+<span class="nc" id="L44">          ? setDescending((Boolean) sortOrder)</span>
+<span class="nc" id="L45">          : set(&quot;sortOrder&quot;, sortOrder);</span>
+  }
+
+  default SQL setDescending(boolean isDescending) {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">    return set(&quot;sortOrder&quot;, isDescending ? &quot;DESC&quot; : &quot;ASC&quot;);</span>
+  }
+
+  default SQL setOrderBy(Object sortColumn, Object sortOrder) {
+<span class="nc" id="L53">    return setSortColumn(sortColumn).setSortOrder(sortOrder);</span>
+  }
+
+  default SQL setOrderBy(Object sortColumn, boolean isDescending) {
+<span class="nc" id="L57">    return setSortColumn(sortColumn).setDescending(isDescending);</span>
+  }
+
+  SQLQuery prepareQuery(Connection con);
+
+  SQLInsert prepareInsert(Connection con);
+
+  SQLUpdate prepareUpdate(Connection con);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

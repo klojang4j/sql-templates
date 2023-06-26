@@ -1,6 +1,7 @@
 package org.klojang.jdbc.x.rs;
 
 import org.klojang.convert.NumberMethods;
+import org.klojang.jdbc.KJSQLException;
 import org.klojang.jdbc.ResultSetReadException;
 
 import static java.sql.Types.*;
@@ -9,7 +10,7 @@ import static org.klojang.jdbc.x.rs.RsMethod.*;
 class EnumExtractors extends ExtractorLookup<Enum<?>> {
 
   private static class NumberAdapter<T extends Number> implements
-      Adapter<T, Enum<?>> {
+        Adapter<T, Enum<?>> {
 
     @Override
     public Enum<?> adapt(T i, Class<Enum<?>> t) {
@@ -42,7 +43,7 @@ class EnumExtractors extends ExtractorLookup<Enum<?>> {
   }
 
   private static <T extends Number> Enum<?> asOrdinal(T number,
-      Class<Enum<?>> enumClass) {
+        Class<Enum<?>> enumClass) {
     if (number == null) {
       return null;
     }
@@ -50,7 +51,7 @@ class EnumExtractors extends ExtractorLookup<Enum<?>> {
     if (i < 0 || i >= enumClass.getEnumConstants().length) {
       String fmt = "Invalid ordinal number for enum type %s: %d";
       String msg = String.format(fmt, enumClass.getSimpleName(), i);
-      throw new ResultSetReadException(msg);
+      throw new KJSQLException(msg);
     }
     return enumClass.getEnumConstants()[i];
   }
@@ -66,7 +67,7 @@ class EnumExtractors extends ExtractorLookup<Enum<?>> {
     }
     String fmt = "Unable to parse \"%s\" into %s";
     String msg = String.format(fmt, s, enumClass.getSimpleName());
-    throw new ResultSetReadException(msg);
+    throw new KJSQLException(msg);
   }
 
 }

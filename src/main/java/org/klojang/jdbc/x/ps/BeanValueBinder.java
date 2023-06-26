@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.klojang.jdbc.BindInfo;
-import org.klojang.jdbc.NamedParameter;
+import org.klojang.jdbc.x.sql.NamedParameter;
 import org.klojang.invoke.Getter;
 import org.klojang.invoke.GetterFactory;
 import org.klojang.util.ClassMethods;

@@ -2,6 +2,7 @@ package org.klojang.jdbc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.klojang.util.IOMethods;
 
@@ -16,7 +17,8 @@ import java.util.Map;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-@org.junit.jupiter.api.Disabled
+
+//@Disabled
 public class SQLInsertTest {
 
   private static final String DB_DIR = System.getProperty("user.home") + "/klojang-db-test";
@@ -54,7 +56,7 @@ public class SQLInsertTest {
     IOMethods.rm(DB_DIR);
     Files.createDirectories(Path.of(DB_DIR));
     Connection c = DriverManager.getConnection("jdbc:h2:" + DB_DIR + "/test");
-    String sql = "CREATE LOCAL TEMPORARY TABLE TEST(ID INT IDENTITY, NAME VARCHAR(255))";
+    String sql = "CREATE LOCAL TEMPORARY TABLE TEST(ID INT AUTO_INCREMENT, NAME VARCHAR(255))";
     try (Statement stmt = c.createStatement()) {
       stmt.executeUpdate(sql);
     }
@@ -69,7 +71,9 @@ public class SQLInsertTest {
     IOMethods.rm(DB_DIR);
   }
 
-  /** Baseline test that only uses JDBC and none of our own abstractions */
+  /**
+   * Baseline test that only uses JDBC and none of our own abstractions
+   */
   @Test
   public void test00() throws SQLException {
     Connection con = MY_CON.get();
@@ -89,11 +93,11 @@ public class SQLInsertTest {
   public void test01() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = Collections.singletonMap("name", "John");
-    SQL sql = SQL.create(s);
+    SQL sql = SQL.parametrized(s);
     long id = Long.MIN_VALUE;
     try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
       insert.bind(data);
-      id = insert.executeAndGetId();
+      id = insert.executeAndGetGeneratedKey();
       assertTrue(id != Long.MIN_VALUE);
     }
   }
@@ -102,11 +106,11 @@ public class SQLInsertTest {
   public void test02() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
-    SQL sql = SQL.create(s);
+    SQL sql = SQL.parametrized(s);
     long id = Long.MIN_VALUE;
     try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
       insert.bind(person);
-      id = insert.executeAndGetId();
+      id = insert.executeAndGetGeneratedKey();
       assertTrue(id != Long.MIN_VALUE);
     }
   }
@@ -115,7 +119,7 @@ public class SQLInsertTest {
   public void test03() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = new HashMap<>(Collections.singletonMap("name", "John"));
-    SQL sql = SQL.create(s);
+    SQL sql = SQL.parametrized(s);
     try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
       insert.bind(data, "id");
       insert.execute();
@@ -128,7 +132,7 @@ public class SQLInsertTest {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
-    SQL sql = SQL.create(s);
+    SQL sql = SQL.parametrized(s);
     try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
       insert.bind(person, "id");
       insert.execute();
@@ -141,7 +145,8 @@ public class SQLInsertTest {
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
     try (SQLInsert insert =
-        SQL.prepareInsert().of(Person.class).into("TEST").excluding("id").prepare(MY_CON.get())) {
+               SQL.prepareInsert().of(Person.class).into("TEST").excluding("id").prepare(
+                     MY_CON.get())) {
       insert.bind(person, "id");
       insert.execute();
       assertTrue(person.getId() != Integer.MIN_VALUE);

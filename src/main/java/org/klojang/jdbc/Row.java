@@ -12,22 +12,6 @@ import java.util.function.Function;
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.util.ObjectMethods.ifNotNull;
 
-/**
- * A thin wrapper around a {@code Map<String,Object>} instance mimicking some of the
- * behaviour of the {@link ResultSet} class. {@code Row} objects are produced by a
- * {@link ResultSetMappifier} and can be quickly pushed up into the higher layers of
- * your application and then {@link SoloSession#insert(Object, String...) inserted}
- * into a Klojang template.
- *
- * <p>Note that it is not a primary goal of the {@code Row} class to behave exactly
- * like to the
- * {@code ResultSet} class. Unlike a {@code ResultSet} you can update the values of
- * the {@code Row}. As with the {@code ResultSet} you can access column values both
- * by column name and by column number, but, unlike {@code ResultSet} class, column
- * numbers need to be specified in a zero-based manner.
- *
- * @author Ayco Holleman
- */
 public class Row {
 
   private static final String ERR0 = "No such column: \"%s\"";

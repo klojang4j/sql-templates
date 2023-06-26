@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.ps;
 
 import org.klojang.jdbc.BindInfo;
-import org.klojang.jdbc.NamedParameter;
+import org.klojang.jdbc.x.sql.NamedParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,14 +10,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class MapBinder {
+public final class MapBinder {
 
   private static final Logger LOG = LoggerFactory.getLogger(MapBinder.class);
 
   private static final Object ABSENT = new Object();
 
-  private List<NamedParameter> params;
-  private BindInfo bindInfo;
+  private final List<NamedParameter> params;
+  private final BindInfo bindInfo;
 
   public MapBinder(List<NamedParameter> params, BindInfo bindInfo) {
     this.params = params;
@@ -26,8 +26,10 @@ public class MapBinder {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void bindMap(
-      PreparedStatement ps, Map<String, Object> map, Collection<NamedParameter> bound)
-      throws Throwable {
+        Map<String, Object> map,
+        PreparedStatement ps,
+        Collection<NamedParameter> bound)
+        throws Throwable {
     ReceiverNegotiator negotiator = ReceiverNegotiator.getInstance();
     for (NamedParameter param : params) {
       String key = param.getName();
@@ -35,24 +37,22 @@ public class MapBinder {
         continue;
       }
       bound.add(param);
-      Object input = map.getOrDefault(key, ABSENT);
-      if (input == ABSENT) {
-        continue;
-      } else if (input == null) {
+      Object value = map.getOrDefault(key, ABSENT);
+      if (value == null) {
         param.getIndices().forEachThrowing(i -> ps.setString(i, null));
-      } else {
+      } else if (value != ABSENT) {
         Receiver receiver;
-        if (input instanceof Enum && bindInfo.bindEnumUsingToString(key)) {
+        if (value instanceof Enum && bindInfo.bindEnumUsingToString(key)) {
           receiver = EnumReceivers.ENUM_TO_STRING;
         } else {
-          receiver = negotiator.getDefaultReceiver(input.getClass());
+          receiver = negotiator.getDefaultReceiver(value.getClass());
         }
-        Object output = receiver.getParamValue(input);
+        Object output = receiver.getParamValue(value);
         if (LOG.isDebugEnabled()) {
-          if (input == output) {
+          if (value == output) {
             LOG.debug("-> Parameter \"{}\": {}", key, output);
           } else {
-            LOG.debug("-> Parameter \"{}\": {} (map value: {})", key, output, input);
+            LOG.debug("-> Parameter \"{}\": {} (map value: {})", key, output, value);
           }
         }
         param.getIndices().forEachThrowing(i -> receiver.bind(ps, i, output));

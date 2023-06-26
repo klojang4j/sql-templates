@@ -1,22 +1,19 @@
 package org.klojang.jdbc;
 
-import java.sql.Connection;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.klojang.check.Check;
 import org.klojang.check.ObjectCheck;
 import org.klojang.invoke.Getter;
 import org.klojang.invoke.GetterFactory;
 import org.klojang.templates.NameMapper;
 
+import java.sql.Connection;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
 import static java.util.stream.Collectors.joining;
-import static org.klojang.check.CommonChecks.empty;
-import static org.klojang.check.CommonChecks.in;
-import static org.klojang.check.CommonChecks.notNull;
+import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.CommonExceptions.STATE;
-import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.util.ObjectMethods.ifNull;
 import static org.klojang.util.ObjectMethods.isEmpty;
 import static org.klojang.util.StringMethods.append;
@@ -55,8 +52,9 @@ public class SQLInsertBuilder {
   }
 
   /**
-   * Sets the {@code NameMapper} to be used when mapping bean properties to column names. Beware of
-   * the direction of the mappings: <i>from</i> bean properties <i>to</i> column names.
+   * Sets the {@code NameMapper} to be used when mapping bean properties to column names.
+   * Beware of the direction of the mappings: <i>from</i> bean properties <i>to</i> column
+   * names.
    *
    * @param propertyToColumnMapper
    * @return
@@ -95,13 +93,14 @@ public class SQLInsertBuilder {
     String table = ifNull(tableName, beanClass.getSimpleName());
     StringBuilder sb = new StringBuilder(100);
     append(sb, "INSERT INTO ", table, " (", cols, ") VALUES(", params, ")");
-    SQL sql = SQL.create(sb.toString(), bindInfo);
+    SQL sql = SQL.parametrized(sb.toString(), bindInfo);
     return sql.prepareInsert(con);
   }
 
-  private ObjectCheck<String, IllegalStateException> checkProperty(Set<String> props, String prop) {
+  private ObjectCheck<String, IllegalStateException> checkProperty(Set<String> props,
+        String prop) {
     return Check.on(STATE, prop)
-        .isNot(empty(), "Empty property name not allowed")
-        .is(in(), props, "No such property in %s: %s", beanClass.getSimpleName(), prop);
+          .isNot(empty(), "Empty property name not allowed")
+          .is(in(), props, "No such property in %s: %s", beanClass.getSimpleName(), prop);
   }
 }

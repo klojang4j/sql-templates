@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLInsert.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLInsert.java</span></div><h1>SQLInsert.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.check.Check;
+import org.klojang.invoke.Setter;
+import org.klojang.invoke.SetterFactory;
+import org.klojang.jdbc.x.sql.AbstractSQL;
+import org.klojang.jdbc.x.sql.SQLInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import static java.sql.Statement.NO_GENERATED_KEYS;
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import static org.klojang.check.CommonChecks.*;
+import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.convert.NumberMethods.convert;
+import static org.klojang.invoke.NoSuchPropertyException.noSuchProperty;
+import static org.klojang.util.ClassMethods.box;
+
+public class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
+
+  @SuppressWarnings(&quot;unused&quot;)
+<span class="nc" id="L31">  private static final Logger LOG = LoggerFactory.getLogger(SQLInsert.class);</span>
+
+  /*
+   * This will track the bindables field in SQLStatement. It will contain the names of the
+   * bean properties and/or map keys corresponding to auto-increment columns.
+   */
+  private final List&lt;String&gt; keys;
+
+  private PreparedStatement ps;
+  private boolean generateKeys;
+
+  public SQLInsert(Connection conn, AbstractSQL sql, SQLInfo sqlInfo) {
+<span class="nc" id="L43">    super(conn, sql, sqlInfo);</span>
+<span class="nc" id="L44">    this.keys = new ArrayList&lt;&gt;(5);</span>
+<span class="nc" id="L45">  }</span>
+
+  public SQLInsert bind(Map&lt;String, ?&gt; map) {
+<span class="nc" id="L48">    super.bind(map);</span>
+<span class="nc" id="L49">    keys.add(null);</span>
+<span class="nc" id="L50">    return this;</span>
+  }
+
+  public SQLInsert bind(Object bean) {
+<span class="nc" id="L54">    super.bind(bean);</span>
+<span class="nc" id="L55">    keys.add(null);</span>
+<span class="nc" id="L56">    return this;</span>
+  }
+
+  /**
+   * Binds the values in the specified JavaBean to the named parameters within the SQL
+   * statement and then, once the statement has executed, binds back the value of the
+   * auto-generated key to the specified bean property. Bean properties that do not
+   * correspond to named parameters will be ignored. The effect of passing anything other
+   * than a proper JavaBean (e.g. scalars like {@code Integer} or multi-valued objects
+   * like {@code Employee[]} or {@code ArrayList}) is undefined. If you don't want the
+   * auto-increment column to be bound back into the bean or {@code Map}, just call
+   * {@link #bind(Object)}.
+   *
+   * &lt;p&gt;Klojang does not support INSERT statements that generate multiple keys or
+   * non-number keys.
+   *
+   * @param bean The bean whose values to bind to the named parameters within the SQL
+   * statement
+   * @param idProperty The name of the property representing the auto-generated primary
+   * key.
+   * @return This {@code SQLInsert} instance
+   */
+  public SQLInsert bind(Object bean, String idProperty) {
+<span class="nc" id="L79">    super.bind(bean);</span>
+<span class="nc" id="L80">    keys.add(idProperty);</span>
+<span class="nc" id="L81">    return this;</span>
+  }
+
+  /**
+   * Binds the values in the specified {@code Map} to the named parameters within the SQL
+   * statement and then, once the statement has executed, binds back the value of the
+   * auto-generated key to the specified map key.
+   *
+   * &lt;p&gt;Klojang does not support INSERT statements that generate multiple keys or
+   * non-number keys.
+   *
+   * @param map The bean whose values to bind to the named parameters within the SQL
+   * statement
+   * @param idKey The name of the map key representing the auto-generated primary key.
+   * @return This {@code SQLInsert} instance
+   */
+  public SQLInsert bind(Map&lt;String, ?&gt; map, String idKey) {
+<span class="nc" id="L98">    super.bind(map);</span>
+<span class="nc" id="L99">    keys.add(idKey);</span>
+<span class="nc" id="L100">    return this;</span>
+  }
+
+  public &lt;U&gt; void insertAll(Collection&lt;U&gt; beans) {
+<span class="nc" id="L104">    Check.on(STATE, bindables).is(empty(), &quot;insertAll not allowed on dirty instance&quot;);</span>
+    try {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">      for (U bean : beans) {</span>
+<span class="nc" id="L107">        bindables.clear();</span>
+<span class="nc" id="L108">        bindables.add(bean);</span>
+<span class="nc" id="L109">        exec(false);</span>
+<span class="nc" id="L110">      }</span>
+<span class="nc" id="L111">    } catch (Throwable t) {</span>
+<span class="nc" id="L112">      throw KJSQLException.wrap(t, sqlInfo);</span>
+    } finally {
+<span class="nc" id="L114">      reset();</span>
+    }
+<span class="nc" id="L116">  }</span>
+
+  @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
+  public void execute() {
+<span class="nc" id="L120">    boolean mustBindBack = keys.stream().anyMatch(notNull());</span>
+    try {
+<span class="nc bnc" id="L122" title="All 2 branches missed.">      if (!mustBindBack) {</span>
+<span class="nc" id="L123">        exec(false);</span>
+      } else {
+<span class="nc" id="L125">        exec(true);</span>
+<span class="nc" id="L126">        try (ResultSet rs = ps.getGeneratedKeys()) {</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">          if (!rs.next()) {</span>
+<span class="nc" id="L128">            throw new KJSQLException(&quot;no keys were generated&quot;);</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">          } else if (rs.getMetaData().getColumnCount() != 1) {</span>
+<span class="nc" id="L130">            throw new KJSQLException(&quot;multiple auto-increment keys not supported&quot;);</span>
+          }
+<span class="nc" id="L132">          long id = rs.getLong(1);</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">          for (int i = 0; i &lt; keys.size(); ++i) {</span>
+<span class="nc" id="L134">            String key = keys.get(i);</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">            if (key != null) {</span>
+<span class="nc" id="L136">              Object obj = bindables.get(i);</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">              if (obj instanceof Map) {</span>
+<span class="nc" id="L138">                ((Map) obj).put(key, id);</span>
+              } else {
+<span class="nc" id="L140">                Map&lt;String, Setter&gt; setters = SetterFactory.INSTANCE.getSetters(obj.getClass());</span>
+<span class="nc" id="L141">                Check.on(s -&gt; noSuchProperty(obj, key), key).is(keyIn(), setters);</span>
+<span class="nc" id="L142">                Setter setter = setters.get(key);</span>
+<span class="nc" id="L143">                Number n = convert(id,</span>
+<span class="nc" id="L144">                      (Class&lt;? extends Number&gt;) box(setter.getParamType()));</span>
+<span class="nc" id="L145">                setter.write(obj, n);</span>
+              }
+            }
+          }
+        }
+      }
+<span class="nc" id="L151">    } catch (Throwable t) {</span>
+<span class="nc" id="L152">      throw KJSQLException.wrap(t, sqlInfo);</span>
+    } finally {
+<span class="nc" id="L154">      reset();</span>
+    }
+<span class="nc" id="L156">  }</span>
+
+  public long executeAndGetGeneratedKey() {
+    try {
+      try {
+<span class="nc" id="L161">        exec(true);</span>
+<span class="nc" id="L162">      } catch (Throwable t) {</span>
+<span class="nc" id="L163">        throw KJSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L164">      }</span>
+<span class="nc" id="L165">      try (ResultSet rs = ps.getGeneratedKeys()) {</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (!rs.next()) {</span>
+<span class="nc" id="L167">          throw new KJSQLException(&quot;No keys were generated&quot;);</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        } else if (rs.getMetaData().getColumnCount() != 1) {</span>
+<span class="nc" id="L169">          throw new KJSQLException(&quot;Multiple auto-increment keys not supported&quot;);</span>
+        }
+<span class="nc" id="L171">        return rs.getLong(1);</span>
+      }
+<span class="nc" id="L173">    } catch (SQLException e) {</span>
+<span class="nc" id="L174">      throw KJSQLException.wrap(e, sqlInfo);</span>
+    } finally {
+<span class="nc" id="L176">      reset();</span>
+    }
+  }
+
+  @Override
+  public void close() {
+<span class="nc" id="L182">    close(ps);</span>
+<span class="nc" id="L183">  }</span>
+
+  private void exec(boolean generateKeys) throws Throwable {
+<span class="nc bnc" id="L186" title="All 2 branches missed.">    if (ps == null) {</span>
+<span class="nc" id="L187">      this.generateKeys = generateKeys;</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">      int i = generateKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
+<span class="nc" id="L189">      ps = con.prepareStatement(sqlInfo.jdbcSQL(), i);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">    } else if (this.generateKeys != generateKeys) {</span>
+<span class="nc" id="L191">      this.generateKeys = generateKeys;</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">      int i = generateKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
+<span class="nc" id="L193">      ps.close();</span>
+<span class="nc" id="L194">      ps = con.prepareStatement(sqlInfo.jdbcSQL(), i);</span>
+    }
+<span class="nc" id="L196">    applyBindings(ps);</span>
+<span class="nc" id="L197">    ps.executeUpdate();</span>
+<span class="nc" id="L198">  }</span>
+
+  private void reset() {
+<span class="nc" id="L201">    bindables.clear();</span>
+<span class="nc" id="L202">    keys.clear();</span>
+    try {
+<span class="nc" id="L204">      ps.clearParameters();</span>
+<span class="nc" id="L205">    } catch (SQLException e) {</span>
+<span class="nc" id="L206">      throw KJSQLException.wrap(e, sqlInfo);</span>
+<span class="nc" id="L207">    }</span>
+<span class="nc" id="L208">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

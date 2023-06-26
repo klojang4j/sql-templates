@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BooleanExtractors.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">BooleanExtractors.java</span></div><h1>BooleanExtractors.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
+
+import org.klojang.convert.Bool;
+
+import static java.sql.Types.*;
+
+class BooleanExtractors extends ExtractorLookup&lt;Boolean&gt; {
+
+<span class="nc" id="L9">  BooleanExtractors() {</span>
+<span class="nc" id="L10">    addMultiple(new RsExtractor&lt;&gt;(RsMethod.GET_BOOLEAN), BOOLEAN, BIT);</span>
+<span class="nc" id="L11">    add(INTEGER, new RsExtractor&lt;&gt;(RsMethod.GET_INT, Bool::from));</span>
+<span class="nc" id="L12">    add(SMALLINT, new RsExtractor&lt;&gt;(RsMethod.GET_SHORT, Bool::from));</span>
+<span class="nc" id="L13">    add(TINYINT, new RsExtractor&lt;&gt;(RsMethod.GET_BYTE, Bool::from));</span>
+<span class="nc" id="L14">    addMultiple(new RsExtractor&lt;&gt;(RsMethod.GET_DOUBLE, Bool::from), FLOAT, DOUBLE);</span>
+<span class="nc" id="L15">    put(BIGINT, new RsExtractor&lt;Long, Boolean&gt;(RsMethod.GET_LONG, Bool::from));</span>
+<span class="nc" id="L16">    put(REAL, new RsExtractor&lt;Float, Boolean&gt;(RsMethod.GET_FLOAT, Bool::from));</span>
+<span class="nc" id="L17">    addMultiple(new RsExtractor&lt;&gt;(RsMethod.GET_BIG_DECIMAL, Bool::from), NUMERIC, DECIMAL);</span>
+<span class="nc" id="L18">    addMultiple(new RsExtractor&lt;&gt;(RsMethod.GET_STRING, Bool::from), CHAR, VARCHAR);</span>
+<span class="nc" id="L19">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

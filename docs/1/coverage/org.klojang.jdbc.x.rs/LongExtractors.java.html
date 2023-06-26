@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LongExtractors.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">LongExtractors.java</span></div><h1>LongExtractors.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
+
+import org.klojang.convert.NumberMethods;
+
+import static java.sql.Types.*;
+
+class LongExtractors extends ExtractorLookup&lt;Long&gt; {
+
+<span class="nc" id="L9">  LongExtractors() {</span>
+<span class="nc" id="L10">    add(BIGINT, new RsExtractor&lt;&gt;(RsMethod.GET_LONG));</span>
+<span class="nc" id="L11">    add(INTEGER, new RsExtractor&lt;&gt;(RsMethod.GET_INT));</span>
+<span class="nc" id="L12">    add(SMALLINT, new RsExtractor&lt;&gt;(RsMethod.GET_SHORT));</span>
+<span class="nc" id="L13">    add(TINYINT, new RsExtractor&lt;&gt;(RsMethod.GET_BYTE));</span>
+<span class="nc" id="L14">    add(REAL, new RsExtractor&lt;Float, Long&gt;(RsMethod.GET_FLOAT, NumberMethods::convert));</span>
+<span class="nc" id="L15">    addMultiple(new RsExtractor&lt;&gt;(RsMethod.GET_DOUBLE, NumberMethods::convert),</span>
+        FLOAT,
+        DOUBLE);
+<span class="nc" id="L18">    addMultiple(new RsExtractor&lt;&gt;(RsMethod.GET_BIG_DECIMAL, NumberMethods::convert),</span>
+        NUMERIC,
+        DECIMAL);
+<span class="nc" id="L21">    addMultiple(new RsExtractor&lt;&gt;(RsMethod.GET_STRING, NumberMethods::parse), VARCHAR, CHAR);</span>
+<span class="nc" id="L22">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

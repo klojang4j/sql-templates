@@ -1,5 +1,13 @@
 package org.klojang.jdbc;
 
+import org.klojang.check.Check;
+import org.klojang.invoke.Setter;
+import org.klojang.invoke.SetterFactory;
+import org.klojang.jdbc.x.sql.AbstractSQL;
+import org.klojang.jdbc.x.sql.SQLInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,12 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import org.klojang.check.Check;
-import org.klojang.invoke.Setter;
-import org.klojang.invoke.SetterFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static java.sql.Statement.NO_GENERATED_KEYS;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -28,15 +30,17 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(SQLInsert.class);
 
-  // This will track the bindables field in SQLStatement. It will contain the names of the bean
-  // properties and/or map keys corresponding to auto-increment columns.
+  /*
+   * This will track the bindables field in SQLStatement. It will contain the names of the
+   * bean properties and/or map keys corresponding to auto-increment columns.
+   */
   private final List<String> keys;
 
   private PreparedStatement ps;
   private boolean generateKeys;
 
-  public SQLInsert(Connection conn, SQL sql) {
-    super(conn, sql);
+  public SQLInsert(Connection conn, AbstractSQL sql, SQLInfo sqlInfo) {
+    super(conn, sql, sqlInfo);
     this.keys = new ArrayList<>(5);
   }
 
@@ -53,18 +57,22 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
   }
 
   /**
-   * Binds the values in the specified JavaBean to the named parameters within the SQL statement and
-   * then, once the statement has executed, binds back the value of the auto-generated key to the
-   * specified bean property. Bean properties that do not correspond to named parameters will be
-   * ignored. The effect of passing anything other than a proper JavaBean (e.g. scalars like {@code
-   * Integer} or multi-valued objects like {@code Employee[]} or {@code ArrayList}) is undefined. If
-   * you don't want the auto-increment column to be bound back into the bean or {@code Map}, just
-   * call {@link #bind(Object)}.
+   * Binds the values in the specified JavaBean to the named parameters within the SQL
+   * statement and then, once the statement has executed, binds back the value of the
+   * auto-generated key to the specified bean property. Bean properties that do not
+   * correspond to named parameters will be ignored. The effect of passing anything other
+   * than a proper JavaBean (e.g. scalars like {@code Integer} or multi-valued objects
+   * like {@code Employee[]} or {@code ArrayList}) is undefined. If you don't want the
+   * auto-increment column to be bound back into the bean or {@code Map}, just call
+   * {@link #bind(Object)}.
    *
-   * <p>Klojang does not support INSERT statements that generate multiple keys or non-number keys.
+   * <p>Klojang does not support INSERT statements that generate multiple keys or
+   * non-number keys.
    *
-   * @param bean The bean whose values to bind to the named parameters within the SQL statement
-   * @param idProperty The name of the property representing the auto-generated primary key.
+   * @param bean The bean whose values to bind to the named parameters within the SQL
+   * statement
+   * @param idProperty The name of the property representing the auto-generated primary
+   * key.
    * @return This {@code SQLInsert} instance
    */
   public SQLInsert bind(Object bean, String idProperty) {
@@ -74,13 +82,15 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
   }
 
   /**
-   * Binds the values in the specified {@code Map} to the named parameters within the SQL statement
-   * and then, once the statement has executed, binds back the value of the auto-generated key to
-   * the specified map key.
+   * Binds the values in the specified {@code Map} to the named parameters within the SQL
+   * statement and then, once the statement has executed, binds back the value of the
+   * auto-generated key to the specified map key.
    *
-   * <p>Klojang does not support INSERT statements that generate multiple keys or non-number keys.
+   * <p>Klojang does not support INSERT statements that generate multiple keys or
+   * non-number keys.
    *
-   * @param map The bean whose values to bind to the named parameters within the SQL statement
+   * @param map The bean whose values to bind to the named parameters within the SQL
+   * statement
    * @param idKey The name of the map key representing the auto-generated primary key.
    * @return This {@code SQLInsert} instance
    */
@@ -99,7 +109,7 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
         exec(false);
       }
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, getSQL());
+      throw KJSQLException.wrap(t, sqlInfo);
     } finally {
       reset();
     }
@@ -115,9 +125,9 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
         exec(true);
         try (ResultSet rs = ps.getGeneratedKeys()) {
           if (!rs.next()) {
-            throw new KJSQLException("No keys were generated");
+            throw new KJSQLException("no keys were generated");
           } else if (rs.getMetaData().getColumnCount() != 1) {
-            throw new KJSQLException("Multiple auto-increment keys not supported");
+            throw new KJSQLException("multiple auto-increment keys not supported");
           }
           long id = rs.getLong(1);
           for (int i = 0; i < keys.size(); ++i) {
@@ -130,7 +140,8 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
                 Map<String, Setter> setters = SetterFactory.INSTANCE.getSetters(obj.getClass());
                 Check.on(s -> noSuchProperty(obj, key), key).is(keyIn(), setters);
                 Setter setter = setters.get(key);
-                Number n = convert(id, (Class<? extends Number>) box(setter.getParamType()));
+                Number n = convert(id,
+                      (Class<? extends Number>) box(setter.getParamType()));
                 setter.write(obj, n);
               }
             }
@@ -138,18 +149,18 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
         }
       }
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, getSQL());
+      throw KJSQLException.wrap(t, sqlInfo);
     } finally {
       reset();
     }
   }
 
-  public long executeAndGetId() {
+  public long executeAndGetGeneratedKey() {
     try {
       try {
         exec(true);
       } catch (Throwable t) {
-        throw KJSQLException.wrap(t, getSQL());
+        throw KJSQLException.wrap(t, sqlInfo);
       }
       try (ResultSet rs = ps.getGeneratedKeys()) {
         if (!rs.next()) {
@@ -160,7 +171,7 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
         return rs.getLong(1);
       }
     } catch (SQLException e) {
-      throw new KJSQLException(getSQL(), e);
+      throw KJSQLException.wrap(e, sqlInfo);
     } finally {
       reset();
     }
@@ -175,12 +186,12 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
     if (ps == null) {
       this.generateKeys = generateKeys;
       int i = generateKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
-      ps = con.prepareStatement(sql.getJdbcSQL(), i);
+      ps = con.prepareStatement(sqlInfo.jdbcSQL(), i);
     } else if (this.generateKeys != generateKeys) {
       this.generateKeys = generateKeys;
       int i = generateKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
       ps.close();
-      ps = con.prepareStatement(sql.getJdbcSQL(), i);
+      ps = con.prepareStatement(sqlInfo.jdbcSQL(), i);
     }
     applyBindings(ps);
     ps.executeUpdate();
@@ -192,7 +203,7 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
     try {
       ps.clearParameters();
     } catch (SQLException e) {
-      throw KJSQLException.wrap(e, getSQL());
+      throw KJSQLException.wrap(e, sqlInfo);
     }
   }
 }

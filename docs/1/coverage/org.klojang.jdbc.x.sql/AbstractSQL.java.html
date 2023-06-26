@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractSQL.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.sql</a> &gt; <span class="el_source">AbstractSQL.java</span></div><h1>AbstractSQL.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.sql;
+
+import org.klojang.check.Check;
+import org.klojang.jdbc.*;
+import org.klojang.jdbc.x.ps.BeanBinder;
+import org.klojang.templates.NameMapper;
+import org.klojang.templates.RenderSession;
+import org.klojang.util.CollectionMethods;
+import org.klojang.util.Tuple2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
+
+import static org.klojang.check.CommonExceptions.illegalState;
+
+public abstract sealed class AbstractSQL implements SQL
+      permits ParametrizedSQL, SQLTemplate, DynamicSQL {
+<span class="nc" id="L23">  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQL.class);</span>
+
+  interface StatementFactory&lt;T extends SQLStatement&gt; {
+    T create(Connection con, AbstractSQL sql, SQLInfo sqlInfo);
+  }
+
+<span class="nc" id="L29">  private final ReentrantLock lock = new ReentrantLock();</span>
+
+<span class="nc" id="L31">  private final Map&lt;Class&lt;?&gt;, BeanBinder&lt;?&gt;&gt; beanBinders = new HashMap&lt;&gt;(4);</span>
+<span class="nc" id="L32">  private final Map&lt;Tuple2&lt;Class&lt;?&gt;, NameMapper&gt;, BeanifierFactory&lt;?&gt;&gt; beanifiers =</span>
+        new HashMap&lt;&gt;(4);
+<span class="nc" id="L34">  private final Map&lt;NameMapper, MappifierFactory&gt; mappifiers = new HashMap&lt;&gt;(4);</span>
+
+
+  final String sql;
+  final BindInfo bindInfo;
+
+<span class="nc" id="L40">  public AbstractSQL(String sql, BindInfo bindInfo) {</span>
+<span class="nc" id="L41">    this.sql = Check.notNull(sql, &quot;sql&quot;).ok();</span>
+<span class="nc" id="L42">    this.bindInfo = Check.notNull(bindInfo, &quot;bindInfo&quot;).ok();</span>
+<span class="nc" id="L43">  }</span>
+
+  public SQLQuery prepareQuery(Connection con) {
+<span class="nc" id="L46">    return prepare(con, SQLQuery::new);</span>
+  }
+
+  public SQLInsert prepareInsert(Connection con) {
+<span class="nc" id="L50">    return prepare(con, SQLInsert::new);</span>
+  }
+
+  public SQLUpdate prepareUpdate(Connection con) {
+<span class="nc" id="L54">    return prepare(con, SQLUpdate::new);</span>
+  }
+
+  public BindInfo getBindInfo() {
+<span class="nc" id="L58">    return bindInfo;</span>
+  }
+
+  public BeanBinder&lt;?&gt; getBeanBinder(Class&lt;?&gt; beanClass, SQLInfo sqlInfo) {
+<span class="nc" id="L62">    BeanBinder&lt;?&gt; binder = beanBinders.get(beanClass);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">    if (binder == null) {</span>
+<span class="nc" id="L64">      binder = new BeanBinder&lt;&gt;(beanClass, sqlInfo.parameters(), bindInfo);</span>
+<span class="nc" id="L65">      beanBinders.put(beanClass, binder);</span>
+    }
+<span class="nc" id="L67">    return binder;</span>
+  }
+
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(Class&lt;T&gt; clazz, NameMapper mapper) {
+<span class="nc" id="L73">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
+<span class="nc" id="L74">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">    if (bf == null) {</span>
+<span class="nc" id="L76">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, mapper));</span>
+    }
+<span class="nc" id="L78">    return bf;</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(
+        Class&lt;T&gt; clazz, Supplier&lt;T&gt; supplier, NameMapper mapper) {
+<span class="nc" id="L84">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
+<span class="nc" id="L85">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">    if (bf == null) {</span>
+<span class="nc" id="L87">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, supplier, mapper));</span>
+    }
+<span class="nc" id="L89">    return bf;</span>
+  }
+
+  public MappifierFactory getMappifierFactory(NameMapper mapper) {
+<span class="nc" id="L93">    return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);</span>
+  }
+
+
+  public abstract void unlock();
+
+  abstract &lt;T extends SQLStatement&lt;?&gt;&gt; T prepare(
+        Connection con,
+        StatementFactory&lt;T&gt; constructor);
+
+  static Supplier&lt;IllegalStateException&gt; sessionNotFinished(RenderSession session) {
+<span class="nc" id="L104">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
+<span class="nc" id="L105">    return illegalState(&quot;one or more variables have not been set yet: &quot; + unset);</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
