@@ -8,23 +8,23 @@ import static org.klojang.util.ObjectMethods.ifNotNull;
 /*
  * Extracts a single value from a ResultSet.
  */
-public class ResultSetReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
+public final class ResultSetReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
 
   private final ResultSetMethod&lt;COLUMN_TYPE&gt; method;
   private final Adapter&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter;
 
-<span class="nc" id="L16">  ResultSetReader(ResultSetMethod&lt;COLUMN_TYPE&gt; method) {</span>
+<span class="nc" id="L16">  public ResultSetReader(ResultSetMethod&lt;COLUMN_TYPE&gt; method) {</span>
 <span class="nc" id="L17">    this.method = method;</span>
 <span class="nc" id="L18">    this.adapter = null;</span>
 <span class="nc" id="L19">  }</span>
 
-  ResultSetReader(
+  public ResultSetReader(
         ResultSetMethod&lt;COLUMN_TYPE&gt; method,
         Function&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {
 <span class="nc" id="L24">    this(method, (x, y) -&gt; ifNotNull(x, adapter::apply));</span>
 <span class="nc" id="L25">  }</span>
 
-  ResultSetReader(
+  public ResultSetReader(
         ResultSetMethod&lt;COLUMN_TYPE&gt; method,
 <span class="nc" id="L29">        Adapter&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {</span>
 <span class="nc" id="L30">    this.method = method;</span>

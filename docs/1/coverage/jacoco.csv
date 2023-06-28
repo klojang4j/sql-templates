@@ -1,24 +1,11 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-SQL Templates,org.klojang.jdbc.x.rs,LongReaders,90,0,0,0,10,0,1,0,1,0
-SQL Templates,org.klojang.jdbc.x.rs,BooleanReaders,114,0,0,0,11,0,1,0,1,0
-SQL Templates,org.klojang.jdbc.x.rs,EnumReaders.StringAdapter,17,0,0,0,5,0,1,0,1,0
-SQL Templates,org.klojang.jdbc.x.rs,FloatReaders,91,0,2,0,11,0,3,0,2,0
+SQL Templates,org.klojang.jdbc.x.rs,ResultSetReaderLookup,24,0,0,0,6,0,4,0,4,0
+SQL Templates,org.klojang.jdbc.x.rs,MapChannel,113,0,4,0,27,0,7,0,5,0
 SQL Templates,org.klojang.jdbc.x.rs,ReaderNegotiator,133,0,2,0,28,0,6,0,5,0
-SQL Templates,org.klojang.jdbc.x.rs,IntReaders,108,0,2,0,11,0,5,0,4,0
-SQL Templates,org.klojang.jdbc.x.rs,EnumReaders.NumberAdapter,4,0,0,0,1,0,1,0,1,0
-SQL Templates,org.klojang.jdbc.x.rs,ResultSetMethod,137,0,4,0,34,0,8,0,6,0
-SQL Templates,org.klojang.jdbc.x.rs,DoubleReaders,100,0,2,0,11,0,3,0,2,0
-SQL Templates,org.klojang.jdbc.x.rs,ShortReaders,93,0,0,0,10,0,1,0,1,0
-SQL Templates,org.klojang.jdbc.x.rs,StringReaders,41,0,2,0,7,0,4,0,3,0
-SQL Templates,org.klojang.jdbc.x.rs,EnumReaders,160,0,14,0,23,0,10,0,3,0
+SQL Templates,org.klojang.jdbc.x.rs,ResultSetMethod,137,0,4,0,46,0,8,0,6,0
 SQL Templates,org.klojang.jdbc.x.rs,BeanChannel,191,0,8,0,46,0,11,0,7,0
-SQL Templates,org.klojang.jdbc.x.rs,LocalDateTimeReaders,34,0,4,0,6,0,5,0,3,0
-SQL Templates,org.klojang.jdbc.x.rs,LocalDateReaders,24,0,0,0,4,0,2,0,2,0
-SQL Templates,org.klojang.jdbc.x.rs,ByteReaders,93,0,0,0,10,0,1,0,1,0
 SQL Templates,org.klojang.jdbc.x.rs,ResultSetReader,49,0,2,0,14,0,6,0,5,0
-SQL Templates,org.klojang.jdbc.x.rs,RowChannel,112,0,4,0,27,0,7,0,5,0
-SQL Templates,org.klojang.jdbc.x.rs,RsMethods,180,0,2,0,33,0,5,0,4,0
-SQL Templates,org.klojang.jdbc.x.rs,ReaderLookup,47,0,0,0,12,0,7,0,7,0
+SQL Templates,org.klojang.jdbc.x.rs,ResultSetMethodLookup,180,0,2,0,33,0,5,0,4,0
 SQL Templates,org.klojang.jdbc.x.sql,SQLInfo,20,36,0,0,5,7,4,4,4,4
 SQL Templates,org.klojang.jdbc.x.sql,SQLTemplate,111,0,8,0,23,0,8,0,4,0
 SQL Templates,org.klojang.jdbc.x.sql,SQLNormalizer,46,184,11,17,11,42,8,15,0,9
@@ -47,25 +34,38 @@ SQL Templates,org.klojang.jdbc.x.ps,DoubleReceivers,2,100,0,0,1,13,1,2,1,2
 SQL Templates,org.klojang.jdbc.x.ps,ReceiverNegotiator,37,104,0,2,6,24,1,6,1,5
 SQL Templates,org.klojang.jdbc,Row,800,0,42,0,129,0,99,0,78,0
 SQL Templates,org.klojang.jdbc,EmptyMappifier,20,0,0,0,8,0,8,0,8,0
-SQL Templates,org.klojang.jdbc,DefaultMappifier.RowIterator,32,0,2,0,6,0,4,0,3,0
 SQL Templates,org.klojang.jdbc,ResultSetReadException,4,0,0,0,2,0,1,0,1,0
-SQL Templates,org.klojang.jdbc,DefaultBeanifier,152,0,14,0,39,0,15,0,8,0
+SQL Templates,org.klojang.jdbc,DefaultBeanifier,152,0,16,0,38,0,16,0,8,0
 SQL Templates,org.klojang.jdbc,SQLInsert,118,223,14,12,27,59,13,13,2,11
 SQL Templates,org.klojang.jdbc,SQLUpdate,31,0,0,0,9,0,3,0,3,0
 SQL Templates,org.klojang.jdbc,SQLInsertBuilder,64,186,4,4,11,29,6,8,3,7
 SQL Templates,org.klojang.jdbc,DefaultBeanifier.BeanIterator,27,0,0,0,6,0,3,0,3,0
+SQL Templates,org.klojang.jdbc,DefaultMappifier.MapIterator,32,0,2,0,6,0,4,0,3,0
 SQL Templates,org.klojang.jdbc,SQLInsertBuilder.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
 SQL Templates,org.klojang.jdbc,EmptyBeanifier,17,0,0,0,7,0,7,0,7,0
 SQL Templates,org.klojang.jdbc,SQLStatement,69,118,2,6,13,29,4,7,2,5
 SQL Templates,org.klojang.jdbc,BeanifierFactory,109,0,6,0,23,0,11,0,8,0
 SQL Templates,org.klojang.jdbc,SQLTypeNames,8,96,1,5,3,17,1,6,0,4
 SQL Templates,org.klojang.jdbc,BindInfo,2,2,0,0,1,1,1,1,1,1
-SQL Templates,org.klojang.jdbc,MappifierFactory,56,0,6,0,14,0,6,0,3,0
+SQL Templates,org.klojang.jdbc,MappifierFactory,60,0,6,0,15,0,6,0,3,0
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},3,0,0,0,1,0,1,0,1,0
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},3,0,0,0,1,0,1,0,1,0
-SQL Templates,org.klojang.jdbc,DefaultMappifier,136,0,12,0,37,0,14,0,8,0
+SQL Templates,org.klojang.jdbc,DefaultMappifier,143,0,16,0,37,0,16,0,8,0
 SQL Templates,org.klojang.jdbc,SQL,64,16,4,0,11,3,11,3,9,3
 SQL Templates,org.klojang.jdbc,SQLQuery,234,0,8,0,58,0,20,0,16,0
 SQL Templates,org.klojang.jdbc,KJSQLException,46,0,4,0,12,0,7,0,5,0
 SQL Templates,org.klojang.jdbc.x,JDBC,39,0,2,0,9,0,3,0,2,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,LocalDateReaders,24,0,0,0,4,0,2,0,2,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,FloatReaders,91,0,2,0,11,0,3,0,2,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,BooleanReaders,114,0,0,0,11,0,1,0,1,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,EnumReaders.StringAdapter,17,0,0,0,5,0,1,0,1,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,EnumReaders.NumberAdapter,4,0,0,0,1,0,1,0,1,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,ByteReaders,93,0,0,0,10,0,1,0,1,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,LocalDateTimeReaders,38,0,4,0,6,0,7,0,5,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,EnumReaders,160,0,14,0,23,0,10,0,3,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,LongReaders,90,0,0,0,10,0,1,0,1,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,DoubleReaders,100,0,2,0,11,0,3,0,2,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,IntReaders,108,0,2,0,11,0,5,0,4,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,StringReaders,41,0,2,0,7,0,4,0,3,0
+SQL Templates,org.klojang.jdbc.x.rs.reader,ShortReaders,93,0,0,0,10,0,1,0,1,0

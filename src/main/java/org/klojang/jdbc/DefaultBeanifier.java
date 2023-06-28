@@ -1,28 +1,27 @@
 package org.klojang.jdbc;
 
-import java.sql.ResultSet;
-import java.util.*;
-import java.util.function.Supplier;
-
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.rs.BeanChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.ResultSet;
+import java.util.*;
+import java.util.function.Supplier;
+
 import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
-import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.jdbc.x.rs.BeanChannel.toBean;
 
-class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
+final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(DefaultBeanifier.class);
 
-  private class BeanIterator implements Iterator<T> {
+  private static class BeanIterator<T> implements Iterator<T> {
 
-    DefaultBeanifier<T> beanifier;
+    private final DefaultBeanifier<T> beanifier;
 
     BeanIterator(DefaultBeanifier<T> beanifier) {
       this.beanifier = beanifier;
@@ -30,12 +29,12 @@ class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
     @Override
     public boolean hasNext() {
-      return beanifier.hasMore;
+      return beanifier.empty;
     }
 
     @Override
     public T next() {
-      Check.on(STATE, beanifier.hasMore).is(yes(), "No more rows in result set");
+      Check.on(STATE, beanifier.empty).is(yes(), "no more rows in result set");
       return beanifier.beanify().get();
     }
   }
@@ -44,7 +43,7 @@ class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
   private final BeanChannel<?, ?>[] channels;
   private final Supplier<T> beanSupplier;
 
-  private boolean hasMore = true;
+  private boolean empty;
 
   DefaultBeanifier(ResultSet rs, BeanChannel<?, ?>[] channels, Supplier<T> supplier) {
     this.rs = rs;
@@ -54,12 +53,12 @@ class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
   @Override
   public Optional<T> beanify() {
-    if (!hasMore) {
+    if (empty) {
       return Optional.empty();
     }
     try {
       Optional<T> bean = Optional.of(toBean(rs, beanSupplier, channels));
-      hasMore = rs.next();
+      empty = !rs.next();
       return bean;
     } catch (Throwable t) {
       throw KJSQLException.wrap(t, null);
@@ -69,7 +68,7 @@ class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
   @Override
   public List<T> beanify(int limit) {
     Check.that(limit, "limit").is(gt(), 0);
-    if (!hasMore) {
+    if (empty) {
       return Collections.emptyList();
     }
     List<T> beans = new ArrayList<>(limit);
@@ -77,7 +76,7 @@ class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
     try {
       do {
         beans.add(toBean(rs, beanSupplier, channels));
-      } while (++i < limit && (hasMore = rs.next()));
+      } while (++i < limit && (empty = !rs.next()));
     } catch (Throwable t) {
       throw KJSQLException.wrap(t, null);
     }
@@ -92,7 +91,7 @@ class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
   @Override
   public List<T> beanifyAll(int sizeEstimate) {
     Check.that(sizeEstimate, "sizeEstimate").is(gt(), 0);
-    if (!hasMore) {
+    if (empty) {
       return Collections.emptyList();
     }
     List<T> beans = new ArrayList<>(sizeEstimate);
@@ -103,17 +102,17 @@ class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
     } catch (Throwable t) {
       throw KJSQLException.wrap(t, null);
     }
-    hasMore = false;
+    empty = true;
     return beans;
   }
 
   @Override
   public boolean isEmpty() {
-    return !hasMore;
+    return empty;
   }
 
   @Override
   public Iterator<T> iterator() {
-    return new BeanIterator(this);
+    return new BeanIterator<>(this);
   }
 }

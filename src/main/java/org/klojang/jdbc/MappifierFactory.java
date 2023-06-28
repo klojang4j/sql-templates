@@ -3,35 +3,34 @@ package org.klojang.jdbc;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.klojang.check.Check;
 import org.klojang.templates.NameMapper;
-import org.klojang.jdbc.x.rs.RowChannel;
+import org.klojang.jdbc.x.rs.MapChannel;
 
-import static org.klojang.jdbc.x.rs.RowChannel.createChannels;
+import static org.klojang.jdbc.x.rs.MapChannel.createChannels;
 
 /**
- * A Factory for {@link ResultSetMappifier} instances. The {@link ResultSet result sets} passed to a
- * {@code MappifierFactory} in return for a beanifier instance cannot just be any arbitrary {@code
- * ResultSet}; they must all be created from the same SQL query. The very first {@code ResultSet}
- * passed to a {@code MappifierFactory} is used to create and cache the objects needed to convert
- * the {@code ResultSet} into a JavaBean. Subsequent calls to {@link #getMappifier(ResultSet)} will
- * use these objects, too. Hence, all result sets passed to {@code getMappifier} must be
- * <i>compatible</i> with the first one: they must have at least as many columns and the column
- * types must match those of the first result set. Column names do in fact no longer matter. The
- * column-to-property mapping is set up and fixed after the first call to {@code getMappifier}.
+ * A factory for {@link ResultSetMappifier} instances. The {@link ResultSet} objects
+ * passed to a {@code MappifierFactory} must all be created from the same SQL query. More
+ * precisely, they may have been created from different queries, but the <i>number</i> and
+ * the <i>types</i> of the columns in their SELECT clause must be the same. The first
+ * {@link ResultSet} passed to a {@code MappifierFactory} is used the determine the key
+ * names. Subsequent {@link ResultSet} objects need not have the same column
+ * <i>names</i>.
  *
  * @author Ayco Holleman
  */
-public class MappifierFactory {
+public final class MappifierFactory {
 
-  private final AtomicReference<RowChannel<?>[]> ref = new AtomicReference<>();
-
+  private final ReentrantLock lock = new ReentrantLock();
+  private final AtomicReference<MapChannel<?>[]> ref = new AtomicReference<>();
   private final NameMapper mapper;
 
   /**
-   * Creates a new {@code MappifierFactory}. Column names will be mapped {@link NameMapper#AS_IS
-   * as-is} to map keys.
+   * Creates a new {@code MappifierFactory}. Column names will be mapped
+   * {@link NameMapper#AS_IS as-is} to map keys.
    */
   public MappifierFactory() {
     this(NameMapper.AS_IS);
@@ -40,22 +39,25 @@ public class MappifierFactory {
   /**
    * Creates a new {@code MappifierFactory}.
    *
-   * @param columnToKeyMapper A {@code NameMapper} mapping column names to map keys
+   * @param columnToKeyMapper a {@code NameMapper} mapping column names to map keys
    */
   public MappifierFactory(NameMapper columnToKeyMapper) {
     this.mapper = Check.notNull(columnToKeyMapper).ok();
   }
 
-  public ResultSetMappifier getMappifier(ResultSet rs) throws SQLException {
+  public ResultSetMappifier getResultSetMappifier(ResultSet rs) throws SQLException {
     if (!rs.next()) {
       return EmptyMappifier.INSTANCE;
     }
-    RowChannel<?>[] channels;
+    MapChannel<?>[] channels;
     if ((channels = ref.getPlain()) == null) {
-      synchronized (this) {
+      lock.lock();
+      try {
         if (ref.get() == null) {
           ref.set(channels = createChannels(rs, mapper));
         }
+      } finally {
+        lock.unlock();
       }
     }
     return new DefaultMappifier(rs, channels);

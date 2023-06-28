@@ -2,6 +2,7 @@ package org.klojang.jdbc.x.rs;
 
 import org.klojang.check.Check;
 import org.klojang.collections.TypeMap;
+import org.klojang.jdbc.x.rs.reader.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -66,7 +67,7 @@ public class ReaderNegotiator {
           .freeze();
   }
 
-  private static Map<Integer, ResultSetReader> immutable(ReaderLookup<?> src) {
+  private static Map<Integer, ResultSetReader> immutable(ResultSetReaderLookup<?> src) {
     return Map.copyOf(src);
   }
 

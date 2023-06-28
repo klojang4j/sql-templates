@@ -1,31 +1,28 @@
 package org.klojang.jdbc;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-class EmptyMappifier implements ResultSetMappifier {
+final class EmptyMappifier implements ResultSetMappifier {
 
   static final EmptyMappifier INSTANCE = new EmptyMappifier();
 
   @Override
-  public Optional<Row> mappify() {
+  public Optional<Map<String,Object>> mappify() {
     return Optional.empty();
   }
 
   @Override
-  public List<Row> mappify(int limit) {
+  public List<Map<String,Object>> mappify(int limit) {
     return Collections.emptyList();
   }
 
   @Override
-  public List<Row> mappifyAll() {
+  public List<Map<String,Object>> mappifyAll() {
     return Collections.emptyList();
   }
 
   @Override
-  public List<Row> mappifyAll(int sizeEstimate) {
+  public List<Map<String,Object>> mappifyAll(int sizeEstimate) {
     return Collections.emptyList();
   }
 
@@ -35,7 +32,7 @@ class EmptyMappifier implements ResultSetMappifier {
   }
 
   @Override
-  public Iterator<Row> iterator() {
+  public Iterator<Map<String,Object>> iterator() {
     return Collections.emptyIterator();
   }
 }

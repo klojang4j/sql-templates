@@ -16,25 +16,35 @@ import static java.lang.invoke.MethodHandles.lookup;
 /*
  * Represents one of the get methods of ResultSet, like ResultSet.getString(columnIndex)
  */
-final class ResultSetMethod<COLUMN_TYPE> {
+public final class ResultSetMethod<COLUMN_TYPE> {
 
-  static final ResultSetMethod<String> GET_STRING = getter("getString", String.class);
-  static final ResultSetMethod<Integer> GET_INT = getter("getInt", int.class);
-  static final ResultSetMethod<Float> GET_FLOAT = getter("getFloat", float.class);
-  static final ResultSetMethod<Double> GET_DOUBLE = getter("getDouble", double.class);
-  static final ResultSetMethod<Long> GET_LONG = getter("getLong", long.class);
-  static final ResultSetMethod<Short> GET_SHORT = getter("getShort", short.class);
-  static final ResultSetMethod<Byte> GET_BYTE = getter("getByte", byte.class);
-  static final ResultSetMethod<Boolean> GET_BOOLEAN = getter("getBoolean", boolean.class);
-  static final ResultSetMethod<Date> GET_DATE = getter("getDate", Date.class);
-  static final ResultSetMethod<Time> GET_TIME = getter("getTime", Time.class);
-  static final ResultSetMethod<Timestamp> GET_TIMESTAMP = getter("getTimestamp",
-        Timestamp.class);
-  static final ResultSetMethod<BigDecimal> GET_BIG_DECIMAL = getter("getBigDecimal",
-        BigDecimal.class);
+  public static final ResultSetMethod<String> GET_STRING
+        = getter("getString", String.class);
+  public static final ResultSetMethod<Integer> GET_INT
+        = getter("getInt", int.class);
+  public static final ResultSetMethod<Float> GET_FLOAT
+        = getter("getFloat", float.class);
+  public static final ResultSetMethod<Double> GET_DOUBLE
+        = getter("getDouble", double.class);
+  public static final ResultSetMethod<Long> GET_LONG
+        = getter("getLong", long.class);
+  public static final ResultSetMethod<Short> GET_SHORT
+        = getter("getShort", short.class);
+  public static final ResultSetMethod<Byte> GET_BYTE
+        = getter("getByte", byte.class);
+  public static final ResultSetMethod<Boolean> GET_BOOLEAN
+        = getter("getBoolean", boolean.class);
+  public static final ResultSetMethod<Date> GET_DATE
+        = getter("getDate", Date.class);
+  public static final ResultSetMethod<Time> GET_TIME
+        = getter("getTime", Time.class);
+  public static final ResultSetMethod<Timestamp> GET_TIMESTAMP
+        = getter("getTimestamp", Timestamp.class);
+  public static final ResultSetMethod<BigDecimal> GET_BIG_DECIMAL
+        = getter("getBigDecimal", BigDecimal.class);
 
   // Invokes <T> ResultSet.getObject(columnIndex, Class<T>)
-  static <T> ResultSetMethod<T> objectGetter(Class<T> returnType) {
+  public static <T> ResultSetMethod<T> objectGetter(Class<T> returnType) {
     MethodType mt = MethodType.methodType(Object.class, int.class, Class.class);
     MethodHandle mh;
     try {

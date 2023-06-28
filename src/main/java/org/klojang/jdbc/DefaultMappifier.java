@@ -1,29 +1,28 @@
 package org.klojang.jdbc;
 
-import java.sql.ResultSet;
-import java.util.*;
-
 import org.klojang.check.Check;
-import org.klojang.jdbc.x.rs.RowChannel;
+import org.klojang.jdbc.x.rs.MapChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.util.*;
 
 import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.no;
 import static org.klojang.check.CommonExceptions.STATE;
-import static org.klojang.check.CommonExceptions.illegalState;
-import static org.klojang.jdbc.x.rs.RowChannel.toRow;
+import static org.klojang.jdbc.x.rs.MapChannel.toMap;
 
-class DefaultMappifier implements ResultSetMappifier {
+final class DefaultMappifier implements ResultSetMappifier {
 
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(DefaultMappifier.class);
 
-  private class RowIterator implements Iterator<Row> {
+  private static class MapIterator implements Iterator<Map<String, Object>> {
 
-    private DefaultMappifier dm;
+    private final DefaultMappifier dm;
 
-    RowIterator(DefaultMappifier dm) {
+    MapIterator(DefaultMappifier dm) {
       this.dm = dm;
     }
 
@@ -33,30 +32,30 @@ class DefaultMappifier implements ResultSetMappifier {
     }
 
     @Override
-    public Row next() {
-      Check.on(STATE, dm.empty).is(no(), "No more rows in result set");
+    public Map<String, Object> next() {
+      Check.on(STATE, dm.empty).is(no(), "no more rows in result set");
       return dm.mappify().get();
     }
   }
 
   private final ResultSet rs;
-  private final RowChannel<?>[] channels;
+  private final MapChannel<?>[] channels;
 
   private boolean empty;
 
-  DefaultMappifier(ResultSet rs, RowChannel<?>[] channels) {
+  DefaultMappifier(ResultSet rs, MapChannel<?>[] channels) {
     this.rs = rs;
     this.channels = channels;
   }
 
   @Override
-  public Optional<Row> mappify() {
+  public Optional<Map<String, Object>> mappify() {
     if (empty) {
       return Optional.empty();
     }
     try {
-      Optional<Row> row = Optional.of(toRow(rs, channels));
-      empty = rs.next();
+      Optional<Map<String, Object>> row = Optional.of(toMap(rs, channels));
+      empty = !rs.next();
       return row;
     } catch (Throwable t) {
       throw KJSQLException.wrap(t, null);
@@ -64,17 +63,17 @@ class DefaultMappifier implements ResultSetMappifier {
   }
 
   @Override
-  public List<Row> mappify(int limit) {
+  public List<Map<String, Object>> mappify(int limit) {
     Check.that(limit, "limit").is(gt(), 0);
     if (empty) {
       return Collections.emptyList();
     }
-    List<Row> all = new ArrayList<>(limit);
+    List<Map<String, Object>> all = new ArrayList<>(limit);
     int i = 0;
     try {
       do {
-        all.add(toRow(rs, channels));
-      } while (++i < limit && (empty = rs.next()));
+        all.add(toMap(rs, channels));
+      } while (++i < limit && (empty = !rs.next()));
     } catch (Throwable t) {
       throw KJSQLException.wrap(t, null);
     }
@@ -82,20 +81,20 @@ class DefaultMappifier implements ResultSetMappifier {
   }
 
   @Override
-  public List<Row> mappifyAll() {
+  public List<Map<String, Object>> mappifyAll() {
     return mappifyAll(10);
   }
 
   @Override
-  public List<Row> mappifyAll(int sizeEstimate) {
+  public List<Map<String, Object>> mappifyAll(int sizeEstimate) {
     Check.that(sizeEstimate, "sizeEstimate").is(gt(), 0);
     if (empty) {
       return Collections.emptyList();
     }
-    List<Row> all = new ArrayList<>(sizeEstimate);
+    List<Map<String, Object>> all = new ArrayList<>(sizeEstimate);
     try {
       do {
-        all.add(toRow(rs, channels));
+        all.add(toMap(rs, channels));
       } while (rs.next());
     } catch (Throwable t) {
       throw KJSQLException.wrap(t, null);
@@ -110,7 +109,7 @@ class DefaultMappifier implements ResultSetMappifier {
   }
 
   @Override
-  public Iterator<Row> iterator() {
-    return new RowIterator(this);
+  public Iterator<Map<String, Object>> iterator() {
+    return new MapIterator(this);
   }
 }

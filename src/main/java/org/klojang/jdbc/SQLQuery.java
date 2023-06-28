@@ -169,7 +169,7 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public ResultSetMappifier getMappifier() {
     try {
-      return sql.getMappifierFactory(mapper).getMappifier(rs());
+      return sql.getMappifierFactory(mapper).getResultSetMappifier(rs());
     } catch (Throwable t) {
       throw KJSQLException.wrap(t, sqlInfo);
     }

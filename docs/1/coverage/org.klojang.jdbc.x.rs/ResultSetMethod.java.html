@@ -16,33 +16,43 @@ import static java.lang.invoke.MethodHandles.lookup;
 /*
  * Represents one of the get methods of ResultSet, like ResultSet.getString(columnIndex)
  */
-final class ResultSetMethod&lt;COLUMN_TYPE&gt; {
+public final class ResultSetMethod&lt;COLUMN_TYPE&gt; {
 
-<span class="nc" id="L21">  static final ResultSetMethod&lt;String&gt; GET_STRING = getter(&quot;getString&quot;, String.class);</span>
-<span class="nc" id="L22">  static final ResultSetMethod&lt;Integer&gt; GET_INT = getter(&quot;getInt&quot;, int.class);</span>
-<span class="nc" id="L23">  static final ResultSetMethod&lt;Float&gt; GET_FLOAT = getter(&quot;getFloat&quot;, float.class);</span>
-<span class="nc" id="L24">  static final ResultSetMethod&lt;Double&gt; GET_DOUBLE = getter(&quot;getDouble&quot;, double.class);</span>
-<span class="nc" id="L25">  static final ResultSetMethod&lt;Long&gt; GET_LONG = getter(&quot;getLong&quot;, long.class);</span>
-<span class="nc" id="L26">  static final ResultSetMethod&lt;Short&gt; GET_SHORT = getter(&quot;getShort&quot;, short.class);</span>
-<span class="nc" id="L27">  static final ResultSetMethod&lt;Byte&gt; GET_BYTE = getter(&quot;getByte&quot;, byte.class);</span>
-<span class="nc" id="L28">  static final ResultSetMethod&lt;Boolean&gt; GET_BOOLEAN = getter(&quot;getBoolean&quot;, boolean.class);</span>
-<span class="nc" id="L29">  static final ResultSetMethod&lt;Date&gt; GET_DATE = getter(&quot;getDate&quot;, Date.class);</span>
-<span class="nc" id="L30">  static final ResultSetMethod&lt;Time&gt; GET_TIME = getter(&quot;getTime&quot;, Time.class);</span>
-<span class="nc" id="L31">  static final ResultSetMethod&lt;Timestamp&gt; GET_TIMESTAMP = getter(&quot;getTimestamp&quot;,</span>
-        Timestamp.class);
-<span class="nc" id="L33">  static final ResultSetMethod&lt;BigDecimal&gt; GET_BIG_DECIMAL = getter(&quot;getBigDecimal&quot;,</span>
-        BigDecimal.class);
+<span class="nc" id="L21">  public static final ResultSetMethod&lt;String&gt; GET_STRING</span>
+<span class="nc" id="L22">        = getter(&quot;getString&quot;, String.class);</span>
+<span class="nc" id="L23">  public static final ResultSetMethod&lt;Integer&gt; GET_INT</span>
+<span class="nc" id="L24">        = getter(&quot;getInt&quot;, int.class);</span>
+<span class="nc" id="L25">  public static final ResultSetMethod&lt;Float&gt; GET_FLOAT</span>
+<span class="nc" id="L26">        = getter(&quot;getFloat&quot;, float.class);</span>
+<span class="nc" id="L27">  public static final ResultSetMethod&lt;Double&gt; GET_DOUBLE</span>
+<span class="nc" id="L28">        = getter(&quot;getDouble&quot;, double.class);</span>
+<span class="nc" id="L29">  public static final ResultSetMethod&lt;Long&gt; GET_LONG</span>
+<span class="nc" id="L30">        = getter(&quot;getLong&quot;, long.class);</span>
+<span class="nc" id="L31">  public static final ResultSetMethod&lt;Short&gt; GET_SHORT</span>
+<span class="nc" id="L32">        = getter(&quot;getShort&quot;, short.class);</span>
+<span class="nc" id="L33">  public static final ResultSetMethod&lt;Byte&gt; GET_BYTE</span>
+<span class="nc" id="L34">        = getter(&quot;getByte&quot;, byte.class);</span>
+<span class="nc" id="L35">  public static final ResultSetMethod&lt;Boolean&gt; GET_BOOLEAN</span>
+<span class="nc" id="L36">        = getter(&quot;getBoolean&quot;, boolean.class);</span>
+<span class="nc" id="L37">  public static final ResultSetMethod&lt;Date&gt; GET_DATE</span>
+<span class="nc" id="L38">        = getter(&quot;getDate&quot;, Date.class);</span>
+<span class="nc" id="L39">  public static final ResultSetMethod&lt;Time&gt; GET_TIME</span>
+<span class="nc" id="L40">        = getter(&quot;getTime&quot;, Time.class);</span>
+<span class="nc" id="L41">  public static final ResultSetMethod&lt;Timestamp&gt; GET_TIMESTAMP</span>
+<span class="nc" id="L42">        = getter(&quot;getTimestamp&quot;, Timestamp.class);</span>
+<span class="nc" id="L43">  public static final ResultSetMethod&lt;BigDecimal&gt; GET_BIG_DECIMAL</span>
+<span class="nc" id="L44">        = getter(&quot;getBigDecimal&quot;, BigDecimal.class);</span>
 
   // Invokes &lt;T&gt; ResultSet.getObject(columnIndex, Class&lt;T&gt;)
-  static &lt;T&gt; ResultSetMethod&lt;T&gt; objectGetter(Class&lt;T&gt; returnType) {
-<span class="nc" id="L38">    MethodType mt = MethodType.methodType(Object.class, int.class, Class.class);</span>
+  public static &lt;T&gt; ResultSetMethod&lt;T&gt; objectGetter(Class&lt;T&gt; returnType) {
+<span class="nc" id="L48">    MethodType mt = MethodType.methodType(Object.class, int.class, Class.class);</span>
     MethodHandle mh;
     try {
-<span class="nc" id="L41">      mh = lookup().findVirtual(ResultSet.class, &quot;getObject&quot;, mt);</span>
-<span class="nc" id="L42">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
-<span class="nc" id="L43">      throw ExceptionMethods.uncheck(e);</span>
-<span class="nc" id="L44">    }</span>
-<span class="nc" id="L45">    return new ResultSetMethod&lt;&gt;(mh, returnType);</span>
+<span class="nc" id="L51">      mh = lookup().findVirtual(ResultSet.class, &quot;getObject&quot;, mt);</span>
+<span class="nc" id="L52">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
+<span class="nc" id="L53">      throw ExceptionMethods.uncheck(e);</span>
+<span class="nc" id="L54">    }</span>
+<span class="nc" id="L55">    return new ResultSetMethod&lt;&gt;(mh, returnType);</span>
   }
 
   private final MethodHandle method;
@@ -53,33 +63,33 @@ final class ResultSetMethod&lt;COLUMN_TYPE&gt; {
   private final Class&lt;?&gt; classArg;
 
   private ResultSetMethod(MethodHandle method) {
-<span class="nc" id="L56">    this(method, null);</span>
-<span class="nc" id="L57">  }</span>
+<span class="nc" id="L66">    this(method, null);</span>
+<span class="nc" id="L67">  }</span>
 
-<span class="nc" id="L59">  private ResultSetMethod(MethodHandle method, Class&lt;?&gt; classArg) {</span>
-<span class="nc" id="L60">    this.method = method;</span>
-<span class="nc" id="L61">    this.classArg = classArg;</span>
-<span class="nc" id="L62">  }</span>
+<span class="nc" id="L69">  private ResultSetMethod(MethodHandle method, Class&lt;?&gt; classArg) {</span>
+<span class="nc" id="L70">    this.method = method;</span>
+<span class="nc" id="L71">    this.classArg = classArg;</span>
+<span class="nc" id="L72">  }</span>
 
   public COLUMN_TYPE invoke(ResultSet rs, int columnIndex) throws Throwable {
     COLUMN_TYPE val;
-<span class="nc bnc" id="L66" title="All 2 branches missed.">    if (classArg == null) {</span>
-<span class="nc" id="L67">      val = (COLUMN_TYPE) method.invoke(rs, columnIndex);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">    if (classArg == null) {</span>
+<span class="nc" id="L77">      val = (COLUMN_TYPE) method.invoke(rs, columnIndex);</span>
     } else {
-<span class="nc" id="L69">      val = (COLUMN_TYPE) method.invoke(rs, columnIndex, classArg);</span>
+<span class="nc" id="L79">      val = (COLUMN_TYPE) method.invoke(rs, columnIndex, classArg);</span>
     }
-<span class="nc bnc" id="L71" title="All 2 branches missed.">    return rs.wasNull() ? null : val;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">    return rs.wasNull() ? null : val;</span>
   }
 
   private static &lt;T&gt; ResultSetMethod&lt;T&gt; getter(String methodName, Class&lt;T&gt; returnType) {
-<span class="nc" id="L75">    MethodType mt = MethodType.methodType(returnType, int.class);</span>
+<span class="nc" id="L85">    MethodType mt = MethodType.methodType(returnType, int.class);</span>
     MethodHandle mh;
     try {
-<span class="nc" id="L78">      mh = lookup().findVirtual(ResultSet.class, methodName, mt);</span>
-<span class="nc" id="L79">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
-<span class="nc" id="L80">      throw new KJSQLException(e);</span>
-<span class="nc" id="L81">    }</span>
-<span class="nc" id="L82">    return new ResultSetMethod&lt;&gt;(mh);</span>
+<span class="nc" id="L88">      mh = lookup().findVirtual(ResultSet.class, methodName, mt);</span>
+<span class="nc" id="L89">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
+<span class="nc" id="L90">      throw new KJSQLException(e);</span>
+<span class="nc" id="L91">    }</span>
+<span class="nc" id="L92">    return new ResultSetMethod&lt;&gt;(mh);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShortReaders.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs.reader</a> &gt; <span class="el_source">ShortReaders.java</span></div><h1>ShortReaders.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs.reader;
+
+import org.klojang.convert.NumberMethods;
+import org.klojang.jdbc.x.rs.ResultSetMethod;
+import org.klojang.jdbc.x.rs.ResultSetReader;
+import org.klojang.jdbc.x.rs.ResultSetReaderLookup;
+
+import static java.sql.Types.*;
+import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
+
+public final class ShortReaders extends ResultSetReaderLookup&lt;Short&gt; {
+
+<span class="nc" id="L13">  public ShortReaders() {</span>
+<span class="nc" id="L14">    add(SMALLINT,</span>
+          new ResultSetReader&lt;Short, Short&gt;(ResultSetMethod.GET_SHORT));
+<span class="nc" id="L16">    add(TINYINT,</span>
+          new ResultSetReader&lt;Byte, Short&gt;(GET_BYTE, NumberMethods::convert));
+<span class="nc" id="L18">    add(INTEGER,</span>
+          new ResultSetReader&lt;Integer, Short&gt;(GET_INT, NumberMethods::convert));
+<span class="nc" id="L20">    add(REAL,</span>
+          new ResultSetReader&lt;Float, Short&gt;(GET_FLOAT, NumberMethods::convert));
+<span class="nc" id="L22">    add(BIGINT,</span>
+          new ResultSetReader&lt;Long, Short&gt;(GET_LONG, NumberMethods::convert));
+<span class="nc" id="L24">    addMultiple(new ResultSetReader&lt;&gt;(GET_DOUBLE, NumberMethods::convert),</span>
+          FLOAT,
+          DOUBLE);
+<span class="nc" id="L27">    addMultiple(new ResultSetReader&lt;&gt;(GET_BIG_DECIMAL, NumberMethods::convert),</span>
+          NUMERIC,
+          DECIMAL);
+<span class="nc" id="L30">    addMultiple(new ResultSetReader&lt;&gt;(GET_STRING, NumberMethods::parse),</span>
+          VARCHAR,
+          CHAR);
+<span class="nc" id="L33">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
