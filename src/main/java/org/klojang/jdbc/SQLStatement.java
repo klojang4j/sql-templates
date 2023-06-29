@@ -15,6 +15,12 @@ import java.util.*;
 import static org.klojang.check.CommonChecks.keyIn;
 import static org.klojang.util.CollectionMethods.collectionToList;
 
+/**
+ * Abstract base class for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate}.
+ *
+ * @param <T> the {@code SQLStatement} subtype returned by various methods in the fluent
+ * API.
+ */
 public abstract class SQLStatement<T extends SQLStatement<T>> implements AutoCloseable {
 
   final Connection con;
@@ -54,7 +60,7 @@ public abstract class SQLStatement<T extends SQLStatement<T>> implements AutoClo
   }
 
   @SuppressWarnings("unchecked")
-  public T bind(Map<String, ?> map) {
+  public T bind(Map<String, Object> map) {
     Check.notNull(map, "map").then(bindables::add);
     return (T) this;
   }

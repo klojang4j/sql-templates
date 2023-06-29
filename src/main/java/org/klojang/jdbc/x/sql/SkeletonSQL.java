@@ -17,14 +17,14 @@ import java.util.Collection;
 import static org.klojang.check.CommonChecks.empty;
 import static org.klojang.check.Tag.VALUE;
 
-public final class DynamicSQL extends AbstractSQL {
+public final class SkeletonSQL extends AbstractSQL {
 
   private final Template template;
 
   private RenderSession session;
 
 
-  public DynamicSQL(String sql, BindInfo bindInfo) {
+  public SkeletonSQL(String sql, BindInfo bindInfo) {
     super(sql, bindInfo);
     try {
       template = Template.fromString(sql);

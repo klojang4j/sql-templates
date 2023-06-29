@@ -44,7 +44,7 @@ public class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 <span class="fc" id="L44">    this.keys = new ArrayList&lt;&gt;(5);</span>
 <span class="fc" id="L45">  }</span>
 
-  public SQLInsert bind(Map&lt;String, ?&gt; map) {
+  public SQLInsert bind(Map&lt;String, Object&gt; map) {
 <span class="fc" id="L48">    super.bind(map);</span>
 <span class="fc" id="L49">    keys.add(null);</span>
 <span class="fc" id="L50">    return this;</span>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DynamicSQL.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.sql</a> &gt; <span class="el_source">DynamicSQL.java</span></div><h1>DynamicSQL.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.sql;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkeletonSQL.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.sql</a> &gt; <span class="el_source">SkeletonSQL.java</span></div><h1>SkeletonSQL.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.sql;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.BindInfo;
@@ -17,14 +17,14 @@ import java.util.Collection;
 import static org.klojang.check.CommonChecks.empty;
 import static org.klojang.check.Tag.VALUE;
 
-public final class DynamicSQL extends AbstractSQL {
+public final class SkeletonSQL extends AbstractSQL {
 
   private final Template template;
 
   private RenderSession session;
 
 
-  public DynamicSQL(String sql, BindInfo bindInfo) {
+  public SkeletonSQL(String sql, BindInfo bindInfo) {
 <span class="nc" id="L28">    super(sql, bindInfo);</span>
     try {
 <span class="nc" id="L30">      template = Template.fromString(sql);</span>

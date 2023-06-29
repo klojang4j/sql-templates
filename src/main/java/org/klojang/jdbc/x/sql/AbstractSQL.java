@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 import static org.klojang.check.CommonExceptions.illegalState;
 
 public abstract sealed class AbstractSQL implements SQL
-      permits ParametrizedSQL, SQLTemplate, DynamicSQL {
+      permits ParametrizedSQL, SQLTemplate, SkeletonSQL {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSQL.class);
 
   interface StatementFactory<T extends SQLStatement> {

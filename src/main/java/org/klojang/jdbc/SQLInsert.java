@@ -44,7 +44,7 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
     this.keys = new ArrayList<>(5);
   }
 
-  public SQLInsert bind(Map<String, ?> map) {
+  public SQLInsert bind(Map<String, Object> map) {
     super.bind(map);
     keys.add(null);
     return this;
