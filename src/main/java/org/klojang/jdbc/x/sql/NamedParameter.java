@@ -3,55 +3,28 @@ package org.klojang.jdbc.x.sql;
 import org.klojang.util.collection.IntList;
 
 /**
- * Represents a single named parameter within a SQL statement.
+ * <p>Represents a single named parameter within a SQL statement. The {@code positions}
+ * component of this record contains the positions of the parameter within the SQL
+ * statement. For example, in the following (nonsensical) query:
+ *
+ * <blockquote><pre>{@code
+ * SELECT *
+ *   FROM person
+ *  WHERE first_name = :firstName
+ *     OR last_name = :lastName
+ *     OR full_name = :fullName
+ *     OR full_name LIKE :firstName
+ *     OR full_name LIKE :lastName
+ * }</pre></blockquote>
+ *
+ * <p>the {@code firstName} parameter occurs at positions 0 and 3, the {@code firstName}
+ * parameter occurs at positions 1 and 4, and the {@code fullName} parameter occurs at
+ * position 2. In other words: <i>these are not string indices!</i>
+ *
+ * @param name the name of the parameters
+ * @param positions the positions at which the parameter can be found. For example, in
+ * {@code SELECT * FROM person WHERE first_name = :firstName or last_name = :lastName}
  */
-public final class NamedParameter {
+public record NamedParameter(String name, IntList positions) {
 
-  private final String name;
-  private final IntList indices;
-
-  public NamedParameter(String paramName, IntList indices) {
-    this.name = paramName;
-    this.indices = indices;
-  }
-
-  /**
-   * Returns the name of the named parameter (as found in the SQL statement).
-   *
-   * @return The name of the named parameter (as found in the SQL statement)
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Returns the positions occupied by the parameter within the SQL statement.
-   *
-   * @return The positions occupied by the parameter within the SQL statement
-   */
-  public IntList getIndices() {
-    return indices;
-  }
-
-  @Override
-  public int hashCode() {
-    int hash = name.hashCode();
-    hash = hash * 31 + indices.hashCode();
-    return hash;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    } else if (obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-    NamedParameter other = (NamedParameter) obj;
-    return name.equals(other.name) && indices.equals(other.indices);
-  }
-
-  public String toString() {
-    return "{" + name + ": " + indices + "}";
-  }
 }

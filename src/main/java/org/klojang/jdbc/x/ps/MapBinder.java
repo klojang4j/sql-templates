@@ -1,6 +1,7 @@
 package org.klojang.jdbc.x.ps;
 
 import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.x.ps.writer.EnumWriterLookup;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,20 +31,20 @@ public final class MapBinder {
         PreparedStatement ps,
         Collection<NamedParameter> bound)
         throws Throwable {
-    ReceiverNegotiator negotiator = ReceiverNegotiator.getInstance();
+    ColumnWriterFinder negotiator = ColumnWriterFinder.getInstance();
     for (NamedParameter param : params) {
-      String key = param.getName();
+      String key = param.name();
       if (!map.containsKey(key)) {
         continue;
       }
       bound.add(param);
       Object value = map.getOrDefault(key, ABSENT);
       if (value == null) {
-        param.getIndices().forEachThrowing(i -> ps.setString(i, null));
+        param.positions().forEachThrowing(i -> ps.setString(i, null));
       } else if (value != ABSENT) {
-        Receiver receiver;
+        ColumnWriter receiver;
         if (value instanceof Enum && bindInfo.bindEnumUsingToString(key)) {
-          receiver = EnumReceivers.ENUM_TO_STRING;
+          receiver = EnumWriterLookup.ENUM_TO_STRING;
         } else {
           receiver = negotiator.getDefaultReceiver(value.getClass());
         }
@@ -55,7 +56,7 @@ public final class MapBinder {
             LOG.debug("-> Parameter \"{}\": {} (map value: {})", key, output, value);
           }
         }
-        param.getIndices().forEachThrowing(i -> receiver.bind(ps, i, output));
+        param.positions().forEachThrowing(i -> receiver.bind(ps, i, output));
       }
     }
   }

@@ -57,13 +57,18 @@ public class SQLInsertBuilder {
    * names.
    *
    * @param propertyToColumnMapper
-   * @return
+   * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder withMapper(NameMapper propertyToColumnMapper) {
     this.mapper = Check.notNull(propertyToColumnMapper).ok();
     return this;
   }
 
+  /**
+   * Sets the {@link BindInfo} object to be used.
+   * @param bindInfo
+   * @return this {@code SQLInsertBuilder}
+   */
   public SQLInsertBuilder withBindInfo(BindInfo bindInfo) {
     this.bindInfo = Check.notNull(bindInfo).ok();
     return this;
@@ -100,7 +105,7 @@ public class SQLInsertBuilder {
   private ObjectCheck<String, IllegalStateException> checkProperty(Set<String> props,
         String prop) {
     return Check.on(STATE, prop)
-          .isNot(empty(), "Empty property name not allowed")
-          .is(in(), props, "No such property in %s: %s", beanClass.getSimpleName(), prop);
+          .isNot(empty(), "empty property name not allowed")
+          .is(in(), props, "no such property in %s: %s", beanClass.getSimpleName(), prop);
   }
 }

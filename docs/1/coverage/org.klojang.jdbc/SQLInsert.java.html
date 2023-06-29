@@ -109,7 +109,7 @@ public class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 <span class="nc" id="L109">        exec(false);</span>
 <span class="nc" id="L110">      }</span>
 <span class="nc" id="L111">    } catch (Throwable t) {</span>
-<span class="nc" id="L112">      throw KJSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L112">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     } finally {
 <span class="nc" id="L114">      reset();</span>
     }
@@ -125,9 +125,9 @@ public class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 <span class="fc" id="L125">        exec(true);</span>
 <span class="fc" id="L126">        try (ResultSet rs = ps.getGeneratedKeys()) {</span>
 <span class="pc bpc" id="L127" title="1 of 2 branches missed.">          if (!rs.next()) {</span>
-<span class="nc" id="L128">            throw new KJSQLException(&quot;no keys were generated&quot;);</span>
+<span class="nc" id="L128">            throw new KlojangSQLException(&quot;no keys were generated&quot;);</span>
 <span class="pc bpc" id="L129" title="1 of 2 branches missed.">          } else if (rs.getMetaData().getColumnCount() != 1) {</span>
-<span class="nc" id="L130">            throw new KJSQLException(&quot;multiple auto-increment keys not supported&quot;);</span>
+<span class="nc" id="L130">            throw new KlojangSQLException(&quot;multiple auto-increment keys not supported&quot;);</span>
           }
 <span class="fc" id="L132">          long id = rs.getLong(1);</span>
 <span class="fc bfc" id="L133" title="All 2 branches covered.">          for (int i = 0; i &lt; keys.size(); ++i) {</span>
@@ -149,7 +149,7 @@ public class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
         }
       }
 <span class="nc" id="L151">    } catch (Throwable t) {</span>
-<span class="nc" id="L152">      throw KJSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L152">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     } finally {
 <span class="fc" id="L154">      reset();</span>
     }
@@ -160,18 +160,18 @@ public class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
       try {
 <span class="fc" id="L161">        exec(true);</span>
 <span class="nc" id="L162">      } catch (Throwable t) {</span>
-<span class="nc" id="L163">        throw KJSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L163">        throw KlojangSQLException.wrap(t, sqlInfo);</span>
 <span class="fc" id="L164">      }</span>
 <span class="fc" id="L165">      try (ResultSet rs = ps.getGeneratedKeys()) {</span>
 <span class="pc bpc" id="L166" title="1 of 2 branches missed.">        if (!rs.next()) {</span>
-<span class="nc" id="L167">          throw new KJSQLException(&quot;No keys were generated&quot;);</span>
+<span class="nc" id="L167">          throw new KlojangSQLException(&quot;No keys were generated&quot;);</span>
 <span class="pc bpc" id="L168" title="1 of 2 branches missed.">        } else if (rs.getMetaData().getColumnCount() != 1) {</span>
-<span class="nc" id="L169">          throw new KJSQLException(&quot;Multiple auto-increment keys not supported&quot;);</span>
+<span class="nc" id="L169">          throw new KlojangSQLException(&quot;Multiple auto-increment keys not supported&quot;);</span>
         }
 <span class="fc" id="L171">        return rs.getLong(1);</span>
       }
 <span class="nc" id="L173">    } catch (SQLException e) {</span>
-<span class="nc" id="L174">      throw KJSQLException.wrap(e, sqlInfo);</span>
+<span class="nc" id="L174">      throw KlojangSQLException.wrap(e, sqlInfo);</span>
     } finally {
 <span class="fc" id="L176">      reset();</span>
     }
@@ -203,7 +203,7 @@ public class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
     try {
 <span class="fc" id="L204">      ps.clearParameters();</span>
 <span class="nc" id="L205">    } catch (SQLException e) {</span>
-<span class="nc" id="L206">      throw KJSQLException.wrap(e, sqlInfo);</span>
+<span class="nc" id="L206">      throw KlojangSQLException.wrap(e, sqlInfo);</span>
 <span class="fc" id="L207">    }</span>
 <span class="fc" id="L208">  }</span>
 }

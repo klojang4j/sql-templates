@@ -19,7 +19,7 @@ import java.util.Optional;
  *     ResultSetBeanifier}
  * @author Ayco Holleman
  */
-public interface ResultSetBeanifier<T> extends Iterable<T> {
+public sealed interface ResultSetBeanifier<T> extends Iterable<T> permits DefaultBeanifier,EmptyBeanifier{
 
   /**
    * Converts the current row within the specified {@code ResultSet} into a JavaBean.

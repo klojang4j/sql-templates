@@ -1,8 +1,8 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.x.rs.ReaderNegotiator;
-import org.klojang.jdbc.x.rs.ResultSetReader;
+import org.klojang.jdbc.x.rs.ColumnReaderFinder;
+import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.sql.AbstractSQL;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.NameMapper;
@@ -57,64 +57,64 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
     try {
       return rs();
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, sqlInfo);
+      throw KlojangSQLException.wrap(t, sqlInfo);
     }
   }
 
   /**
    * Executes the query and returns the value of the first column in the first row. If the
    * query had already been executed, you get the value from the second row, etc. Throws a
-   * {@link KJSQLException} if the query returned zero rows or if there are no more rows
+   * {@link KlojangSQLException} if the query returned zero rows or if there are no more rows
    * in the {@code ResultSet}.
    *
    * @param <T> The type of the value to be returned
    * @param clazz The class of the value to be returned
    * @return The value of the first column in the first row
-   * @throws KJSQLException If the query returned zero rows
+   * @throws KlojangSQLException If the query returned zero rows
    */
   public <T> T lookup(Class<T> clazz) {
     ResultSet rs = executeAndNext();
     try {
       int sqlType = rs.getMetaData().getColumnType(1);
-      ResultSetReader<?, T> emitter = ReaderNegotiator.getInstance().findReader(clazz,
+      ColumnReader<?, T> emitter = ColumnReaderFinder.getInstance().findReader(clazz,
             sqlType);
       return emitter.getValue(rs, 1, clazz);
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, sqlInfo);
+      throw KlojangSQLException.wrap(t, sqlInfo);
     }
   }
 
   /**
    * Executes the query and returns the value of the first column in the first row as an
    * integer. If the query had already been executed, you get the value from the second
-   * row, etc. Throws a {@link KJSQLException} if the query returned zero rows or if there
+   * row, etc. Throws a {@link KlojangSQLException} if the query returned zero rows or if there
    * are no more rows in the {@code ResultSet}.
    *
    * @return The value of the first column in the first row as an integer
-   * @throws KJSQLException If the query returned zero rows
+   * @throws KlojangSQLException If the query returned zero rows
    */
-  public int getInt() throws KJSQLException {
+  public int getInt() throws KlojangSQLException {
     try {
       return executeAndNext().getInt(1);
     } catch (SQLException e) {
-      throw KJSQLException.wrap(e, sqlInfo);
+      throw KlojangSQLException.wrap(e, sqlInfo);
     }
   }
 
   /**
    * Returns the value of the first column of the first row as a {@code String}. If the
    * query had already been executed, you get the value from the second row, etc. Throws a
-   * {@link KJSQLException} if the query returned zero rows or if there are no more rows
+   * {@link KlojangSQLException} if the query returned zero rows or if there are no more rows
    * in the {@code ResultSet}.
    *
    * @return The value of the first column of the first row as aa {@code String}
-   * @throws KJSQLException If the query returned zero rows
+   * @throws KlojangSQLException If the query returned zero rows
    */
-  public String getString() throws KJSQLException {
+  public String getString() throws KlojangSQLException {
     try {
       return executeAndNext().getString(1);
     } catch (SQLException e) {
-      throw KJSQLException.wrap(e, sqlInfo);
+      throw KlojangSQLException.wrap(e, sqlInfo);
     }
   }
 
@@ -148,7 +148,7 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
         return Collections.emptyList();
       }
       int sqlType = rs.getMetaData().getColumnType(1);
-      ResultSetReader<?, T> extractor = ReaderNegotiator.getInstance().findReader(clazz,
+      ColumnReader<?, T> extractor = ColumnReaderFinder.getInstance().findReader(clazz,
             sqlType);
       List<T> list = new ArrayList<>(expectedSize);
       do {
@@ -156,22 +156,22 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
       } while (rs.next());
       return list;
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, sqlInfo);
+      throw KlojangSQLException.wrap(t, sqlInfo);
     }
   }
 
   /**
    * Executes the query and returns a {@code ResultSetMappifier} that you can use to
-   * convert the rows in the {@link ResultSet} into {@link Row} objects.
+   * convert the rows in the {@link ResultSet} into {@code Map<String, Object>} instances.
    *
    * @return A {@code ResultSetMappifier} that you can use to convert the rows in the
-   * {@link ResultSet} into {@link Row} objects.
+   * {@link ResultSet} into {@code Map<String, Object>} instances.
    */
   public ResultSetMappifier getMappifier() {
     try {
       return sql.getMappifierFactory(mapper).getResultSetMappifier(rs());
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, sqlInfo);
+      throw KlojangSQLException.wrap(t, sqlInfo);
     }
   }
 
@@ -188,7 +188,7 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
     try {
       return sql.getBeanifierFactory(beanClass, mapper).getBeanifier(rs());
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, sqlInfo);
+      throw KlojangSQLException.wrap(t, sqlInfo);
     }
   }
 
@@ -207,7 +207,7 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
     try {
       return sql.getBeanifierFactory(beanClass, beanSupplier, mapper).getBeanifier(rs());
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, sqlInfo);
+      throw KlojangSQLException.wrap(t, sqlInfo);
     }
   }
 
@@ -222,9 +222,9 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
     try {
       hasRows = (rs = rs()).next();
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, sqlInfo);
+      throw KlojangSQLException.wrap(t, sqlInfo);
     }
-    Check.on(KJSQLException::new, hasRows).is(yes(), "query returned zero rows");
+    Check.on(KlojangSQLException::new, hasRows).is(yes(), "query returned zero rows");
     return rs;
   }
 

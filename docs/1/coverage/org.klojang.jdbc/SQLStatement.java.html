@@ -93,7 +93,7 @@ public abstract class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt; implem
         try {
 <span class="fc" id="L94">          ps.close();</span>
 <span class="nc" id="L95">        } catch (SQLException e) {</span>
-<span class="nc" id="L96">          throw KJSQLException.wrap(e, sqlInfo);</span>
+<span class="nc" id="L96">          throw KlojangSQLException.wrap(e, sqlInfo);</span>
 <span class="fc" id="L97">        }</span>
       }
     } finally {
@@ -101,13 +101,13 @@ public abstract class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt; implem
     }
 <span class="fc" id="L102">  }</span>
 
-  private KJSQLException notExecutable() {
+  private KlojangSQLException notExecutable() {
 <span class="nc" id="L105">    Set&lt;NamedParameter&gt; params = HashSet.newHashSet(sqlInfo.parameters().size());</span>
 <span class="nc" id="L106">    params.addAll(sqlInfo.parameters());</span>
 <span class="nc" id="L107">    params.removeAll(bound);</span>
-<span class="nc" id="L108">    List&lt;String&gt; unbound = collectionToList(params, NamedParameter::getName);</span>
+<span class="nc" id="L108">    List&lt;String&gt; unbound = collectionToList(params, NamedParameter::name);</span>
 <span class="nc" id="L109">    String fmt = &quot;some query parameters have not been bound yet: %s&quot;;</span>
-<span class="nc" id="L110">    return new KJSQLException(String.format(fmt, unbound));</span>
+<span class="nc" id="L110">    return new KlojangSQLException(String.format(fmt, unbound));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

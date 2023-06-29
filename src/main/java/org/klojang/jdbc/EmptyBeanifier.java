@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-class EmptyBeanifier<T> implements ResultSetBeanifier<T> {
+final class EmptyBeanifier<T> implements ResultSetBeanifier<T> {
 
   @SuppressWarnings("rawtypes")
   static final EmptyBeanifier INSTANCE = new EmptyBeanifier();

@@ -93,7 +93,7 @@ public abstract class SQLStatement<T extends SQLStatement<T>> implements AutoClo
         try {
           ps.close();
         } catch (SQLException e) {
-          throw KJSQLException.wrap(e, sqlInfo);
+          throw KlojangSQLException.wrap(e, sqlInfo);
         }
       }
     } finally {
@@ -101,12 +101,12 @@ public abstract class SQLStatement<T extends SQLStatement<T>> implements AutoClo
     }
   }
 
-  private KJSQLException notExecutable() {
+  private KlojangSQLException notExecutable() {
     Set<NamedParameter> params = HashSet.newHashSet(sqlInfo.parameters().size());
     params.addAll(sqlInfo.parameters());
     params.removeAll(bound);
-    List<String> unbound = collectionToList(params, NamedParameter::getName);
+    List<String> unbound = collectionToList(params, NamedParameter::name);
     String fmt = "some query parameters have not been bound yet: %s";
-    return new KJSQLException(String.format(fmt, unbound));
+    return new KlojangSQLException(String.format(fmt, unbound));
   }
 }

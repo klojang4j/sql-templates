@@ -109,7 +109,7 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
         exec(false);
       }
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, sqlInfo);
+      throw KlojangSQLException.wrap(t, sqlInfo);
     } finally {
       reset();
     }
@@ -125,9 +125,9 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
         exec(true);
         try (ResultSet rs = ps.getGeneratedKeys()) {
           if (!rs.next()) {
-            throw new KJSQLException("no keys were generated");
+            throw new KlojangSQLException("no keys were generated");
           } else if (rs.getMetaData().getColumnCount() != 1) {
-            throw new KJSQLException("multiple auto-increment keys not supported");
+            throw new KlojangSQLException("multiple auto-increment keys not supported");
           }
           long id = rs.getLong(1);
           for (int i = 0; i < keys.size(); ++i) {
@@ -149,7 +149,7 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
         }
       }
     } catch (Throwable t) {
-      throw KJSQLException.wrap(t, sqlInfo);
+      throw KlojangSQLException.wrap(t, sqlInfo);
     } finally {
       reset();
     }
@@ -160,18 +160,18 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
       try {
         exec(true);
       } catch (Throwable t) {
-        throw KJSQLException.wrap(t, sqlInfo);
+        throw KlojangSQLException.wrap(t, sqlInfo);
       }
       try (ResultSet rs = ps.getGeneratedKeys()) {
         if (!rs.next()) {
-          throw new KJSQLException("No keys were generated");
+          throw new KlojangSQLException("No keys were generated");
         } else if (rs.getMetaData().getColumnCount() != 1) {
-          throw new KJSQLException("Multiple auto-increment keys not supported");
+          throw new KlojangSQLException("Multiple auto-increment keys not supported");
         }
         return rs.getLong(1);
       }
     } catch (SQLException e) {
-      throw KJSQLException.wrap(e, sqlInfo);
+      throw KlojangSQLException.wrap(e, sqlInfo);
     } finally {
       reset();
     }
@@ -203,7 +203,7 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
     try {
       ps.clearParameters();
     } catch (SQLException e) {
-      throw KJSQLException.wrap(e, sqlInfo);
+      throw KlojangSQLException.wrap(e, sqlInfo);
     }
   }
 }

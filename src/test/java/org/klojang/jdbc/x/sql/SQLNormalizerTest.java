@@ -15,9 +15,9 @@ public class SQLNormalizerTest {
     SQLNormalizer normalizer=new SQLNormalizer(s);
     List<NamedParameter> params = normalizer.getParameters();
     assertEquals(1, params.size());
-    assertEquals("fullName", params.get(0).getName());
-    assertEquals(1, params.get(0).getIndices().size());
-    assertEquals(1, params.get(0).getIndices().get(0));
+    assertEquals("fullName", params.get(0).name());
+    assertEquals(1, params.get(0).positions().size());
+    assertEquals(1, params.get(0).positions().get(0));
     assertEquals("SELECT FOO FROM BAR WHERE FULL_NAME = ?", normalizer.getNormalizedSQL());
   }
 
@@ -36,10 +36,10 @@ public class SQLNormalizerTest {
     assertEquals(IntList.of(5), paramMap.get("to"));
     List<NamedParameter> params = normalizer.getParameters();
     assertEquals(4, params.size());
-    assertEquals("name", params.get(0).getName());
-    assertEquals("lastName", params.get(1).getName());
-    assertEquals("from", params.get(2).getName());
-    assertEquals("to", params.get(3).getName());
-    assertEquals(IntList.of(1, 3), params.get(0).getIndices());
+    assertEquals("name", params.get(0).name());
+    assertEquals("lastName", params.get(1).name());
+    assertEquals("from", params.get(2).name());
+    assertEquals("to", params.get(3).name());
+    assertEquals(IntList.of(1, 3), params.get(0).positions());
   }
 }

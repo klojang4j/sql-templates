@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-class EmptyBeanifier&lt;T&gt; implements ResultSetBeanifier&lt;T&gt; {
+final class EmptyBeanifier&lt;T&gt; implements ResultSetBeanifier&lt;T&gt; {
 
   @SuppressWarnings(&quot;rawtypes&quot;)
 <span class="nc" id="L11">  static final EmptyBeanifier INSTANCE = new EmptyBeanifier();</span>

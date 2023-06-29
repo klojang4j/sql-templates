@@ -7,7 +7,7 @@ import java.sql.ResultSet;
  *
  * @author Ayco Holleman
  */
-public class ResultSetReadException extends KJSQLException {
+public class ResultSetReadException extends KlojangSQLException {
 
   public ResultSetReadException(String message) {
     super(message);

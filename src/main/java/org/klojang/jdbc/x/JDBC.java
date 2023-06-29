@@ -1,6 +1,6 @@
 package org.klojang.jdbc.x;
 
-import org.klojang.jdbc.KJSQLException;
+import org.klojang.jdbc.KlojangSQLException;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -20,7 +20,7 @@ public final class JDBC {
       }
       return colNames;
     } catch (SQLException e) {
-      throw new KJSQLException(e);
+      throw new KlojangSQLException(e);
     }
   }
 

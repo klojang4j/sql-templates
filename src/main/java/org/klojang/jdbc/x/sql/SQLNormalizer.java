@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.sql;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.KJSQLException;
+import org.klojang.jdbc.KlojangSQLException;
 import org.klojang.util.CollectionMethods;
 import org.klojang.util.MutableInt;
 import org.klojang.util.collection.IntArrayList;
@@ -70,7 +70,7 @@ public final class SQLNormalizer {
           if (c == '\'') {
             inString = true;
           } else if (c == ':') {
-            fail(KJSQLException::new, ERR_ADJACENT_PARAMS, pStartPos, i);
+            fail(KlojangSQLException::new, ERR_ADJACENT_PARAMS, pStartPos, i);
           }
         }
       } else if (c == ':') {
@@ -111,7 +111,7 @@ public final class SQLNormalizer {
         StringBuilder param,
         MutableInt pCount,
         int startPos) {
-    Check.on(KJSQLException::new, param)
+    Check.on(KlojangSQLException::new, param)
           .has(StringBuilder::length, ne(), 0, ERR_EMPTY_NAME, startPos);
     paramMap.computeIfAbsent(param.toString(), k -> new IntArrayList())
           .add(pCount.ppi());

@@ -2,7 +2,7 @@ package org.klojang.jdbc.x.sql;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.BindInfo;
-import org.klojang.jdbc.KJSQLException;
+import org.klojang.jdbc.KlojangSQLException;
 import org.klojang.jdbc.SQL;
 import org.klojang.jdbc.SQLStatement;
 import org.klojang.templates.ParseException;
@@ -29,7 +29,7 @@ public final class SQLTemplate extends AbstractSQL {
     try {
       template = Template.fromString(normalizer.getNormalizedSQL());
     } catch (ParseException e) {
-      throw new KJSQLException(e);
+      throw new KlojangSQLException(e);
     }
   }
 

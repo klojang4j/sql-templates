@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import org.klojang.jdbc.KJSQLException;
+import org.klojang.jdbc.KlojangSQLException;
 import org.klojang.util.ExceptionMethods;
 
 import static java.lang.invoke.MethodHandles.lookup;
@@ -87,7 +87,7 @@ public final class ResultSetMethod<COLUMN_TYPE> {
     try {
       mh = lookup().findVirtual(ResultSet.class, methodName, mt);
     } catch (NoSuchMethodException | IllegalAccessException e) {
-      throw new KJSQLException(e);
+      throw new KlojangSQLException(e);
     }
     return new ResultSetMethod<>(mh);
   }

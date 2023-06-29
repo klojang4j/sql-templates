@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.x.ps.writer.EnumWriterLookup;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.klojang.invoke.Getter;
 import org.klojang.invoke.GetterFactory;
@@ -38,21 +39,21 @@ class BeanValueBinder<FIELD_TYPE, PARAM_TYPE> {
       List<NamedParameter> params,
       BindInfo bindInfo,
       Collection<NamedParameter> bound) {
-    ReceiverNegotiator negotiator = ReceiverNegotiator.getInstance();
+    ColumnWriterFinder negotiator = ColumnWriterFinder.getInstance();
     Map<String, Getter> getters = GetterFactory.INSTANCE.getGetters(beanClass, true);
     List<BeanValueBinder<?, ?>> binders = new ArrayList<>(params.size());
     for (NamedParameter param : params) {
-      Getter getter = getters.get(param.getName());
+      Getter getter = getters.get(param.name());
       if (getter == null) {
         continue;
       }
       bound.add(param);
-      String property = param.getName();
+      String property = param.name();
       Class<?> type = getter.getReturnType();
-      Receiver<?, ?> receiver;
+      ColumnWriter<?, ?> receiver;
       if (ClassMethods.isSubtype(type, Enum.class)
           && bindInfo.bindEnumUsingToString(property)) {
-        receiver = EnumReceivers.ENUM_TO_STRING;
+        receiver = EnumWriterLookup.ENUM_TO_STRING;
       } else {
         Integer sqlType = bindInfo.getSqlType(property, type);
         if (sqlType == null) {
@@ -67,11 +68,11 @@ class BeanValueBinder<FIELD_TYPE, PARAM_TYPE> {
   }
 
   private final Getter getter;
-  private final Receiver<FIELD_TYPE, PARAM_TYPE> receiver;
+  private final ColumnWriter<FIELD_TYPE, PARAM_TYPE> receiver;
   private final NamedParameter param;
 
   private BeanValueBinder(Getter getter,
-      Receiver<FIELD_TYPE, PARAM_TYPE> receiver,
+      ColumnWriter<FIELD_TYPE, PARAM_TYPE> receiver,
       NamedParameter param) {
     this.getter = getter;
     this.receiver = receiver;
@@ -86,9 +87,9 @@ class BeanValueBinder<FIELD_TYPE, PARAM_TYPE> {
       LOG.debug("-> Parameter \"{}\": {}", getter.getProperty(), paramValue);
     } else {
       String fmt = "-> Parameter \"{}\": {} (bean value: {})";
-      LOG.debug(fmt, param.getName(), paramValue, beanValue);
+      LOG.debug(fmt, param.name(), paramValue, beanValue);
     }
-    param.getIndices().forEachThrowing(i -> receiver.bind(ps, i, paramValue));
+    param.positions().forEachThrowing(i -> receiver.bind(ps, i, paramValue));
   }
 
 }

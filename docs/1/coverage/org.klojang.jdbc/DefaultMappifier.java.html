@@ -58,7 +58,7 @@ final class DefaultMappifier implements ResultSetMappifier {
 <span class="nc bnc" id="L58" title="All 2 branches missed.">      empty = !rs.next();</span>
 <span class="nc" id="L59">      return row;</span>
 <span class="nc" id="L60">    } catch (Throwable t) {</span>
-<span class="nc" id="L61">      throw KJSQLException.wrap(t, null);</span>
+<span class="nc" id="L61">      throw KlojangSQLException.wrap(t, null);</span>
     }
   }
 
@@ -75,7 +75,7 @@ final class DefaultMappifier implements ResultSetMappifier {
 <span class="nc" id="L75">        all.add(toMap(rs, channels));</span>
 <span class="nc bnc" id="L76" title="All 6 branches missed.">      } while (++i &lt; limit &amp;&amp; (empty = !rs.next()));</span>
 <span class="nc" id="L77">    } catch (Throwable t) {</span>
-<span class="nc" id="L78">      throw KJSQLException.wrap(t, null);</span>
+<span class="nc" id="L78">      throw KlojangSQLException.wrap(t, null);</span>
 <span class="nc" id="L79">    }</span>
 <span class="nc" id="L80">    return all;</span>
   }
@@ -97,7 +97,7 @@ final class DefaultMappifier implements ResultSetMappifier {
 <span class="nc" id="L97">        all.add(toMap(rs, channels));</span>
 <span class="nc bnc" id="L98" title="All 2 branches missed.">      } while (rs.next());</span>
 <span class="nc" id="L99">    } catch (Throwable t) {</span>
-<span class="nc" id="L100">      throw KJSQLException.wrap(t, null);</span>
+<span class="nc" id="L100">      throw KlojangSQLException.wrap(t, null);</span>
 <span class="nc" id="L101">    }</span>
 <span class="nc" id="L102">    empty = true;</span>
 <span class="nc" id="L103">    return all;</span>

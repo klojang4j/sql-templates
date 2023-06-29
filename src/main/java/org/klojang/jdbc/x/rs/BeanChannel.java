@@ -47,7 +47,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
       LOG.trace("Columns ......: {}", implode(cols));
       LOG.trace("Properties ...: {}", implode(props));
     }
-    ReaderNegotiator negotiator = ReaderNegotiator.getInstance();
+    ColumnReaderFinder negotiator = ColumnReaderFinder.getInstance();
     try {
       ResultSetMetaData rsmd = rs.getMetaData();
       int sz = rsmd.getColumnCount();
@@ -64,7 +64,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
           continue;
         }
         Class<?> javaType = setter.getParamType();
-        ResultSetReader<?, ?> extractor = negotiator.findReader(javaType, sqlType);
+        ColumnReader<?, ?> extractor = negotiator.findReader(javaType, sqlType);
         transporters.add(new BeanChannel<>(extractor, setter, jdbcIdx, sqlType));
       }
       return transporters.toArray(BeanChannel[]::new);
@@ -73,13 +73,13 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
     }
   }
 
-  private final ResultSetReader<COLUMN_TYPE, FIELD_TYPE> extractor;
+  private final ColumnReader<COLUMN_TYPE, FIELD_TYPE> extractor;
   private final Setter setter;
   private final int jdbcIdx;
   private final int sqlType;
 
   private BeanChannel(
-      ResultSetReader<COLUMN_TYPE, FIELD_TYPE> extractor,
+      ColumnReader<COLUMN_TYPE, FIELD_TYPE> extractor,
       Setter setter,
       int jdbcIdx,
       int sqlType) {

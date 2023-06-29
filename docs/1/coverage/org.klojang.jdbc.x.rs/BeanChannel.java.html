@@ -47,7 +47,7 @@ public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; implements Channel&lt;Ob
 <span class="nc" id="L47">      LOG.trace(&quot;Columns ......: {}&quot;, implode(cols));</span>
 <span class="nc" id="L48">      LOG.trace(&quot;Properties ...: {}&quot;, implode(props));</span>
     }
-<span class="nc" id="L50">    ReaderNegotiator negotiator = ReaderNegotiator.getInstance();</span>
+<span class="nc" id="L50">    ColumnReaderFinder negotiator = ColumnReaderFinder.getInstance();</span>
     try {
 <span class="nc" id="L52">      ResultSetMetaData rsmd = rs.getMetaData();</span>
 <span class="nc" id="L53">      int sz = rsmd.getColumnCount();</span>
@@ -64,7 +64,7 @@ public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; implements Channel&lt;Ob
 <span class="nc" id="L64">          continue;</span>
         }
 <span class="nc" id="L66">        Class&lt;?&gt; javaType = setter.getParamType();</span>
-<span class="nc" id="L67">        ResultSetReader&lt;?, ?&gt; extractor = negotiator.findReader(javaType, sqlType);</span>
+<span class="nc" id="L67">        ColumnReader&lt;?, ?&gt; extractor = negotiator.findReader(javaType, sqlType);</span>
 <span class="nc" id="L68">        transporters.add(new BeanChannel&lt;&gt;(extractor, setter, jdbcIdx, sqlType));</span>
       }
 <span class="nc" id="L70">      return transporters.toArray(BeanChannel[]::new);</span>
@@ -73,13 +73,13 @@ public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; implements Channel&lt;Ob
     }
   }
 
-  private final ResultSetReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; extractor;
+  private final ColumnReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; extractor;
   private final Setter setter;
   private final int jdbcIdx;
   private final int sqlType;
 
   private BeanChannel(
-      ResultSetReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; extractor,
+      ColumnReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; extractor,
       Setter setter,
       int jdbcIdx,
 <span class="nc" id="L85">      int sqlType) {</span>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColumnWriterFinder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.ps</a> &gt; <span class="el_source">ColumnWriterFinder.java</span></div><h1>ColumnWriterFinder.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.ps;
+
+import org.klojang.check.Check;
+import org.klojang.collections.TypeMap;
+import org.klojang.jdbc.x.ps.writer.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import static org.klojang.check.CommonChecks.notNull;
+import static org.klojang.jdbc.SQLTypeNames.getTypeName;
+
+@SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
+class ColumnWriterFinder {
+
+  private static ColumnWriterFinder INSTANCE;
+
+  static ColumnWriterFinder getInstance() {
+<span class="fc bfc" id="L20" title="All 2 branches covered.">    if (INSTANCE == null) {</span>
+<span class="fc" id="L21">      INSTANCE = new ColumnWriterFinder();</span>
+    }
+<span class="fc" id="L23">    return INSTANCE;</span>
+  }
+
+  private final Map&lt;Class&lt;?&gt;, Map&lt;Integer, ColumnWriter&gt;&gt; all;
+
+<span class="fc" id="L28">  private ColumnWriterFinder() {</span>
+<span class="fc" id="L29">    Map tmp = createReceivers(); // to hell with generics</span>
+<span class="fc" id="L30">    all = (Map&lt;Class&lt;?&gt;, Map&lt;Integer, ColumnWriter&gt;&gt;) tmp;</span>
+<span class="fc" id="L31">  }</span>
+
+  &lt;T, U&gt; ColumnWriter&lt;T, U&gt; getDefaultReceiver(Class&lt;T&gt; fieldType) {
+<span class="fc" id="L34">    ColumnWriter receiver = DefaultWriters.INSTANCE.getDefaultReceiver(fieldType);</span>
+<span class="fc" id="L35">    return Check.that(receiver).is(notNull(), &quot;Type not supported: {type}&quot;).ok();</span>
+  }
+
+  &lt;T, U&gt; ColumnWriter&lt;T, U&gt; findReceiver(Class&lt;T&gt; fieldType, int sqlType) {
+    // This implicitly checks that the specified int is one of the
+    // static final int constants in the java.sql.Types class
+<span class="nc" id="L41">    String sqlTypeName = getTypeName(sqlType);</span>
+<span class="nc" id="L42">    Map&lt;Integer, ColumnWriter&gt; receivers = all.get(fieldType);</span>
+<span class="nc" id="L43">    Check.that(receivers).is(notNull(), &quot;Type not supported: {type}&quot;);</span>
+<span class="nc" id="L44">    ColumnWriter&lt;T, U&gt; receiver = receivers.get(sqlType);</span>
+<span class="nc" id="L45">    Check.that(receiver).is(notNull(), &quot;Cannot convert {0} to {type}&quot;, sqlTypeName);</span>
+<span class="nc" id="L46">    return receiver;</span>
+  }
+
+  private static Map createReceivers() {
+<span class="fc" id="L50">    return TypeMap.nativeTypeMapBuilder()</span>
+<span class="fc" id="L51">        .autobox(true)</span>
+<span class="fc" id="L52">        .add(String.class, immutable(new StringWriterLookup()))</span>
+<span class="fc" id="L53">        .add(Integer.class, immutable(new IntWriterLookup()))</span>
+<span class="fc" id="L54">        .add(Long.class, immutable(new LongWriterLookup()))</span>
+<span class="fc" id="L55">        .add(Double.class, immutable(new DoubleWriterLookup()))</span>
+<span class="fc" id="L56">        .add(Float.class, immutable(new FloatWriterLookup()))</span>
+<span class="fc" id="L57">        .add(Short.class, immutable(new ShortWriterLookup()))</span>
+<span class="fc" id="L58">        .add(Byte.class, immutable(new ByteWriterLookup()))</span>
+<span class="fc" id="L59">        .add(Boolean.class, immutable(new BooleanWriterLookup()))</span>
+<span class="fc" id="L60">        .add(LocalDate.class, immutable(new LocalDateWriterLookup()))</span>
+<span class="fc" id="L61">        .add(LocalDateTime.class, immutable(new LocalDateTimeReceivers()))</span>
+<span class="fc" id="L62">        .add(Enum.class, immutable(new EnumWriterLookup()))</span>
+<span class="fc" id="L63">        .freeze();</span>
+  }
+
+  private static Map&lt;Integer, ColumnWriter&gt; immutable(ColumnWriterLookup src) {
+<span class="fc" id="L67">    return Map.copyOf(src);</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

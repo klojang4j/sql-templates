@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShortReaderLookup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs.reader</a> &gt; <span class="el_source">ShortReaderLookup.java</span></div><h1>ShortReaderLookup.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs.reader;
+
+import org.klojang.convert.NumberMethods;
+import org.klojang.jdbc.x.rs.ResultSetMethod;
+import org.klojang.jdbc.x.rs.ColumnReader;
+import org.klojang.jdbc.x.rs.ColumnReaderLookup;
+
+import static java.sql.Types.*;
+import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
+
+public final class ShortReaderLookup extends ColumnReaderLookup&lt;Short&gt; {
+
+<span class="nc" id="L13">  public ShortReaderLookup() {</span>
+<span class="nc" id="L14">    add(SMALLINT, new ColumnReader&lt;&gt;(ResultSetMethod.GET_SHORT));</span>
+<span class="nc" id="L15">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE, NumberMethods::convert));</span>
+<span class="nc" id="L16">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT, NumberMethods::convert));</span>
+<span class="nc" id="L17">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, NumberMethods::convert));</span>
+<span class="nc" id="L18">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, NumberMethods::convert));</span>
+<span class="nc" id="L19">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE, NumberMethods::convert),</span>
+          FLOAT,
+          DOUBLE);
+<span class="nc" id="L22">    addMultiple(new ColumnReader&lt;&gt;(GET_BIG_DECIMAL, NumberMethods::convert),</span>
+          NUMERIC,
+          DECIMAL);
+<span class="nc" id="L25">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse),</span>
+          VARCHAR,
+          CHAR);
+<span class="nc" id="L28">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
