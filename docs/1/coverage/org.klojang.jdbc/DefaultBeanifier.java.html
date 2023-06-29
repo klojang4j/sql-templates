@@ -29,7 +29,7 @@ final class DefaultBeanifier&lt;T&gt; implements ResultSetBeanifier&lt;T&gt; {
 
     @Override
     public boolean hasNext() {
-<span class="nc" id="L32">      return beanifier.empty;</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">      return !beanifier.empty;</span>
     }
 
     @Override

@@ -51,18 +51,23 @@ public final class SkeletonSQL extends AbstractSQL {
   }
 
   @Override
-  public void unlock() {
-<span class="nc" id="L55">    session = null;</span>
-<span class="nc" id="L56">  }</span>
+<span class="nc" id="L54">  void cleanup() {session = null;}</span>
 
   @Override
   &lt;T extends SQLStatement&lt;?&gt;&gt; T prepare(Connection con, StatementFactory&lt;T&gt; constructor) {
-<span class="nc bnc" id="L60" title="All 2 branches missed.">    if (session == null) {</span>
-<span class="nc" id="L61">      session = template.newRenderSession();</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">    if (session == null) {</span>
+<span class="nc" id="L59">      session = template.newRenderSession();</span>
     }
-<span class="nc" id="L63">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
-<span class="nc" id="L64">    SQLNormalizer normalizer = new SQLNormalizer(session.render());</span>
-<span class="nc" id="L65">    return constructor.create(con, this, new SQLInfo(sql, session.render(), normalizer));</span>
+<span class="nc" id="L61">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
+<span class="nc" id="L62">    SQLNormalizer normalizer = new SQLNormalizer(session.render());</span>
+<span class="nc" id="L63">    SQLInfo sqlInfo = new SQLInfo(sql, session.render(), normalizer);</span>
+<span class="nc" id="L64">    lock();</span>
+    try {
+<span class="nc" id="L66">      return constructor.create(con, this, sqlInfo);</span>
+<span class="nc" id="L67">    } catch (Throwable t) {</span>
+<span class="nc" id="L68">      unlock();</span>
+<span class="nc" id="L69">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+    }
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

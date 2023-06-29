@@ -93,8 +93,19 @@ public abstract sealed class AbstractSQL implements SQL
     return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);
   }
 
+  void lock() {
+    lock.lock();
+  }
 
-  public abstract void unlock();
+  public void unlock() {
+    try {
+      cleanup();
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  abstract void cleanup();
 
   abstract <T extends SQLStatement<?>> T prepare(
         Connection con,

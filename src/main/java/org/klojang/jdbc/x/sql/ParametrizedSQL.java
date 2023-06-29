@@ -1,6 +1,7 @@
 package org.klojang.jdbc.x.sql;
 
 import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.KlojangSQLException;
 import org.klojang.jdbc.SQL;
 import org.klojang.jdbc.SQLStatement;
 
@@ -21,11 +22,18 @@ public final class ParametrizedSQL extends AbstractSQL {
   }
 
   @Override
-  public void unlock() {}
+  void cleanup() {}
 
   @Override
   <T extends SQLStatement<?>> T prepare(Connection con, StatementFactory<T> constructor) {
-    return constructor.create(con, this, new SQLInfo(sql, normalizer));
+    SQLInfo sqlInfo = new SQLInfo(sql, normalizer);
+    lock();
+    try {
+      return constructor.create(con, this, sqlInfo);
+    } catch (Throwable t) {
+      unlock();
+      throw KlojangSQLException.wrap(t, sqlInfo);
+    }
   }
 
 }

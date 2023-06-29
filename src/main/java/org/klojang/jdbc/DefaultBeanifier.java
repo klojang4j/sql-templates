@@ -29,7 +29,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
     @Override
     public boolean hasNext() {
-      return beanifier.empty;
+      return !beanifier.empty;
     }
 
     @Override

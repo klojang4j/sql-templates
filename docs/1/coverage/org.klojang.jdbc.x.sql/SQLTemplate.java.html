@@ -21,47 +21,53 @@ public final class SQLTemplate extends AbstractSQL {
 
   private final SQLNormalizer normalizer;
   private final Template template;
+
   private RenderSession session;
 
   public SQLTemplate(String sql, BindInfo bindInfo) {
-<span class="nc" id="L27">    super(sql, bindInfo);</span>
-<span class="nc" id="L28">    normalizer = new SQLNormalizer(sql);</span>
+<span class="nc" id="L28">    super(sql, bindInfo);</span>
+<span class="nc" id="L29">    normalizer = new SQLNormalizer(sql);</span>
     try {
-<span class="nc" id="L30">      template = Template.fromString(normalizer.getNormalizedSQL());</span>
-<span class="nc" id="L31">    } catch (ParseException e) {</span>
-<span class="nc" id="L32">      throw new KlojangSQLException(e);</span>
-<span class="nc" id="L33">    }</span>
-<span class="nc" id="L34">  }</span>
+<span class="nc" id="L31">      template = Template.fromString(normalizer.getNormalizedSQL());</span>
+<span class="nc" id="L32">    } catch (ParseException e) {</span>
+<span class="nc" id="L33">      throw new KlojangSQLException(e);</span>
+<span class="nc" id="L34">    }</span>
+<span class="nc" id="L35">  }</span>
 
   @Override
   public SQL set(String varName, Object value) {
-<span class="nc" id="L38">    Check.notNull(varName, &quot;varName&quot;);</span>
-<span class="nc" id="L39">    Check.notNull(value, VALUE);</span>
-<span class="nc bnc" id="L40" title="All 2 branches missed.">    if (session == null) {</span>
-<span class="nc" id="L41">      session = template.newRenderSession();</span>
+<span class="nc" id="L39">    Check.notNull(varName, &quot;varName&quot;);</span>
+<span class="nc" id="L40">    Check.notNull(value, VALUE);</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">    if (session == null) {</span>
+<span class="nc" id="L42">      session = template.newRenderSession();</span>
     }
-<span class="nc bnc" id="L43" title="All 2 branches missed.">    if (value instanceof Collection&lt;?&gt; c) {</span>
-<span class="nc" id="L44">      session.set(varName, CollectionMethods.implode(c));</span>
-<span class="nc bnc" id="L45" title="All 2 branches missed.">    } else if (value.getClass().isArray()) {</span>
-<span class="nc" id="L46">      session.set(varName, ArrayMethods.implodeAny(value));</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">    if (value instanceof Collection&lt;?&gt; c) {</span>
+<span class="nc" id="L45">      session.set(varName, CollectionMethods.implode(c));</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">    } else if (value.getClass().isArray()) {</span>
+<span class="nc" id="L47">      session.set(varName, ArrayMethods.implodeAny(value));</span>
     } else {
-<span class="nc" id="L48">      session.set(varName, value);</span>
+<span class="nc" id="L49">      session.set(varName, value);</span>
     }
-<span class="nc" id="L50">    return this;</span>
+<span class="nc" id="L51">    return this;</span>
   }
 
   @Override
-  public void unlock() {
-<span class="nc" id="L55">    session = null;</span>
-<span class="nc" id="L56">  }</span>
+<span class="nc" id="L55">  void cleanup() {session = null;}</span>
 
   @Override
   &lt;T extends SQLStatement&lt;?&gt;&gt; T prepare(Connection con, StatementFactory&lt;T&gt; constructor) {
-<span class="nc bnc" id="L60" title="All 2 branches missed.">    if (session == null) {</span>
-<span class="nc" id="L61">      session = template.newRenderSession();</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">    if (session == null) {</span>
+<span class="nc" id="L60">      session = template.newRenderSession();</span>
     }
-<span class="nc" id="L63">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
-<span class="nc" id="L64">    return constructor.create(con, this, new SQLInfo(sql, session.render(), normalizer));</span>
+<span class="nc" id="L62">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
+<span class="nc" id="L63">    SQLInfo sqlInfo = new SQLInfo(sql, session.render(), normalizer);</span>
+<span class="nc" id="L64">    lock();</span>
+    try {
+<span class="nc" id="L66">      return constructor.create(con, this, sqlInfo);</span>
+<span class="nc" id="L67">    } catch (Throwable t) {</span>
+<span class="nc" id="L68">      unlock();</span>
+<span class="nc" id="L69">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+    }
   }
 
 }

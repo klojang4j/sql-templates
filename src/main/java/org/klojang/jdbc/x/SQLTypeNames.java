@@ -1,6 +1,7 @@
-package org.klojang.jdbc;
+package org.klojang.jdbc.x;
 
-import static org.klojang.check.CommonChecks.keyIn;
+import org.klojang.check.Check;
+import org.klojang.util.ExceptionMethods;
 
 import java.io.PrintStream;
 import java.lang.reflect.Field;
@@ -8,27 +9,20 @@ import java.sql.Types;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.klojang.check.Check;
-import org.klojang.util.ExceptionMethods;
+import static org.klojang.check.CommonChecks.keyIn;
 
 public class SQLTypeNames {
 
-  private static SQLTypeNames instance;
+  private static final SQLTypeNames instance = new SQLTypeNames();
 
   public static String getTypeName(int sqlType) {
-    if (instance == null) {
-      instance = new SQLTypeNames();
-    }
     return Check.that((Integer) sqlType)
-        .is(keyIn(), instance.map, "No such constant in java.sql.Types: %d", sqlType)
-        .ok(instance.map::get);
+          .is(keyIn(), instance.map, "no such constant in java.sql.Types: %d", sqlType)
+          .ok(instance.map::get);
   }
 
   public static void printAll(PrintStream out) {
     Check.notNull(out);
-    if (instance == null) {
-      instance = new SQLTypeNames();
-    }
     instance.map.forEach((k, v) -> out.printf("%5d : %s%n", k, v));
   }
 

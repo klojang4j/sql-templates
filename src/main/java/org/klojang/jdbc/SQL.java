@@ -112,7 +112,7 @@ public sealed interface SQL permits AbstractSQL {
   /**
    * Returns an {@code SQL} implementation that allows for named parameters and <i>Klojang
    * Templates</i> variables. The template variables may be set to strings that themselves
-   * again contain named parameters. These named parameters, too, will be picked up and
+   * again contain named parameters. These named parameters, too, will be detected and
    * extracted by <i>Klojang JDBC</i>.
    *
    * @param sql the SQL query string
@@ -125,7 +125,7 @@ public sealed interface SQL permits AbstractSQL {
   /**
    * Returns an {@code SQL} implementation that allows for named parameters and <i>Klojang
    * Templates</i> variables. The template variables may be set to strings that themselves
-   * again contain named parameters. These named parameters, too, will be picked up and
+   * again contain named parameters. These named parameters, too, will be detected and
    * extracted by <i>Klojang JDBC</i>.
    *
    * @param sql the SQL query string
@@ -147,9 +147,9 @@ public sealed interface SQL permits AbstractSQL {
    * since that implementation is not based on <i>Klojang Templates</i>.
    *
    * @param varName the name of the template variable
-   * @param value the value to set it to. If the value is an array or collection, it will
-   * be "imploded" to a string, using {@code ", " } to separate the elements in the array
-   * or collection.
+   * @param value the value to set the variable to. If the value is an array or
+   * collection, it will be "imploded" to a string, using {@code ", " } to separate the
+   * elements in the array or collection.
    * @return this {@code SQL} instance
    * @see org.klojang.templates.RenderSession#set(String, Object)
    */

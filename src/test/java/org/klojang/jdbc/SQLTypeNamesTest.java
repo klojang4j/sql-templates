@@ -2,7 +2,7 @@ package org.klojang.jdbc;
 
 import java.sql.Types;
 import org.junit.jupiter.api.Test;
-import org.klojang.jdbc.SQLTypeNames;
+import org.klojang.jdbc.x.SQLTypeNames;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

@@ -13,7 +13,7 @@ import java.sql.SQLException;
  */
 public class KlojangSQLException extends RuntimeException{
 
-  static KlojangSQLException wrap(Throwable exc, SQLInfo sqlInfo) {
+  public static KlojangSQLException wrap(Throwable exc, SQLInfo sqlInfo) {
     if (exc instanceof KlojangSQLException exc0) {
       return exc0;
     } else if (exc instanceof UncheckedException exc0) {

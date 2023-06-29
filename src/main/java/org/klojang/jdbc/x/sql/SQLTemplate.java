@@ -21,6 +21,7 @@ public final class SQLTemplate extends AbstractSQL {
 
   private final SQLNormalizer normalizer;
   private final Template template;
+
   private RenderSession session;
 
   public SQLTemplate(String sql, BindInfo bindInfo) {
@@ -51,9 +52,7 @@ public final class SQLTemplate extends AbstractSQL {
   }
 
   @Override
-  public void unlock() {
-    session = null;
-  }
+  void cleanup() {session = null;}
 
   @Override
   <T extends SQLStatement<?>> T prepare(Connection con, StatementFactory<T> constructor) {
@@ -61,7 +60,14 @@ public final class SQLTemplate extends AbstractSQL {
       session = template.newRenderSession();
     }
     Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));
-    return constructor.create(con, this, new SQLInfo(sql, session.render(), normalizer));
+    SQLInfo sqlInfo = new SQLInfo(sql, session.render(), normalizer);
+    lock();
+    try {
+      return constructor.create(con, this, sqlInfo);
+    } catch (Throwable t) {
+      unlock();
+      throw KlojangSQLException.wrap(t, sqlInfo);
+    }
   }
 
 }

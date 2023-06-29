@@ -93,16 +93,27 @@ public abstract sealed class AbstractSQL implements SQL
 <span class="nc" id="L93">    return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);</span>
   }
 
+  void lock() {
+<span class="fc" id="L97">    lock.lock();</span>
+<span class="fc" id="L98">  }</span>
 
-  public abstract void unlock();
+  public void unlock() {
+    try {
+<span class="fc" id="L102">      cleanup();</span>
+    } finally {
+<span class="fc" id="L104">      lock.unlock();</span>
+    }
+<span class="fc" id="L106">  }</span>
+
+  abstract void cleanup();
 
   abstract &lt;T extends SQLStatement&lt;?&gt;&gt; T prepare(
         Connection con,
         StatementFactory&lt;T&gt; constructor);
 
   static Supplier&lt;IllegalStateException&gt; sessionNotFinished(RenderSession session) {
-<span class="nc" id="L104">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
-<span class="nc" id="L105">    return illegalState(&quot;one or more variables have not been set yet: &quot; + unset);</span>
+<span class="nc" id="L115">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
+<span class="nc" id="L116">    return illegalState(&quot;one or more variables have not been set yet: &quot; + unset);</span>
   }
 
 }

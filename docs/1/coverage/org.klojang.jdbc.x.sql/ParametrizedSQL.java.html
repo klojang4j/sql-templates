@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParametrizedSQL.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.sql</a> &gt; <span class="el_source">ParametrizedSQL.java</span></div><h1>ParametrizedSQL.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.sql;
 
 import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.KlojangSQLException;
 import org.klojang.jdbc.SQL;
 import org.klojang.jdbc.SQLStatement;
 
@@ -11,21 +12,28 @@ public final class ParametrizedSQL extends AbstractSQL {
   private final SQLNormalizer normalizer;
 
   public ParametrizedSQL(String sql, BindInfo bindInfo) {
-<span class="fc" id="L14">    super(sql, bindInfo);</span>
-<span class="fc" id="L15">    this.normalizer = new SQLNormalizer(sql);</span>
-<span class="fc" id="L16">  }</span>
+<span class="fc" id="L15">    super(sql, bindInfo);</span>
+<span class="fc" id="L16">    this.normalizer = new SQLNormalizer(sql);</span>
+<span class="fc" id="L17">  }</span>
 
   @Override
   public SQL set(String varName, Object value) {
-<span class="nc" id="L20">    throw new UnsupportedOperationException();</span>
+<span class="nc" id="L21">    throw new UnsupportedOperationException();</span>
   }
 
   @Override
-<span class="fc" id="L24">  public void unlock() {}</span>
+<span class="fc" id="L25">  void cleanup() {}</span>
 
   @Override
   &lt;T extends SQLStatement&lt;?&gt;&gt; T prepare(Connection con, StatementFactory&lt;T&gt; constructor) {
-<span class="fc" id="L28">    return constructor.create(con, this, new SQLInfo(sql, normalizer));</span>
+<span class="fc" id="L29">    SQLInfo sqlInfo = new SQLInfo(sql, normalizer);</span>
+<span class="fc" id="L30">    lock();</span>
+    try {
+<span class="fc" id="L32">      return constructor.create(con, this, sqlInfo);</span>
+<span class="nc" id="L33">    } catch (Throwable t) {</span>
+<span class="nc" id="L34">      unlock();</span>
+<span class="nc" id="L35">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+    }
   }
 
 }

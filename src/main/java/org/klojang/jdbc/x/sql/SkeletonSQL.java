@@ -51,9 +51,7 @@ public final class SkeletonSQL extends AbstractSQL {
   }
 
   @Override
-  public void unlock() {
-    session = null;
-  }
+  void cleanup() {session = null;}
 
   @Override
   <T extends SQLStatement<?>> T prepare(Connection con, StatementFactory<T> constructor) {
@@ -62,6 +60,13 @@ public final class SkeletonSQL extends AbstractSQL {
     }
     Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));
     SQLNormalizer normalizer = new SQLNormalizer(session.render());
-    return constructor.create(con, this, new SQLInfo(sql, session.render(), normalizer));
+    SQLInfo sqlInfo = new SQLInfo(sql, session.render(), normalizer);
+    lock();
+    try {
+      return constructor.create(con, this, sqlInfo);
+    } catch (Throwable t) {
+      unlock();
+      throw KlojangSQLException.wrap(t, sqlInfo);
+    }
   }
 }

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.SQLTypeNames;
+import org.klojang.jdbc.x.SQLTypeNames;
 
 import static java.sql.Types.*;
 import static org.klojang.check.CommonChecks.keyIn;
