@@ -2,10 +2,8 @@
 
 import org.klojang.jdbc.x.sql.AbstractSQL;
 import org.klojang.jdbc.x.sql.ParametrizedSQL;
+import org.klojang.jdbc.x.sql.SQLSkeleton;
 import org.klojang.jdbc.x.sql.SQLTemplate;
-import org.klojang.jdbc.x.sql.SkeletonSQL;
-
-import java.sql.Connection;
 
 /**
  * &lt;p&gt;Encapsulates a user-provided SQL query string. The query string can be parametrized
@@ -62,188 +60,80 @@ import java.sql.Connection;
  * @see org.klojang.templates.Template
  */
 public sealed interface SQL permits AbstractSQL {
+    /**
+     * Returns an {@code SQL} implementation that allows for named parameters, but not for
+     * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
+     *
+     * @param sql the SQL query string
+     * @return an instance of an {@code SQL} implementation that behaves as described above
+     */
+    static SQL parametrized(String sql) {
+<span class="fc" id="L71">        return parametrized(sql, new BindInfo() {});</span>
+    }
 
-  /**
-   * Returns an {@code SQL} implementation that allows for named parameters, but not for
-   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
-   *
-   * @param sql the SQL query string
-   * @return an instance of an {@code SQL} implementation that behaves as described above
-   */
-  static SQL parametrized(String sql) {
-<span class="fc" id="L74">    return parametrized(sql, new BindInfo() {});</span>
-  }
+    /**
+     * Returns an {@code SQL} implementation that allows for named parameters, but not for
+     * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
+     *
+     * @param sql      the SQL query string
+     * @param bindInfo
+     * @return an instance of an {@code SQL} implementation that behaves as described above
+     */
+    static SQL parametrized(String sql, BindInfo bindInfo) {
+<span class="fc" id="L83">        return new ParametrizedSQL(sql, bindInfo);</span>
+    }
 
-  /**
-   * Returns an {@code SQL} implementation that allows for named parameters, but not for
-   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
-   *
-   * @param sql the SQL query string
-   * @param bindInfo
-   * @return an instance of an {@code SQL} implementation that behaves as described above
-   */
-  static SQL parametrized(String sql, BindInfo bindInfo) {
-<span class="fc" id="L86">    return new ParametrizedSQL(sql, bindInfo);</span>
-  }
+    /**
+     * Returns an {@code SQL} implementation that allows for named parameters and &lt;i&gt;Klojang
+     * Templates&lt;/i&gt; variables.
+     *
+     * @param sql the SQL query string
+     * @return an instance of an {@code SQL} implementation that behaves as described above
+     */
+    static SQL template(String sql) {
+<span class="nc" id="L94">        return template(sql, new BindInfo() {});</span>
+    }
 
-  /**
-   * Returns an {@code SQL} implementation that allows for named parameters and &lt;i&gt;Klojang
-   * Templates&lt;/i&gt; variables.
-   *
-   * @param sql the SQL query string
-   * @return an instance of an {@code SQL} implementation that behaves as described above
-   */
-  static SQL template(String sql) {
-<span class="nc" id="L97">    return template(sql, new BindInfo() {});</span>
-  }
+    /**
+     * Returns an {@code SQL} implementation that allows for named parameters and &lt;i&gt;Klojang
+     * Templates&lt;/i&gt; variables.
+     *
+     * @param sql      the SQL query string
+     * @param bindInfo
+     * @return an instance of an {@code SQL} implementation that behaves as described above
+     */
+    static SQL template(String sql, BindInfo bindInfo) {
+<span class="nc" id="L106">        return new SQLTemplate(sql, bindInfo);</span>
+    }
 
-  /**
-   * Returns an {@code SQL} implementation that allows for named parameters and &lt;i&gt;Klojang
-   * Templates&lt;/i&gt; variables.
-   *
-   * @param sql the SQL query string
-   * @param bindInfo
-   * @return an instance of an {@code SQL} implementation that behaves as described above
-   */
-  static SQL template(String sql, BindInfo bindInfo) {
-<span class="nc" id="L109">    return new SQLTemplate(sql, bindInfo);</span>
-  }
+    /**
+     * Returns an {@code SQL} implementation that allows for named parameters and &lt;i&gt;Klojang
+     * Templates&lt;/i&gt; variables. The template variables may be set to strings that themselves
+     * again contain named parameters. These named parameters, too, will be detected and
+     * extracted by &lt;i&gt;Klojang JDBC&lt;/i&gt;.
+     *
+     * @param sql the SQL query string
+     * @return an instance of an {@code SQL} implementation that behaves as described above
+     */
+    static SQL skeleton(String sql) {
+<span class="nc" id="L119">        return skeleton(sql, new BindInfo() {});</span>
+    }
 
-  /**
-   * Returns an {@code SQL} implementation that allows for named parameters and &lt;i&gt;Klojang
-   * Templates&lt;/i&gt; variables. The template variables may be set to strings that themselves
-   * again contain named parameters. These named parameters, too, will be detected and
-   * extracted by &lt;i&gt;Klojang JDBC&lt;/i&gt;.
-   *
-   * @param sql the SQL query string
-   * @return an instance of an {@code SQL} implementation that behaves as described above
-   */
-  static SQL skeleton(String sql) {
-<span class="nc" id="L122">    return skeleton(sql, new BindInfo() {});</span>
-  }
+    /**
+     * Returns an {@code SQL} implementation that allows for named parameters and &lt;i&gt;Klojang
+     * Templates&lt;/i&gt; variables. The template variables may be set to strings that themselves
+     * again contain named parameters. These named parameters, too, will be detected and
+     * extracted by &lt;i&gt;Klojang JDBC&lt;/i&gt;.
+     *
+     * @param sql      the SQL query string
+     * @param bindInfo
+     * @return an instance of an {@code SQL} implementation that behaves as described above
+     */
+    static SQL skeleton(String sql, BindInfo bindInfo) {
+<span class="nc" id="L133">        return new SQLSkeleton(sql, bindInfo);</span>
+    }
 
-  /**
-   * Returns an {@code SQL} implementation that allows for named parameters and &lt;i&gt;Klojang
-   * Templates&lt;/i&gt; variables. The template variables may be set to strings that themselves
-   * again contain named parameters. These named parameters, too, will be detected and
-   * extracted by &lt;i&gt;Klojang JDBC&lt;/i&gt;.
-   *
-   * @param sql the SQL query string
-   * @param bindInfo
-   * @return an instance of an {@code SQL} implementation that behaves as described above
-   */
-  static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L136">    return new SkeletonSQL(sql, bindInfo);</span>
-  }
+    SQLSession newSession();
 
-  static SQLInsertBuilder prepareInsert() {
-<span class="fc" id="L140">    return new SQLInsertBuilder();</span>
-  }
-
-  /**
-   * Sets the value of a &lt;i&gt;Klojang Templates&lt;/i&gt; variable within a SQL template. This
-   * method will throw an {@link UnsupportedOperationException} for the {@code SQL}
-   * implementation returned by the {@link #parametrized(String) parametrized()} methods
-   * since that implementation is not based on &lt;i&gt;Klojang Templates&lt;/i&gt;.
-   *
-   * @param varName the name of the template variable
-   * @param value the value to set the variable to. If the value is an array or
-   * collection, it will be &quot;imploded&quot; to a string, using {@code &quot;, &quot; } to separate the
-   * elements in the array or collection.
-   * @return this {@code SQL} instance
-   * @see org.klojang.templates.RenderSession#set(String, Object)
-   */
-  SQL set(String varName, Object value);
-
-  /**
-   * Sets a &lt;i&gt;Klojang Templates&lt;/i&gt; variable name &quot;sortColumn&quot; to the specified value.
-   * This presumes and requires that the SQL template indeed contains a variable with that
-   * name. This is a convenience method facilitating the most common use case for
-   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables: setting the column(s) in the ORDER BY clause
-   *
-   * @param sortColumn the column(s) to sort on
-   * @return this {@code SQL} instance
-   */
-  default SQL setSortColumn(Object sortColumn) {
-<span class="nc" id="L168">    return set(&quot;sortColumn&quot;, sortColumn);</span>
-  }
-
-  /**
-   * Sets a &lt;i&gt;Klojang Templates&lt;/i&gt; variable name &quot;sortOrder&quot; to the specified value.
-   * This presumes and requires that the SQL template indeed contains a variable with that
-   * name. The provided value supposedly is either &quot;ASC&quot; or &quot;DESC&quot;. The value may also be
-   * a boolean, in which case {@code true} is translated into &quot;DESC&quot; and {@code false}
-   * into &quot;ASC&quot;. This is a convenience method facilitating the most common use case for
-   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables: setting the sort order for the column(s) in the
-   * ORDER BY clause.
-   *
-   * @param sortOrder the sort order
-   * @return this {@code SQL} instance
-   */
-  default SQL setSortOrder(Object sortOrder) {
-<span class="nc bnc" id="L184" title="All 2 branches missed.">    return (sortOrder instanceof Boolean)</span>
-<span class="nc" id="L185">          ? setDescending((Boolean) sortOrder)</span>
-<span class="nc" id="L186">          : set(&quot;sortOrder&quot;, sortOrder);</span>
-  }
-
-  /**
-   * Sets a &lt;i&gt;Klojang Templates&lt;/i&gt; variable name &quot;sortOrder&quot; to &quot;DESC&quot; if the argument
-   * equals {@code true}, else to &quot;ASC&quot;.
-   *
-   * @param isDescending whether to sort in descending order
-   * @return this {@code SQL} instance
-   */
-  default SQL setDescending(boolean isDescending) {
-<span class="nc bnc" id="L197" title="All 2 branches missed.">    return set(&quot;sortOrder&quot;, isDescending ? &quot;DESC&quot; : &quot;ASC&quot;);</span>
-  }
-
-  /**
-   * Sets the components of an ORDER BY clause.
-   *
-   * @param sortColumn the column to sort on
-   * @param sortOrder the sort order
-   * @return this {@code SQL} instance
-   */
-  default SQL setOrderBy(Object sortColumn, Object sortOrder) {
-<span class="nc" id="L208">    return setSortColumn(sortColumn).setSortOrder(sortOrder);</span>
-  }
-
-  /**
-   * Sets the components of an ORDER BY clause.
-   *
-   * @param sortColumn the column to sort on
-   * @param isDescending whether to sort in descending order
-   * @return this {@code SQL} instance
-   */
-  default SQL setOrderBy(Object sortColumn, boolean isDescending) {
-<span class="nc" id="L219">    return setSortColumn(sortColumn).setDescending(isDescending);</span>
-  }
-
-  /**
-   * Returns a {@code SQLQuery} instance that allows you to provide values for named
-   * parameters (&quot;binding&quot;) and then execute the query.
-   *
-   * @param con the JDBC connection to use for the query
-   * @return a {@code SQLQuery} instance
-   */
-  SQLQuery prepareQuery(Connection con);
-
-  /**
-   * Returns a {@code SQLInsert} instance that allows you to provide values for named
-   * parameters (&quot;binding&quot;) and then execute the INSERT statement.
-   *
-   * @param con the JDBC connection to use for the query
-   * @return a {@code SQLInsert} instance
-   */
-  SQLInsert prepareInsert(Connection con);
-
-  /**
-   * Returns a {@code SQLUpdate} instance that allows you to provide values for named
-   * parameters (&quot;binding&quot;) and then execute the UPDATE or DELETE statement.
-   *
-   * @param con the JDBC connection to use for the query
-   * @return a {@code SQLUpdate} instance
-   */
-  SQLUpdate prepareUpdate(Connection con);
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -7,40 +7,42 @@ import java.util.Map;
 
 public final class SQLInfo {
 
-  private final String unparsedSQL;
-  private final String normalizedSQL;
-  private final String jdbcSQL;
-  private final List&lt;NamedParameter&gt; parameters;
-  private final Map&lt;String, IntList&gt; parameterPositions;
+    private final String normalizedSQL;
+    private final String jdbcSQL;
+    private final List&lt;NamedParameter&gt; parameters;
+    private final Map&lt;String, IntList&gt; parameterPositions;
 
-<span class="fc" id="L16">  SQLInfo(String unparsedSQL, SQLNormalizer normalizer) {</span>
-<span class="fc" id="L17">    this.unparsedSQL = unparsedSQL;</span>
-<span class="fc" id="L18">    this.normalizedSQL = normalizer.getNormalizedSQL();</span>
-<span class="fc" id="L19">    this.jdbcSQL = normalizer.getNormalizedSQL();</span>
-<span class="fc" id="L20">    this.parameters = normalizer.getParameters();</span>
-<span class="fc" id="L21">    this.parameterPositions = normalizer.getParameterPositions();</span>
-<span class="fc" id="L22">  }</span>
+<span class="fc" id="L15">    SQLInfo(SQLNormalizer normalizer) {</span>
+<span class="fc" id="L16">        this.normalizedSQL = normalizer.getNormalizedSQL();</span>
+<span class="fc" id="L17">        this.jdbcSQL = normalizer.getNormalizedSQL();</span>
+<span class="fc" id="L18">        this.parameters = normalizer.getParameters();</span>
+<span class="fc" id="L19">        this.parameterPositions = normalizer.getParameterPositions();</span>
+<span class="fc" id="L20">    }</span>
 
-<span class="nc" id="L24">  SQLInfo(String unparsedSQL, String jdbcSQL, SQLNormalizer normalizer) {</span>
-<span class="nc" id="L25">    this.unparsedSQL = unparsedSQL;</span>
-<span class="nc" id="L26">    this.normalizedSQL = normalizer.getNormalizedSQL();</span>
-<span class="nc" id="L27">    this.jdbcSQL = jdbcSQL;</span>
-<span class="nc" id="L28">    this.parameters = normalizer.getParameters();</span>
-<span class="nc" id="L29">    this.parameterPositions = normalizer.getParameterPositions();</span>
-<span class="nc" id="L30">  }</span>
+<span class="nc" id="L22">    SQLInfo(String jdbcSQL, SQLNormalizer normalizer) {</span>
+<span class="nc" id="L23">        this.normalizedSQL = normalizer.getNormalizedSQL();</span>
+<span class="nc" id="L24">        this.jdbcSQL = jdbcSQL;</span>
+<span class="nc" id="L25">        this.parameters = normalizer.getParameters();</span>
+<span class="nc" id="L26">        this.parameterPositions = normalizer.getParameterPositions();</span>
+<span class="nc" id="L27">    }</span>
 
-<span class="nc" id="L32">  public String unparsedSQL() {return unparsedSQL;}</span>
 
-<span class="nc" id="L34">  public String normalizedSQL() {return normalizedSQL;}</span>
+    public String normalizedSQL() {
+<span class="nc" id="L31">        return normalizedSQL;</span>
+    }
 
-<span class="fc" id="L36">  public String jdbcSQL() {return jdbcSQL;}</span>
+    public String jdbcSQL() {
+<span class="fc" id="L35">        return jdbcSQL;</span>
+    }
 
-<span class="fc" id="L38">  public List&lt;NamedParameter&gt; parameters() {return parameters;}</span>
+    public List&lt;NamedParameter&gt; parameters() {
+<span class="fc" id="L39">        return parameters;</span>
+    }
 
-<span class="nc" id="L40">  public Map&lt;String, IntList&gt; parameterPositions() {return parameterPositions;}</span>
+    public Map&lt;String, IntList&gt; parameterPositions() {
+<span class="nc" id="L43">        return parameterPositions;</span>
+    }
 
-  @Override
-<span class="nc" id="L43">  public String toString() {return unparsedSQL;}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

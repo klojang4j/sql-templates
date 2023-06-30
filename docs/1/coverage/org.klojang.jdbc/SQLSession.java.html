@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLSession.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLSession.java</span></div><h1>SQLSession.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.jdbc.x.sql.AbstractSQLSession;
+
+import java.sql.Connection;
+
+/**
+ * An {@code SQLSession} is used to execute the SQL encapsulated in an {@link SQL} object.
+ * Their main purpose is to allow the user to set SQL template variables.
+ */
+public sealed interface SQLSession permits AbstractSQLSession {
+
+  /**
+   * Sets the value of a &lt;i&gt;Klojang Templates&lt;/i&gt; variable within a SQL template. This
+   * method will throw an {@link UnsupportedOperationException} for
+   * {@link SQL#parametrized(String) SQL.parametrized()} sessions since these are not
+   * based on &lt;i&gt;Klojang Templates&lt;/i&gt;.
+   *
+   * @param varName the name of the template variable
+   * @param value the value to set the variable to. If the value is an array or
+   *     collection, it will be &quot;imploded&quot; to a string, using {@code &quot;, &quot; } to separate
+   *     the elements in the array or collection.
+   * @return this {@code SQL} instance
+   * @see org.klojang.templates.RenderSession#set(String, Object)
+   */
+  SQLSession set(String varName, Object value);
+
+  /**
+   * Sets a &lt;i&gt;Klojang Templates&lt;/i&gt; variable name &quot;sortColumn&quot; to the specified value.
+   * This presumes and requires that the SQL template indeed contains a variable with that
+   * name. This is a convenience method facilitating the most common use case for
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables: setting the column(s) in the ORDER BY clause
+   *
+   * @param sortColumn the column(s) to sort on
+   * @return this {@code SQL} instance
+   */
+  default SQLSession setSortColumn(Object sortColumn) {
+<span class="nc" id="L38">    return set(&quot;sortColumn&quot;, sortColumn);</span>
+  }
+
+  /**
+   * Sets a &lt;i&gt;Klojang Templates&lt;/i&gt; variable name &quot;sortOrder&quot; to the specified value.
+   * This presumes and requires that the SQL template indeed contains a variable with that
+   * name. The provided value supposedly is either &quot;ASC&quot; or &quot;DESC&quot;. The value may also be
+   * a boolean, in which case {@code true} is translated into &quot;DESC&quot; and {@code false}
+   * into &quot;ASC&quot;. This is a convenience method facilitating the most common use case for
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables: setting the sort order for the column(s) in the
+   * ORDER BY clause.
+   *
+   * @param sortOrder the sort order
+   * @return this {@code SQL} instance
+   */
+  default SQLSession setSortOrder(Object sortOrder) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">    return (sortOrder instanceof Boolean)</span>
+<span class="nc" id="L55">        ? setDescending((Boolean) sortOrder)</span>
+<span class="nc" id="L56">        : set(&quot;sortOrder&quot;, sortOrder);</span>
+  }
+
+  /**
+   * Sets a &lt;i&gt;Klojang Templates&lt;/i&gt; variable name &quot;sortOrder&quot; to &quot;DESC&quot; if the argument
+   * equals {@code true}, else to &quot;ASC&quot;.
+   *
+   * @param isDescending whether to sort in descending order
+   * @return this {@code SQL} instance
+   */
+  default SQLSession setDescending(boolean isDescending) {
+<span class="nc bnc" id="L67" title="All 2 branches missed.">    return set(&quot;sortOrder&quot;, isDescending ? &quot;DESC&quot; : &quot;ASC&quot;);</span>
+  }
+
+  /**
+   * Sets the components of an ORDER BY clause.
+   *
+   * @param sortColumn the column to sort on
+   * @param sortOrder the sort order
+   * @return this {@code SQL} instance
+   */
+  default SQLSession setOrderBy(Object sortColumn, Object sortOrder) {
+<span class="nc" id="L78">    return setSortColumn(sortColumn).setSortOrder(sortOrder);</span>
+  }
+
+  /**
+   * Sets the components of an ORDER BY clause.
+   *
+   * @param sortColumn the column to sort on
+   * @param isDescending whether to sort in descending order
+   * @return this {@code SQL} instance
+   */
+  default SQLSession setOrderBy(Object sortColumn, boolean isDescending) {
+<span class="nc" id="L89">    return setSortColumn(sortColumn).setDescending(isDescending);</span>
+  }
+
+  /**
+   * Returns a {@code SQLQuery} instance that allows you to provide values for named
+   * parameters (&quot;binding&quot;) and then execute the query.
+   *
+   * @param con the JDBC connection to use for the query
+   * @return a {@code SQLQuery} instance
+   */
+  SQLQuery prepareQuery(Connection con);
+
+  /**
+   * Returns a {@code SQLInsert} instance that allows you to provide values for named
+   * parameters (&quot;binding&quot;) and then execute the INSERT statement.
+   *
+   * @param con the JDBC connection to use for the query
+   * @return a {@code SQLInsert} instance
+   */
+  SQLInsert prepareInsert(Connection con);
+
+  /**
+   * Returns a {@code SQLUpdate} instance that allows you to provide values for named
+   * parameters (&quot;binding&quot;) and then execute the UPDATE or DELETE statement.
+   *
+   * @param con the JDBC connection to use for the query
+   * @return a {@code SQLUpdate} instance
+   */
+  SQLUpdate prepareUpdate(Connection con);
+
+  static SQLInsertBuilder prepareInsert() {
+<span class="fc" id="L120">    return new SQLInsertBuilder();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

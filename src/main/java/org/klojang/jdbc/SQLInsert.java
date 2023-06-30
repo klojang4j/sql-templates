@@ -3,7 +3,7 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
-import org.klojang.jdbc.x.sql.AbstractSQL;
+import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
   private PreparedStatement ps;
   private boolean generateKeys;
 
-  public SQLInsert(Connection conn, AbstractSQL sql, SQLInfo sqlInfo) {
+  public SQLInsert(Connection conn, AbstractSQLSession sql, SQLInfo sqlInfo) {
     super(conn, sql, sqlInfo);
     this.keys = new ArrayList<>(5);
   }

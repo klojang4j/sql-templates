@@ -1,9 +1,9 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.x.rs.ColumnReaderFinder;
 import org.klojang.jdbc.x.rs.ColumnReader;
-import org.klojang.jdbc.x.sql.AbstractSQL;
+import org.klojang.jdbc.x.rs.ColumnReaderFinder;
+import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.NameMapper;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
   private PreparedStatement ps;
   private ResultSet rs;
 
-  public SQLQuery(Connection con, AbstractSQL sql, SQLInfo sqlInfo) {
+  public SQLQuery(Connection con, AbstractSQLSession sql, SQLInfo sqlInfo) {
     super(con, sql, sqlInfo);
   }
 
@@ -39,7 +39,7 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * names <i>to</i> bean properties (or map keys).
    *
    * @param columnMapper The {@code NameMapper} to be used when mapping column names to
-   * bean properties or map keys.
+   *                     bean properties or map keys.
    * @return This {@code SQLQuery} instance
    */
   public SQLQuery withMapper(NameMapper columnMapper) {
@@ -67,7 +67,7 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * {@link KlojangSQLException} if the query returned zero rows or if there are no more rows
    * in the {@code ResultSet}.
    *
-   * @param <T> The type of the value to be returned
+   * @param <T>   The type of the value to be returned
    * @param clazz The class of the value to be returned
    * @return The value of the first column in the first row
    * @throws KlojangSQLException If the query returned zero rows
@@ -76,8 +76,9 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
     ResultSet rs = executeAndNext();
     try {
       int sqlType = rs.getMetaData().getColumnType(1);
-      ColumnReader<?, T> emitter = ColumnReaderFinder.getInstance().findReader(clazz,
-            sqlType);
+      ColumnReader<?, T> emitter = ColumnReaderFinder.getInstance().findReader(
+          clazz,
+          sqlType);
       return emitter.getValue(rs, 1, clazz);
     } catch (Throwable t) {
       throw KlojangSQLException.wrap(t, sqlInfo);
@@ -122,7 +123,7 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * Returns a {@code List} of the all values in the first column. Equivalent to
    * {@code getList(clazz, 10)}.
    *
-   * @param <T> The desired type of the values
+   * @param <T>   The desired type of the values
    * @param clazz The desired class of the values
    * @return A {@code List} of the values of the first column in the rows selected by the
    * query
@@ -135,8 +136,8 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * Returns a {@code List} of the all values in the first column. In other words, this
    * method will exhaust the {@link ResultSet}.
    *
-   * @param <T> The desired type of the values
-   * @param clazz The desired class of the values
+   * @param <T>          The desired type of the values
+   * @param clazz        The desired class of the values
    * @param expectedSize The expected number of rows
    * @return A {@code List} of the values of the first column in the rows selected by the
    * query
@@ -148,8 +149,9 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
         return Collections.emptyList();
       }
       int sqlType = rs.getMetaData().getColumnType(1);
-      ColumnReader<?, T> extractor = ColumnReaderFinder.getInstance().findReader(clazz,
-            sqlType);
+      ColumnReader<?, T> extractor = ColumnReaderFinder.getInstance().findReader(
+          clazz,
+          sqlType);
       List<T> list = new ArrayList<>(expectedSize);
       do {
         list.add(extractor.getValue(rs, 1, clazz));
@@ -169,7 +171,8 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public ResultSetMappifier getMappifier() {
     try {
-      return sql.getMappifierFactory(mapper).getResultSetMappifier(rs());
+      return session.getSQL().getMappifierFactory(mapper).getResultSetMappifier(
+          rs());
     } catch (Throwable t) {
       throw KlojangSQLException.wrap(t, sqlInfo);
     }
@@ -179,14 +182,15 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * Executes the query and returns a {@code ResultSetBeanifier} that you can use to
    * convert the rows in the {@link ResultSet} into JavaBeans.
    *
-   * @param <T> The type of the JavaBeans
+   * @param <T>       The type of the JavaBeans
    * @param beanClass The class of the JavaBeans
    * @return A {@code ResultSetBeanifier} that you can use to convert the rows in the
    * {@link ResultSet} into JavaBeans.
    */
   public <T> ResultSetBeanifier<T> getBeanifier(Class<T> beanClass) {
     try {
-      return sql.getBeanifierFactory(beanClass, mapper).getBeanifier(rs());
+      return session.getSQL().getBeanifierFactory(beanClass, mapper).getBeanifier(
+          rs());
     } catch (Throwable t) {
       throw KlojangSQLException.wrap(t, sqlInfo);
     }
@@ -196,16 +200,18 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * Executes the query and returns a {@code ResultSetBeanifier} that you can use to
    * convert the rows in the {@link ResultSet} into JavaBeans.
    *
-   * @param <T> The type of the JavaBeans
-   * @param beanClass The class of the JavaBeans
+   * @param <T>          The type of the JavaBeans
+   * @param beanClass    The class of the JavaBeans
    * @param beanSupplier The supplier of the JavaBean instances
    * @return A {@code ResultSetBeanifier} that you can use to convert the rows in the
    * {@link ResultSet} into JavaBeans.
    */
   public <T> ResultSetBeanifier<T> getBeanifier(Class<T> beanClass,
-        Supplier<T> beanSupplier) {
+                                                Supplier<T> beanSupplier) {
     try {
-      return sql.getBeanifierFactory(beanClass, beanSupplier, mapper).getBeanifier(rs());
+      return session.getSQL()
+          .getBeanifierFactory(beanClass, beanSupplier, mapper)
+          .getBeanifier(rs());
     } catch (Throwable t) {
       throw KlojangSQLException.wrap(t, sqlInfo);
     }

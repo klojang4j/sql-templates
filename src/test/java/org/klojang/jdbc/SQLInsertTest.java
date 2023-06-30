@@ -2,7 +2,6 @@ package org.klojang.jdbc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.klojang.util.IOMethods;
 
@@ -93,7 +92,7 @@ public class SQLInsertTest {
   public void test01() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = Collections.singletonMap("name", "John");
-    SQL sql = SQL.parametrized(s);
+    SQLSession sql = SQL.parametrized(s).newSession();
     long id = Long.MIN_VALUE;
     try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
       insert.bind(data);
@@ -106,7 +105,7 @@ public class SQLInsertTest {
   public void test02() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
-    SQL sql = SQL.parametrized(s);
+    SQLSession sql = SQL.parametrized(s).newSession();
     long id = Long.MIN_VALUE;
     try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
       insert.bind(person);
@@ -119,7 +118,7 @@ public class SQLInsertTest {
   public void test03() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = new HashMap<>(Collections.singletonMap("name", "John"));
-    SQL sql = SQL.parametrized(s);
+    SQLSession sql = SQL.parametrized(s).newSession();
     try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
       insert.bind(data, "id");
       insert.execute();
@@ -132,7 +131,7 @@ public class SQLInsertTest {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
-    SQL sql = SQL.parametrized(s);
+    SQLSession sql = SQL.parametrized(s).newSession();
     try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
       insert.bind(person, "id");
       insert.execute();
@@ -145,7 +144,7 @@ public class SQLInsertTest {
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
     try (SQLInsert insert =
-               SQL.prepareInsert().of(Person.class).into("TEST").excluding("id").prepare(
+               SQLSession.prepareInsert().of(Person.class).into("TEST").excluding("id").prepare(
                      MY_CON.get())) {
       insert.bind(person, "id");
       insert.execute();

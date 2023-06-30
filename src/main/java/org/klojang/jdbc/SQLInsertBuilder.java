@@ -66,6 +66,7 @@ public class SQLInsertBuilder {
 
   /**
    * Sets the {@link BindInfo} object to be used.
+   *
    * @param bindInfo
    * @return this {@code SQLInsertBuilder}
    */
@@ -98,14 +99,14 @@ public class SQLInsertBuilder {
     String table = ifNull(tableName, beanClass.getSimpleName());
     StringBuilder sb = new StringBuilder(100);
     append(sb, "INSERT INTO ", table, " (", cols, ") VALUES(", params, ")");
-    SQL sql = SQL.parametrized(sb.toString(), bindInfo);
+    SQLSession sql = SQL.parametrized(sb.toString(), bindInfo).newSession();
     return sql.prepareInsert(con);
   }
 
   private ObjectCheck<String, IllegalStateException> checkProperty(Set<String> props,
-        String prop) {
+                                                                   String prop) {
     return Check.on(STATE, prop)
-          .isNot(empty(), "empty property name not allowed")
-          .is(in(), props, "no such property in %s: %s", beanClass.getSimpleName(), prop);
+        .isNot(empty(), "empty property name not allowed")
+        .is(in(), props, "no such property in %s: %s", beanClass.getSimpleName(), prop);
   }
 }

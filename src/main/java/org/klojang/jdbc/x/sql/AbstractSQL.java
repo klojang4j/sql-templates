@@ -1,57 +1,42 @@
 package org.klojang.jdbc.x.sql;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.*;
+import org.klojang.jdbc.BeanifierFactory;
+import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.MappifierFactory;
+import org.klojang.jdbc.SQL;
 import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.templates.NameMapper;
-import org.klojang.templates.RenderSession;
-import org.klojang.util.CollectionMethods;
 import org.klojang.util.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-import static org.klojang.check.CommonExceptions.illegalState;
-
 public abstract sealed class AbstractSQL implements SQL
-      permits ParametrizedSQL, SQLTemplate, SkeletonSQL {
-  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQL.class);
+    permits ParametrizedSQL, SQLTemplate, SQLSkeleton {
 
-  interface StatementFactory<T extends SQLStatement> {
-    T create(Connection con, AbstractSQL sql, SQLInfo sqlInfo);
-  }
-
-  private final ReentrantLock lock = new ReentrantLock();
+  @SuppressWarnings({"unused"})
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);
 
   private final Map<Class<?>, BeanBinder<?>> beanBinders = new HashMap<>(4);
   private final Map<Tuple2<Class<?>, NameMapper>, BeanifierFactory<?>> beanifiers =
-        new HashMap<>(4);
+      new HashMap<>(4);
   private final Map<NameMapper, MappifierFactory> mappifiers = new HashMap<>(4);
 
 
-  final String sql;
-  final BindInfo bindInfo;
+  private final String unparsedSQL;
+  private final BindInfo bindInfo;
 
   public AbstractSQL(String sql, BindInfo bindInfo) {
-    this.sql = Check.notNull(sql, "sql").ok();
+    this.unparsedSQL = sql;
     this.bindInfo = Check.notNull(bindInfo, "bindInfo").ok();
   }
 
-  public SQLQuery prepareQuery(Connection con) {
-    return prepare(con, SQLQuery::new);
-  }
-
-  public SQLInsert prepareInsert(Connection con) {
-    return prepare(con, SQLInsert::new);
-  }
-
-  public SQLUpdate prepareUpdate(Connection con) {
-    return prepare(con, SQLUpdate::new);
+  public String getUnparsedSQL() {
+    return unparsedSQL;
   }
 
   public BindInfo getBindInfo() {
@@ -67,7 +52,6 @@ public abstract sealed class AbstractSQL implements SQL
     return binder;
   }
 
-
   @SuppressWarnings("unchecked")
   public <T> BeanifierFactory<T> getBeanifierFactory(Class<T> clazz, NameMapper mapper) {
     Tuple2<Class<?>, NameMapper> key = Tuple2.of(clazz, mapper);
@@ -80,7 +64,7 @@ public abstract sealed class AbstractSQL implements SQL
 
   @SuppressWarnings("unchecked")
   public <T> BeanifierFactory<T> getBeanifierFactory(
-        Class<T> clazz, Supplier<T> supplier, NameMapper mapper) {
+      Class<T> clazz, Supplier<T> supplier, NameMapper mapper) {
     Tuple2<Class<?>, NameMapper> key = Tuple2.of(clazz, mapper);
     BeanifierFactory<T> bf = (BeanifierFactory<T>) beanifiers.get(key);
     if (bf == null) {
@@ -91,29 +75,6 @@ public abstract sealed class AbstractSQL implements SQL
 
   public MappifierFactory getMappifierFactory(NameMapper mapper) {
     return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);
-  }
-
-  void lock() {
-    lock.lock();
-  }
-
-  public void unlock() {
-    try {
-      cleanup();
-    } finally {
-      lock.unlock();
-    }
-  }
-
-  abstract void cleanup();
-
-  abstract <T extends SQLStatement<?>> T prepare(
-        Connection con,
-        StatementFactory<T> constructor);
-
-  static Supplier<IllegalStateException> sessionNotFinished(RenderSession session) {
-    String unset = CollectionMethods.implode(session.getAllUnsetVariables());
-    return illegalState("one or more variables have not been set yet: " + unset);
   }
 
 }

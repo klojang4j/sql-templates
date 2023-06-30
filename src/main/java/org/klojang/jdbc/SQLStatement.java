@@ -3,7 +3,7 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.ps.MapBinder;
-import org.klojang.jdbc.x.sql.AbstractSQL;
+import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.klojang.jdbc.x.sql.SQLInfo;
 
@@ -18,21 +18,21 @@ import static org.klojang.util.CollectionMethods.collectionToList;
 /**
  * Abstract base class for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate}.
  *
- * @param <T> the {@code SQLStatement} subtype returned by various methods in the fluent
- * API.
+ * @param <T> the {@code SQLStatement} subtype returned by various methods in the
+ *     fluent API.
  */
 public abstract class SQLStatement<T extends SQLStatement<T>> implements AutoCloseable {
 
   final Connection con;
-  final AbstractSQL sql;
+  final AbstractSQLSession session;
   final SQLInfo sqlInfo;
   final List<Object> bindables;
 
   private final Set<NamedParameter> bound;
 
-  SQLStatement(Connection con, AbstractSQL sql, SQLInfo sqlInfo) {
+  SQLStatement(Connection con, AbstractSQLSession session, SQLInfo sqlInfo) {
     this.con = con;
-    this.sql = sql;
+    this.session = session;
     this.sqlInfo = sqlInfo;
     this.bindables = new ArrayList<>(5);
     this.bound = HashSet.newHashSet(sqlInfo.parameters().size());
@@ -50,7 +50,7 @@ public abstract class SQLStatement<T extends SQLStatement<T>> implements AutoClo
    * be bound back into the bean or {@code Map}, just call {@link #bind(Object)}.
    *
    * @param bean The bean whose values to bind to the named parameters within the SQL
-   * statement
+   *     statement
    * @return This {@code SQLInsert} instance
    */
   @SuppressWarnings("unchecked")
@@ -68,22 +68,21 @@ public abstract class SQLStatement<T extends SQLStatement<T>> implements AutoClo
   @SuppressWarnings("unchecked")
   public T bind(String param, Object value) {
     Check.notNull(param, "param")
-          .is(keyIn(), sqlInfo.parameterPositions(), "no such parameter: \"%s\"", param);
+        .is(keyIn(), sqlInfo.parameterPositions(), "no such parameter: \"%s\"", param);
     bindables.add(Collections.singletonMap(param, value));
     return (T) this;
   }
-
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   <U> void applyBindings(PreparedStatement ps) throws Throwable {
     for (Object obj : bindables) {
       if (obj instanceof Map map) {
         MapBinder binder = new MapBinder(
-              sqlInfo.parameters(),
-              sql.getBindInfo());
+            sqlInfo.parameters(),
+            session.getSQL().getBindInfo());
         binder.bindMap(map, ps, bound);
       } else {
-        BeanBinder binder = sql.getBeanBinder(obj.getClass(), sqlInfo);
+        BeanBinder binder = session.getSQL().getBeanBinder(obj.getClass(), sqlInfo);
         binder.bind(obj, ps);
         bound.addAll(binder.getBoundParameters());
       }
@@ -94,16 +93,12 @@ public abstract class SQLStatement<T extends SQLStatement<T>> implements AutoClo
   }
 
   void close(PreparedStatement ps) {
-    try {
-      if (ps != null) {
-        try {
-          ps.close();
-        } catch (SQLException e) {
-          throw KlojangSQLException.wrap(e, sqlInfo);
-        }
+    if (ps != null) {
+      try {
+        ps.close();
+      } catch (SQLException e) {
+        throw KlojangSQLException.wrap(e, sqlInfo);
       }
-    } finally {
-      sql.unlock();
     }
   }
 
