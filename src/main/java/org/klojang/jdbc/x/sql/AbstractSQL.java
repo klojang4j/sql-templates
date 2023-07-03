@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public abstract sealed class AbstractSQL implements SQL
-    permits ParametrizedSQL, SQLTemplate, SQLSkeleton {
+    permits BasicSQL, SQLTemplate, SQLSkeleton {
 
   @SuppressWarnings({"unused"})
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);

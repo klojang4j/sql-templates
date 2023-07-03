@@ -7,7 +7,7 @@ import org.klojang.util.ExceptionMethods;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
-public class SQLUpdate extends SQLStatement<SQLUpdate> {
+public final class SQLUpdate extends SQLStatement<SQLUpdate> {
 
   private PreparedStatement ps;
 

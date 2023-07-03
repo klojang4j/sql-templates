@@ -13,83 +13,86 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static org.klojang.check.Check.fail;
-import static org.klojang.check.CommonChecks.blank;
 import static org.klojang.check.CommonChecks.ne;
+import static org.klojang.check.CommonProperties.strlen;
 import static org.klojang.util.CollectionMethods.collectionToList;
 
 /*
  * Extracts named parameters from a SQL query string and replaces them with positional
  * parameters (question marks).
- *
  */
-public final class SQLNormalizer {
+final class SQLNormalizer {
 
   private static final String ERR_ADJACENT_PARAMS =
-        "adjacent parameters at positions ${0} and ${1} cannot yield valid SQL";
+      "adjacent parameters at positions ${0} and ${1} cannot yield valid SQL";
   private static final String ERR_EMPTY_NAME =
-        "zero-length parameter name at position ${0}";
+      "zero-length parameter name at position ${0}";
+
+  private static final char QUOTE = '\'';
+  private static final char COLON = ':';
+  private static final char BACKSLASH = '\\';
 
   private final String normalized;
   private final Map<String, IntList> positions;
   private final List<NamedParameter> params;
 
   SQLNormalizer(String sql) {
-    Check.that(sql).isNot(blank());
-    Map<String, IntList> tmp = new LinkedHashMap<>();
-    StringBuilder out = new StringBuilder(sql.length());
-    MutableInt pCount = new MutableInt(); // parameter counter
-    int pStartPos = -1;
-    boolean inString = false;
+    final StringBuilder normalized = new StringBuilder(sql.length());
+    final Map<String, IntList> positions = new LinkedHashMap<>();
+    final MutableInt counter = new MutableInt(); // parameter counter
+    final StringBuilder name = new StringBuilder(); // parameter name
+    int position = -1; // parameter start position
+    boolean insideString = false;
     boolean escaped = false;
-    StringBuilder param = null;
     for (int i = 0; i < sql.length(); ++i) {
       char c = sql.charAt(i);
-      if (inString) {
-        out.append(c);
-        if (c == '\'') {
+      if (insideString) {
+        normalized.append(c);
+        if (c == QUOTE) {
           if (!escaped) {
-            inString = false;
-          } else {
-            escaped = true;
+            insideString = false;
           }
-        } else if (c == '\\') {
+        } else if (c == BACKSLASH) {
           escaped = true;
         } else {
           escaped = false;
         }
-      } else if (pStartPos != -1) { // we are assembling a parameter name
+      } else if (position != -1) { // we are assembling a parameter name
         if (isParamChar(c)) {
-          param.append(c);
+          name.append(c);
           if (i == sql.length() - 1) {
-            addParam(tmp, param, pCount, pStartPos);
+            addParam(name, position, positions, counter);
           }
         } else {
-          addParam(tmp, param, pCount, pStartPos);
-          out.append(c);
-          pStartPos = -1;
-          if (c == '\'') {
-            inString = true;
-          } else if (c == ':') {
-            fail(KlojangSQLException::new, ERR_ADJACENT_PARAMS, pStartPos, i);
+          addParam(name, position, positions, counter);
+          normalized.append(c);
+          position = -1;
+          if (c == QUOTE) {
+            insideString = true;
+          } else if (c == COLON) {
+            fail(KlojangSQLException::new, ERR_ADJACENT_PARAMS, position, i);
           }
         }
-      } else if (c == ':') {
-        out.append('?');
-        pStartPos = i;
-        param = new StringBuilder();
+      } else if (c == COLON) {
+        normalized.append('?');
+        position = i;
+        name.setLength(0);
       } else {
-        out.append(c);
-        if (c == '\'') {
-          inString = true;
+        normalized.append(c);
+        if (c == QUOTE) {
+          insideString = true;
         }
       }
     }
-    this.normalized = out.toString();
-    this.positions = CollectionMethods.freeze(tmp, IntList::copyOf);
-    this.params = collectionToList(tmp.entrySet(), this::toNamedParam);
+    this.normalized = normalized.toString();
+    this.positions = CollectionMethods.freeze(positions, IntList::copyOf);
+    this.params = collectionToList(positions.entrySet(), this::toNamedParam);
   }
 
-
+  /*
+   * Returns SQL in which all named parameters have been replaced with question marks
+   * (i.e. standard JDBC positional parameters).
+   */
   public String getNormalizedSQL() {
     return normalized;
   }
@@ -107,14 +110,15 @@ public final class SQLNormalizer {
   }
 
   private static void addParam(
-        Map<String, IntList> paramMap,
-        StringBuilder param,
-        MutableInt pCount,
-        int startPos) {
-    Check.on(KlojangSQLException::new, param)
-          .has(StringBuilder::length, ne(), 0, ERR_EMPTY_NAME, startPos);
-    paramMap.computeIfAbsent(param.toString(), k -> new IntArrayList())
-          .add(pCount.ppi());
+      StringBuilder name,
+      int position,
+      Map<String, IntList> positions,
+      MutableInt counter) {
+    Check.on(KlojangSQLException::new, name)
+        .has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);
+    positions
+        .computeIfAbsent(name.toString(), k -> new IntArrayList())
+        .add(counter.ppi());
   }
 
   private NamedParameter toNamedParam(Entry<String, IntList> e) {

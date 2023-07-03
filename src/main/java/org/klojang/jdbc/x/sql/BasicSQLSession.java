@@ -5,11 +5,11 @@ import org.klojang.jdbc.SQLStatement;
 
 import java.sql.Connection;
 
-final class ParametrizedSQLSession extends AbstractSQLSession {
+final class BasicSQLSession extends AbstractSQLSession {
 
   private final SQLInfo sqlInfo;
 
-  ParametrizedSQLSession(AbstractSQL sql, SQLInfo sqlInfo) {
+  BasicSQLSession(AbstractSQL sql, SQLInfo sqlInfo) {
     super(sql);
     this.sqlInfo = sqlInfo;
   }

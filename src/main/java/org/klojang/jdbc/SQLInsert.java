@@ -25,15 +25,13 @@ import static org.klojang.convert.NumberMethods.convert;
 import static org.klojang.invoke.NoSuchPropertyException.noSuchProperty;
 import static org.klojang.util.ClassMethods.box;
 
-public class SQLInsert extends SQLStatement<SQLInsert> {
+public final class SQLInsert extends SQLStatement<SQLInsert> {
 
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(SQLInsert.class);
+  private static final String NO_KEYS_GENERATED = "no keys were generated";
+  private static final String MULTIPLE_AUTO_KEYS = "multiple auto-increment keys not supported";
 
-  /*
-   * This will track the bindables field in SQLStatement. It will contain the names of the
-   * bean properties and/or map keys corresponding to auto-increment columns.
-   */
   private final List<String> keys;
 
   private PreparedStatement ps;
@@ -57,23 +55,22 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
   }
 
   /**
-   * Binds the values in the specified JavaBean to the named parameters within the SQL
-   * statement and then, once the statement has executed, binds back the value of the
-   * auto-generated key to the specified bean property. Bean properties that do not
-   * correspond to named parameters will be ignored. The effect of passing anything other
-   * than a proper JavaBean (e.g. scalars like {@code Integer} or multi-valued objects
-   * like {@code Employee[]} or {@code ArrayList}) is undefined. If you don't want the
-   * auto-increment column to be bound back into the bean or {@code Map}, just call
-   * {@link #bind(Object)}.
+   * Binds the values in the specified JavaBean to the parameters within the SQL
+   * statement. Bean properties that do not correspond to named parameters will be
+   * ignored. The effect of passing anything other than a proper JavaBean (e.g. an
+   * {@code Integer}, {@code String} or array) is undefined. The {@code idProperty}
+   * argument must be the name of the property corresponding to the auto-increment column.
+   * The generated value for that column will be bound back into the bean. Therefore, make
+   * sure the bean is modifiable.
    *
-   * <p>Klojang does not support INSERT statements that generate multiple keys or
-   * non-number keys.
+   * <p><b><i>Klojang JDBC</i> does not support INSERT statements that generate multiple
+   * keys or non-integer keys.</b>
    *
-   * @param bean The bean whose values to bind to the named parameters within the SQL
-   * statement
-   * @param idProperty The name of the property representing the auto-generated primary
-   * key.
-   * @return This {@code SQLInsert} instance
+   * @param bean the bean whose values to bind to the named parameters within the SQL
+   *     statement
+   * @param idProperty the name of the property representing the auto-generated
+   *     primary key.
+   * @return this {@code SQLInsert} instance
    */
   public SQLInsert bind(Object bean, String idProperty) {
     super.bind(bean);
@@ -82,17 +79,20 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
   }
 
   /**
-   * Binds the values in the specified {@code Map} to the named parameters within the SQL
-   * statement and then, once the statement has executed, binds back the value of the
-   * auto-generated key to the specified map key.
+   * Binds the values in the specified map to the parameters within the SQL statement.
+   * Keys that do not correspond to named parameters will be ignored. The {@code idKey}
+   * argument must be the name of the property corresponding to the auto-increment column.
+   * The generated value for that column will be bound back into the map using
+   * {@code idKey} as the map key. Therefore, make sure the map is modifiable.
    *
-   * <p>Klojang does not support INSERT statements that generate multiple keys or
-   * non-number keys.
+   * <p><b><i>Klojang JDBC</i> does not support INSERT statements that generate multiple
+   * keys or non-integer keys.</b>
    *
-   * @param map The bean whose values to bind to the named parameters within the SQL
-   * statement
-   * @param idKey The name of the map key representing the auto-generated primary key.
-   * @return This {@code SQLInsert} instance
+   * @param map the bean whose values to bind to the named parameters within the SQL
+   *     statement
+   * @param idKey the name of the map key representing the auto-generated primary
+   *     key.
+   * @return this {@code SQLInsert} instance
    */
   public SQLInsert bind(Map<String, ?> map, String idKey) {
     super.bind(map);
@@ -101,7 +101,7 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
   }
 
   public <U> void insertAll(Collection<U> beans) {
-    Check.on(STATE, bindables).is(empty(), "insertAll not allowed on dirty instance");
+    Check.on(STATE, bindables).is(empty(), "insertAll() not allowed on dirty instance");
     try {
       for (U bean : beans) {
         bindables.clear();
@@ -124,11 +124,8 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
       } else {
         exec(true);
         try (ResultSet rs = ps.getGeneratedKeys()) {
-          if (!rs.next()) {
-            throw new KlojangSQLException("no keys were generated");
-          } else if (rs.getMetaData().getColumnCount() != 1) {
-            throw new KlojangSQLException("multiple auto-increment keys not supported");
-          }
+          Check.that(rs.next()).is(yes(), NO_KEYS_GENERATED);
+          Check.that(rs.getMetaData().getColumnCount()).is(ne(), 1, MULTIPLE_AUTO_KEYS);
           long id = rs.getLong(1);
           for (int i = 0; i < keys.size(); ++i) {
             String key = keys.get(i);
@@ -137,11 +134,13 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
               if (obj instanceof Map) {
                 ((Map) obj).put(key, id);
               } else {
-                Map<String, Setter> setters = SetterFactory.INSTANCE.getSetters(obj.getClass());
+                Map<String, Setter> setters = SetterFactory.INSTANCE.getSetters(
+                    obj.getClass());
                 Check.on(s -> noSuchProperty(obj, key), key).is(keyIn(), setters);
                 Setter setter = setters.get(key);
-                Number n = convert(id,
-                      (Class<? extends Number>) box(setter.getParamType()));
+                Number n = convert(
+                    id,
+                    (Class<? extends Number>) box(setter.getParamType()));
                 setter.write(obj, n);
               }
             }
@@ -155,7 +154,7 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
     }
   }
 
-  public long executeAndGetGeneratedKey() {
+  public long executeAndGetID() {
     try {
       try {
         exec(true);
@@ -163,11 +162,8 @@ public class SQLInsert extends SQLStatement<SQLInsert> {
         throw KlojangSQLException.wrap(t, sqlInfo);
       }
       try (ResultSet rs = ps.getGeneratedKeys()) {
-        if (!rs.next()) {
-          throw new KlojangSQLException("No keys were generated");
-        } else if (rs.getMetaData().getColumnCount() != 1) {
-          throw new KlojangSQLException("Multiple auto-increment keys not supported");
-        }
+        Check.that(rs.next()).is(yes(), NO_KEYS_GENERATED);
+        Check.that(rs.getMetaData().getColumnCount()).is(ne(), 1, MULTIPLE_AUTO_KEYS);
         return rs.getLong(1);
       }
     } catch (SQLException e) {

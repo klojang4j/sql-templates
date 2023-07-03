@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 import static org.klojang.check.CommonChecks.yes;
 
-public class SQLQuery extends SQLStatement<SQLQuery> {
+public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SQLQuery.class);
 
@@ -38,8 +38,8 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * properties or map keys. Beware of the direction of the mappings: <i>from</i> column
    * names <i>to</i> bean properties (or map keys).
    *
-   * @param columnMapper The {@code NameMapper} to be used when mapping column names to
-   *                     bean properties or map keys.
+   * @param columnMapper the {@code NameMapper} to be used when mapping column names
+   *     to bean properties or map keys.
    * @return This {@code SQLQuery} instance
    */
   public SQLQuery withMapper(NameMapper columnMapper) {
@@ -64,11 +64,11 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Executes the query and returns the value of the first column in the first row. If the
    * query had already been executed, you get the value from the second row, etc. Throws a
-   * {@link KlojangSQLException} if the query returned zero rows or if there are no more rows
-   * in the {@code ResultSet}.
+   * {@link KlojangSQLException} if the query returned zero rows or if there are no more
+   * rows in the {@code ResultSet}.
    *
-   * @param <T>   The type of the value to be returned
-   * @param clazz The class of the value to be returned
+   * @param <T> The type of the value to be returned
+   * @param clazz the class of the value to be returned
    * @return The value of the first column in the first row
    * @throws KlojangSQLException If the query returned zero rows
    */
@@ -88,8 +88,8 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Executes the query and returns the value of the first column in the first row as an
    * integer. If the query had already been executed, you get the value from the second
-   * row, etc. Throws a {@link KlojangSQLException} if the query returned zero rows or if there
-   * are no more rows in the {@code ResultSet}.
+   * row, etc. Throws a {@link KlojangSQLException} if the query returned zero rows or if
+   * there are no more rows in the {@code ResultSet}.
    *
    * @return The value of the first column in the first row as an integer
    * @throws KlojangSQLException If the query returned zero rows
@@ -105,8 +105,8 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Returns the value of the first column of the first row as a {@code String}. If the
    * query had already been executed, you get the value from the second row, etc. Throws a
-   * {@link KlojangSQLException} if the query returned zero rows or if there are no more rows
-   * in the {@code ResultSet}.
+   * {@link KlojangSQLException} if the query returned zero rows or if there are no more
+   * rows in the {@code ResultSet}.
    *
    * @return The value of the first column of the first row as aa {@code String}
    * @throws KlojangSQLException If the query returned zero rows
@@ -123,10 +123,10 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * Returns a {@code List} of the all values in the first column. Equivalent to
    * {@code getList(clazz, 10)}.
    *
-   * @param <T>   The desired type of the values
-   * @param clazz The desired class of the values
+   * @param <T> The desired type of the values
+   * @param clazz the desired class of the values
    * @return A {@code List} of the values of the first column in the rows selected by the
-   * query
+   *     query
    */
   public <T> List<T> getList(Class<T> clazz) {
     return getList(clazz, 10);
@@ -136,11 +136,11 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * Returns a {@code List} of the all values in the first column. In other words, this
    * method will exhaust the {@link ResultSet}.
    *
-   * @param <T>          The desired type of the values
-   * @param clazz        The desired class of the values
-   * @param expectedSize The expected number of rows
+   * @param <T> the desired type of the values
+   * @param clazz the desired class of the values
+   * @param expectedSize the expected number of rows
    * @return A {@code List} of the values of the first column in the rows selected by the
-   * query
+   *     query
    */
   public <T> List<T> getList(Class<T> clazz, int expectedSize) {
     try {
@@ -164,10 +164,11 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
 
   /**
    * Executes the query and returns a {@code ResultSetMappifier} that you can use to
-   * convert the rows in the {@link ResultSet} into {@code Map<String, Object>} instances.
+   * convert the rows in the {@link ResultSet} into {@code Map<String, Object>}
+   * instances.
    *
    * @return A {@code ResultSetMappifier} that you can use to convert the rows in the
-   * {@link ResultSet} into {@code Map<String, Object>} instances.
+   *     {@link ResultSet} into {@code Map<String, Object>} instances.
    */
   public ResultSetMappifier getMappifier() {
     try {
@@ -182,10 +183,10 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * Executes the query and returns a {@code ResultSetBeanifier} that you can use to
    * convert the rows in the {@link ResultSet} into JavaBeans.
    *
-   * @param <T>       The type of the JavaBeans
-   * @param beanClass The class of the JavaBeans
+   * @param <T> The type of the JavaBeans
+   * @param beanClass the class of the JavaBeans
    * @return A {@code ResultSetBeanifier} that you can use to convert the rows in the
-   * {@link ResultSet} into JavaBeans.
+   *     {@link ResultSet} into JavaBeans.
    */
   public <T> ResultSetBeanifier<T> getBeanifier(Class<T> beanClass) {
     try {
@@ -200,11 +201,11 @@ public class SQLQuery extends SQLStatement<SQLQuery> {
    * Executes the query and returns a {@code ResultSetBeanifier} that you can use to
    * convert the rows in the {@link ResultSet} into JavaBeans.
    *
-   * @param <T>          The type of the JavaBeans
-   * @param beanClass    The class of the JavaBeans
-   * @param beanSupplier The supplier of the JavaBean instances
+   * @param <T> The type of the JavaBeans
+   * @param beanClass the class of the JavaBeans
+   * @param beanSupplier the supplier of the JavaBean instances
    * @return A {@code ResultSetBeanifier} that you can use to convert the rows in the
-   * {@link ResultSet} into JavaBeans.
+   *     {@link ResultSet} into JavaBeans.
    */
   public <T> ResultSetBeanifier<T> getBeanifier(Class<T> beanClass,
                                                 Supplier<T> beanSupplier) {
