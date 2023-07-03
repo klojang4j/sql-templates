@@ -99,7 +99,7 @@ public class SQLInsertBuilder {
     String table = ifNull(tableName, beanClass.getSimpleName());
     StringBuilder sb = new StringBuilder(100);
     append(sb, "INSERT INTO ", table, " (", cols, ") VALUES(", params, ")");
-    SQLSession sql = SQL.basic(sb.toString(), bindInfo).newSession();
+    SQLSession sql = SQL.basic(sb.toString(), bindInfo).session();
     return sql.prepareInsert(con);
   }
 

@@ -11,8 +11,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static java.util.Collections.singletonMap;
+import static org.klojang.check.CommonChecks.eq;
 import static org.klojang.check.CommonChecks.keyIn;
 import static org.klojang.check.Tag.*;
 import static org.klojang.util.CollectionMethods.collectionToList;
@@ -31,7 +33,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   final Connection con;
   final AbstractSQLSession session;
   final SQLInfo sqlInfo;
-  final List<Object> bindables;
+  final List<Object> bindings;
 
   private final Set<NamedParameter> bound;
 
@@ -39,7 +41,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     this.con = con;
     this.session = session;
     this.sqlInfo = sqlInfo;
-    this.bindables = new ArrayList<>(5);
+    this.bindings = new ArrayList<>(5);
     this.bound = HashSet.newHashSet(sqlInfo.parameters().size());
   }
 
@@ -60,12 +62,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    * Binds the values in the specified JavaBean to the parameters within the SQL
    * statement. Bean properties that do not correspond to named parameters will be
    * ignored. The effect of passing anything other than a proper JavaBean (e.g. an
-   * {@code Integer}, {@code String} or array) is undefined. The {@code idProperty}
-   * argument must be the name of the property that corresponds to the auto-increment
-   * column. The generated value for that column will be bound back into the bean. Of
-   * course, the bean or {@code Map} needs to be modifiable in that case. If you don't
-   * want the auto-increment column to be bound back into the bean or {@code Map}, just
-   * call {@link #bind(Object)}.
+   * {@code Integer}, {@code String} or array) is undefined.
    *
    * @param bean The bean whose values to bind to the named parameters within the SQL
    *     statement
@@ -73,19 +70,27 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    */
   @SuppressWarnings("unchecked")
   public T bind(Object bean) {
-    Check.notNull(bean, BEAN).then(bindables::add);
+    Check.notNull(bean, BEAN).then(bindings::add);
     return (T) this;
   }
 
+  /**
+   * Binds the values in the specified map to the parameters within the SQL statement.
+   * Keys that do not correspond to named parameters will be ignored.
+   *
+   * @param map the map whose values to bind to the named parameters within the SQL
+   *     statement
+   * @return this {@code SQLStatement} instance
+   */
   @SuppressWarnings("unchecked")
   public T bind(Map<String, Object> map) {
-    Check.notNull(map, MAP).then(bindables::add);
+    Check.notNull(map, MAP).then(bindings::add);
     return (T) this;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   void applyBindings(PreparedStatement ps) throws Throwable {
-    for (Object obj : bindables) {
+    for (Object obj : bindings) {
       if (obj instanceof Map map) {
         MapBinder binder = new MapBinder(
             sqlInfo.parameters(),
@@ -97,9 +102,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
         bound.addAll(binder.getBoundParameters());
       }
     }
-    if (bound.size() != sqlInfo.parameters().size()) {
-      throw unboundParameters();
-    }
+    Check.that(bound.size()).is(eq(), sqlInfo.parameters().size(), incompleteBindings());
   }
 
   void close(PreparedStatement ps) {
@@ -112,12 +115,12 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     }
   }
 
-  private KlojangSQLException unboundParameters() {
+  private Supplier<KlojangSQLException> incompleteBindings() {
     Set<NamedParameter> params = HashSet.newHashSet(sqlInfo.parameters().size());
     params.addAll(sqlInfo.parameters());
     params.removeAll(bound);
     List<String> unbound = collectionToList(params, NamedParameter::name);
     String fmt = "some query parameters have not been bound yet: %s";
-    return new KlojangSQLException(String.format(fmt, unbound));
+    return () -> new KlojangSQLException(String.format(fmt, unbound));
   }
 }

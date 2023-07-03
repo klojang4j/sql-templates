@@ -7,6 +7,9 @@ import org.klojang.util.ExceptionMethods;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
+/**
+ * Facilitates the execution of SQL UPDATE and DELETE statements.
+ */
 public final class SQLUpdate extends SQLStatement<SQLUpdate> {
 
   private PreparedStatement ps;

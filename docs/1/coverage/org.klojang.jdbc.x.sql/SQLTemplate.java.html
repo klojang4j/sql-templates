@@ -22,7 +22,7 @@ public final class SQLTemplate extends AbstractSQL {
 <span class="nc" id="L22">        }</span>
 <span class="nc" id="L23">    }</span>
 
-    public SQLSession newSession() {
+    public SQLSession session() {
 <span class="nc" id="L26">        return new SQLTemplateSession(this, normalizer, template.newRenderSession());</span>
     }
 

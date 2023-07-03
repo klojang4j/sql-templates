@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import static org.klojang.check.CommonExceptions.illegalState;
 
 public abstract sealed class AbstractSQLSession implements SQLSession
-    permits ParametrizedSQLSession, SQLTemplateSession, SQLSkeletonSession {
+    permits BasicSQLSession, SQLTemplateSession, SQLSkeletonSession {
 
   @SuppressWarnings({&quot;unused&quot;})
 <span class="fc" id="L18">  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);</span>

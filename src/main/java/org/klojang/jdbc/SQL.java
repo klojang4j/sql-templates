@@ -140,6 +140,6 @@ public sealed interface SQL permits AbstractSQL {
    *
    * @return a {@code SQLSession} that allows you to execute the SQL query
    */
-  SQLSession newSession();
+  SQLSession session();
 
 }

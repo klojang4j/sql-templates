@@ -12,7 +12,7 @@ public final class BasicSQL extends AbstractSQL {
         sqlInfo = new SQLInfo(new SQLNormalizer(sql));
     }
 
-    public SQLSession newSession() {
+    public SQLSession session() {
         return new BasicSQLSession(this, sqlInfo);
     }
 

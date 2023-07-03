@@ -7,27 +7,30 @@ import org.klojang.util.ExceptionMethods;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
-public class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
+/**
+ * Facilitates the execution of SQL UPDATE and DELETE statements.
+ */
+public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
 
   private PreparedStatement ps;
 
   public SQLUpdate(Connection conn, AbstractSQLSession sql, SQLInfo sqlInfo) {
-<span class="nc" id="L15">    super(conn, sql, sqlInfo);</span>
-<span class="nc" id="L16">  }</span>
+<span class="nc" id="L18">    super(conn, sql, sqlInfo);</span>
+<span class="nc" id="L19">  }</span>
 
   public int execute() {
     try {
-<span class="nc" id="L20">      ps = con.prepareStatement(sqlInfo.jdbcSQL());</span>
-<span class="nc" id="L21">      applyBindings(ps);</span>
-<span class="nc" id="L22">      return ps.executeUpdate();</span>
-<span class="nc" id="L23">    } catch (Throwable t) {</span>
-<span class="nc" id="L24">      throw ExceptionMethods.uncheck(t);</span>
+<span class="nc" id="L23">      ps = con.prepareStatement(sqlInfo.jdbcSQL());</span>
+<span class="nc" id="L24">      applyBindings(ps);</span>
+<span class="nc" id="L25">      return ps.executeUpdate();</span>
+<span class="nc" id="L26">    } catch (Throwable t) {</span>
+<span class="nc" id="L27">      throw ExceptionMethods.uncheck(t);</span>
     }
   }
 
   @Override
   public void close() {
-<span class="nc" id="L30">    close(ps);</span>
-<span class="nc" id="L31">  }</span>
+<span class="nc" id="L33">    close(ps);</span>
+<span class="nc" id="L34">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

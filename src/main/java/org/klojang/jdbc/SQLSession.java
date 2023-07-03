@@ -54,13 +54,13 @@ public sealed interface SQLSession permits AbstractSQLSession {
   /**
    * Sets a template variable name "sortColumn" to the specified value. This presumes and
    * requires that the SQL template indeed contains a variable with that name. This is a
-   * convenience method facilitating the most common use case for template variables:
-   * setting the column(s) in the ORDER BY clause.
+   * convenience method facilitating the most common use case for template variables: to
+   * parametrize the column(s) in the ORDER BY clause.
    *
    * @param sortColumn the column(s) to sort on
    * @return this {@code SQLSession} instance
    */
-  default SQLSession setSortColumn(Object sortColumn)
+  default SQLSession setOrderBy(Object sortColumn)
       throws UnsupportedOperationException {
     return set("sortColumn", sortColumn);
   }
@@ -71,7 +71,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * provided value supposedly is either "ASC" or "DESC". The value may also be a boolean,
    * in which case {@code true} is translated into "DESC" and {@code false} into "ASC".
    * This is a convenience method facilitating the most common use case for template
-   * variables: setting the sort order for the column(s) in the ORDER BY clause.
+   * variables: to parametrize the sort order for the column(s) in the ORDER BY clause.
    *
    * @param sortOrder the sort order
    * @return this {@code SQLSession} instance
@@ -104,7 +104,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setOrderBy(Object sortColumn, Object sortOrder)
       throws UnsupportedOperationException {
-    return setSortColumn(sortColumn).setSortOrder(sortOrder);
+    return setOrderBy(sortColumn).setSortOrder(sortOrder);
   }
 
   /**
@@ -116,7 +116,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setOrderBy(Object sortColumn, boolean isDescending)
       throws UnsupportedOperationException {
-    return setSortColumn(sortColumn).setDescending(isDescending);
+    return setOrderBy(sortColumn).setDescending(isDescending);
   }
 
   /**

@@ -19,7 +19,7 @@ public final class SQLSkeleton extends AbstractSQL {
         }
     }
 
-    public SQLSession newSession() {
+    public SQLSession session() {
         return new SQLSkeletonSession(this, template.newRenderSession());
     }
 

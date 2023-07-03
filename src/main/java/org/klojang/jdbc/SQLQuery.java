@@ -20,6 +20,39 @@ import java.util.function.Supplier;
 
 import static org.klojang.check.CommonChecks.yes;
 
+/**
+ * <p>Facilitates the execution of SQL SELECT statements. {@code SQLQuery} instances are
+ * obtained via {@link SQLSession#prepareQuery(Connection) SQLSession.prepareQuery()}. You
+ * should always obtain them using a try-with-resources block. Here is a simple example of
+ * how you can use the {@code SQLQuery} class:
+ *
+ * <blockquote><pre>{@code
+ * SQL sql = SQL.basic("SELECT * FROM PERSON WHERE FIRST_NAME = :firstName");
+ * try(SQLQuery query = sql.session().prepareQuery(jdbcConnection)) {
+ *  query.bind("firstName", "John");
+ *  List<Person> persons = query.getBeanifier(Person.class).beanifyAll();
+ * }
+ * }</pre></blockquote>
+ *
+ * <p>Here is an example of SQL that contains both named parameters and template
+ * variables (see {@link SQL} for more information):
+ *
+ * <blockquote><pre>{@code
+ * String queryString = """
+ *  SELECT LAST_NAME
+ *    FROM PERSON
+ *   WHERE FIRST_NAME = :firstName
+ *   ORDER BY :sortColumn
+ *  """;
+ * SQL sql = SQL.template(queryString);
+ * SQLSession session = sql.session();
+ * session.setSortColumn("BIRTH_DATE");
+ * try(SQLQuery query = session.prepareQuery(jdbcConnection)) {
+ *  query.bind("firstName", "John");
+ *  List<String> lastNames = query.firstColumn();
+ * }
+ * }</pre></blockquote>
+ */
 public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SQLQuery.class);
@@ -40,7 +73,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    *
    * @param columnMapper the {@code NameMapper} to be used when mapping column names
    *     to bean properties or map keys.
-   * @return This {@code SQLQuery} instance
+   * @return this {@code SQLQuery} instance
    */
   public SQLQuery withMapper(NameMapper columnMapper) {
     this.mapper = Check.notNull(columnMapper).ok();
@@ -48,10 +81,10 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Executes the query and returns the {@link ResultSet} produced by the JDBC driver. If
-   * the query had already been executed, the initial {@link ResultSet} is returned.
+   * Executes the query and returns the {@link ResultSet}. If the query had already been
+   * executed, the initial {@link ResultSet} is returned. It will not be re-executed.
    *
-   * @return The {@code ResultSet} produced by the JDBC driver
+   * @return the {@code ResultSet} produced by the JDBC driver
    */
   public ResultSet getResultSet() {
     try {
@@ -67,19 +100,19 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * {@link KlojangSQLException} if the query returned zero rows or if there are no more
    * rows in the {@code ResultSet}.
    *
-   * @param <T> The type of the value to be returned
+   * @param <T> the type of the value to be returned
    * @param clazz the class of the value to be returned
-   * @return The value of the first column in the first row
+   * @return the value of the first column in the first row
    * @throws KlojangSQLException If the query returned zero rows
    */
   public <T> T lookup(Class<T> clazz) {
     ResultSet rs = executeAndNext();
     try {
       int sqlType = rs.getMetaData().getColumnType(1);
-      ColumnReader<?, T> emitter = ColumnReaderFinder.getInstance().findReader(
-          clazz,
-          sqlType);
-      return emitter.getValue(rs, 1, clazz);
+      ColumnReader<?, T> reader = ColumnReaderFinder
+          .getInstance()
+          .findReader(clazz, sqlType);
+      return reader.getValue(rs, 1, clazz);
     } catch (Throwable t) {
       throw KlojangSQLException.wrap(t, sqlInfo);
     }
@@ -91,8 +124,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * row, etc. Throws a {@link KlojangSQLException} if the query returned zero rows or if
    * there are no more rows in the {@code ResultSet}.
    *
-   * @return The value of the first column in the first row as an integer
-   * @throws KlojangSQLException If the query returned zero rows
+   * @return the value of the first column in the first row as an integer
+   * @throws KlojangSQLException if the query returned zero rows
    */
   public int getInt() throws KlojangSQLException {
     try {
@@ -103,12 +136,12 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Returns the value of the first column of the first row as a {@code String}. If the
-   * query had already been executed, you get the value from the second row, etc. Throws a
-   * {@link KlojangSQLException} if the query returned zero rows or if there are no more
-   * rows in the {@code ResultSet}.
+   * Executes the query and returns  the value of the first column of the first row as a
+   * {@code String}. If the query had already been executed, you get the value from the
+   * second row, etc. Throws a {@link KlojangSQLException} if the query returned zero rows
+   * or if there are no more rows in the {@code ResultSet}.
    *
-   * @return The value of the first column of the first row as aa {@code String}
+   * @return the value of the first column of the first row as aa {@code String}
    * @throws KlojangSQLException If the query returned zero rows
    */
   public String getString() throws KlojangSQLException {
@@ -120,41 +153,45 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Returns a {@code List} of the all values in the first column. Equivalent to
-   * {@code getList(clazz, 10)}.
+   * Executes the query and returns  a {@code List} of all values in the first column of
+   * the result set. Equivalent to {@link #firstColumn(Class) firstColumn(String.class)}.
    *
-   * @param <T> The desired type of the values
-   * @param clazz the desired class of the values
-   * @return A {@code List} of the values of the first column in the rows selected by the
-   *     query
+   * @return the values of the first column in the result set
    */
-  public <T> List<T> getList(Class<T> clazz) {
-    return getList(clazz, 10);
-  }
+  public List<String> firstColumn() { return firstColumn(String.class); }
 
   /**
-   * Returns a {@code List} of the all values in the first column. In other words, this
-   * method will exhaust the {@link ResultSet}.
+   * Executes the query and returns  a {@code List} of all values in the first column of
+   * the result set. Equivalent to
+   * {@link #firstColumn(Class, int) firstColumn(clazz, 10)}.
    *
    * @param <T> the desired type of the values
    * @param clazz the desired class of the values
-   * @param expectedSize the expected number of rows
-   * @return A {@code List} of the values of the first column in the rows selected by the
-   *     query
+   * @return the values of the first column in the result set
    */
-  public <T> List<T> getList(Class<T> clazz, int expectedSize) {
+  public <T> List<T> firstColumn(Class<T> clazz) { return firstColumn(clazz, 10); }
+
+  /**
+   * Executes the query and returns a {@code List} of the all values in the first column.
+   * In other words, this method will exhaust the {@link ResultSet}.
+   *
+   * @param <T> the desired type of the values
+   * @param clazz the desired class of the values
+   * @param sizeEstimate the expected number of rows in the result set
+   * @return the values of the first column in the result set
+   */
+  public <T> List<T> firstColumn(Class<T> clazz, int sizeEstimate) {
     try {
       ResultSet rs = rs();
       if (!rs.next()) {
         return Collections.emptyList();
       }
       int sqlType = rs.getMetaData().getColumnType(1);
-      ColumnReader<?, T> extractor = ColumnReaderFinder.getInstance().findReader(
-          clazz,
-          sqlType);
-      List<T> list = new ArrayList<>(expectedSize);
+      ColumnReader<?, T> reader = ColumnReaderFinder.getInstance()
+          .findReader(clazz, sqlType);
+      List<T> list = new ArrayList<>(sizeEstimate);
       do {
-        list.add(extractor.getValue(rs, 1, clazz));
+        list.add(reader.getValue(rs, 1, clazz));
       } while (rs.next());
       return list;
     } catch (Throwable t) {
@@ -167,7 +204,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * convert the rows in the {@link ResultSet} into {@code Map<String, Object>}
    * instances.
    *
-   * @return A {@code ResultSetMappifier} that you can use to convert the rows in the
+   * @return a {@code ResultSetMappifier} that you can use to convert the rows in the
    *     {@link ResultSet} into {@code Map<String, Object>} instances.
    */
   public ResultSetMappifier getMappifier() {
@@ -183,15 +220,16 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * Executes the query and returns a {@code ResultSetBeanifier} that you can use to
    * convert the rows in the {@link ResultSet} into JavaBeans.
    *
-   * @param <T> The type of the JavaBeans
+   * @param <T> the type of the JavaBeans
    * @param beanClass the class of the JavaBeans
-   * @return A {@code ResultSetBeanifier} that you can use to convert the rows in the
+   * @return a {@code ResultSetBeanifier} that you can use to convert the rows in the
    *     {@link ResultSet} into JavaBeans.
    */
   public <T> ResultSetBeanifier<T> getBeanifier(Class<T> beanClass) {
     try {
-      return session.getSQL().getBeanifierFactory(beanClass, mapper).getBeanifier(
-          rs());
+      return session.getSQL()
+          .getBeanifierFactory(beanClass, mapper)
+          .getBeanifier(rs());
     } catch (Throwable t) {
       throw KlojangSQLException.wrap(t, sqlInfo);
     }
@@ -201,14 +239,15 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * Executes the query and returns a {@code ResultSetBeanifier} that you can use to
    * convert the rows in the {@link ResultSet} into JavaBeans.
    *
-   * @param <T> The type of the JavaBeans
+   * @param <T> the type of the JavaBeans
    * @param beanClass the class of the JavaBeans
    * @param beanSupplier the supplier of the JavaBean instances
-   * @return A {@code ResultSetBeanifier} that you can use to convert the rows in the
+   * @return a {@code ResultSetBeanifier} that you can use to convert the rows in the
    *     {@link ResultSet} into JavaBeans.
    */
-  public <T> ResultSetBeanifier<T> getBeanifier(Class<T> beanClass,
-                                                Supplier<T> beanSupplier) {
+  public <T> ResultSetBeanifier<T> getBeanifier(
+      Class<T> beanClass,
+      Supplier<T> beanSupplier) {
     try {
       return session.getSQL()
           .getBeanifierFactory(beanClass, beanSupplier, mapper)

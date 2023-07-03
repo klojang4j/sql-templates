@@ -19,7 +19,7 @@ public final class SQLSkeleton extends AbstractSQL {
 <span class="nc" id="L19">        }</span>
 <span class="nc" id="L20">    }</span>
 
-    public SQLSession newSession() {
+    public SQLSession session() {
 <span class="nc" id="L23">        return new SQLSkeletonSession(this, template.newRenderSession());</span>
     }
 

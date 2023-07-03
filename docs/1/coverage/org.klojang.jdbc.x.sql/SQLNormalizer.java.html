@@ -13,112 +13,116 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static org.klojang.check.Check.fail;
-import static org.klojang.check.CommonChecks.blank;
 import static org.klojang.check.CommonChecks.ne;
+import static org.klojang.check.CommonProperties.strlen;
 import static org.klojang.util.CollectionMethods.collectionToList;
 
 /*
  * Extracts named parameters from a SQL query string and replaces them with positional
  * parameters (question marks).
- *
  */
-public final class SQLNormalizer {
+final class SQLNormalizer {
 
   private static final String ERR_ADJACENT_PARAMS =
-        &quot;adjacent parameters at positions ${0} and ${1} cannot yield valid SQL&quot;;
+      &quot;adjacent parameters at positions ${0} and ${1} cannot yield valid SQL&quot;;
   private static final String ERR_EMPTY_NAME =
-        &quot;zero-length parameter name at position ${0}&quot;;
+      &quot;zero-length parameter name at position ${0}&quot;;
+
+  private static final char QUOTE = '\'';
+  private static final char COLON = ':';
+  private static final char BACKSLASH = '\\';
 
   private final String normalized;
   private final Map&lt;String, IntList&gt; positions;
   private final List&lt;NamedParameter&gt; params;
 
-<span class="fc" id="L36">  SQLNormalizer(String sql) {</span>
-<span class="fc" id="L37">    Check.that(sql).isNot(blank());</span>
-<span class="fc" id="L38">    Map&lt;String, IntList&gt; tmp = new LinkedHashMap&lt;&gt;();</span>
-<span class="fc" id="L39">    StringBuilder out = new StringBuilder(sql.length());</span>
-<span class="fc" id="L40">    MutableInt pCount = new MutableInt(); // parameter counter</span>
-<span class="fc" id="L41">    int pStartPos = -1;</span>
-<span class="fc" id="L42">    boolean inString = false;</span>
-<span class="fc" id="L43">    boolean escaped = false;</span>
-<span class="fc" id="L44">    StringBuilder param = null;</span>
-<span class="fc bfc" id="L45" title="All 2 branches covered.">    for (int i = 0; i &lt; sql.length(); ++i) {</span>
-<span class="fc" id="L46">      char c = sql.charAt(i);</span>
-<span class="pc bpc" id="L47" title="1 of 2 branches missed.">      if (inString) {</span>
-<span class="nc" id="L48">        out.append(c);</span>
-<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (c == '\'') {</span>
-<span class="nc bnc" id="L50" title="All 2 branches missed.">          if (!escaped) {</span>
-<span class="nc" id="L51">            inString = false;</span>
-          } else {
-<span class="nc" id="L53">            escaped = true;</span>
+<span class="fc" id="L39">  SQLNormalizer(String sql) {</span>
+<span class="fc" id="L40">    final StringBuilder normalized = new StringBuilder(sql.length());</span>
+<span class="fc" id="L41">    final Map&lt;String, IntList&gt; positions = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L42">    final MutableInt counter = new MutableInt(); // parameter counter</span>
+<span class="fc" id="L43">    final StringBuilder name = new StringBuilder(); // parameter name</span>
+<span class="fc" id="L44">    int position = -1; // parameter start position</span>
+<span class="fc" id="L45">    boolean insideString = false;</span>
+<span class="fc" id="L46">    boolean escaped = false;</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">    for (int i = 0; i &lt; sql.length(); ++i) {</span>
+<span class="fc" id="L48">      char c = sql.charAt(i);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">      if (insideString) {</span>
+<span class="fc" id="L50">        normalized.append(c);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (c == QUOTE) {</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">          if (!escaped) {</span>
+<span class="fc" id="L53">            insideString = false;</span>
           }
-<span class="nc bnc" id="L55" title="All 2 branches missed.">        } else if (c == '\\') {</span>
-<span class="nc" id="L56">          escaped = true;</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        } else if (c == BACKSLASH) {</span>
+<span class="fc" id="L56">          escaped = true;</span>
         } else {
-<span class="nc" id="L58">          escaped = false;</span>
+<span class="fc" id="L58">          escaped = false;</span>
         }
-<span class="fc bfc" id="L60" title="All 2 branches covered.">      } else if (pStartPos != -1) { // we are assembling a parameter name</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">      } else if (position != -1) { // we are assembling a parameter name</span>
 <span class="fc bfc" id="L61" title="All 2 branches covered.">        if (isParamChar(c)) {</span>
-<span class="fc" id="L62">          param.append(c);</span>
+<span class="fc" id="L62">          name.append(c);</span>
 <span class="fc bfc" id="L63" title="All 2 branches covered.">          if (i == sql.length() - 1) {</span>
-<span class="fc" id="L64">            addParam(tmp, param, pCount, pStartPos);</span>
+<span class="fc" id="L64">            addParam(name, position, positions, counter);</span>
           }
         } else {
-<span class="fc" id="L67">          addParam(tmp, param, pCount, pStartPos);</span>
-<span class="fc" id="L68">          out.append(c);</span>
-<span class="fc" id="L69">          pStartPos = -1;</span>
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">          if (c == '\'') {</span>
-<span class="nc" id="L71">            inString = true;</span>
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">          } else if (c == ':') {</span>
-<span class="nc" id="L73">            fail(KlojangSQLException::new, ERR_ADJACENT_PARAMS, pStartPos, i);</span>
+<span class="fc" id="L67">          addParam(name, position, positions, counter);</span>
+<span class="fc" id="L68">          normalized.append(c);</span>
+<span class="fc" id="L69">          position = -1;</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">          if (c == QUOTE) {</span>
+<span class="nc" id="L71">            insideString = true;</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">          } else if (c == COLON) {</span>
+<span class="nc" id="L73">            fail(KlojangSQLException::new, ERR_ADJACENT_PARAMS, position, i);</span>
           }
         }
-<span class="fc bfc" id="L76" title="All 2 branches covered.">      } else if (c == ':') {</span>
-<span class="fc" id="L77">        out.append('?');</span>
-<span class="fc" id="L78">        pStartPos = i;</span>
-<span class="fc" id="L79">        param = new StringBuilder();</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">      } else if (c == COLON) {</span>
+<span class="fc" id="L77">        normalized.append('?');</span>
+<span class="fc" id="L78">        position = i;</span>
+<span class="fc" id="L79">        name.setLength(0);</span>
       } else {
-<span class="fc" id="L81">        out.append(c);</span>
-<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        if (c == '\'') {</span>
-<span class="nc" id="L83">          inString = true;</span>
+<span class="fc" id="L81">        normalized.append(c);</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (c == QUOTE) {</span>
+<span class="fc" id="L83">          insideString = true;</span>
         }
       }
     }
-<span class="fc" id="L87">    this.normalized = out.toString();</span>
-<span class="fc" id="L88">    this.positions = CollectionMethods.freeze(tmp, IntList::copyOf);</span>
-<span class="fc" id="L89">    this.params = collectionToList(tmp.entrySet(), this::toNamedParam);</span>
+<span class="fc" id="L87">    this.normalized = normalized.toString();</span>
+<span class="fc" id="L88">    this.positions = CollectionMethods.freeze(positions, IntList::copyOf);</span>
+<span class="fc" id="L89">    this.params = collectionToList(positions.entrySet(), this::toNamedParam);</span>
 <span class="fc" id="L90">  }</span>
 
-
+  /*
+   * Returns SQL in which all named parameters have been replaced with question marks
+   * (i.e. standard JDBC positional parameters).
+   */
   public String getNormalizedSQL() {
-<span class="fc" id="L94">    return normalized;</span>
+<span class="fc" id="L97">    return normalized;</span>
   }
 
   public List&lt;NamedParameter&gt; getParameters() {
-<span class="fc" id="L98">    return params;</span>
+<span class="fc" id="L101">    return params;</span>
   }
 
   public Map&lt;String, IntList&gt; getParameterPositions() {
-<span class="fc" id="L102">    return positions;</span>
+<span class="fc" id="L105">    return positions;</span>
   }
 
   private static boolean isParamChar(char c) {
-<span class="pc bpc" id="L106" title="1 of 4 branches missed.">    return Character.isLetterOrDigit(c) || c == '_';</span>
+<span class="pc bpc" id="L109" title="1 of 4 branches missed.">    return Character.isLetterOrDigit(c) || c == '_';</span>
   }
 
   private static void addParam(
-        Map&lt;String, IntList&gt; paramMap,
-        StringBuilder param,
-        MutableInt pCount,
-        int startPos) {
-<span class="fc" id="L114">    Check.on(KlojangSQLException::new, param)</span>
-<span class="fc" id="L115">          .has(StringBuilder::length, ne(), 0, ERR_EMPTY_NAME, startPos);</span>
-<span class="fc" id="L116">    paramMap.computeIfAbsent(param.toString(), k -&gt; new IntArrayList())</span>
-<span class="fc" id="L117">          .add(pCount.ppi());</span>
-<span class="fc" id="L118">  }</span>
+      StringBuilder name,
+      int position,
+      Map&lt;String, IntList&gt; positions,
+      MutableInt counter) {
+<span class="fc" id="L117">    Check.on(KlojangSQLException::new, name)</span>
+<span class="fc" id="L118">        .has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);</span>
+<span class="fc" id="L119">    positions</span>
+<span class="fc" id="L120">        .computeIfAbsent(name.toString(), k -&gt; new IntArrayList())</span>
+<span class="fc" id="L121">        .add(counter.ppi());</span>
+<span class="fc" id="L122">  }</span>
 
   private NamedParameter toNamedParam(Entry&lt;String, IntList&gt; e) {
-<span class="fc" id="L121">    return new NamedParameter(e.getKey(), IntList.copyOf(e.getValue()));</span>
+<span class="fc" id="L125">    return new NamedParameter(e.getKey(), IntList.copyOf(e.getValue()));</span>
   }
 
 }
