@@ -58,7 +58,7 @@ final class DefaultMappifier implements ResultSetMappifier {
       empty = !rs.next();
       return row;
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, null);
+      throw new KlojangSQLException(t);
     }
   }
 
@@ -75,7 +75,7 @@ final class DefaultMappifier implements ResultSetMappifier {
         all.add(toMap(rs, channels));
       } while (++i < limit && (empty = !rs.next()));
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, null);
+      throw new KlojangSQLException(t);
     }
     return all;
   }
@@ -97,7 +97,7 @@ final class DefaultMappifier implements ResultSetMappifier {
         all.add(toMap(rs, channels));
       } while (rs.next());
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, null);
+      throw new KlojangSQLException(t);
     }
     empty = true;
     return all;

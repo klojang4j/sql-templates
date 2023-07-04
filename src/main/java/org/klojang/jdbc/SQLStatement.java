@@ -14,10 +14,9 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import static java.util.Collections.singletonMap;
-import static org.klojang.check.CommonChecks.eq;
-import static org.klojang.check.CommonChecks.keyIn;
+import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.Tag.*;
-import static org.klojang.util.CollectionMethods.collectionToList;
+import static org.klojang.util.CollectionMethods.collectionToSet;
 
 /**
  * Abstract base class for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate}. An
@@ -30,12 +29,16 @@ import static org.klojang.util.CollectionMethods.collectionToList;
 public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     implements AutoCloseable permits SQLQuery, SQLUpdate, SQLInsert {
 
+  private static final String NO_SUCH_PARAM = "no such parameter: \"${arg}\"";
+  private static final String DIRTY_INSTANCE = "statement already executed; call reset() first()";
+
   final Connection con;
   final AbstractSQLSession session;
   final SQLInfo sqlInfo;
   final List<Object> bindings;
+  final Set<NamedParameter> bound;
 
-  private final Set<NamedParameter> bound;
+  private boolean fresh = true;
 
   SQLStatement(Connection con, AbstractSQLSession session, SQLInfo sqlInfo) {
     this.con = con;
@@ -53,8 +56,8 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    * @return this {@code SQLStatement} instance
    */
   public T bind(String param, Object value) {
-    Check.notNull(param, PARAM)
-        .is(keyIn(), sqlInfo.parameterPositions(), "no such parameter: \"${arg}\"");
+    Check.that(fresh).is(yes(), DIRTY_INSTANCE);
+    Check.notNull(param, PARAM).is(keyIn(), sqlInfo.parameterPositions(), NO_SUCH_PARAM);
     return bind(singletonMap(param, value));
   }
 
@@ -70,6 +73,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    */
   @SuppressWarnings("unchecked")
   public T bind(Object bean) {
+    Check.that(fresh).is(yes(), DIRTY_INSTANCE);
     Check.notNull(bean, BEAN).then(bindings::add);
     return (T) this;
   }
@@ -84,12 +88,25 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    */
   @SuppressWarnings("unchecked")
   public T bind(Map<String, Object> map) {
+    Check.that(fresh).is(yes(), DIRTY_INSTANCE);
     Check.notNull(map, MAP).then(bindings::add);
     return (T) this;
   }
 
+  /**
+   * Clears all bindings and allows the statement to be re-executed with new bindings.
+   */
+  public void reset() {
+    bindings.clear();
+    bound.clear();
+    fresh = true;
+  }
+
+  abstract void initialize();
+
   @SuppressWarnings({"unchecked", "rawtypes"})
   void applyBindings(PreparedStatement ps) throws Throwable {
+    fresh = false;
     for (Object obj : bindings) {
       if (obj instanceof Map map) {
         MapBinder binder = new MapBinder(
@@ -106,21 +123,17 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   }
 
   void close(PreparedStatement ps) {
-    if (ps != null) {
-      try {
-        ps.close();
-      } catch (SQLException e) {
-        throw KlojangSQLException.wrap(e, sqlInfo);
-      }
+    try {
+      ps.close();
+    } catch (SQLException e) {
+      throw KlojangSQLException.wrap(e, sqlInfo);
     }
   }
 
   private Supplier<KlojangSQLException> incompleteBindings() {
-    Set<NamedParameter> params = HashSet.newHashSet(sqlInfo.parameters().size());
-    params.addAll(sqlInfo.parameters());
-    params.removeAll(bound);
-    List<String> unbound = collectionToList(params, NamedParameter::name);
+    Set<String> all = new HashSet<>(sqlInfo.parameterPositions().keySet());
+    all.removeAll(collectionToSet(bound, NamedParameter::name));
     String fmt = "some query parameters have not been bound yet: %s";
-    return () -> new KlojangSQLException(String.format(fmt, unbound));
+    return () -> new KlojangSQLException(String.format(fmt, all));
   }
 }

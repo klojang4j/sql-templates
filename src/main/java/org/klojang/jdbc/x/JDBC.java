@@ -1,14 +1,13 @@
 package org.klojang.jdbc.x;
 
 import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.x.sql.SQLInfo;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 
 public final class JDBC {
 
-  private JDBC() {throw new UnsupportedOperationException();}
+  private JDBC() { throw new UnsupportedOperationException(); }
 
   public static String[] getColumnNames(ResultSet rs) {
     try {
@@ -19,6 +18,14 @@ public final class JDBC {
         colNames[i] = rsmd.getColumnLabel(i + 1);
       }
       return colNames;
+    } catch (SQLException e) {
+      throw new KlojangSQLException(e);
+    }
+  }
+
+  public static PreparedStatement getPreparedStatement(Connection con, SQLInfo sqlInfo) {
+    try {
+      return con.prepareStatement(sqlInfo.jdbcSQL());
     } catch (SQLException e) {
       throw new KlojangSQLException(e);
     }

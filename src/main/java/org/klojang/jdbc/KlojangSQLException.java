@@ -11,15 +11,19 @@ import java.sql.SQLException;
  *
  * @author Ayco Holleman
  */
-public class KlojangSQLException extends RuntimeException{
+public class KlojangSQLException extends RuntimeException {
 
   public static KlojangSQLException wrap(Throwable exc, SQLInfo sqlInfo) {
+    return wrap(exc, sqlInfo.jdbcSQL());
+  }
+
+  public static KlojangSQLException wrap(Throwable exc, String sql) {
     if (exc instanceof KlojangSQLException exc0) {
       return exc0;
     } else if (exc instanceof UncheckedException exc0) {
-      return wrap(exc0.unwrap(), sqlInfo);
+      return wrap(exc0.unwrap(), sql);
     }
-    return new KlojangSQLException(message(sqlInfo, exc), exc);
+    return new KlojangSQLException(message(exc, sql), exc);
   }
 
   public KlojangSQLException(String message) {
@@ -34,8 +38,8 @@ public class KlojangSQLException extends RuntimeException{
     super(message, cause);
   }
 
-  private static String message(SQLInfo sqlInfo, Throwable cause) {
-    return cause.toString() + " >>>> while executing: " + sqlInfo;
+  private static String message(Throwable cause, String sql) {
+    return cause.toString() + " **** while executing: " + sql;
   }
 
 }

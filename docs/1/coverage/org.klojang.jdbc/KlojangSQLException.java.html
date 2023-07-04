@@ -11,31 +11,35 @@ import java.sql.SQLException;
  *
  * @author Ayco Holleman
  */
-public class KlojangSQLException extends RuntimeException{
+public class KlojangSQLException extends RuntimeException {
 
   public static KlojangSQLException wrap(Throwable exc, SQLInfo sqlInfo) {
-<span class="nc bnc" id="L17" title="All 2 branches missed.">    if (exc instanceof KlojangSQLException exc0) {</span>
-<span class="nc" id="L18">      return exc0;</span>
-<span class="nc bnc" id="L19" title="All 2 branches missed.">    } else if (exc instanceof UncheckedException exc0) {</span>
-<span class="nc" id="L20">      return wrap(exc0.unwrap(), sqlInfo);</span>
+<span class="nc" id="L17">    return wrap(exc, sqlInfo.jdbcSQL());</span>
+  }
+
+  public static KlojangSQLException wrap(Throwable exc, String sql) {
+<span class="nc bnc" id="L21" title="All 2 branches missed.">    if (exc instanceof KlojangSQLException exc0) {</span>
+<span class="nc" id="L22">      return exc0;</span>
+<span class="nc bnc" id="L23" title="All 2 branches missed.">    } else if (exc instanceof UncheckedException exc0) {</span>
+<span class="nc" id="L24">      return wrap(exc0.unwrap(), sql);</span>
     }
-<span class="nc" id="L22">    return new KlojangSQLException(message(sqlInfo, exc), exc);</span>
+<span class="nc" id="L26">    return new KlojangSQLException(message(exc, sql), exc);</span>
   }
 
   public KlojangSQLException(String message) {
-<span class="nc" id="L26">    super(message);</span>
-<span class="nc" id="L27">  }</span>
-
-  public KlojangSQLException(Throwable cause) {
-<span class="nc" id="L30">    super(cause);</span>
+<span class="nc" id="L30">    super(message);</span>
 <span class="nc" id="L31">  }</span>
 
-  private KlojangSQLException(String message, Throwable cause) {
-<span class="nc" id="L34">    super(message, cause);</span>
+  public KlojangSQLException(Throwable cause) {
+<span class="nc" id="L34">    super(cause);</span>
 <span class="nc" id="L35">  }</span>
 
-  private static String message(SQLInfo sqlInfo, Throwable cause) {
-<span class="nc" id="L38">    return cause.toString() + &quot; &gt;&gt;&gt;&gt; while executing: &quot; + sqlInfo;</span>
+  private KlojangSQLException(String message, Throwable cause) {
+<span class="nc" id="L38">    super(message, cause);</span>
+<span class="nc" id="L39">  }</span>
+
+  private static String message(Throwable cause, String sql) {
+<span class="nc" id="L42">    return cause.toString() + &quot; **** while executing: &quot; + sql;</span>
   }
 
 }

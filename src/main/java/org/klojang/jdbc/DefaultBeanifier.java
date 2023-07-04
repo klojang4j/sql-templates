@@ -61,7 +61,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
       empty = !rs.next();
       return bean;
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, null);
+      throw new KlojangSQLException(t);
     }
   }
 
@@ -78,7 +78,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
         beans.add(toBean(rs, beanSupplier, channels));
       } while (++i < limit && (empty = !rs.next()));
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, null);
+      throw new KlojangSQLException(t);
     }
     return beans;
   }
@@ -100,7 +100,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
         beans.add(toBean(rs, beanSupplier, channels));
       } while (rs.next());
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, null);
+      throw new KlojangSQLException(t);
     }
     empty = true;
     return beans;
