@@ -45,7 +45,7 @@ public abstract sealed class AbstractSQL implements SQL
 
   public BeanBinder&lt;?&gt; getBeanBinder(Class&lt;?&gt; beanClass, SQLInfo sqlInfo) {
 <span class="fc" id="L47">    BeanBinder&lt;?&gt; binder = beanBinders.get(beanClass);</span>
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (binder == null) {</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">    if (binder == null) {</span>
 <span class="fc" id="L49">      binder = new BeanBinder&lt;&gt;(beanClass, sqlInfo.parameters(), bindInfo);</span>
 <span class="fc" id="L50">      beanBinders.put(beanClass, binder);</span>
     }

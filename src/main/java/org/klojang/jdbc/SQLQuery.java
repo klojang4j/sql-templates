@@ -6,6 +6,7 @@ import org.klojang.jdbc.x.rs.ColumnReaderFinder;
 import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.NameMapper;
+import org.klojang.util.ModulePrivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,10 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   private PreparedStatement ps;
   private ResultSet rs;
 
+  /**
+   * For internal use only.
+   */
+  @ModulePrivate
   public SQLQuery(Connection con, AbstractSQLSession sql, SQLInfo sqlInfo) {
     super(con, sql, sqlInfo);
   }

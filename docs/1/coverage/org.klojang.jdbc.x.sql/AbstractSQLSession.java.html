@@ -28,7 +28,7 @@ public abstract sealed class AbstractSQLSession implements SQLSession
 <span class="fc" id="L28">  }</span>
 
   public SQLQuery prepareQuery(Connection con) {
-<span class="nc" id="L31">    return prepare(con, SQLQuery::new);</span>
+<span class="fc" id="L31">    return prepare(con, SQLQuery::new);</span>
   }
 
   public SQLInsert prepareInsert(Connection con) {

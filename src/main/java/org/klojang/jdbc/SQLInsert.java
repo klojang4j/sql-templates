@@ -5,6 +5,7 @@ import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
 import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.util.ModulePrivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,10 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
   private PreparedStatement ps;
   private boolean generateKeys;
 
+  /**
+   * For internal use only.
+   */
+  @ModulePrivate
   public SQLInsert(Connection conn, AbstractSQLSession sql, SQLInfo sqlInfo) {
     super(conn, sql, sqlInfo);
     this.keys = new ArrayList<>(5);
@@ -109,7 +114,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
    * sure the map is modifiable.
    *
    * <p><b><i>Klojang JDBC</i> does not support INSERT statements that generate multiple
-   * keys or non-integer keys.</b>
+   * keys or non-integral keys.</b>
    *
    * @param map the map whose values to bind to the named parameters within the SQL
    *     statement
@@ -202,13 +207,13 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
   private void exec(boolean generateKeys) throws Throwable {
     if (ps == null) {
       this.generateKeys = generateKeys;
-      int i = generateKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
-      ps = con.prepareStatement(sqlInfo.jdbcSQL(), i);
+      int x = generateKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
+      ps = con.prepareStatement(sqlInfo.jdbcSQL(), x);
     } else if (this.generateKeys != generateKeys) {
       this.generateKeys = generateKeys;
-      int i = generateKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
+      int x = generateKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
       ps.close();
-      ps = con.prepareStatement(sqlInfo.jdbcSQL(), i);
+      ps = con.prepareStatement(sqlInfo.jdbcSQL(), x);
     }
     applyBindings(ps);
     ps.executeUpdate();
@@ -217,10 +222,12 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
   private void reset() {
     bindings.clear();
     keys.clear();
-    try {
-      ps.clearParameters();
-    } catch (SQLException e) {
-      throw KlojangSQLException.wrap(e, sqlInfo);
+    if (ps != null) {
+      try {
+        ps.clearParameters();
+      } catch (SQLException e) {
+        throw KlojangSQLException.wrap(e, sqlInfo);
+      }
     }
   }
 }

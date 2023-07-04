@@ -9,10 +9,10 @@ SQL Templates,org.klojang.jdbc.x.rs,ResultSetMethodLookup,180,0,2,0,33,0,5,0,4,0
 SQL Templates,org.klojang.jdbc.x.sql,SQLInfo,24,25,0,0,8,8,3,3,3,3
 SQL Templates,org.klojang.jdbc.x.sql,SQLTemplate,34,0,0,0,8,0,2,0,2,0
 SQL Templates,org.klojang.jdbc.x.sql,SQLNormalizer,20,199,3,25,2,50,3,19,0,8
-SQL Templates,org.klojang.jdbc.x.sql,AbstractSQL,63,63,5,1,12,14,7,4,4,4
+SQL Templates,org.klojang.jdbc.x.sql,AbstractSQL,63,63,4,2,12,14,6,5,4,4
 SQL Templates,org.klojang.jdbc.x.sql,SQLSkeletonSession,80,0,4,0,15,0,5,0,3,0
 SQL Templates,org.klojang.jdbc.x.sql,BasicSQLSession,4,14,0,0,1,4,1,2,1,2
-SQL Templates,org.klojang.jdbc.x.sql,AbstractSQLSession,20,19,0,0,4,6,3,4,3,4
+SQL Templates,org.klojang.jdbc.x.sql,AbstractSQLSession,14,25,0,0,3,7,2,5,2,5
 SQL Templates,org.klojang.jdbc.x.sql,NamedParameter,0,15,0,0,0,1,0,3,0,3
 SQL Templates,org.klojang.jdbc.x.sql,SQLSkeleton,24,0,0,0,7,0,2,0,2,0
 SQL Templates,org.klojang.jdbc.x.sql,BasicSQL,0,21,0,0,0,4,0,2,0,2
@@ -27,7 +27,7 @@ SQL Templates,org.klojang.jdbc.x.ps,ColumnWriterFinder,37,104,0,2,6,24,1,6,1,5
 SQL Templates,org.klojang.jdbc.x.ps,PreparedStatementMethod,27,149,2,2,7,46,3,6,1,6
 SQL Templates,org.klojang.jdbc,EmptyMappifier,20,0,0,0,8,0,8,0,8,0
 SQL Templates,org.klojang.jdbc,DefaultBeanifier,152,0,16,0,38,0,16,0,8,0
-SQL Templates,org.klojang.jdbc,SQLInsert,98,253,10,8,23,59,9,13,2,11
+SQL Templates,org.klojang.jdbc,SQLInsert,59,295,6,14,15,68,6,17,1,12
 SQL Templates,org.klojang.jdbc,SQLUpdate,31,0,0,0,9,0,3,0,3,0
 SQL Templates,org.klojang.jdbc,SQLInsertBuilder,64,187,4,4,11,29,6,8,3,7
 SQL Templates,org.klojang.jdbc,DefaultBeanifier.BeanIterator,31,0,2,0,6,0,4,0,3,0
@@ -45,7 +45,7 @@ SQL Templates,org.klojang.jdbc,SQLSession,40,4,4,0,7,1,7,1,5,1
 SQL Templates,org.klojang.jdbc,DefaultMappifier,143,0,16,0,37,0,16,0,8,0
 SQL Templates,org.klojang.jdbc,SQL,24,12,0,0,4,2,4,2,4,2
 SQL Templates,org.klojang.jdbc,KlojangSQLException,46,0,4,0,12,0,7,0,5,0
-SQL Templates,org.klojang.jdbc,SQLQuery,241,0,8,0,66,0,21,0,17,0
+SQL Templates,org.klojang.jdbc,SQLQuery,167,74,6,2,47,19,14,7,10,7
 SQL Templates,org.klojang.jdbc.x.ps.writer,LongWriterLookup,0,77,0,0,0,11,0,2,0,2
 SQL Templates,org.klojang.jdbc.x.ps.writer,BooleanWriterLookup,10,39,4,0,1,6,3,2,1,2
 SQL Templates,org.klojang.jdbc.x.ps.writer,LocalDateTimeReceivers,5,16,0,0,1,4,1,2,1,2

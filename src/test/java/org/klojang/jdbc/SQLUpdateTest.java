@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -19,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 //@Disabled
-public class SQLInsertTest {
+public class SQLUpdateTest {
 
-  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-db-insert-test";
+  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-db-update-test";
   private static final ThreadLocal<Connection> MY_CON = new ThreadLocal<>();
 
   public static class Person {
@@ -49,7 +48,7 @@ public class SQLInsertTest {
     }
   }
 
-  public SQLInsertTest() { }
+  public SQLUpdateTest() { }
 
   @BeforeEach
   public void before() throws IOException, SQLException {
@@ -153,27 +152,6 @@ public class SQLInsertTest {
       insert.bind(person, "id");
       insert.execute();
       assertTrue(person.getId() != Integer.MIN_VALUE);
-    }
-  }
-
-  @Test
-  public void test06() {
-    Person person0 = new Person("John");
-    person0.setId(Integer.MIN_VALUE);
-    try (SQLInsert insert = SQLSession
-        .prepareInsert()
-        .of(Person.class)
-        .into("TEST")
-        .excluding("id")
-        .prepare(MY_CON.get())) {
-      insert.insertAll(List.of(new Person("John"),
-          new Person("Mark"),
-          new Person("Edward")));
-    }
-    try (SQLQuery query = SQL.basic("SELECT COUNT(*) FROM TEST")
-        .session()
-        .prepareQuery(MY_CON.get())) {
-      assertEquals(3, query.getInt());
     }
   }
 }
