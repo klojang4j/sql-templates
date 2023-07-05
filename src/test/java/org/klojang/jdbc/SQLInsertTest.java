@@ -3,6 +3,7 @@ package org.klojang.jdbc;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.klojang.convert.Morph;
 import org.klojang.util.IOMethods;
 
 import java.io.IOException;
@@ -15,8 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 //@Disabled
 public class SQLInsertTest {
@@ -157,9 +157,7 @@ public class SQLInsertTest {
   }
 
   @Test
-  public void insertBatch00() {
-    Person person0 = new Person("John");
-    person0.setId(Integer.MIN_VALUE);
+  public void insertAll00() {
     try (SQLInsert insert = SQL
         .prepareInsert()
         .of(Person.class)
@@ -176,4 +174,50 @@ public class SQLInsertTest {
       assertEquals(3, query.getInt());
     }
   }
+
+  @Test
+  public void insertAllAndGetIDs00() {
+    long[] ids;
+    try (SQLInsert insert = SQL
+        .prepareInsert()
+        .of(Person.class)
+        .into("TEST")
+        .excluding("id")
+        .prepare(MY_CON.get())) {
+      ids = insert.insertAllAndGetIDs("id",
+          List.of(new Person("John"),
+              new Person("Mark"),
+              new Person("Edward")));
+    }
+    assertEquals(3, ids.length);
+    try (SQLQuery query = SQL.basic("SELECT ID FROM TEST")
+        .session()
+        .prepareQuery(MY_CON.get())) {
+      long[] actual = Morph.convert(query.firstColumn(), long[].class);
+      assertArrayEquals(ids, actual);
+    }
+  }
+
+  @Test
+  public void insertAllAndSetIDs00() {
+    List<Person> beans = List.of(new Person("John"),
+        new Person("Mark"),
+        new Person("Edward"));
+    try (SQLInsert insert = SQL
+        .prepareInsert()
+        .of(Person.class)
+        .into("TEST")
+        .excluding("id")
+        .prepare(MY_CON.get())) {
+      insert.insertAllAndSetIDs("id", beans);
+    }
+    int[] ids = beans.stream().mapToInt(Person::getId).toArray();
+    try (SQLQuery query = SQL.basic("SELECT ID FROM TEST")
+        .session()
+        .prepareQuery(MY_CON.get())) {
+      int[] actual = Morph.convert(query.firstColumn(), int[].class);
+      assertArrayEquals(ids, actual);
+    }
+  }
+
 }
