@@ -100,6 +100,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     bindings.clear();
     bound.clear();
     fresh = true;
+    initialize();
   }
 
   abstract void initialize();

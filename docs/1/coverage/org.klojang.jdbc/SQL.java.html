@@ -5,6 +5,8 @@ import org.klojang.jdbc.x.sql.BasicSQL;
 import org.klojang.jdbc.x.sql.SQLSkeleton;
 import org.klojang.jdbc.x.sql.SQLTemplate;
 
+import java.sql.Connection;
+
 /**
  * &lt;p&gt;Encapsulates a user-provided SQL query. The query string can be parametrized in
  * three qualitatively ways. For each of these variants a different implementation is
@@ -82,7 +84,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql) {
-<span class="fc" id="L85">    return basic(sql, new BindInfo() { });</span>
+<span class="fc" id="L87">    return basic(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -94,7 +96,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql, BindInfo bindInfo) {
-<span class="fc" id="L97">    return new BasicSQL(sql, bindInfo);</span>
+<span class="fc" id="L99">    return new BasicSQL(sql, bindInfo);</span>
   }
 
   /**
@@ -105,7 +107,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql) {
-<span class="nc" id="L108">    return template(sql, new BindInfo() { });</span>
+<span class="nc" id="L110">    return template(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -117,7 +119,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql, BindInfo bindInfo) {
-<span class="nc" id="L120">    return new SQLTemplate(sql, bindInfo);</span>
+<span class="nc" id="L122">    return new SQLTemplate(sql, bindInfo);</span>
   }
 
   /**
@@ -130,7 +132,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql) {
-<span class="nc" id="L133">    return skeleton(sql, new BindInfo() { });</span>
+<span class="nc" id="L135">    return skeleton(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -144,7 +146,66 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L147">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="nc" id="L149">    return new SQLSkeleton(sql, bindInfo);</span>
+  }
+
+  /**
+   * Returns a {@code SQLQuery} instance that allows you to provide values for any named
+   * parameters (&quot;binding&quot;) within the SQL and then execute the query. The SQL is not
+   * supposed to contain &lt;i&gt;Klojang Templates&lt;/i&gt; variables. This method is a shortcut
+   * for:
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * basic(sql, bindInfo).session().prepareQuery(con)
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * @param con the JDBC connection to use for the query
+   * @return a {@code SQLQuery} instance
+   */
+  static SQLQuery prepareQuery(Connection con, String sql, BindInfo bindInfo) {
+<span class="nc" id="L165">    return basic(sql, bindInfo).session().prepareQuery(con);</span>
+  }
+
+  /**
+   * Returns a {@code SQLInsert} instance that allows you to provide values for any named
+   * parameters (&quot;binding&quot;) within the SQL and then execute the INSERT statement. The SQL
+   * is not supposed to contain &lt;i&gt;Klojang Templates&lt;/i&gt; variables. This method is a
+   * shortcut for:
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * basic(sql, bindInfo).session().prepareInsert(con)
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * @param con the JDBC connection to use for the query
+   * @return a {@code SQLInsert} instance
+   */
+  static SQLInsert prepareInsert(Connection con, String sql, BindInfo bindInfo) {
+<span class="nc" id="L181">    return basic(sql, bindInfo).session().prepareInsert(con);</span>
+  }
+
+  /**
+   * Returns a {@code SQLUpdate} instance that allows you to provide values for any named
+   * parameters (&quot;binding&quot;) within the SQL and then execute the UPDATE or DELETE
+   * statement. The SQL is not supposed to contain &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
+   * This method is a shortcut for:
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * basic(sql, bindInfo).session().prepareUpdate(con)
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * @param con the JDBC connection to use for the query
+   * @return a {@code SQLUpdate} instance
+   */
+  static SQLUpdate prepareUpdate(Connection con, String sql, BindInfo bindInfo) {
+<span class="nc" id="L197">    return basic(sql, bindInfo).session().prepareUpdate(con);</span>
+  }
+
+  /**
+   * Returns an {@link SQLInsertBuilder} that enables you to easily configure an SQL
+   * INSERT statement.
+   *
+   * @return an {@code SQLInsertBuilder} that enables you to easily configure an SQL
+   *     INSERT statement
+   */
+  static SQLInsertBuilder prepareInsert() {
+<span class="fc" id="L208">    return new SQLInsertBuilder();</span>
   }
 
   /**

@@ -5,6 +5,8 @@ import org.klojang.jdbc.x.sql.BasicSQL;
 import org.klojang.jdbc.x.sql.SQLSkeleton;
 import org.klojang.jdbc.x.sql.SQLTemplate;
 
+import java.sql.Connection;
+
 /**
  * <p>Encapsulates a user-provided SQL query. The query string can be parametrized in
  * three qualitatively ways. For each of these variants a different implementation is
@@ -145,6 +147,65 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
     return new SQLSkeleton(sql, bindInfo);
+  }
+
+  /**
+   * Returns a {@code SQLQuery} instance that allows you to provide values for any named
+   * parameters ("binding") within the SQL and then execute the query. The SQL is not
+   * supposed to contain <i>Klojang Templates</i> variables. This method is a shortcut
+   * for:
+   * <blockquote><pre>{@code
+   * basic(sql, bindInfo).session().prepareQuery(con)
+   * }</pre></blockquote>
+   *
+   * @param con the JDBC connection to use for the query
+   * @return a {@code SQLQuery} instance
+   */
+  static SQLQuery prepareQuery(Connection con, String sql, BindInfo bindInfo) {
+    return basic(sql, bindInfo).session().prepareQuery(con);
+  }
+
+  /**
+   * Returns a {@code SQLInsert} instance that allows you to provide values for any named
+   * parameters ("binding") within the SQL and then execute the INSERT statement. The SQL
+   * is not supposed to contain <i>Klojang Templates</i> variables. This method is a
+   * shortcut for:
+   * <blockquote><pre>{@code
+   * basic(sql, bindInfo).session().prepareInsert(con)
+   * }</pre></blockquote>
+   *
+   * @param con the JDBC connection to use for the query
+   * @return a {@code SQLInsert} instance
+   */
+  static SQLInsert prepareInsert(Connection con, String sql, BindInfo bindInfo) {
+    return basic(sql, bindInfo).session().prepareInsert(con);
+  }
+
+  /**
+   * Returns a {@code SQLUpdate} instance that allows you to provide values for any named
+   * parameters ("binding") within the SQL and then execute the UPDATE or DELETE
+   * statement. The SQL is not supposed to contain <i>Klojang Templates</i> variables.
+   * This method is a shortcut for:
+   * <blockquote><pre>{@code
+   * basic(sql, bindInfo).session().prepareUpdate(con)
+   * }</pre></blockquote>
+   *
+   * @param con the JDBC connection to use for the query
+   * @return a {@code SQLUpdate} instance
+   */
+  static SQLUpdate prepareUpdate(Connection con, String sql, BindInfo bindInfo) {
+    return basic(sql, bindInfo).session().prepareUpdate(con);
+  }
+
+  /**
+   * Returns an {@link SQLInsertBuilder} that enables you to easily configure an SQL
+   * INSERT statement.
+   *
+   * @return an {@code SQLInsertBuilder} that enables you to easily configure an SQL
+   *     INSERT statement
+   */
+  static SQLInsertBuilder prepareInsert() {
+    return new SQLInsertBuilder();
   }
 
   /**

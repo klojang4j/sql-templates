@@ -144,7 +144,7 @@ public class SQLInsertTest {
   public void test05() {
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
-    try (SQLInsert insert = SQLSession
+    try (SQLInsert insert = SQL
         .prepareInsert()
         .of(Person.class)
         .into("TEST")
@@ -157,16 +157,16 @@ public class SQLInsertTest {
   }
 
   @Test
-  public void test06() {
+  public void insertBatch00() {
     Person person0 = new Person("John");
     person0.setId(Integer.MIN_VALUE);
-    try (SQLInsert insert = SQLSession
+    try (SQLInsert insert = SQL
         .prepareInsert()
         .of(Person.class)
         .into("TEST")
         .excluding("id")
         .prepare(MY_CON.get())) {
-      insert.insertBatch(List.of(new Person("John"),
+      insert.insertAll(List.of(new Person("John"),
           new Person("Mark"),
           new Person("Edward")));
     }

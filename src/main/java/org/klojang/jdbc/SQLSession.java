@@ -146,7 +146,4 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   SQLUpdate prepareUpdate(Connection con);
 
-  static SQLInsertBuilder prepareInsert() {
-    return new SQLInsertBuilder();
-  }
 }

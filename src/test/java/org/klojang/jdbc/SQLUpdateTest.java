@@ -143,7 +143,7 @@ public class SQLUpdateTest {
   public void test05() {
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
-    try (SQLInsert insert = SQLSession
+    try (SQLInsert insert = SQL
         .prepareInsert()
         .of(Person.class)
         .into("TEST")

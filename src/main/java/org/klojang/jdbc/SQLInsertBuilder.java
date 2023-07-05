@@ -14,49 +14,85 @@ import java.util.Set;
 import static java.util.stream.Collectors.joining;
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.check.Tag.PROPERTIES;
 import static org.klojang.util.ObjectMethods.ifNull;
 import static org.klojang.util.ObjectMethods.isEmpty;
 import static org.klojang.util.StringMethods.append;
 
-public class SQLInsertBuilder {
+/**
+ * A {@code Builder} class for {@link SQLInsert} instances. This is the only class in
+ * <i>Klojang JDBC</i> that deviates from its design decision to <i>not</i> provide
+ * fluent APIs to mimic SQL statements (since we already have SQL for that). In this
+ * particular case, however, it provides just to must convenience for the user to let
+ * slip.
+ */
+public final class SQLInsertBuilder {
 
   private Class<?> beanClass;
   private String tableName;
   private String[] properties;
   private boolean exclude;
   private NameMapper mapper = NameMapper.AS_IS;
-  private BindInfo bindInfo = new BindInfo() {};
+  private BindInfo bindInfo = new BindInfo() { };
 
-  SQLInsertBuilder() {}
+  SQLInsertBuilder() { }
 
+  /**
+   * Sets the type of the beans to be persisted.
+   *
+   * @param beanClass the type of the beans to be persisted
+   * @return this {@code SQLInsertBuilder}
+   */
   public SQLInsertBuilder of(Class<?> beanClass) {
     this.beanClass = Check.notNull(beanClass).ok();
     return this;
   }
 
+  /**
+   * Sets the table name to insert the data into.
+   *
+   * @param tableName the table name to insert the data into
+   * @return this {@code SQLInsertBuilder}
+   */
   public SQLInsertBuilder into(String tableName) {
     this.tableName = Check.that(tableName).isNot(empty()).ok();
     return this;
   }
 
+  /**
+   * Sets the properties and (corresponding columns) to exclude from the INSERT statement.
+   * You would most likely at least want to exclude the property corresponding to an
+   * auto-increment column.
+   *
+   * @param properties the properties and (corresponding columns) to exclude from the
+   *     INSERT statement
+   * @return this {@code SQLInsertBuilder}
+   */
   public SQLInsertBuilder excluding(String... properties) {
-    this.properties = Check.notNull(properties, "properties").ok();
+    this.properties = Check.notNull(properties, PROPERTIES).ok();
     this.exclude = true;
     return this;
   }
 
+  /**
+   * Sets the properties and (corresponding columns) to include in the INSERT statement.
+   *
+   * @param properties the properties and (corresponding columns) to include in the
+   *     INSERT statement
+   * @return this {@code SQLInsertBuilder}
+   */
   public SQLInsertBuilder including(String... properties) {
-    this.properties = Check.notNull(properties, "properties").ok();
+    this.properties = Check.notNull(properties, PROPERTIES).ok();
     this.exclude = false;
     return this;
   }
 
   /**
-   * Sets the {@code NameMapper} to be used when mapping bean properties to column names.
-   * Beware of the direction of the mappings: <i>from</i> bean properties <i>to</i> column
-   * names.
+   * Sets the property-to-column mapper to be used when mapping bean properties to column
+   * names. Beware of the direction of the mappings: <i>from</i> bean properties <i>to</i>
+   * column names.
    *
-   * @param propertyToColumnMapper
+   * @param propertyToColumnMapper the property-to-column mapper
    * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder withMapper(NameMapper propertyToColumnMapper) {
@@ -65,9 +101,10 @@ public class SQLInsertBuilder {
   }
 
   /**
-   * Sets the {@link BindInfo} object to be used.
+   * Sets the {@link BindInfo} object to be used to fine-tune the binding process
    *
-   * @param bindInfo
+   * @param bindInfo the {@code BindInfo} object to be used to fine-tune the binding
+   *     process
    * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder withBindInfo(BindInfo bindInfo) {
@@ -75,6 +112,13 @@ public class SQLInsertBuilder {
     return this;
   }
 
+  /**
+   * Creates and returns a {@code SQLInsert} instance using the input provided via the
+   * other methods
+   *
+   * @param con the JDBC {@code Connection} to use for the INSERT statement
+   * @return a {@code SQLInsert} instance
+   */
   public SQLInsert prepare(Connection con) {
     Check.notNull(con);
     Check.on(STATE, beanClass, "beanClass").is(notNull());
@@ -104,7 +148,7 @@ public class SQLInsertBuilder {
   }
 
   private ObjectCheck<String, IllegalStateException> checkProperty(Set<String> props,
-                                                                   String prop) {
+      String prop) {
     return Check.on(STATE, prop)
         .isNot(empty(), "empty property name not allowed")
         .is(in(), props, "no such property in %s: %s", beanClass.getSimpleName(), prop);
