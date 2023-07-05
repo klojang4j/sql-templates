@@ -35,7 +35,7 @@ SQL Templates,org.klojang.jdbc,DefaultMappifier.MapIterator,32,0,2,0,6,0,4,0,3,0
 SQL Templates,org.klojang.jdbc,SQLInsertBuilder.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
 SQL Templates,org.klojang.jdbc,EmptyBeanifier,17,0,0,0,7,0,7,0,7,0
 SQL Templates,org.klojang.jdbc,SQLStatement,46,177,0,4,5,39,2,9,2,7
-SQL Templates,org.klojang.jdbc,BeanifierFactory,109,0,6,0,23,0,11,0,8,0
+SQL Templates,org.klojang.jdbc,BeanifierFactory,108,0,6,0,24,0,11,0,8,0
 SQL Templates,org.klojang.jdbc,BindInfo,2,2,0,0,1,1,1,1,1,1
 SQL Templates,org.klojang.jdbc,MappifierFactory,60,0,6,0,15,0,6,0,3,0
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1

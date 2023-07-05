@@ -24,14 +24,16 @@ import org.klojang.jdbc.x.sql.SQLTemplate;
  * &lt;p&gt;Named parameters are placeholders for, and will ultimately be replaced by regular
  * JDBC parameters (that is: question marks). Thus, named parameters can and should be
  * used wherever you would ordinarily use regular JDBC parameters. An instance of this
- * implementation can be obtained via the {@link #basic(String) parametrized()}
- * methods of the {@code SQL} interface. You should also preferably use this
- * implementation for completely static SQL.
+ * implementation can be obtained via the {@link #basic(String) parametrized()} methods of
+ * the {@code SQL} interface. You should also preferably use this implementation for
+ * completely static SQL.
  *
  * &lt;h2&gt;SQL Templates&lt;/h2&gt;
  * &lt;p&gt;A classic example of something that you often want to, but cannot parametrize with
  * JDBC are the column(s) in the ORDER BY clause. &lt;i&gt;Klojang JDBC&lt;/i&gt; lets you do this
- * using &lt;a href=&quot;https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html&quot;&gt;Klojang Template&lt;/a&gt; variables. For example:
+ * using &lt;a
+ * href=&quot;https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html&quot;&gt;Klojang
+ * Template&lt;/a&gt; variables. For example:
  * &lt;blockquote&gt;&lt;pre&gt;{@code
  * SELECT *
  *   FROM PERSON
@@ -58,6 +60,16 @@ import org.klojang.jdbc.x.sql.SQLTemplate;
  * SQL template has been rendered. This makes SQL skeletons less efficient, but more
  * dynamic than SQL templates.
  *
+ * &lt;h2&gt;SQL Injection&lt;/h2&gt;
+ * &lt;p&gt;As mentioned, named parameters are ultimately just placeholders for standard JDBC
+ * parameters (question marks). Therefore, using them carries no risk of SQL injection.
+ * This is not the case for SQL templates &amp;#8212; that is, SQL containing
+ * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. They can appear anywhere in your SQL template, and
+ * &lt;i&gt;Klojang JDBC&lt;/i&gt; does not make any attempt to parse, analyse or escape them.
+ * Therefore, the values you provide for the variables in a SQL template should preferably
+ * be hard-coded somewhere in your own program. Accepting values of unknown origin is a
+ * bad idea.
+ *
  * @see org.klojang.templates.Template
  * @see org.klojang.templates.RenderSession
  */
@@ -70,7 +82,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql) {
-<span class="fc" id="L73">    return basic(sql, new BindInfo() {});</span>
+<span class="fc" id="L85">    return basic(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -82,7 +94,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql, BindInfo bindInfo) {
-<span class="fc" id="L85">    return new BasicSQL(sql, bindInfo);</span>
+<span class="fc" id="L97">    return new BasicSQL(sql, bindInfo);</span>
   }
 
   /**
@@ -93,7 +105,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql) {
-<span class="nc" id="L96">    return template(sql, new BindInfo() {});</span>
+<span class="nc" id="L108">    return template(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -105,7 +117,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql, BindInfo bindInfo) {
-<span class="nc" id="L108">    return new SQLTemplate(sql, bindInfo);</span>
+<span class="nc" id="L120">    return new SQLTemplate(sql, bindInfo);</span>
   }
 
   /**
@@ -118,7 +130,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql) {
-<span class="nc" id="L121">    return skeleton(sql, new BindInfo() {});</span>
+<span class="nc" id="L133">    return skeleton(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -132,7 +144,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L135">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="nc" id="L147">    return new SQLSkeleton(sql, bindInfo);</span>
   }
 
   /**

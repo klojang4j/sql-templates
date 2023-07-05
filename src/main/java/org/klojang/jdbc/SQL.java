@@ -24,14 +24,16 @@ import org.klojang.jdbc.x.sql.SQLTemplate;
  * <p>Named parameters are placeholders for, and will ultimately be replaced by regular
  * JDBC parameters (that is: question marks). Thus, named parameters can and should be
  * used wherever you would ordinarily use regular JDBC parameters. An instance of this
- * implementation can be obtained via the {@link #basic(String) parametrized()}
- * methods of the {@code SQL} interface. You should also preferably use this
- * implementation for completely static SQL.
+ * implementation can be obtained via the {@link #basic(String) parametrized()} methods of
+ * the {@code SQL} interface. You should also preferably use this implementation for
+ * completely static SQL.
  *
  * <h2>SQL Templates</h2>
  * <p>A classic example of something that you often want to, but cannot parametrize with
  * JDBC are the column(s) in the ORDER BY clause. <i>Klojang JDBC</i> lets you do this
- * using <a href="https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html">Klojang Template</a> variables. For example:
+ * using <a
+ * href="https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html">Klojang
+ * Template</a> variables. For example:
  * <blockquote><pre>{@code
  * SELECT *
  *   FROM PERSON
@@ -58,6 +60,16 @@ import org.klojang.jdbc.x.sql.SQLTemplate;
  * SQL template has been rendered. This makes SQL skeletons less efficient, but more
  * dynamic than SQL templates.
  *
+ * <h2>SQL Injection</h2>
+ * <p>As mentioned, named parameters are ultimately just placeholders for standard JDBC
+ * parameters (question marks). Therefore, using them carries no risk of SQL injection.
+ * This is not the case for SQL templates &#8212; that is, SQL containing
+ * <i>Klojang Templates</i> variables. They can appear anywhere in your SQL template, and
+ * <i>Klojang JDBC</i> does not make any attempt to parse, analyse or escape them.
+ * Therefore, the values you provide for the variables in a SQL template should preferably
+ * be hard-coded somewhere in your own program. Accepting values of unknown origin is a
+ * bad idea.
+ *
  * @see org.klojang.templates.Template
  * @see org.klojang.templates.RenderSession
  */
@@ -70,7 +82,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql) {
-    return basic(sql, new BindInfo() {});
+    return basic(sql, new BindInfo() { });
   }
 
   /**
@@ -93,7 +105,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql) {
-    return template(sql, new BindInfo() {});
+    return template(sql, new BindInfo() { });
   }
 
   /**
@@ -118,7 +130,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql) {
-    return skeleton(sql, new BindInfo() {});
+    return skeleton(sql, new BindInfo() { });
   }
 
   /**
