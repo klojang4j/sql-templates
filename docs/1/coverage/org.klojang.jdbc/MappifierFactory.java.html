@@ -12,55 +12,63 @@ import org.klojang.jdbc.x.rs.MapChannel;
 import static org.klojang.jdbc.x.rs.MapChannel.createChannels;
 
 /**
- * A factory for {@link ResultSetMappifier} instances. The {@link ResultSet} objects
- * passed to a {@code MappifierFactory} must all be created from the same SQL query. More
- * precisely, they may have been created from different queries, but the &lt;i&gt;number&lt;/i&gt; and
- * the &lt;i&gt;types&lt;/i&gt; of the columns in their SELECT clause must be the same. The first
- * {@link ResultSet} passed to a {@code MappifierFactory} is used the determine the key
- * names. Subsequent {@link ResultSet} objects need not have the same column
- * &lt;i&gt;names&lt;/i&gt;.
+ * &lt;p&gt;A factory for {@link ResultSetMappifier} instances.
+ * {@link ResultSet} objects passed to a single {@code MappifierFactory} instance must all
+ * be created from the same SQL query. The very first {@code ResultSet} passed to its
+ * {@link #getMappifier(ResultSet) getMappifier()} method is used to configure the
+ * conversion from the {@code ResultSet} into a JavaBean. Subsequent calls to
+ * {@code getMappifier()} will use the same configuration. Passing heterogeneous result
+ * set to one and the same {@code MappifierFactory} instance will produce undefined
+ * results.
+ *
+ * &lt;p&gt;(More precisely: all result sets must have the same number of columns and the same
+ * column types in the same order. Column names/labels do in fact not matter. The
+ * column-to-key mapping is set up and fixed after the first call to
+ * {@code getMappifier()}. Thus, strictly speaking, the SQL query itself is not the
+ * defining factor.)
  *
  * @author Ayco Holleman
  */
 public final class MappifierFactory {
 
-<span class="nc" id="L27">  private final ReentrantLock lock = new ReentrantLock();</span>
-<span class="nc" id="L28">  private final AtomicReference&lt;MapChannel&lt;?&gt;[]&gt; ref = new AtomicReference&lt;&gt;();</span>
+<span class="nc" id="L34">  private final AtomicReference&lt;MapChannel&lt;?&gt;[]&gt; ref = new AtomicReference&lt;&gt;();</span>
+<span class="nc" id="L35">  private final ReentrantLock lock = new ReentrantLock();</span>
+
   private final NameMapper mapper;
 
   /**
-   * Creates a new {@code MappifierFactory}. Column names will be mapped
-   * {@link NameMapper#AS_IS as-is} to map keys.
+   * Creates a new {@code MappifierFactory}. Column names will be mapped as-is to map
+   * keys.
    */
   public MappifierFactory() {
-<span class="nc" id="L36">    this(NameMapper.AS_IS);</span>
-<span class="nc" id="L37">  }</span>
+<span class="nc" id="L44">    this(NameMapper.AS_IS);</span>
+<span class="nc" id="L45">  }</span>
 
   /**
    * Creates a new {@code MappifierFactory}.
    *
    * @param columnToKeyMapper a {@code NameMapper} mapping column names to map keys
    */
-<span class="nc" id="L44">  public MappifierFactory(NameMapper columnToKeyMapper) {</span>
-<span class="nc" id="L45">    this.mapper = Check.notNull(columnToKeyMapper).ok();</span>
-<span class="nc" id="L46">  }</span>
+<span class="nc" id="L52">  public MappifierFactory(NameMapper columnToKeyMapper) {</span>
+<span class="nc" id="L53">    this.mapper = Check.notNull(columnToKeyMapper).ok();</span>
+<span class="nc" id="L54">  }</span>
 
-  public ResultSetMappifier getResultSetMappifier(ResultSet rs) throws SQLException {
-<span class="nc bnc" id="L49" title="All 2 branches missed.">    if (!rs.next()) {</span>
-<span class="nc" id="L50">      return EmptyMappifier.INSTANCE;</span>
+  public ResultSetMappifier getMappifier(ResultSet rs) throws SQLException {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">    if (!rs.next()) {</span>
+<span class="nc" id="L58">      return EmptyMappifier.INSTANCE;</span>
     }
     MapChannel&lt;?&gt;[] channels;
-<span class="nc bnc" id="L53" title="All 2 branches missed.">    if ((channels = ref.getPlain()) == null) {</span>
-<span class="nc" id="L54">      lock.lock();</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">    if ((channels = ref.getPlain()) == null) {</span>
+<span class="nc" id="L62">      lock.lock();</span>
       try {
-<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (ref.get() == null) {</span>
-<span class="nc" id="L57">          ref.set(channels = createChannels(rs, mapper));</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (ref.get() == null) {</span>
+<span class="nc" id="L65">          ref.set(channels = createChannels(rs, mapper));</span>
         }
       } finally {
-<span class="nc" id="L60">        lock.unlock();</span>
+<span class="nc" id="L68">        lock.unlock();</span>
       }
     }
-<span class="nc" id="L63">    return new DefaultMappifier(rs, channels);</span>
+<span class="nc" id="L71">    return new DefaultMappifier(rs, channels);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

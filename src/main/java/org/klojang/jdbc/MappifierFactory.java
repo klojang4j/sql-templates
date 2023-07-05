@@ -12,25 +12,33 @@ import org.klojang.jdbc.x.rs.MapChannel;
 import static org.klojang.jdbc.x.rs.MapChannel.createChannels;
 
 /**
- * A factory for {@link ResultSetMappifier} instances. The {@link ResultSet} objects
- * passed to a {@code MappifierFactory} must all be created from the same SQL query. More
- * precisely, they may have been created from different queries, but the <i>number</i> and
- * the <i>types</i> of the columns in their SELECT clause must be the same. The first
- * {@link ResultSet} passed to a {@code MappifierFactory} is used the determine the key
- * names. Subsequent {@link ResultSet} objects need not have the same column
- * <i>names</i>.
+ * <p>A factory for {@link ResultSetMappifier} instances.
+ * {@link ResultSet} objects passed to a single {@code MappifierFactory} instance must all
+ * be created from the same SQL query. The very first {@code ResultSet} passed to its
+ * {@link #getMappifier(ResultSet) getMappifier()} method is used to configure the
+ * conversion from the {@code ResultSet} into a JavaBean. Subsequent calls to
+ * {@code getMappifier()} will use the same configuration. Passing heterogeneous result
+ * set to one and the same {@code MappifierFactory} instance will produce undefined
+ * results.
+ *
+ * <p>(More precisely: all result sets must have the same number of columns and the same
+ * column types in the same order. Column names/labels do in fact not matter. The
+ * column-to-key mapping is set up and fixed after the first call to
+ * {@code getMappifier()}. Thus, strictly speaking, the SQL query itself is not the
+ * defining factor.)
  *
  * @author Ayco Holleman
  */
 public final class MappifierFactory {
 
-  private final ReentrantLock lock = new ReentrantLock();
   private final AtomicReference<MapChannel<?>[]> ref = new AtomicReference<>();
+  private final ReentrantLock lock = new ReentrantLock();
+
   private final NameMapper mapper;
 
   /**
-   * Creates a new {@code MappifierFactory}. Column names will be mapped
-   * {@link NameMapper#AS_IS as-is} to map keys.
+   * Creates a new {@code MappifierFactory}. Column names will be mapped as-is to map
+   * keys.
    */
   public MappifierFactory() {
     this(NameMapper.AS_IS);
@@ -45,7 +53,7 @@ public final class MappifierFactory {
     this.mapper = Check.notNull(columnToKeyMapper).ok();
   }
 
-  public ResultSetMappifier getResultSetMappifier(ResultSet rs) throws SQLException {
+  public ResultSetMappifier getMappifier(ResultSet rs) throws SQLException {
     if (!rs.next()) {
       return EmptyMappifier.INSTANCE;
     }

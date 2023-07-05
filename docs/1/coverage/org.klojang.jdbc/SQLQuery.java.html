@@ -220,7 +220,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
 <span class="nc" id="L220">      return session</span>
 <span class="nc" id="L221">          .getSQL()</span>
 <span class="nc" id="L222">          .getMappifierFactory(mapper)</span>
-<span class="nc" id="L223">          .getResultSetMappifier(resultSet);</span>
+<span class="nc" id="L223">          .getMappifier(resultSet);</span>
 <span class="nc" id="L224">    } catch (Throwable t) {</span>
 <span class="nc" id="L225">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }

@@ -27,7 +27,7 @@ SQL Templates,org.klojang.jdbc.x.ps,ColumnWriterFinder,37,104,0,2,6,24,1,6,1,5
 SQL Templates,org.klojang.jdbc.x.ps,PreparedStatementMethod,27,149,2,2,7,46,3,6,1,6
 SQL Templates,org.klojang.jdbc,EmptyMappifier,20,0,0,0,8,0,8,0,8,0
 SQL Templates,org.klojang.jdbc,DefaultBeanifier,155,0,16,0,38,0,16,0,8,0
-SQL Templates,org.klojang.jdbc,SQLInsert,56,285,3,13,16,63,5,16,2,11
+SQL Templates,org.klojang.jdbc,SQLInsert,60,288,3,13,16,65,7,17,4,12
 SQL Templates,org.klojang.jdbc,SQLUpdate,39,0,0,0,14,0,4,0,4,0
 SQL Templates,org.klojang.jdbc,SQLInsertBuilder,64,187,4,4,11,29,6,8,3,7
 SQL Templates,org.klojang.jdbc,DefaultBeanifier.BeanIterator,31,0,2,0,6,0,4,0,3,0

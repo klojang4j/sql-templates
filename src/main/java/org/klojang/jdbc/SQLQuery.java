@@ -220,7 +220,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       return session
           .getSQL()
           .getMappifierFactory(mapper)
-          .getResultSetMappifier(resultSet);
+          .getMappifier(resultSet);
     } catch (Throwable t) {
       throw KlojangSQLException.wrap(t, sqlInfo);
     }

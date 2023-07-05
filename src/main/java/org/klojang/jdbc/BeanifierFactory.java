@@ -15,9 +15,9 @@ import java.util.function.Supplier;
 import static org.klojang.jdbc.x.rs.BeanChannel.createChannels;
 
 /**
- * <p>A factory for {@link ResultSetBeanifier} instances. All
- * {@link ResultSet} objects passed to a single {@code BeanifierFactory} instance must be
- * created from the same SQL query. The very first {@code ResultSet} passed to its
+ * <p>A factory for {@link ResultSetBeanifier} instances.
+ * {@link ResultSet} objects passed to a single {@code BeanifierFactory} instance must all
+ * be created from the same SQL query. The very first {@code ResultSet} passed to its
  * {@link #getBeanifier(ResultSet) getBeanifier()} method is used to configure the
  * conversion from the {@code ResultSet} into a JavaBean. Subsequent calls to
  * {@code getBeanifier()} will use the same configuration. Passing heterogeneous result

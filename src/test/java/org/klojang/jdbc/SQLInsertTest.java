@@ -166,7 +166,7 @@ public class SQLInsertTest {
         .into("TEST")
         .excluding("id")
         .prepare(MY_CON.get())) {
-      insert.insertAll(List.of(new Person("John"),
+      insert.insertBatch(List.of(new Person("John"),
           new Person("Mark"),
           new Person("Edward")));
     }
