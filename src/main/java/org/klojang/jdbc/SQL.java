@@ -64,11 +64,11 @@ import org.klojang.jdbc.x.sql.SQLTemplate;
  * <p>As mentioned, named parameters are ultimately just placeholders for standard JDBC
  * parameters (question marks). Therefore, using them carries no risk of SQL injection.
  * This is not the case for SQL templates &#8212; that is, SQL containing
- * <i>Klojang Templates</i> variables. They can appear anywhere in your SQL template, and
+ * <i>Klojang Templates</i> variables. They can appear anywhere in a SQL template, and
  * <i>Klojang JDBC</i> does not make any attempt to parse, analyse or escape them.
- * Therefore, the values you provide for the variables in a SQL template should preferably
- * be hard-coded somewhere in your own program. Accepting values of unknown origin is a
- * bad idea.
+ * Therefore, the values you provide for SQL template variables should preferably be
+ * hard-coded somewhere in your own program. Accepting values of unknown origin is a bad
+ * idea.
  *
  * @see org.klojang.templates.Template
  * @see org.klojang.templates.RenderSession
