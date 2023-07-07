@@ -27,11 +27,11 @@ public final class MapBinder {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void bindMap(
-        Map<String, Object> map,
-        PreparedStatement ps,
-        Collection<NamedParameter> bound)
-        throws Throwable {
-    ColumnWriterFinder negotiator = ColumnWriterFinder.getInstance();
+      Map<String, Object> map,
+      PreparedStatement ps,
+      Collection<NamedParameter> bound)
+      throws Throwable {
+    ColumnWriterFinder writerFinder = ColumnWriterFinder.getInstance();
     for (NamedParameter param : params) {
       String key = param.name();
       if (!map.containsKey(key)) {
@@ -42,13 +42,13 @@ public final class MapBinder {
       if (value == null) {
         param.positions().forEachThrowing(i -> ps.setString(i, null));
       } else if (value != ABSENT) {
-        ColumnWriter receiver;
-        if (value instanceof Enum && bindInfo.bindEnumUsingToString(key)) {
-          receiver = EnumWriterLookup.ENUM_TO_STRING;
+        ColumnWriter writer;
+        if (value instanceof Enum && bindInfo.saveEnumAsString(Map.class, key)) {
+          writer = EnumWriterLookup.ENUM_TO_STRING;
         } else {
-          receiver = negotiator.getDefaultReceiver(value.getClass());
+          writer = writerFinder.getDefaultWriter(value.getClass());
         }
-        Object output = receiver.getParamValue(value);
+        Object output = writer.getParamValue(value);
         if (LOG.isDebugEnabled()) {
           if (value == output) {
             LOG.debug("-> Parameter \"{}\": {}", key, output);
@@ -56,7 +56,7 @@ public final class MapBinder {
             LOG.debug("-> Parameter \"{}\": {} (map value: {})", key, output, value);
           }
         }
-        param.positions().forEachThrowing(i -> receiver.bind(ps, i, output));
+        param.positions().forEachThrowing(i -> writer.bind(ps, i, output));
       }
     }
   }

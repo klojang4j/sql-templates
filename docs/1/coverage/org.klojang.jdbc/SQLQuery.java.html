@@ -165,7 +165,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    *
    * @return the values of the first column in the result set
    */
-<span class="nc" id="L168">  public List&lt;String&gt; firstColumn() { return firstColumn(String.class); }</span>
+<span class="fc" id="L168">  public List&lt;String&gt; firstColumn() { return firstColumn(String.class); }</span>
 
   /**
    * Executes the query and returns a {@code List} of all values in the first column of
@@ -176,7 +176,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @param clazz the desired class of the values
    * @return the values of the first column in the result set
    */
-<span class="nc" id="L179">  public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz) { return firstColumn(clazz, 10); }</span>
+<span class="fc" id="L179">  public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz) { return firstColumn(clazz, 10); }</span>
 
   /**
    * Executes the query and returns a {@code List} of the all values in the first column.
@@ -189,18 +189,18 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz, int sizeEstimate) {
     try {
-<span class="nc" id="L192">      executeQuery();</span>
-<span class="nc bnc" id="L193" title="All 2 branches missed.">      if (!resultSet.next()) {</span>
+<span class="fc" id="L192">      executeQuery();</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">      if (!resultSet.next()) {</span>
 <span class="nc" id="L194">        return Collections.emptyList();</span>
       }
-<span class="nc" id="L196">      int sqlType = resultSet.getMetaData().getColumnType(1);</span>
-<span class="nc" id="L197">      ColumnReader&lt;?, T&gt; reader = ColumnReaderFinder.getInstance()</span>
-<span class="nc" id="L198">          .findReader(clazz, sqlType);</span>
-<span class="nc" id="L199">      List&lt;T&gt; list = new ArrayList&lt;&gt;(sizeEstimate);</span>
+<span class="fc" id="L196">      int sqlType = resultSet.getMetaData().getColumnType(1);</span>
+<span class="fc" id="L197">      ColumnReader&lt;?, T&gt; reader = ColumnReaderFinder.getInstance()</span>
+<span class="fc" id="L198">          .findReader(clazz, sqlType);</span>
+<span class="fc" id="L199">      List&lt;T&gt; list = new ArrayList&lt;&gt;(sizeEstimate);</span>
       do {
-<span class="nc" id="L201">        list.add(reader.getValue(resultSet, 1, clazz));</span>
-<span class="nc bnc" id="L202" title="All 2 branches missed.">      } while (resultSet.next());</span>
-<span class="nc" id="L203">      return list;</span>
+<span class="fc" id="L201">        list.add(reader.getValue(resultSet, 1, clazz));</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">      } while (resultSet.next());</span>
+<span class="fc" id="L203">      return list;</span>
 <span class="nc" id="L204">    } catch (Throwable t) {</span>
 <span class="nc" id="L205">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }

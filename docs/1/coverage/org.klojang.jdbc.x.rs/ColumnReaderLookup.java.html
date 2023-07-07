@@ -27,16 +27,16 @@ public sealed class ColumnReaderLookup&lt;T&gt; extends HashMap&lt;Integer, Colu
       StringReaderLookup {
 
   public ColumnReaderLookup() {
-<span class="nc" id="L30">    super();</span>
-<span class="nc" id="L31">  }</span>
+<span class="fc" id="L30">    super();</span>
+<span class="fc" id="L31">  }</span>
 
   public void add(int sqlType, ColumnReader&lt;?, T&gt; extractor) {
-<span class="nc" id="L34">    put(sqlType, extractor);</span>
-<span class="nc" id="L35">  }</span>
+<span class="fc" id="L34">    put(sqlType, extractor);</span>
+<span class="fc" id="L35">  }</span>
 
   public void addMultiple(ColumnReader&lt;?, T&gt; extractor, int... sqlTypes) {
-<span class="nc" id="L38">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, extractor));</span>
-<span class="nc" id="L39">  }</span>
+<span class="fc" id="L38">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, extractor));</span>
+<span class="fc" id="L39">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -50,46 +50,46 @@ class BeanValueBinder<FIELD_TYPE, PARAM_TYPE> {
       bound.add(param);
       String property = param.name();
       Class<?> type = getter.getReturnType();
-      ColumnWriter<?, ?> receiver;
+      ColumnWriter<?, ?> writer;
       if (ClassMethods.isSubtype(type, Enum.class)
-          && bindInfo.bindEnumUsingToString(property)) {
-        receiver = EnumWriterLookup.ENUM_TO_STRING;
+          && bindInfo.saveEnumAsString(beanClass, property)) {
+        writer = EnumWriterLookup.ENUM_TO_STRING;
       } else {
-        Integer sqlType = bindInfo.getSqlType(property, type);
+        Integer sqlType = bindInfo.getSqlType(beanClass, property, type);
         if (sqlType == null) {
-          receiver = negotiator.getDefaultReceiver(type);
+          writer = negotiator.getDefaultWriter(type);
         } else {
-          receiver = negotiator.findReceiver(type, sqlType);
+          writer = negotiator.findReceiver(type, sqlType);
         }
       }
-      binders.add(new BeanValueBinder<>(getter, receiver, param));
+      binders.add(new BeanValueBinder<>(getter, writer, param));
     }
     return binders.toArray(BeanValueBinder[]::new);
   }
 
   private final Getter getter;
-  private final ColumnWriter<FIELD_TYPE, PARAM_TYPE> receiver;
+  private final ColumnWriter<FIELD_TYPE, PARAM_TYPE> writer;
   private final NamedParameter param;
 
   private BeanValueBinder(Getter getter,
-      ColumnWriter<FIELD_TYPE, PARAM_TYPE> receiver,
+      ColumnWriter<FIELD_TYPE, PARAM_TYPE> writer,
       NamedParameter param) {
     this.getter = getter;
-    this.receiver = receiver;
+    this.writer = writer;
     this.param = param;
   }
 
   @SuppressWarnings("unchecked")
   private <T> void bindValue(PreparedStatement ps, T bean) throws Throwable {
     FIELD_TYPE beanValue = (FIELD_TYPE) getter.read(bean);
-    PARAM_TYPE paramValue = receiver.getParamValue(beanValue);
+    PARAM_TYPE paramValue = writer.getParamValue(beanValue);
     if (beanValue == paramValue) { // No adapter defined
       LOG.debug("-> Parameter \"{}\": {}", getter.getProperty(), paramValue);
     } else {
       String fmt = "-> Parameter \"{}\": {} (bean value: {})";
       LOG.debug(fmt, param.name(), paramValue, beanValue);
     }
-    param.positions().forEachThrowing(i -> receiver.bind(ps, i, paramValue));
+    param.positions().forEachThrowing(i -> writer.bind(ps, i, paramValue));
   }
 
 }

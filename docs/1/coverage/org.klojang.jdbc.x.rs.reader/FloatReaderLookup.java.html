@@ -9,20 +9,20 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
 public final class FloatReaderLookup extends ColumnReaderLookup&lt;Float&gt; {
 
-<span class="nc" id="L12">  public FloatReaderLookup() {</span>
-<span class="nc" id="L13">    add(FLOAT, new ColumnReader&lt;&gt;(GET_FLOAT));</span>
-<span class="nc" id="L14">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT, Integer::floatValue));</span>
-<span class="nc" id="L15">    add(SMALLINT, new ColumnReader&lt;&gt;(GET_SHORT, Short::floatValue));</span>
-<span class="nc" id="L16">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE, Byte::floatValue));</span>
-<span class="nc" id="L17">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, Float::floatValue));</span>
-<span class="nc" id="L18">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, Long::floatValue));</span>
-<span class="nc bnc" id="L19" title="All 2 branches missed.">    add(BOOLEAN, new ColumnReader&lt;&gt;(GET_BOOLEAN, x -&gt; x ? 1.0F : 0));</span>
-<span class="nc" id="L20">    addMultiple(</span>
+<span class="fc" id="L12">  public FloatReaderLookup() {</span>
+<span class="fc" id="L13">    add(FLOAT, new ColumnReader&lt;&gt;(GET_FLOAT));</span>
+<span class="fc" id="L14">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT, Integer::floatValue));</span>
+<span class="fc" id="L15">    add(SMALLINT, new ColumnReader&lt;&gt;(GET_SHORT, Short::floatValue));</span>
+<span class="fc" id="L16">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE, Byte::floatValue));</span>
+<span class="fc" id="L17">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, Float::floatValue));</span>
+<span class="fc" id="L18">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, Long::floatValue));</span>
+<span class="pc bnc" id="L19" title="All 2 branches missed.">    add(BOOLEAN, new ColumnReader&lt;&gt;(GET_BOOLEAN, x -&gt; x ? 1.0F : 0));</span>
+<span class="fc" id="L20">    addMultiple(</span>
           new ColumnReader&lt;&gt;(GET_BIG_DECIMAL, NumberMethods::convert),
           NUMERIC,
           DECIMAL);
-<span class="nc" id="L24">    add(VARCHAR, new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse));</span>
-<span class="nc" id="L25">  }</span>
+<span class="fc" id="L24">    add(VARCHAR, new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse));</span>
+<span class="fc" id="L25">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

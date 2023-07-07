@@ -27,11 +27,11 @@ public final class MapBinder {
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   public void bindMap(
-        Map&lt;String, Object&gt; map,
-        PreparedStatement ps,
-        Collection&lt;NamedParameter&gt; bound)
-        throws Throwable {
-<span class="fc" id="L34">    ColumnWriterFinder negotiator = ColumnWriterFinder.getInstance();</span>
+      Map&lt;String, Object&gt; map,
+      PreparedStatement ps,
+      Collection&lt;NamedParameter&gt; bound)
+      throws Throwable {
+<span class="fc" id="L34">    ColumnWriterFinder writerFinder = ColumnWriterFinder.getInstance();</span>
 <span class="fc bfc" id="L35" title="All 2 branches covered.">    for (NamedParameter param : params) {</span>
 <span class="fc" id="L36">      String key = param.name();</span>
 <span class="pc bpc" id="L37" title="1 of 2 branches missed.">      if (!map.containsKey(key)) {</span>
@@ -42,13 +42,13 @@ public final class MapBinder {
 <span class="pc bpc" id="L42" title="1 of 2 branches missed.">      if (value == null) {</span>
 <span class="nc" id="L43">        param.positions().forEachThrowing(i -&gt; ps.setString(i, null));</span>
 <span class="pc bpc" id="L44" title="1 of 2 branches missed.">      } else if (value != ABSENT) {</span>
-        ColumnWriter receiver;
-<span class="pc bpc" id="L46" title="3 of 4 branches missed.">        if (value instanceof Enum &amp;&amp; bindInfo.bindEnumUsingToString(key)) {</span>
-<span class="nc" id="L47">          receiver = EnumWriterLookup.ENUM_TO_STRING;</span>
+        ColumnWriter writer;
+<span class="pc bpc" id="L46" title="3 of 4 branches missed.">        if (value instanceof Enum &amp;&amp; bindInfo.saveEnumAsString(Map.class, key)) {</span>
+<span class="nc" id="L47">          writer = EnumWriterLookup.ENUM_TO_STRING;</span>
         } else {
-<span class="fc" id="L49">          receiver = negotiator.getDefaultReceiver(value.getClass());</span>
+<span class="fc" id="L49">          writer = writerFinder.getDefaultWriter(value.getClass());</span>
         }
-<span class="fc" id="L51">        Object output = receiver.getParamValue(value);</span>
+<span class="fc" id="L51">        Object output = writer.getParamValue(value);</span>
 <span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (LOG.isDebugEnabled()) {</span>
 <span class="nc bnc" id="L53" title="All 2 branches missed.">          if (value == output) {</span>
 <span class="nc" id="L54">            LOG.debug(&quot;-&gt; Parameter \&quot;{}\&quot;: {}&quot;, key, output);</span>
@@ -56,7 +56,7 @@ public final class MapBinder {
 <span class="nc" id="L56">            LOG.debug(&quot;-&gt; Parameter \&quot;{}\&quot;: {} (map value: {})&quot;, key, output, value);</span>
           }
         }
-<span class="fc" id="L59">        param.positions().forEachThrowing(i -&gt; receiver.bind(ps, i, output));</span>
+<span class="fc" id="L59">        param.positions().forEachThrowing(i -&gt; writer.bind(ps, i, output));</span>
       }
 <span class="fc" id="L61">    }</span>
 <span class="fc" id="L62">  }</span>

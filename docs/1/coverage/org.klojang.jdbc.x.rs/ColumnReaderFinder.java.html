@@ -25,50 +25,50 @@ public class ColumnReaderFinder {
   private static ColumnReaderFinder INSTANCE;
 
   public static ColumnReaderFinder getInstance() {
-<span class="nc bnc" id="L28" title="All 2 branches missed.">    if (INSTANCE == null) {</span>
-<span class="nc" id="L29">      INSTANCE = new ColumnReaderFinder();</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">    if (INSTANCE == null) {</span>
+<span class="fc" id="L29">      INSTANCE = new ColumnReaderFinder();</span>
     }
-<span class="nc" id="L31">    return INSTANCE;</span>
+<span class="fc" id="L31">    return INSTANCE;</span>
   }
 
   private final Map&lt;Class&lt;?&gt;, Map&lt;Integer, ColumnReader&gt;&gt; all;
 
-<span class="nc" id="L36">  private ColumnReaderFinder() {</span>
-<span class="nc" id="L37">    all = configure();</span>
-<span class="nc" id="L38">  }</span>
+<span class="fc" id="L36">  private ColumnReaderFinder() {</span>
+<span class="fc" id="L37">    all = configure();</span>
+<span class="fc" id="L38">  }</span>
 
   @SuppressWarnings({&quot;unchecked&quot;})
   public &lt;T, U&gt; ColumnReader&lt;T, U&gt; findReader(Class&lt;U&gt; fieldType, int sqlType) {
     // Implicitly checks that the specified int is one of the
     // static final int constants in java.sql.Types
-<span class="nc" id="L44">    String sqlTypeName = getTypeName(sqlType);</span>
-<span class="nc" id="L45">    Map&lt;Integer, ColumnReader&gt; extractors = Check.that(all.get(fieldType))</span>
-<span class="nc" id="L46">          .is(notNull(), &quot;type not supported: ${0}&quot;, className(fieldType))</span>
-<span class="nc" id="L47">          .ok();</span>
-<span class="nc" id="L48">    return Check.that(extractors.get(sqlType))</span>
-<span class="nc" id="L49">          .is(notNull(), &quot;cannot convert ${0} to ${1}&quot;, sqlTypeName, className(fieldType))</span>
-<span class="nc" id="L50">          .ok();</span>
+<span class="fc" id="L44">    String sqlTypeName = getTypeName(sqlType);</span>
+<span class="fc" id="L45">    Map&lt;Integer, ColumnReader&gt; extractors = Check.that(all.get(fieldType))</span>
+<span class="fc" id="L46">          .is(notNull(), &quot;type not supported: ${0}&quot;, className(fieldType))</span>
+<span class="fc" id="L47">          .ok();</span>
+<span class="fc" id="L48">    return Check.that(extractors.get(sqlType))</span>
+<span class="fc" id="L49">          .is(notNull(), &quot;cannot convert ${0} to ${1}&quot;, sqlTypeName, className(fieldType))</span>
+<span class="fc" id="L50">          .ok();</span>
   }
 
   private static Map configure() {
-<span class="nc" id="L54">    return TypeMap.nativeTypeMapBuilder()</span>
-<span class="nc" id="L55">          .autobox(true)</span>
-<span class="nc" id="L56">          .add(String.class, immutable(new StringReaderLookup()))</span>
-<span class="nc" id="L57">          .add(Integer.class, immutable(new IntReaderLookup()))</span>
-<span class="nc" id="L58">          .add(Double.class, immutable(new DoubleReaderLookup()))</span>
-<span class="nc" id="L59">          .add(Long.class, immutable(new LongReaderLookup()))</span>
-<span class="nc" id="L60">          .add(Float.class, immutable(new FloatReaderLookup()))</span>
-<span class="nc" id="L61">          .add(Short.class, immutable(new ShortReaderLookup()))</span>
-<span class="nc" id="L62">          .add(Byte.class, immutable(new ByteReaderLookup()))</span>
-<span class="nc" id="L63">          .add(Boolean.class, immutable(new BooleanReaderLookup()))</span>
-<span class="nc" id="L64">          .add(LocalDate.class, immutable(new LocalDateReaderLookup()))</span>
-<span class="nc" id="L65">          .add(LocalDateTime.class, immutable(new LocalDateTimeReaderLookup()))</span>
-<span class="nc" id="L66">          .add(Enum.class, immutable(new EnumReaderLookup()))</span>
-<span class="nc" id="L67">          .freeze();</span>
+<span class="fc" id="L54">    return TypeMap.nativeTypeMapBuilder()</span>
+<span class="fc" id="L55">          .autobox(true)</span>
+<span class="fc" id="L56">          .add(String.class, immutable(new StringReaderLookup()))</span>
+<span class="fc" id="L57">          .add(Integer.class, immutable(new IntReaderLookup()))</span>
+<span class="fc" id="L58">          .add(Double.class, immutable(new DoubleReaderLookup()))</span>
+<span class="fc" id="L59">          .add(Long.class, immutable(new LongReaderLookup()))</span>
+<span class="fc" id="L60">          .add(Float.class, immutable(new FloatReaderLookup()))</span>
+<span class="fc" id="L61">          .add(Short.class, immutable(new ShortReaderLookup()))</span>
+<span class="fc" id="L62">          .add(Byte.class, immutable(new ByteReaderLookup()))</span>
+<span class="fc" id="L63">          .add(Boolean.class, immutable(new BooleanReaderLookup()))</span>
+<span class="fc" id="L64">          .add(LocalDate.class, immutable(new LocalDateReaderLookup()))</span>
+<span class="fc" id="L65">          .add(LocalDateTime.class, immutable(new LocalDateTimeReaderLookup()))</span>
+<span class="fc" id="L66">          .add(Enum.class, immutable(new EnumReaderLookup()))</span>
+<span class="fc" id="L67">          .freeze();</span>
   }
 
   private static Map&lt;Integer, ColumnReader&gt; immutable(ColumnReaderLookup&lt;?&gt; src) {
-<span class="nc" id="L71">    return Map.copyOf(src);</span>
+<span class="fc" id="L71">    return Map.copyOf(src);</span>
   }
 
 }

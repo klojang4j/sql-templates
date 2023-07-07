@@ -30,7 +30,7 @@ class ColumnWriterFinder {
     all = (Map<Class<?>, Map<Integer, ColumnWriter>>) tmp;
   }
 
-  <T, U> ColumnWriter<T, U> getDefaultReceiver(Class<T> fieldType) {
+  <T, U> ColumnWriter<T, U> getDefaultWriter(Class<T> fieldType) {
     ColumnWriter receiver = DefaultWriters.INSTANCE.getDefaultReceiver(fieldType);
     return Check.that(receiver).is(notNull(), "Type not supported: {type}").ok();
   }

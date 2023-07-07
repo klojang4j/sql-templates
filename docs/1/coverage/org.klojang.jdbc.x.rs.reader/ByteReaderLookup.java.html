@@ -10,19 +10,19 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
 public final class ByteReaderLookup extends ColumnReaderLookup&lt;Byte&gt; {
 
-<span class="nc" id="L13">  public ByteReaderLookup() {</span>
-<span class="nc" id="L14">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE));</span>
-<span class="nc" id="L15">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT, NumberMethods::convert));</span>
-<span class="nc" id="L16">    add(SMALLINT, new ColumnReader&lt;&gt;(GET_SHORT, NumberMethods::convert));</span>
-<span class="nc" id="L17">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, NumberMethods::convert));</span>
-<span class="nc" id="L18">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, NumberMethods::convert));</span>
-<span class="nc" id="L19">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE, NumberMethods::convert), FLOAT, DOUBLE);</span>
-<span class="nc" id="L20">    addMultiple(</span>
+<span class="fc" id="L13">  public ByteReaderLookup() {</span>
+<span class="fc" id="L14">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE));</span>
+<span class="fc" id="L15">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT, NumberMethods::convert));</span>
+<span class="fc" id="L16">    add(SMALLINT, new ColumnReader&lt;&gt;(GET_SHORT, NumberMethods::convert));</span>
+<span class="fc" id="L17">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, NumberMethods::convert));</span>
+<span class="fc" id="L18">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, NumberMethods::convert));</span>
+<span class="fc" id="L19">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE, NumberMethods::convert), FLOAT, DOUBLE);</span>
+<span class="fc" id="L20">    addMultiple(</span>
           new ColumnReader&lt;&gt;(GET_BIG_DECIMAL, NumberMethods::convert),
           NUMERIC,
           DECIMAL);
-<span class="nc" id="L24">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse), VARCHAR, CHAR);</span>
-<span class="nc" id="L25">  }</span>
+<span class="fc" id="L24">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse), VARCHAR, CHAR);</span>
+<span class="fc" id="L25">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

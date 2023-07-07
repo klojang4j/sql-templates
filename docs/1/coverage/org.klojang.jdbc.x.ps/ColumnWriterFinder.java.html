@@ -30,7 +30,7 @@ class ColumnWriterFinder {
 <span class="fc" id="L30">    all = (Map&lt;Class&lt;?&gt;, Map&lt;Integer, ColumnWriter&gt;&gt;) tmp;</span>
 <span class="fc" id="L31">  }</span>
 
-  &lt;T, U&gt; ColumnWriter&lt;T, U&gt; getDefaultReceiver(Class&lt;T&gt; fieldType) {
+  &lt;T, U&gt; ColumnWriter&lt;T, U&gt; getDefaultWriter(Class&lt;T&gt; fieldType) {
 <span class="fc" id="L34">    ColumnWriter receiver = DefaultWriters.INSTANCE.getDefaultReceiver(fieldType);</span>
 <span class="fc" id="L35">    return Check.that(receiver).is(notNull(), &quot;Type not supported: {type}&quot;).ok();</span>
   }

@@ -15,17 +15,17 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
 public final class LocalDateTimeReaderLookup extends ColumnReaderLookup&lt;LocalDateTime&gt; {
 
-<span class="nc" id="L18">  public LocalDateTimeReaderLookup() {</span>
-<span class="nc" id="L19">    add(DATE, new ColumnReader&lt;&gt;(GET_DATE, sqlDateToLocalDateTime()));</span>
-<span class="nc" id="L20">    add(TIMESTAMP, new ColumnReader&lt;&gt;(GET_TIMESTAMP, sqlTimestampToLocalDateTime()));</span>
-<span class="nc" id="L21">  }</span>
+<span class="fc" id="L18">  public LocalDateTimeReaderLookup() {</span>
+<span class="fc" id="L19">    add(DATE, new ColumnReader&lt;&gt;(GET_DATE, sqlDateToLocalDateTime()));</span>
+<span class="fc" id="L20">    add(TIMESTAMP, new ColumnReader&lt;&gt;(GET_TIMESTAMP, sqlTimestampToLocalDateTime()));</span>
+<span class="fc" id="L21">  }</span>
 
   private static Function&lt;Date, LocalDateTime&gt; sqlDateToLocalDateTime() {
-<span class="nc bnc" id="L24" title="All 2 branches missed.">    return d -&gt; d == null ? null : d.toLocalDate().atStartOfDay();</span>
+<span class="pc bnc" id="L24" title="All 2 branches missed.">    return d -&gt; d == null ? null : d.toLocalDate().atStartOfDay();</span>
   }
 
   private static Function&lt;Timestamp, LocalDateTime&gt; sqlTimestampToLocalDateTime() {
-<span class="nc bnc" id="L28" title="All 2 branches missed.">    return d -&gt; d == null ? null : d.toLocalDateTime();</span>
+<span class="pc bnc" id="L28" title="All 2 branches missed.">    return d -&gt; d == null ? null : d.toLocalDateTime();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
