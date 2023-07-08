@@ -14,6 +14,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.joining;
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.check.Tag.PROPERTIES;
 import static org.klojang.util.ObjectMethods.ifNull;
 import static org.klojang.util.ObjectMethods.isEmpty;
@@ -27,6 +28,8 @@ import static org.klojang.util.StringMethods.append;
  * slip.
  */
 public final class SQLInsertBuilder {
+
+  static final String PROPERTIES_ALREADY_SET = "properties to include/exclude can only be set once";
 
   private Class<?> beanClass;
   private String tableName;
@@ -49,7 +52,7 @@ public final class SQLInsertBuilder {
   }
 
   /**
-   * Sets the table name to insert the data into.
+   * Sets the table name to insert the data into. If not specified, this
    *
    * @param tableName the table name to insert the data into
    * @return this {@code SQLInsertBuilder}
@@ -62,13 +65,15 @@ public final class SQLInsertBuilder {
   /**
    * Sets the properties and (corresponding columns) to exclude from the INSERT statement.
    * You would most likely at least want to exclude the property corresponding to an
-   * auto-increment column.
+   * auto-increment column. You cannot call both this method and the
+   * {@link #including(String...)} on the same {@code SQLInsertBuilder} instance.
    *
    * @param properties the properties and (corresponding columns) to exclude from the
    *     INSERT statement
    * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder excluding(String... properties) {
+    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));
     this.properties = Check.notNull(properties, PROPERTIES).ok();
     this.exclude = true;
     return this;
@@ -76,12 +81,15 @@ public final class SQLInsertBuilder {
 
   /**
    * Sets the properties and (corresponding columns) to include in the INSERT statement.
+   * You cannot call both this method and the {@link #excluding(String...)} on the same
+   * {@code SQLInsertBuilder} instance.
    *
    * @param properties the properties and (corresponding columns) to include in the
    *     INSERT statement
    * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder including(String... properties) {
+    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));
     this.properties = Check.notNull(properties, PROPERTIES).ok();
     this.exclude = false;
     return this;

@@ -114,44 +114,44 @@ public class SQLUpdateTest {
     }
   }
 
-  @Test
-  public void test03() {
-    String s = "INSERT INTO TEST(NAME) VALUES(:name)";
-    Map<String, Object> data = new HashMap<>(Collections.singletonMap("name", "John"));
-    SQLSession sql = SQL.basic(s).session();
-    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
-      insert.bind(data, "id");
-      insert.execute();
-      assertTrue(data.containsKey("id"));
-    }
-  }
-
-  @Test
-  public void test04() {
-    String s = "INSERT INTO TEST(NAME) VALUES(:name)";
-    Person person = new Person("John");
-    person.setId(Integer.MIN_VALUE);
-    SQLSession sql = SQL.basic(s).session();
-    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
-      insert.bind(person, "id");
-      insert.execute();
-      assertTrue(person.getId() != Integer.MIN_VALUE);
-    }
-  }
-
-  @Test
-  public void test05() {
-    Person person = new Person("John");
-    person.setId(Integer.MIN_VALUE);
-    try (SQLInsert insert = SQL
-        .prepareInsert()
-        .of(Person.class)
-        .into("TEST")
-        .excluding("id")
-        .prepare(MY_CON.get())) {
-      insert.bind(person, "id");
-      insert.execute();
-      assertTrue(person.getId() != Integer.MIN_VALUE);
-    }
-  }
+//  @Test
+//  public void test03() {
+//    String s = "INSERT INTO TEST(NAME) VALUES(:name)";
+//    Map<String, Object> data = new HashMap<>(Collections.singletonMap("name", "John"));
+//    SQLSession sql = SQL.basic(s).session();
+//    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
+//      insert.bind(data, "id");
+//      insert.execute();
+//      assertTrue(data.containsKey("id"));
+//    }
+//  }
+//
+//  @Test
+//  public void test04() {
+//    String s = "INSERT INTO TEST(NAME) VALUES(:name)";
+//    Person person = new Person("John");
+//    person.setId(Integer.MIN_VALUE);
+//    SQLSession sql = SQL.basic(s).session();
+//    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
+//      insert.bind(person, "id");
+//      insert.execute();
+//      assertTrue(person.getId() != Integer.MIN_VALUE);
+//    }
+//  }
+//
+//  @Test
+//  public void test05() {
+//    Person person = new Person("John");
+//    person.setId(Integer.MIN_VALUE);
+//    try (SQLInsert insert = SQL
+//        .prepareInsert()
+//        .of(Person.class)
+//        .into("TEST")
+//        .excluding("id")
+//        .prepare(MY_CON.get())) {
+//      insert.bind(person, "id");
+//      insert.execute();
+//      assertTrue(person.getId() != Integer.MIN_VALUE);
+//    }
+//  }
 }

@@ -6,6 +6,7 @@ SQL Templates,org.klojang.jdbc.x.rs,BeanChannel,191,0,8,0,46,0,11,0,7,0
 SQL Templates,org.klojang.jdbc.x.rs,ColumnReader,4,47,1,1,1,13,1,5,0,5
 SQL Templates,org.klojang.jdbc.x.rs,ColumnReaderFinder,0,133,0,2,0,28,0,6,0,5
 SQL Templates,org.klojang.jdbc.x.rs,ResultSetMethodLookup,180,0,2,0,33,0,5,0,4,0
+SQL Templates,org.klojang.jdbc.x.sql,BatchInsertConfig,3,48,0,0,0,1,1,8,1,8
 SQL Templates,org.klojang.jdbc.x.sql,SQLInfo,21,28,0,0,7,9,2,4,2,4
 SQL Templates,org.klojang.jdbc.x.sql,SQLTemplate,34,0,0,0,8,0,2,0,2,0
 SQL Templates,org.klojang.jdbc.x.sql,SQLNormalizer,20,199,3,25,2,50,3,19,0,8
@@ -14,6 +15,7 @@ SQL Templates,org.klojang.jdbc.x.sql,SQLSkeletonSession,80,0,4,0,15,0,5,0,3,0
 SQL Templates,org.klojang.jdbc.x.sql,BasicSQLSession,4,14,0,0,1,4,1,2,1,2
 SQL Templates,org.klojang.jdbc.x.sql,AbstractSQLSession,14,25,0,0,3,7,2,5,2,5
 SQL Templates,org.klojang.jdbc.x.sql,NamedParameter,0,15,0,0,0,1,0,3,0,3
+SQL Templates,org.klojang.jdbc.x.sql,SQLExpression,12,0,0,0,2,0,3,0,3,0
 SQL Templates,org.klojang.jdbc.x.sql,SQLSkeleton,24,0,0,0,7,0,2,0,2,0
 SQL Templates,org.klojang.jdbc.x.sql,BasicSQL,0,21,0,0,0,4,0,2,0,2
 SQL Templates,org.klojang.jdbc.x.sql,SQLTemplateSession,77,0,4,0,15,0,5,0,3,0
@@ -25,11 +27,13 @@ SQL Templates,org.klojang.jdbc.x.ps,DefaultWriters,0,53,0,0,0,18,0,3,0,3
 SQL Templates,org.klojang.jdbc.x.ps,ColumnWriterLookup,0,17,0,0,0,3,0,3,0,3
 SQL Templates,org.klojang.jdbc.x.ps,ColumnWriterFinder,37,104,0,2,6,24,1,6,1,5
 SQL Templates,org.klojang.jdbc.x.ps,PreparedStatementMethod,27,149,2,2,7,46,3,6,1,6
+SQL Templates,org.klojang.jdbc,SQLBatchInsertBuilder,70,169,2,4,18,30,9,7,7,6
 SQL Templates,org.klojang.jdbc,EmptyMappifier,20,0,0,0,8,0,8,0,8,0
 SQL Templates,org.klojang.jdbc,DefaultBeanifier,155,0,16,0,38,0,16,0,8,0
-SQL Templates,org.klojang.jdbc,SQLInsert,54,361,2,16,13,80,5,24,3,17
+SQL Templates,org.klojang.jdbc,SQLBatchInsert,38,470,7,35,8,93,7,30,0,16
+SQL Templates,org.klojang.jdbc,SQLInsert,60,294,2,16,19,70,3,21,1,14
 SQL Templates,org.klojang.jdbc,SQLUpdate,39,0,0,0,14,0,4,0,4,0
-SQL Templates,org.klojang.jdbc,SQLInsertBuilder,64,187,4,4,11,29,6,8,3,7
+SQL Templates,org.klojang.jdbc,SQLInsertBuilder,72,195,4,4,12,30,6,8,3,7
 SQL Templates,org.klojang.jdbc,DefaultBeanifier.BeanIterator,31,0,2,0,6,0,4,0,3,0
 SQL Templates,org.klojang.jdbc,DefaultMappifier.MapIterator,32,0,2,0,6,0,4,0,3,0
 SQL Templates,org.klojang.jdbc,SQLInsertBuilder.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
@@ -43,7 +47,7 @@ SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},3,0,0,0,1,0,1,0,1,0
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},3,0,0,0,1,0,1,0,1,0
 SQL Templates,org.klojang.jdbc,SQLSession,40,0,4,0,7,0,7,0,5,0
 SQL Templates,org.klojang.jdbc,DefaultMappifier,146,0,16,0,37,0,16,0,8,0
-SQL Templates,org.klojang.jdbc,SQL,45,16,0,0,7,3,7,3,7,3
+SQL Templates,org.klojang.jdbc,SQL,50,20,0,0,8,4,8,4,8,4
 SQL Templates,org.klojang.jdbc,KlojangSQLException,50,0,4,0,13,0,8,0,6,0
 SQL Templates,org.klojang.jdbc,SQLQuery,152,99,5,5,53,28,12,10,8,9
 SQL Templates,org.klojang.jdbc.x.ps.writer,LongWriterLookup,0,77,0,0,0,11,0,2,0,2
@@ -57,7 +61,7 @@ SQL Templates,org.klojang.jdbc.x.ps.writer,LocalDateWriterLookup,5,26,0,0,1,5,1,
 SQL Templates,org.klojang.jdbc.x.ps.writer,FloatWriterLookup,0,101,0,0,0,12,0,2,0,2
 SQL Templates,org.klojang.jdbc.x.ps.writer,StringWriterLookup,0,121,0,0,0,15,0,2,0,2
 SQL Templates,org.klojang.jdbc.x.ps.writer,IntWriterLookup,0,64,0,0,0,9,0,2,0,2
-SQL Templates,org.klojang.jdbc.x,JDBC,45,5,2,0,11,1,3,1,2,1
+SQL Templates,org.klojang.jdbc.x,JDBC,59,85,2,2,13,17,6,4,5,3
 SQL Templates,org.klojang.jdbc.x,SQLTypeNames,4,93,0,2,2,15,0,6,0,5
 SQL Templates,org.klojang.jdbc.x.rs.reader,BooleanReaderLookup,0,114,0,0,0,11,0,1,0,1
 SQL Templates,org.klojang.jdbc.x.rs.reader,DoubleReaderLookup,8,92,2,0,0,11,2,1,1,1

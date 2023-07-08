@@ -14,6 +14,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.joining;
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.check.Tag.PROPERTIES;
 import static org.klojang.util.ObjectMethods.ifNull;
 import static org.klojang.util.ObjectMethods.isEmpty;
@@ -28,14 +29,16 @@ import static org.klojang.util.StringMethods.append;
  */
 public final class SQLInsertBuilder {
 
+  static final String PROPERTIES_ALREADY_SET = &quot;properties to include/exclude can only be set once&quot;;
+
   private Class&lt;?&gt; beanClass;
   private String tableName;
   private String[] properties;
   private boolean exclude;
-<span class="fc" id="L35">  private NameMapper mapper = NameMapper.AS_IS;</span>
-<span class="fc" id="L36">  private BindInfo bindInfo = new BindInfo() { };</span>
+<span class="fc" id="L38">  private NameMapper mapper = NameMapper.AS_IS;</span>
+<span class="fc" id="L39">  private BindInfo bindInfo = new BindInfo() { };</span>
 
-<span class="fc" id="L38">  SQLInsertBuilder() { }</span>
+<span class="fc" id="L41">  SQLInsertBuilder() { }</span>
 
   /**
    * Sets the type of the beans to be persisted.
@@ -44,47 +47,52 @@ public final class SQLInsertBuilder {
    * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder of(Class&lt;?&gt; beanClass) {
-<span class="fc" id="L47">    this.beanClass = Check.notNull(beanClass).ok();</span>
-<span class="fc" id="L48">    return this;</span>
+<span class="fc" id="L50">    this.beanClass = Check.notNull(beanClass).ok();</span>
+<span class="fc" id="L51">    return this;</span>
   }
 
   /**
-   * Sets the table name to insert the data into.
+   * Sets the table name to insert the data into. If not specified, this
    *
    * @param tableName the table name to insert the data into
    * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder into(String tableName) {
-<span class="fc" id="L58">    this.tableName = Check.that(tableName).isNot(empty()).ok();</span>
-<span class="fc" id="L59">    return this;</span>
+<span class="fc" id="L61">    this.tableName = Check.that(tableName).isNot(empty()).ok();</span>
+<span class="fc" id="L62">    return this;</span>
   }
 
   /**
    * Sets the properties and (corresponding columns) to exclude from the INSERT statement.
    * You would most likely at least want to exclude the property corresponding to an
-   * auto-increment column.
+   * auto-increment column. You cannot call both this method and the
+   * {@link #including(String...)} on the same {@code SQLInsertBuilder} instance.
    *
    * @param properties the properties and (corresponding columns) to exclude from the
    *     INSERT statement
    * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder excluding(String... properties) {
-<span class="fc" id="L72">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
-<span class="fc" id="L73">    this.exclude = true;</span>
-<span class="fc" id="L74">    return this;</span>
+<span class="fc" id="L76">    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));</span>
+<span class="fc" id="L77">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
+<span class="fc" id="L78">    this.exclude = true;</span>
+<span class="fc" id="L79">    return this;</span>
   }
 
   /**
    * Sets the properties and (corresponding columns) to include in the INSERT statement.
+   * You cannot call both this method and the {@link #excluding(String...)} on the same
+   * {@code SQLInsertBuilder} instance.
    *
    * @param properties the properties and (corresponding columns) to include in the
    *     INSERT statement
    * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder including(String... properties) {
-<span class="nc" id="L85">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
-<span class="nc" id="L86">    this.exclude = false;</span>
-<span class="nc" id="L87">    return this;</span>
+<span class="nc" id="L92">    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));</span>
+<span class="nc" id="L93">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
+<span class="nc" id="L94">    this.exclude = false;</span>
+<span class="nc" id="L95">    return this;</span>
   }
 
   /**
@@ -96,8 +104,8 @@ public final class SQLInsertBuilder {
    * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder withMapper(NameMapper propertyToColumnMapper) {
-<span class="nc" id="L99">    this.mapper = Check.notNull(propertyToColumnMapper).ok();</span>
-<span class="nc" id="L100">    return this;</span>
+<span class="nc" id="L107">    this.mapper = Check.notNull(propertyToColumnMapper).ok();</span>
+<span class="nc" id="L108">    return this;</span>
   }
 
   /**
@@ -108,8 +116,8 @@ public final class SQLInsertBuilder {
    * @return this {@code SQLInsertBuilder}
    */
   public SQLInsertBuilder withBindInfo(BindInfo bindInfo) {
-<span class="nc" id="L111">    this.bindInfo = Check.notNull(bindInfo).ok();</span>
-<span class="nc" id="L112">    return this;</span>
+<span class="nc" id="L119">    this.bindInfo = Check.notNull(bindInfo).ok();</span>
+<span class="nc" id="L120">    return this;</span>
   }
 
   /**
@@ -120,38 +128,38 @@ public final class SQLInsertBuilder {
    * @return a {@code SQLInsert} instance
    */
   public SQLInsert prepare(Connection con) {
-<span class="fc" id="L123">    Check.notNull(con);</span>
-<span class="fc" id="L124">    Check.on(STATE, beanClass, &quot;beanClass&quot;).is(notNull());</span>
-<span class="fc" id="L125">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
-<span class="fc" id="L126">    Set&lt;String&gt; props = getters.keySet();</span>
-<span class="pc bpc" id="L127" title="1 of 2 branches missed.">    if (!isEmpty(properties)) {</span>
-<span class="pc bpc" id="L128" title="1 of 2 branches missed.">      if (exclude) {</span>
-<span class="fc" id="L129">        props = new LinkedHashSet&lt;&gt;(props);</span>
-<span class="fc bfc" id="L130" title="All 2 branches covered.">        for (String prop : properties) {</span>
-<span class="fc" id="L131">          checkProperty(props, prop).then(props::remove);</span>
+<span class="fc" id="L131">    Check.notNull(con);</span>
+<span class="fc" id="L132">    Check.on(STATE, beanClass, &quot;beanClass&quot;).is(notNull());</span>
+<span class="fc" id="L133">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
+<span class="fc" id="L134">    Set&lt;String&gt; props = getters.keySet();</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">    if (!isEmpty(properties)) {</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">      if (exclude) {</span>
+<span class="fc" id="L137">        props = new LinkedHashSet&lt;&gt;(props);</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">        for (String prop : properties) {</span>
+<span class="fc" id="L139">          checkProperty(props, prop).then(props::remove);</span>
         }
       } else {
-<span class="nc" id="L134">        Set&lt;String&gt; tmp = new LinkedHashSet&lt;&gt;(properties.length);</span>
-<span class="nc bnc" id="L135" title="All 2 branches missed.">        for (String prop : properties) {</span>
-<span class="nc" id="L136">          checkProperty(props, prop).then(tmp::add);</span>
+<span class="nc" id="L142">        Set&lt;String&gt; tmp = new LinkedHashSet&lt;&gt;(properties.length);</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        for (String prop : properties) {</span>
+<span class="nc" id="L144">          checkProperty(props, prop).then(tmp::add);</span>
         }
-<span class="nc" id="L138">        props = tmp;</span>
+<span class="nc" id="L146">        props = tmp;</span>
       }
     }
-<span class="fc" id="L141">    String cols = props.stream().map(mapper::map).collect(joining(&quot;,&quot;));</span>
-<span class="fc" id="L142">    String params = props.stream().map(s -&gt; &quot;:&quot; + s).collect(joining(&quot;,&quot;));</span>
-<span class="fc" id="L143">    String table = ifNull(tableName, beanClass.getSimpleName());</span>
-<span class="fc" id="L144">    StringBuilder sb = new StringBuilder(100);</span>
-<span class="fc" id="L145">    append(sb, &quot;INSERT INTO &quot;, table, &quot; (&quot;, cols, &quot;) VALUES(&quot;, params, &quot;)&quot;);</span>
-<span class="fc" id="L146">    SQLSession sql = SQL.basic(sb.toString(), bindInfo).session();</span>
-<span class="fc" id="L147">    return sql.prepareInsert(con);</span>
+<span class="fc" id="L149">    String cols = props.stream().map(mapper::map).collect(joining(&quot;,&quot;));</span>
+<span class="fc" id="L150">    String params = props.stream().map(s -&gt; &quot;:&quot; + s).collect(joining(&quot;,&quot;));</span>
+<span class="fc" id="L151">    String table = ifNull(tableName, beanClass.getSimpleName());</span>
+<span class="fc" id="L152">    StringBuilder sb = new StringBuilder(100);</span>
+<span class="fc" id="L153">    append(sb, &quot;INSERT INTO &quot;, table, &quot; (&quot;, cols, &quot;) VALUES(&quot;, params, &quot;)&quot;);</span>
+<span class="fc" id="L154">    SQLSession sql = SQL.basic(sb.toString(), bindInfo).session();</span>
+<span class="fc" id="L155">    return sql.prepareInsert(con);</span>
   }
 
   private ObjectCheck&lt;String, IllegalStateException&gt; checkProperty(Set&lt;String&gt; props,
       String prop) {
-<span class="fc" id="L152">    return Check.on(STATE, prop)</span>
-<span class="fc" id="L153">        .isNot(empty(), &quot;empty property name not allowed&quot;)</span>
-<span class="fc" id="L154">        .is(in(), props, &quot;no such property in %s: %s&quot;, beanClass.getSimpleName(), prop);</span>
+<span class="fc" id="L160">    return Check.on(STATE, prop)</span>
+<span class="fc" id="L161">        .isNot(empty(), &quot;empty property name not allowed&quot;)</span>
+<span class="fc" id="L162">        .is(in(), props, &quot;no such property in %s: %s&quot;, beanClass.getSimpleName(), prop);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

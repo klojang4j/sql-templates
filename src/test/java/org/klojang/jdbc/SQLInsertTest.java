@@ -75,7 +75,7 @@ public class SQLInsertTest {
    * Baseline test that only uses JDBC and none of our own abstractions
    */
   @Test
-  public void test00() throws SQLException {
+  public void executeAndGetID00() throws SQLException {
     Connection con = MY_CON.get();
     String sql = "INSERT INTO TEST(NAME) VALUES(?)";
     try (PreparedStatement ps = con.prepareStatement(sql, RETURN_GENERATED_KEYS)) {
@@ -90,7 +90,7 @@ public class SQLInsertTest {
   }
 
   @Test
-  public void test01() {
+  public void executeAndGetID01() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = Collections.singletonMap("name", "John");
     SQLSession sql = SQL.basic(s).session();
@@ -103,7 +103,7 @@ public class SQLInsertTest {
   }
 
   @Test
-  public void test02() {
+  public void executeAndGetID02() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
     SQLSession sql = SQL.basic(s).session();
@@ -116,32 +116,32 @@ public class SQLInsertTest {
   }
 
   @Test
-  public void test03() {
+  public void executeAndSetID00() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = new HashMap<>(Collections.singletonMap("name", "John"));
     SQLSession sql = SQL.basic(s).session();
     try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
       insert.bind(data, "id");
-      insert.execute();
+      insert.executeAndSetID();
       assertTrue(data.containsKey("id"));
     }
   }
 
   @Test
-  public void test04() {
+  public void executeAndSetID01() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
     SQLSession sql = SQL.basic(s).session();
     try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
       insert.bind(person, "id");
-      insert.execute();
+      insert.executeAndSetID();
       assertTrue(person.getId() != Integer.MIN_VALUE);
     }
   }
 
   @Test
-  public void test05() {
+  public void executeAndSetID02() {
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
     try (SQLInsert insert = SQL
@@ -151,20 +151,20 @@ public class SQLInsertTest {
         .excluding("id")
         .prepare(MY_CON.get())) {
       insert.bind(person, "id");
-      insert.execute();
+      insert.executeAndSetID();
       assertTrue(person.getId() != Integer.MIN_VALUE);
     }
   }
 
   @Test
-  public void insertAll00() {
+  public void insertBatch00() {
     try (SQLInsert insert = SQL
         .prepareInsert()
         .of(Person.class)
         .into("TEST")
         .excluding("id")
         .prepare(MY_CON.get())) {
-      insert.insertAll(List.of(new Person("John"),
+      insert.insertBatch(List.of(new Person("John"),
           new Person("Mark"),
           new Person("Edward")));
     }
@@ -184,7 +184,7 @@ public class SQLInsertTest {
         .into("TEST")
         .excluding("id")
         .prepare(MY_CON.get())) {
-      ids = insert.insertAllAndGetIDs("id",
+      ids = insert.insertBatchAndGetIDs(
           List.of(new Person("John"),
               new Person("Mark"),
               new Person("Edward")));
@@ -209,7 +209,7 @@ public class SQLInsertTest {
         .into("TEST")
         .excluding("id")
         .prepare(MY_CON.get())) {
-      insert.insertAllAndSetIDs("id", beans);
+      insert.insertBatchAndSetIDs("id", beans);
     }
     int[] ids = beans.stream().mapToInt(Person::getId).toArray();
     try (SQLQuery query = SQL.basic("SELECT ID FROM TEST")
