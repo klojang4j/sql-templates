@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQL.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQL.java</span></div><h1>SQL.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
-import org.klojang.jdbc.x.sql.*;
+import org.klojang.jdbc.x.sql.AbstractSQL;
+import org.klojang.jdbc.x.sql.BasicSQL;
+import org.klojang.jdbc.x.sql.SQLSkeleton;
+import org.klojang.jdbc.x.sql.SQLTemplate;
 
 import java.sql.Connection;
 
@@ -81,7 +84,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql) {
-<span class="fc" id="L84">    return basic(sql, new BindInfo() { });</span>
+<span class="fc" id="L87">    return basic(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -94,7 +97,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql, BindInfo bindInfo) {
-<span class="fc" id="L97">    return new BasicSQL(sql, bindInfo);</span>
+<span class="fc" id="L100">    return new BasicSQL(sql, bindInfo);</span>
   }
 
   /**
@@ -105,7 +108,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql) {
-<span class="nc" id="L108">    return template(sql, new BindInfo() { });</span>
+<span class="nc" id="L111">    return template(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -118,7 +121,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql, BindInfo bindInfo) {
-<span class="nc" id="L121">    return new SQLTemplate(sql, bindInfo);</span>
+<span class="nc" id="L124">    return new SQLTemplate(sql, bindInfo);</span>
   }
 
   /**
@@ -131,7 +134,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql) {
-<span class="nc" id="L134">    return skeleton(sql, new BindInfo() { });</span>
+<span class="nc" id="L137">    return skeleton(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -146,7 +149,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L149">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="nc" id="L152">    return new SQLSkeleton(sql, bindInfo);</span>
   }
 
   /**
@@ -165,7 +168,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return a {@code SQLQuery} instance
    */
   static SQLQuery prepareQuery(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L168">    return basic(sql, bindInfo).session().prepareQuery(con);</span>
+<span class="nc" id="L171">    return basic(sql, bindInfo).session().prepareQuery(con);</span>
   }
 
   /**
@@ -184,7 +187,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return a {@code SQLInsert} instance
    */
   static SQLInsert prepareInsert(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L187">    return basic(sql, bindInfo).session().prepareInsert(con);</span>
+<span class="nc" id="L190">    return basic(sql, bindInfo).session().prepareInsert(con);</span>
   }
 
   /**
@@ -203,7 +206,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return a {@code SQLUpdate} instance
    */
   static SQLUpdate prepareUpdate(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L206">    return basic(sql, bindInfo).session().prepareUpdate(con);</span>
+<span class="nc" id="L209">    return basic(sql, bindInfo).session().prepareUpdate(con);</span>
   }
 
   /**
@@ -214,7 +217,7 @@ public sealed interface SQL permits AbstractSQL {
    *     INSERT statement
    */
   static SQLInsertBuilder prepareInsert() {
-<span class="fc" id="L217">    return new SQLInsertBuilder();</span>
+<span class="fc" id="L220">    return new SQLInsertBuilder();</span>
   }
 
   /**
@@ -225,7 +228,7 @@ public sealed interface SQL permits AbstractSQL {
    *     batch inserts.
    */
   static SQLBatchInsertBuilder prepareBatchInsert() {
-<span class="fc" id="L228">    return new SQLBatchInsertBuilder();</span>
+<span class="fc" id="L231">    return new SQLBatchInsertBuilder();</span>
   }
 
   /**
@@ -240,9 +243,10 @@ public sealed interface SQL permits AbstractSQL {
    * @return a special object that signals to &lt;i&gt;Klojang JDBC&lt;/i&gt; that the specified
    *     string is to be treated as an SQL expression
    * @see java.sql.Statement#enquoteLiteral(String)
+   * @see Quoter
    */
   static Object expression(String expression) {
-<span class="nc" id="L245">    return new SQLExpression(expression);</span>
+<span class="nc" id="L249">    return new SQLExpression(expression);</span>
   }
 
   /**

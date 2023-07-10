@@ -1,6 +1,9 @@
 package org.klojang.jdbc;
 
-import org.klojang.jdbc.x.sql.*;
+import org.klojang.jdbc.x.sql.AbstractSQL;
+import org.klojang.jdbc.x.sql.BasicSQL;
+import org.klojang.jdbc.x.sql.SQLSkeleton;
+import org.klojang.jdbc.x.sql.SQLTemplate;
 
 import java.sql.Connection;
 
@@ -240,6 +243,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return a special object that signals to <i>Klojang JDBC</i> that the specified
    *     string is to be treated as an SQL expression
    * @see java.sql.Statement#enquoteLiteral(String)
+   * @see Quoter
    */
   static Object expression(String expression) {
     return new SQLExpression(expression);

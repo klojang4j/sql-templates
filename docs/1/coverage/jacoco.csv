@@ -15,7 +15,6 @@ SQL Templates,org.klojang.jdbc.x.sql,SQLSkeletonSession,80,0,4,0,15,0,5,0,3,0
 SQL Templates,org.klojang.jdbc.x.sql,BasicSQLSession,4,14,0,0,1,4,1,2,1,2
 SQL Templates,org.klojang.jdbc.x.sql,AbstractSQLSession,14,25,0,0,3,7,2,5,2,5
 SQL Templates,org.klojang.jdbc.x.sql,NamedParameter,0,15,0,0,0,1,0,3,0,3
-SQL Templates,org.klojang.jdbc.x.sql,SQLExpression,12,0,0,0,2,0,3,0,3,0
 SQL Templates,org.klojang.jdbc.x.sql,SQLSkeleton,24,0,0,0,7,0,2,0,2,0
 SQL Templates,org.klojang.jdbc.x.sql,BasicSQL,0,21,0,0,0,4,0,2,0,2
 SQL Templates,org.klojang.jdbc.x.sql,SQLTemplateSession,77,0,4,0,15,0,5,0,3,0
@@ -27,10 +26,11 @@ SQL Templates,org.klojang.jdbc.x.ps,DefaultWriters,0,53,0,0,0,18,0,3,0,3
 SQL Templates,org.klojang.jdbc.x.ps,ColumnWriterLookup,0,17,0,0,0,3,0,3,0,3
 SQL Templates,org.klojang.jdbc.x.ps,ColumnWriterFinder,37,104,0,2,6,24,1,6,1,5
 SQL Templates,org.klojang.jdbc.x.ps,PreparedStatementMethod,27,149,2,2,7,46,3,6,1,6
-SQL Templates,org.klojang.jdbc,SQLBatchInsertBuilder,70,169,2,4,18,30,9,7,7,6
+SQL Templates,org.klojang.jdbc,SQLBatchInsertBuilder,80,195,2,4,19,35,10,9,8,8
 SQL Templates,org.klojang.jdbc,EmptyMappifier,20,0,0,0,8,0,8,0,8,0
+SQL Templates,org.klojang.jdbc,SQLExpression,9,0,0,0,4,0,2,0,2,0
 SQL Templates,org.klojang.jdbc,DefaultBeanifier,155,0,16,0,38,0,16,0,8,0
-SQL Templates,org.klojang.jdbc,SQLBatchInsert,38,470,7,35,8,93,7,30,0,16
+SQL Templates,org.klojang.jdbc,SQLBatchInsert,52,426,13,27,11,93,13,23,0,16
 SQL Templates,org.klojang.jdbc,SQLInsert,60,294,2,16,19,70,3,21,1,14
 SQL Templates,org.klojang.jdbc,SQLUpdate,39,0,0,0,14,0,4,0,4,0
 SQL Templates,org.klojang.jdbc,SQLInsertBuilder,72,195,4,4,12,30,6,8,3,7
@@ -45,6 +45,7 @@ SQL Templates,org.klojang.jdbc,MappifierFactory,60,0,6,0,15,0,6,0,3,0
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},3,0,0,0,1,0,1,0,1,0
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},3,0,0,0,1,0,1,0,1,0
+SQL Templates,org.klojang.jdbc,Quoter,25,0,6,0,8,0,5,0,2,0
 SQL Templates,org.klojang.jdbc,SQLSession,40,0,4,0,7,0,7,0,5,0
 SQL Templates,org.klojang.jdbc,DefaultMappifier,146,0,16,0,37,0,16,0,8,0
 SQL Templates,org.klojang.jdbc,SQL,50,20,0,0,8,4,8,4,8,4

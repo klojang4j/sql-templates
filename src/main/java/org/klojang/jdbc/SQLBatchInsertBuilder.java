@@ -7,10 +7,10 @@ import org.klojang.jdbc.x.sql.BatchInsertConfig;
 import org.klojang.templates.NameMapper;
 
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import static org.klojang.check.CommonChecks.*;
@@ -30,7 +30,7 @@ import static org.klojang.util.ObjectMethods.isEmpty;
  */
 public final class SQLBatchInsertBuilder<T> {
 
-  private Map<String, BiFunction<T, Object, Object>> transformers = new HashMap<>();
+  private Map<String, Transformer<T>> transformers = new HashMap<>();
   private NameMapper nameMapper = NameMapper.AS_IS;
   private int chunkSize = -1;
   boolean commitPerChunk = true;
@@ -158,7 +158,7 @@ public final class SQLBatchInsertBuilder<T> {
    */
   public SQLBatchInsertBuilder<T> withTransformer(
       String property,
-      BiFunction<T, Object, Object> transformer) {
+      Transformer<T> transformer) {
     Check.notNull(property, PROPERTY);
     Check.notNull(transformer, "transformer");
     this.transformers.put(property, transformer);
@@ -172,11 +172,15 @@ public final class SQLBatchInsertBuilder<T> {
    * @param con the JDBC {@code Connection} to use for the INSERT statement
    * @return a {@code SQLInsert} instance
    */
+  @SuppressWarnings("rawtypes")
   public SQLBatchInsert<T> prepare(Connection con) {
     Check.notNull(con);
     Check.on(STATE, beanClass, "beanClass").is(notNull());
     Map<String, Getter> getters = GetterFactory.INSTANCE.getGetters(beanClass, true);
-    if (!isEmpty(properties)) {
+    Getter[] getterArray;
+    if (isEmpty(properties)) {
+      getterArray = getters.values().toArray(Getter[]::new);
+    } else {
       for (String prop : properties) {
         Check.that(prop).is(keyIn(), getters, noSuchProperty(prop));
       }
@@ -188,8 +192,13 @@ public final class SQLBatchInsertBuilder<T> {
         tmp.keySet().retainAll(Set.of(properties));
       }
       Check.that(tmp).has(mapSize(), gt(), 0,
-          () -> new KlojangSQLException("no properties to save"));
+          () -> new KlojangSQLException("no properties/columns selected"));
+      getterArray = tmp.values().toArray(Getter[]::new);
     }
+    Transformer[] transformerArray = Arrays.stream(getterArray)
+        .map(Getter::getProperty)
+        .map(transformers::get)
+        .toArray(Transformer[]::new);
     transformers = Map.copyOf(transformers);
     BatchInsertConfig<T> cfg = new BatchInsertConfig<>(
         con,
@@ -197,8 +206,8 @@ public final class SQLBatchInsertBuilder<T> {
         tableName,
         chunkSize,
         commitPerChunk,
-        getters,
-        transformers,
+        getterArray,
+        transformerArray,
         nameMapper);
     return new SQLBatchInsert<>(cfg);
   }
