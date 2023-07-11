@@ -20,202 +20,199 @@ import static org.klojang.check.Tag.PROPERTY;
 import static org.klojang.util.ObjectMethods.isEmpty;
 
 /**
- * A {@code Builder} class for {@link SQLInsert} instances. This is the only class in
- * &lt;i&gt;Klojang JDBC&lt;/i&gt; that deviates from its design decision to &lt;i&gt;not&lt;/i&gt; provide
- * fluent APIs to mimic SQL statements. In this particular case, however, it provides just
- * too much convenience for the user to let slip. {@code SQLBatchInsertBuilder} instances
- * are obtained via {@link SQL#prepareBatchInsert()}.
+ * A builder class for {@link SQLBatchInsert} instances. {@code SQLBatchInsertBuilder}
+ * instances are obtained via {@link SQL#prepareBatchInsert()}.
  *
  * @param &lt;T&gt; the type of the beans to be saved
  */
 public final class SQLBatchInsertBuilder&lt;T&gt; {
 
-<span class="fc" id="L33">  private Map&lt;String, Transformer&lt;T&gt;&gt; transformers = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L34">  private NameMapper nameMapper = NameMapper.AS_IS;</span>
-<span class="fc" id="L35">  private int chunkSize = -1;</span>
-<span class="fc" id="L36">  boolean commitPerChunk = true;</span>
+<span class="fc" id="L30">    private final Map&lt;String, Transformer&lt;T&gt;&gt; transformers = new HashMap&lt;&gt;();</span>
 
-  private Class&lt;T&gt; beanClass;
-  private String tableName;
-  private String[] properties;
-  private boolean exclude;
+<span class="fc" id="L32">    private NameMapper nameMapper = NameMapper.AS_IS;</span>
+<span class="fc" id="L33">    private int chunkSize = -1;</span>
+<span class="fc" id="L34">    boolean commitPerChunk = true;</span>
 
-<span class="fc" id="L43">  SQLBatchInsertBuilder() { }</span>
+    private Class&lt;T&gt; beanClass;
+    private String tableName;
+    private String[] properties;
+    private boolean exclude;
 
-  /**
-   * Sets the type of the beans to be persisted.
-   *
-   * @param beanClass the type of the beans to be persisted
-   * @return this {@code SQLBatchInsertBuilder}
-   */
-  public SQLBatchInsertBuilder&lt;T&gt; of(Class&lt;T&gt; beanClass) {
-<span class="fc" id="L52">    this.beanClass = Check.notNull(beanClass).ok();</span>
-<span class="fc" id="L53">    return this;</span>
-  }
+<span class="fc" id="L41">    SQLBatchInsertBuilder() {}</span>
 
-  /**
-   * Sets the table name to insert the data into. If not specified, this defaults to the
-   * simple class name of the bean class.
-   *
-   * @param tableName the table name to insert the data into
-   * @return this {@code SQLBatchInsertBuilder}
-   */
-  public SQLBatchInsertBuilder&lt;T&gt; into(String tableName) {
-<span class="fc" id="L64">    this.tableName = Check.that(tableName).isNot(empty()).ok();</span>
-<span class="fc" id="L65">    return this;</span>
-  }
-
-  /**
-   * Sets the properties and (corresponding columns) to exclude from the INSERT statement.
-   * You would most likely at least want to exclude the property corresponding to an
-   * auto-increment column. It makes no sense to call both this method and the
-   * {@link #including(String...)} on the same {@code SQLInsertBuilder} instance. The last
-   * call will override the effect of any previous calls to {@code including()} and
-   * {@code excluding()}.
-   *
-   * @param properties the properties and (corresponding columns) to exclude from the
-   *     INSERT statement
-   * @return this {@code SQLBatchInsertBuilder}
-   */
-  public SQLBatchInsertBuilder&lt;T&gt; excluding(String... properties) {
-<span class="fc" id="L81">    Check.that(properties).is(deepNotEmpty());</span>
-<span class="fc" id="L82">    this.properties = properties;</span>
-<span class="fc" id="L83">    this.exclude = true;</span>
-<span class="fc" id="L84">    return this;</span>
-  }
-
-  /**
-   * Sets the properties and (corresponding columns) to include in the INSERT statement.
-   * It makes no sense to call both this method and the {@link #including(String...)} on
-   * the same {@code SQLInsertBuilder} instance. The last call will override the effect of
-   * any previous calls to {@code including()} and {@code excluding()}.
-   *
-   * @param properties the properties and (corresponding columns) to include in the
-   *     INSERT statement
-   * @return this {@code SQLBatchInsertBuilder}
-   */
-  public SQLBatchInsertBuilder&lt;T&gt; including(String... properties) {
-<span class="nc" id="L98">    Check.that(properties).is(deepNotEmpty());</span>
-<span class="nc" id="L99">    this.properties = properties;</span>
-<span class="nc" id="L100">    this.exclude = false;</span>
-<span class="nc" id="L101">    return this;</span>
-  }
-
-  /**
-   * Sets the property-to-column mapper to be used when mapping bean properties to column
-   * names. Beware of the direction of the mappings: &lt;i&gt;from&lt;/i&gt; bean properties &lt;i&gt;to&lt;/i&gt;
-   * column names.
-   *
-   * @param propertyToColumnMapper the property-to-column mapper
-   * @return this {@code SQLBatchInsertBuilder}
-   */
-  public SQLBatchInsertBuilder&lt;T&gt; withNameMapper(NameMapper propertyToColumnMapper) {
-<span class="nc" id="L113">    Check.notNull(propertyToColumnMapper);</span>
-<span class="nc" id="L114">    this.nameMapper = propertyToColumnMapper;</span>
-<span class="nc" id="L115">    return this;</span>
-  }
-
-  /**
-   * Sets number of beans that will be saved at a time. By default the entire batch will
-   * be saved at once. Make sure this does not exceed the limits of your database or JDBC
-   * client.
-   *
-   * @param chunkSize the number of beans that will be saved at a time
-   * @return this {@code SQLBatchInsertBuilder}
-   */
-  public SQLBatchInsertBuilder&lt;T&gt; withChunkSize(int chunkSize) {
-<span class="nc" id="L127">    Check.that(chunkSize).is(gt(), 0);</span>
-<span class="nc" id="L128">    this.chunkSize = chunkSize;</span>
-<span class="nc" id="L129">    return this;</span>
-  }
-
-  /**
-   * Specifies whether to issue a database commit directly after een chunk of beans has
-   * been saved to the database. If not, you must issue the commits yourself if and when
-   * necessary. The default behaviour is to issue a commit.
-   *
-   * @param commitPerChunk whether to commit after een chunk of beans has been saved
-   *     to the database
-   * @return this {@code SQLBatchInsertBuilder}
-   */
-  public SQLBatchInsertBuilder&lt;T&gt; withCommitPerChunk(boolean commitPerChunk) {
-<span class="nc" id="L142">    this.commitPerChunk = commitPerChunk;</span>
-<span class="nc" id="L143">    return this;</span>
-  }
-
-  /**
-   * Specifies a transformer function for the specified property. The function is passed
-   * the bean to be saved and the value of the property. It must return the value to be
-   * saved for that property. If the return value is anything other than {@code null}, a
-   * {@link Number} or an {@link SQL#expression(String) SQL expression}, it is stringified
-   * using {@code toString()} and then quoted and escaped using the database's quoting and
-   * escaping rules.
-   *
-   * @param property the property whose value is to be transformed
-   * @param transformer the transformation functions
-   * @return this {@code SQLBatchInsertBuilder}
-   * @see java.sql.Statement#enquoteLiteral(String)
-   */
-  public SQLBatchInsertBuilder&lt;T&gt; withTransformer(
-      String property,
-      Transformer&lt;T&gt; transformer) {
-<span class="nc" id="L162">    Check.notNull(property, PROPERTY);</span>
-<span class="nc" id="L163">    Check.notNull(transformer, &quot;transformer&quot;);</span>
-<span class="nc" id="L164">    this.transformers.put(property, transformer);</span>
-<span class="nc" id="L165">    return this;</span>
-  }
-
-  /**
-   * Creates and returns a {@code SQLBatchInsert} instance using the input provided via
-   * the other methods
-   *
-   * @param con the JDBC {@code Connection} to use for the INSERT statement
-   * @return a {@code SQLInsert} instance
-   */
-  @SuppressWarnings(&quot;rawtypes&quot;)
-  public SQLBatchInsert&lt;T&gt; prepare(Connection con) {
-<span class="fc" id="L177">    Check.notNull(con);</span>
-<span class="fc" id="L178">    Check.on(STATE, beanClass, &quot;beanClass&quot;).is(notNull());</span>
-<span class="fc" id="L179">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
-    Getter[] getterArray;
-<span class="pc bpc" id="L181" title="1 of 2 branches missed.">    if (isEmpty(properties)) {</span>
-<span class="nc" id="L182">      getterArray = getters.values().toArray(Getter[]::new);</span>
-    } else {
-<span class="fc bfc" id="L184" title="All 2 branches covered.">      for (String prop : properties) {</span>
-<span class="fc" id="L185">        Check.that(prop).is(keyIn(), getters, noSuchProperty(prop));</span>
-      }
-<span class="fc" id="L187">      Map&lt;String, Getter&gt; tmp = HashMap.newHashMap(getters.size());</span>
-<span class="fc" id="L188">      tmp.putAll(getters);</span>
-<span class="pc bpc" id="L189" title="1 of 2 branches missed.">      if (exclude) {</span>
-<span class="fc" id="L190">        tmp.keySet().removeAll(Set.of(properties));</span>
-      } else {
-<span class="nc" id="L192">        tmp.keySet().retainAll(Set.of(properties));</span>
-      }
-<span class="fc" id="L194">      Check.that(tmp).has(mapSize(), gt(), 0,</span>
-<span class="nc" id="L195">          () -&gt; new KlojangSQLException(&quot;no properties/columns selected&quot;));</span>
-<span class="fc" id="L196">      getterArray = tmp.values().toArray(Getter[]::new);</span>
+    /**
+     * Sets the type of the beans to be saved.
+     *
+     * @param beanClass the type of the beans to be saved
+     * @return this {@code SQLBatchInsertBuilder}
+     */
+    public SQLBatchInsertBuilder&lt;T&gt; of(Class&lt;T&gt; beanClass) {
+<span class="fc" id="L50">        this.beanClass = Check.notNull(beanClass).ok();</span>
+<span class="fc" id="L51">        return this;</span>
     }
-<span class="fc" id="L198">    Transformer[] transformerArray = Arrays.stream(getterArray)</span>
-<span class="fc" id="L199">        .map(Getter::getProperty)</span>
-<span class="fc" id="L200">        .map(transformers::get)</span>
-<span class="fc" id="L201">        .toArray(Transformer[]::new);</span>
-<span class="fc" id="L202">    transformers = Map.copyOf(transformers);</span>
-<span class="fc" id="L203">    BatchInsertConfig&lt;T&gt; cfg = new BatchInsertConfig&lt;&gt;(</span>
-        con,
-        beanClass,
-        tableName,
-        chunkSize,
-        commitPerChunk,
-        getterArray,
-        transformerArray,
-        nameMapper);
-<span class="fc" id="L212">    return new SQLBatchInsert&lt;&gt;(cfg);</span>
-  }
 
-  private Supplier&lt;KlojangSQLException&gt; noSuchProperty(String prop) {
-<span class="fc" id="L216">    String fmt = &quot;no such property in class %s: %s&quot;;</span>
-<span class="fc" id="L217">    String msg = String.format(fmt, beanClass.getSimpleName(), prop);</span>
-<span class="pc" id="L218">    return () -&gt; new KlojangSQLException(msg);</span>
-  }
+    /**
+     * Sets the table name to insert the data into. If not specified, this defaults to the
+     * simple class name of the bean class.
+     *
+     * @param tableName the table name to insert the data into
+     * @return this {@code SQLBatchInsertBuilder}
+     */
+    public SQLBatchInsertBuilder&lt;T&gt; into(String tableName) {
+<span class="fc" id="L62">        this.tableName = Check.that(tableName).isNot(empty()).ok();</span>
+<span class="fc" id="L63">        return this;</span>
+    }
+
+    /**
+     * Sets the properties and (corresponding columns) to exclude from the INSERT
+     * statement. You would most likely at least want to exclude the property
+     * corresponding to the auto-generated key column. It makes no sense to call both this
+     * method and the {@link #including(String...)} on the same
+     * {@code SQLBatchInsertBuilder} instance. The last call will override the effect of
+     * any previous calls to {@code including()} and {@code excluding()}.
+     *
+     * @param properties the properties and (corresponding columns) to exclude from the
+     * INSERT statement
+     * @return this {@code SQLBatchInsertBuilder}
+     */
+    public SQLBatchInsertBuilder&lt;T&gt; excluding(String... properties) {
+<span class="fc" id="L79">        Check.that(properties).is(deepNotEmpty());</span>
+<span class="fc" id="L80">        this.properties = properties;</span>
+<span class="fc" id="L81">        this.exclude = true;</span>
+<span class="fc" id="L82">        return this;</span>
+    }
+
+    /**
+     * Sets the properties and (corresponding columns) to include in the INSERT statement.
+     * It makes no sense to call both this method and the {@link #excluding(String...)} on
+     * the same {@code SQLBatchInsertBuilder} instance. The last call will override the
+     * effect of any previous calls to {@code including()} and {@code excluding()}.
+     *
+     * @param properties the properties and (corresponding columns) to include in the
+     * INSERT statement
+     * @return this {@code SQLBatchInsertBuilder}
+     */
+    public SQLBatchInsertBuilder&lt;T&gt; including(String... properties) {
+<span class="nc" id="L96">        Check.that(properties).is(deepNotEmpty());</span>
+<span class="nc" id="L97">        this.properties = properties;</span>
+<span class="nc" id="L98">        this.exclude = false;</span>
+<span class="nc" id="L99">        return this;</span>
+    }
+
+    /**
+     * Sets the property-to-column mapper to be used when mapping bean properties to
+     * column names. Beware of the direction of the mappings: &lt;i&gt;from&lt;/i&gt; bean properties
+     * &lt;i&gt;to&lt;/i&gt; column names.
+     *
+     * @param propertyToColumnMapper the property-to-column mapper
+     * @return this {@code SQLBatchInsertBuilder}
+     */
+    public SQLBatchInsertBuilder&lt;T&gt; withNameMapper(NameMapper propertyToColumnMapper) {
+<span class="nc" id="L111">        Check.notNull(propertyToColumnMapper);</span>
+<span class="nc" id="L112">        this.nameMapper = propertyToColumnMapper;</span>
+<span class="nc" id="L113">        return this;</span>
+    }
+
+    /**
+     * Sets number of beans that will be saved at a time. By default the entire batch will
+     * be saved at once. Make sure this does not exceed the limits of your database or
+     * JDBC client.
+     *
+     * @param chunkSize the number of beans that will be saved at a time
+     * @return this {@code SQLBatchInsertBuilder}
+     */
+    public SQLBatchInsertBuilder&lt;T&gt; withChunkSize(int chunkSize) {
+<span class="nc" id="L125">        Check.that(chunkSize).is(gt(), 0);</span>
+<span class="nc" id="L126">        this.chunkSize = chunkSize;</span>
+<span class="nc" id="L127">        return this;</span>
+    }
+
+    /**
+     * Specifies whether to issue a database commit directly after een chunk of beans has
+     * been saved to the database. If not, you must issue the commits yourself if and when
+     * necessary. The default behaviour is to issue a commit.
+     *
+     * @param commitPerChunk whether to commit after een chunk of beans has been saved to
+     * the database
+     * @return this {@code SQLBatchInsertBuilder}
+     */
+    public SQLBatchInsertBuilder&lt;T&gt; withCommitPerChunk(boolean commitPerChunk) {
+<span class="nc" id="L140">        this.commitPerChunk = commitPerChunk;</span>
+<span class="nc" id="L141">        return this;</span>
+    }
+
+    /**
+     * Specifies a transformer function for the specified property. The function is passed
+     * the bean to be saved and the value of the property. It must return the value to be
+     * saved for that property. If the return value is anything other than {@code null}, a
+     * {@link Number} or an {@link SQL#expression(String) SQL expression}, it is
+     * stringified using {@code toString()} and then quoted and escaped using the
+     * database's quoting and escaping rules.
+     *
+     * @param property the property whose value is to be transformed
+     * @param transformer the transformation functions
+     * @return this {@code SQLBatchInsertBuilder}
+     * @see java.sql.Statement#enquoteLiteral(String)
+     */
+    public SQLBatchInsertBuilder&lt;T&gt; withTransformer(
+            String property,
+            Transformer&lt;T&gt; transformer) {
+<span class="nc" id="L160">        Check.notNull(property, PROPERTY);</span>
+<span class="nc" id="L161">        Check.notNull(transformer, &quot;transformer&quot;);</span>
+<span class="nc" id="L162">        this.transformers.put(property, transformer);</span>
+<span class="nc" id="L163">        return this;</span>
+    }
+
+    /**
+     * Creates and returns a {@code SQLBatchInsert} instance using the input provided via
+     * the other methods
+     *
+     * @param con the JDBC {@code Connection} to use for the INSERT statement
+     * @return a {@code SQLInsert} instance
+     */
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    public SQLBatchInsert&lt;T&gt; prepare(Connection con) {
+<span class="fc" id="L175">        Check.notNull(con);</span>
+<span class="fc" id="L176">        Check.on(STATE, beanClass, &quot;beanClass&quot;).is(notNull());</span>
+<span class="fc" id="L177">        Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
+        Getter[] getterArray;
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">        if (isEmpty(properties)) {</span>
+<span class="nc" id="L180">            getterArray = getters.values().toArray(Getter[]::new);</span>
+        } else {
+<span class="fc bfc" id="L182" title="All 2 branches covered.">            for (String prop : properties) {</span>
+<span class="fc" id="L183">                Check.that(prop).is(keyIn(), getters, noSuchProperty(prop));</span>
+            }
+<span class="fc" id="L185">            Map&lt;String, Getter&gt; tmp = HashMap.newHashMap(getters.size());</span>
+<span class="fc" id="L186">            tmp.putAll(getters);</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">            if (exclude) {</span>
+<span class="fc" id="L188">                tmp.keySet().removeAll(Set.of(properties));</span>
+            } else {
+<span class="nc" id="L190">                tmp.keySet().retainAll(Set.of(properties));</span>
+            }
+<span class="fc" id="L192">            Check.that(tmp).has(mapSize(), gt(), 0,</span>
+<span class="nc" id="L193">                    () -&gt; new KlojangSQLException(&quot;no properties/columns selected&quot;));</span>
+<span class="fc" id="L194">            getterArray = tmp.values().toArray(Getter[]::new);</span>
+        }
+<span class="fc" id="L196">        Transformer[] transformerArray = Arrays.stream(getterArray)</span>
+<span class="fc" id="L197">                .map(Getter::getProperty)</span>
+<span class="fc" id="L198">                .map(transformers::get)</span>
+<span class="fc" id="L199">                .toArray(Transformer[]::new);</span>
+<span class="fc" id="L200">        BatchInsertConfig&lt;T&gt; cfg = new BatchInsertConfig&lt;&gt;(</span>
+                con,
+                beanClass,
+                tableName,
+                chunkSize,
+                commitPerChunk,
+                getterArray,
+                transformerArray,
+                nameMapper);
+<span class="fc" id="L209">        return new SQLBatchInsert&lt;&gt;(cfg);</span>
+    }
+
+    private Supplier&lt;KlojangSQLException&gt; noSuchProperty(String prop) {
+<span class="fc" id="L213">        String fmt = &quot;no such property in class %s: %s&quot;;</span>
+<span class="fc" id="L214">        String msg = String.format(fmt, beanClass.getSimpleName(), prop);</span>
+<span class="pc" id="L215">        return () -&gt; new KlojangSQLException(msg);</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

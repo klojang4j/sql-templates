@@ -26,303 +26,277 @@ import static org.klojang.check.CommonExceptions.illegalState;
  */
 public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 
-  @SuppressWarnings(&quot;unused&quot;)
-<span class="fc" id="L30">  private static final Logger LOG = LoggerFactory.getLogger(SQLInsert.class);</span>
-  private static final String DIRTY_INSTANCE = &quot;insertAll() not allowed on dirty instance; call reset() first&quot;;
+    @SuppressWarnings(&quot;unused&quot;)
+<span class="fc" id="L30">    private static final Logger LOG = LoggerFactory.getLogger(SQLInsert.class);</span>
+    private static final String DIRTY_INSTANCE = &quot;insertAll() not allowed on dirty instance; call reset() first&quot;;
 
-<span class="fc" id="L33">  private final List&lt;String&gt; idProperties = new ArrayList&lt;&gt;(5);</span>
+<span class="fc" id="L33">    private final List&lt;String&gt; idProperties = new ArrayList&lt;&gt;(5);</span>
 
-  private PreparedStatement ps;
-  private boolean generateKeys;
+    private PreparedStatement ps;
+    private boolean generateKeys;
 
-  /**
-   * For internal use only.
-   */
-  @ModulePrivate
-  public SQLInsert(Connection con, AbstractSQLSession sql, SQLInfo sqlInfo) {
-<span class="fc" id="L43">    super(con, sql, sqlInfo);</span>
-<span class="fc" id="L44">  }</span>
+    /**
+     * For internal use only.
+     */
+    @ModulePrivate
+    public SQLInsert(Connection con, AbstractSQLSession sql, SQLInfo sqlInfo) {
+<span class="fc" id="L43">        super(con, sql, sqlInfo);</span>
+<span class="fc" id="L44">    }</span>
 
-  /**
-   * Binds the values in the specified JavaBean to the parameters within the SQL
-   * statement. Bean properties that do not correspond to named parameters will be
-   * ignored. The effect of passing anything other than a proper JavaBean (e.g. an
-   * {@code Integer}, {@code String} or array) is undefined.
-   *
-   * @param bean The bean whose values to bind to the named parameters within the SQL
-   *     statement
-   * @return this {@code SQLInsert} instance
-   */
-  @Override
-  public SQLInsert bind(Object bean) {
-<span class="fc" id="L58">    super.bind(bean);</span>
-<span class="fc" id="L59">    idProperties.add(null);</span>
-<span class="fc" id="L60">    return this;</span>
-  }
-
-  /**
-   * &lt;p&gt;Binds the values in the specified JavaBean to the parameters within the SQL
-   * statement. Bean properties that do not correspond to named parameters will be
-   * ignored. The effect of passing anything other than a proper JavaBean (e.g. an
-   * {@code Integer}, {@code String} or array) is undefined. The {@code idProperty}
-   * argument must be the name of the property corresponding to the primary key. The
-   * generated value for that column will be bound back into the bean. Therefore, make
-   * sure the bean is modifiable.
-   *
-   * &lt;p&gt;&lt;b&gt;&lt;i&gt;Klojang JDBC&lt;/i&gt; does not support table definitions that generate keys for
-   * multiple columns.&lt;/b&gt;
-   *
-   * @param bean the bean whose values to bind to the named parameters within the SQL
-   *     statement
-   * @param idProperty the name of the property representing the auto-generated
-   *     primary key.
-   * @return this {@code SQLInsert} instance
-   */
-  public SQLInsert bind(Object bean, String idProperty) {
-<span class="fc" id="L82">    super.bind(bean);</span>
-<span class="fc" id="L83">    Check.notNull(idProperty, &quot;idProperty&quot;).then(idProperties::add);</span>
-<span class="fc" id="L84">    return this;</span>
-  }
-
-  /**
-   * Binds the values in the specified map to the parameters within the SQL statement.
-   * Keys that do not correspond to named parameters will be ignored.
-   *
-   * @param map the map whose values to bind to the named parameters within the SQL
-   *     statement
-   * @return this {@code SQLInsert} instance
-   */
-  @Override
-  public SQLInsert bind(Map&lt;String, Object&gt; map) {
-<span class="fc" id="L97">    super.bind(map);</span>
-<span class="fc" id="L98">    idProperties.add(null);</span>
-<span class="fc" id="L99">    return this;</span>
-  }
-
-  /**
-   * Binds the values in the specified map to the parameters within the SQL statement.
-   * Keys that do not correspond to named parameters will be ignored. The {@code idKey}
-   * argument must be the name of the map key corresponding to the table's primary key.
-   * The generated value for that column will be bound back into the map. Therefore, make
-   * sure the map is modifiable.
-   *
-   * &lt;p&gt;&lt;b&gt;&lt;i&gt;Klojang JDBC&lt;/i&gt; does not support table definitions that generate keys for
-   * multiple columns.&lt;/b&gt;
-   *
-   * @param map the map whose values to bind to the named parameters within the SQL
-   *     statement
-   * @param idKey the name of the map key representing the auto-generated primary
-   *     key.
-   * @return this {@code SQLInsert} instance
-   */
-  public SQLInsert bind(Map&lt;String, ?&gt; map, String idKey) {
-<span class="fc" id="L119">    super.bind(map);</span>
-<span class="fc" id="L120">    Check.notNull(idKey, &quot;idKey&quot;).then(idProperties::add);</span>
-<span class="fc" id="L121">    return this;</span>
-  }
-
-  /**
-   * Executes the INSERT statement. Auto-generated keys will not be passed back to the
-   * client.
-   */
-  public void execute() {
-    try {
-<span class="nc" id="L130">      exec(false);</span>
-<span class="nc" id="L131">    } catch (Throwable t) {</span>
-<span class="nc" id="L132">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
-    } finally {
-<span class="nc" id="L134">      reset();</span>
+    /**
+     * Binds the values in the specified JavaBean to the parameters within the SQL
+     * statement. Bean properties that do not correspond to named parameters will be
+     * ignored. The effect of passing anything other than a proper JavaBean (e.g. an
+     * {@code Integer}, {@code String} or array) is undefined.
+     *
+     * @param bean The bean whose values to bind to the named parameters within the SQL
+     * statement
+     * @return this {@code SQLInsert} instance
+     */
+    @Override
+    public SQLInsert bind(Object bean) {
+<span class="fc" id="L58">        super.bind(bean);</span>
+<span class="fc" id="L59">        idProperties.add(null);</span>
+<span class="fc" id="L60">        return this;</span>
     }
-<span class="nc" id="L136">  }</span>
 
-  /**
-   * Executes the INSERT statement and returns the key generated by the database. If the
-   * database generated keys for multiple columns, a {@link KlojangSQLException} is
-   * thrown, as this is not supported by &lt;i&gt;Klojang JDBC&lt;/i&gt;.
-   *
-   * @return the key generated by the database
-   */
-  public long executeAndGetID() {
-    try {
-<span class="fc" id="L147">      exec(true);</span>
-<span class="fc" id="L148">      return JDBC.getGeneratedKeys(ps, 1)[0];</span>
-<span class="nc" id="L149">    } catch (Throwable t) {</span>
-<span class="nc" id="L150">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
-    } finally {
-<span class="fc" id="L152">      reset();</span>
+    /**
+     * &lt;p&gt;Binds the values in the specified JavaBean to the parameters within the SQL
+     * statement. Bean properties that do not correspond to named parameters will be
+     * ignored. The effect of passing anything other than a proper JavaBean (e.g. an
+     * {@code Integer}, {@code String} or array) is undefined. The {@code idProperty}
+     * argument must be the name of the property corresponding to the primary key. The
+     * generated value for that column will be bound back into the bean. Therefore, make
+     * sure the bean is modifiable.
+     *
+     * &lt;p&gt;&lt;b&gt;&lt;i&gt;Klojang JDBC&lt;/i&gt; does not support table definitions that generate keys
+     * for multiple columns.&lt;/b&gt;
+     *
+     * @param bean the bean whose values to bind to the named parameters within the SQL
+     * statement
+     * @param idProperty the name of the property representing the auto-generated primary
+     * key.
+     * @return this {@code SQLInsert} instance
+     */
+    public SQLInsert bind(Object bean, String idProperty) {
+<span class="fc" id="L82">        super.bind(bean);</span>
+<span class="fc" id="L83">        Check.notNull(idProperty, &quot;idProperty&quot;).then(idProperties::add);</span>
+<span class="fc" id="L84">        return this;</span>
     }
-  }
 
-  /**
-   * Executes the INSERT statement and returns the key generated by the database. Any
-   * JavaBean that was bound using {@link #bind(Object, String) bind(bean, idProperty)}
-   * will have its ID property set to the key generated by the database. JavaBeans that
-   * were bound using {@link #bind(Object) bind(bean)} will remain unmodified. The same
-   * applies &lt;i&gt;mutatis mutandis&lt;/i&gt; for {@code Map} objects.
-   */
-  @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
-  public void executeAndSetID() {
-    try {
-<span class="fc" id="L166">      exec(true);</span>
-<span class="fc" id="L167">      long dbKey = JDBC.getGeneratedKeys(ps, 1)[0];</span>
-<span class="fc bfc" id="L168" title="All 2 branches covered.">      for (int i = 0; i &lt; idProperties.size(); ++i) {</span>
-<span class="fc" id="L169">        String idProperty = idProperties.get(i);</span>
-<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if (idProperty != null) {</span>
-<span class="fc" id="L171">          Object obj = bindings.get(i);</span>
-<span class="fc bfc" id="L172" title="All 2 branches covered.">          if (obj instanceof Map map) {</span>
-<span class="fc" id="L173">            map.put(idProperty, dbKey);</span>
-          } else {
-<span class="fc" id="L175">            JDBC.setID(obj, idProperty, dbKey);</span>
-          }
+    /**
+     * Binds the values in the specified map to the parameters within the SQL statement.
+     * Keys that do not correspond to named parameters will be ignored.
+     *
+     * @param map the map whose values to bind to the named parameters within the SQL
+     * statement
+     * @return this {@code SQLInsert} instance
+     */
+    @Override
+    public SQLInsert bind(Map&lt;String, Object&gt; map) {
+<span class="fc" id="L97">        super.bind(map);</span>
+<span class="fc" id="L98">        idProperties.add(null);</span>
+<span class="fc" id="L99">        return this;</span>
+    }
+
+    /**
+     * Binds the values in the specified map to the parameters within the SQL statement.
+     * Keys that do not correspond to named parameters will be ignored. The {@code idKey}
+     * argument must be the name of the map key corresponding to the table's primary key.
+     * The generated value for that column will be bound back into the map. Therefore,
+     * make sure the map is modifiable.
+     *
+     * &lt;p&gt;&lt;b&gt;&lt;i&gt;Klojang JDBC&lt;/i&gt; does not support table definitions that generate keys
+     * for multiple columns.&lt;/b&gt;
+     *
+     * @param map the map whose values to bind to the named parameters within the SQL
+     * statement
+     * @param idKey the name of the map key representing the auto-generated primary key.
+     * @return this {@code SQLInsert} instance
+     */
+    public SQLInsert bind(Map&lt;String, ?&gt; map, String idKey) {
+<span class="fc" id="L118">        super.bind(map);</span>
+<span class="fc" id="L119">        Check.notNull(idKey, &quot;idKey&quot;).then(idProperties::add);</span>
+<span class="fc" id="L120">        return this;</span>
+    }
+
+    /**
+     * Executes the INSERT statement. Auto-generated keys will not be passed back to the
+     * client.
+     */
+    public void execute() {
+        try {
+<span class="nc" id="L129">            exec(false);</span>
+<span class="nc" id="L130">        } catch (Throwable t) {</span>
+<span class="nc" id="L131">            throw KlojangSQLException.wrap(t, sqlInfo);</span>
+        } finally {
+<span class="nc" id="L133">            reset();</span>
         }
-      }
-<span class="nc" id="L179">    } catch (Throwable t) {</span>
-<span class="nc" id="L180">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
-    } finally {
-<span class="fc" id="L182">      reset();</span>
+<span class="nc" id="L135">    }</span>
+
+    /**
+     * Executes the INSERT statement and returns the key generated by the database. If the
+     * database generated keys for multiple columns, a {@link KlojangSQLException} is
+     * thrown, as this is not supported by &lt;i&gt;Klojang JDBC&lt;/i&gt;.
+     *
+     * @return the key generated by the database
+     */
+    public long executeAndGetID() {
+        try {
+<span class="fc" id="L146">            exec(true);</span>
+<span class="fc" id="L147">            return JDBC.getGeneratedKeys(ps, 1)[0];</span>
+<span class="nc" id="L148">        } catch (Throwable t) {</span>
+<span class="nc" id="L149">            throw KlojangSQLException.wrap(t, sqlInfo);</span>
+        } finally {
+<span class="fc" id="L151">            reset();</span>
+        }
     }
-<span class="fc" id="L184">  }</span>
 
-  /**
-   * Saves the specified JavaBeans to the database. This method combines the binding and
-   * execution phase. Therefore it must be called on a &quot;fresh&quot; instance. That is, it must
-   * not contain any bound values, beans or maps yet &amp;#8212; which would be the case if
-   * the instance has just been created, or you have just executed the INSERT statement
-   * (which resets the instance), or you have explicitly called {@link #reset()}.
-   *
-   * &lt;p&gt;For large batches consider using the {@link SQLBatchInsert} class as it is likely
-   * to be more performant.
-   *
-   * @param beans the beans to save
-   * @param &lt;U&gt; the type of the beans
-   */
-  public &lt;U&gt; void insertBatch(Collection&lt;U&gt; beans) {
-<span class="fc" id="L200">    Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
-    try {
-<span class="fc bfc" id="L202" title="All 2 branches covered.">      for (U bean : beans) {</span>
-<span class="fc" id="L203">        bind(bean).exec(false);</span>
-<span class="fc" id="L204">        reset();</span>
-<span class="fc" id="L205">      }</span>
-<span class="nc" id="L206">    } catch (Throwable t) {</span>
-<span class="nc" id="L207">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
-<span class="fc" id="L208">    }</span>
-<span class="fc" id="L209">  }</span>
+    /**
+     * Executes the INSERT statement and returns the key generated by the database. Any
+     * JavaBean that was bound using {@link #bind(Object, String) bind(bean, idProperty)}
+     * will have its ID property set to the key generated by the database. JavaBeans that
+     * were bound using {@link #bind(Object) bind(bean)} will remain unmodified. The same
+     * applies &lt;i&gt;mutatis mutandis&lt;/i&gt; for {@code Map} objects.
+     */
+    @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
+    public void executeAndSetID() {
+        try {
+<span class="fc" id="L165">            exec(true);</span>
+<span class="fc" id="L166">            long dbKey = JDBC.getGeneratedKeys(ps, 1)[0];</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">            for (int i = 0; i &lt; idProperties.size(); ++i) {</span>
+<span class="fc" id="L168">                String idProperty = idProperties.get(i);</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">                if (idProperty != null) {</span>
+<span class="fc" id="L170">                    Object obj = bindings.get(i);</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">                    if (obj instanceof Map map) {</span>
+<span class="fc" id="L172">                        map.put(idProperty, dbKey);</span>
+                    } else {
+<span class="fc" id="L174">                        JDBC.setID(obj, idProperty, dbKey);</span>
+                    }
+                }
+            }
+<span class="nc" id="L178">        } catch (Throwable t) {</span>
+<span class="nc" id="L179">            throw KlojangSQLException.wrap(t, sqlInfo);</span>
+        } finally {
+<span class="fc" id="L181">            reset();</span>
+        }
+<span class="fc" id="L183">    }</span>
 
-  /**
-   * Saves the specified JavaBeans to the database and returns the auto-generated keys.
-   * This method combines the binding and execution phase. Therefore it must be called on
-   * a &quot;fresh&quot; instance. That is, it must not contain any bound values, beans or maps yet
-   * &amp;#8212; which would be the case if the instance has just been created, or you have
-   * just executed the INSERT statement (which resets the instance), or you have
-   * explicitly called {@link #reset()}.
-   *
-   * &lt;p&gt;For large batches consider using the {@link SQLBatchInsert} class as it is likely
-   * to be more performant.
-   *
-   * @param beans the beans to save
-   * @param &lt;U&gt; the type of the beans
-   * @return the keys generated by the database
-   */
-  public &lt;U&gt; long[] insertBatchAndGetIDs(Collection&lt;U&gt; beans) {
-<span class="fc" id="L227">    Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
-<span class="fc" id="L228">    long[] keys = new long[beans.size()];</span>
-    try {
-<span class="fc" id="L230">      int i = 0;</span>
-<span class="fc bfc" id="L231" title="All 2 branches covered.">      for (U bean : beans) {</span>
-<span class="fc" id="L232">        bind(bean).exec(true);</span>
-<span class="fc" id="L233">        keys[i++] = JDBC.getGeneratedKeys(ps, 1)[0];</span>
-<span class="fc" id="L234">        reset();</span>
-<span class="fc" id="L235">      }</span>
-<span class="nc" id="L236">    } catch (Throwable t) {</span>
-<span class="nc" id="L237">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
-<span class="fc" id="L238">    }</span>
-<span class="fc" id="L239">    return keys;</span>
-  }
+    /**
+     * Saves the specified JavaBeans to the database. This method combines the binding and
+     * execution phase. Therefore it must be called on a &quot;fresh&quot; instance. That is, it
+     * must not contain any bound values, beans or maps yet &amp;#8212; which would be the
+     * case if the instance has just been created, or you have just executed the INSERT
+     * statement (which resets the instance), or you have explicitly called
+     * {@link #reset()}.
+     *
+     * &lt;p&gt;For large batches consider using the {@link SQLBatchInsert} class as it is
+     * likely to be more performant.
+     *
+     * @param beans the beans to save
+     * @param &lt;U&gt; the type of the beans
+     */
+    public &lt;U&gt; void insertBatch(Collection&lt;U&gt; beans) {
+<span class="fc" id="L200">        Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
+        try {
+<span class="fc bfc" id="L202" title="All 2 branches covered.">            for (U bean : beans) {</span>
+<span class="fc" id="L203">                bind(bean).exec(false);</span>
+<span class="fc" id="L204">                reset();</span>
+<span class="fc" id="L205">            }</span>
+<span class="nc" id="L206">        } catch (Throwable t) {</span>
+<span class="nc" id="L207">            throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="fc" id="L208">        }</span>
+<span class="fc" id="L209">    }</span>
 
-  /**
-   * Saves the specified JavaBeans to the database and sets the specified ID property in
-   * each of them to the key generated by the database. This method combines the binding
-   * and execution phase. Therefore it must be called on a &quot;fresh&quot; instance. That is, it
-   * must not contain any bound values, beans or maps yet &amp;#8212; which would be the case
-   * if the instance has just been created, or you have just executed the INSERT statement
-   * (which resets the instance), or you have explicitly called {@link #reset()}.
-   *
-   * @param &lt;U&gt; the type of the beans
-   * @param idProperty the name of the property corresponding to the primary key
-   * @param beans the beans to save
-   */
-  public &lt;U&gt; void insertBatchAndSetIDs(String idProperty, Collection&lt;U&gt; beans) {
-<span class="fc" id="L255">    Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
-    try {
-<span class="fc bfc" id="L257" title="All 2 branches covered.">      for (U bean : beans) {</span>
-<span class="fc" id="L258">        bind(bean, idProperty).exec(true);</span>
-<span class="fc" id="L259">        long key = JDBC.getGeneratedKeys(ps, 1)[0];</span>
-<span class="fc" id="L260">        JDBC.setID(bean, idProperty, key);</span>
-<span class="fc" id="L261">        reset();</span>
-<span class="fc" id="L262">      }</span>
-<span class="nc" id="L263">    } catch (Throwable t) {</span>
-<span class="nc" id="L264">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
-<span class="fc" id="L265">    }</span>
-<span class="fc" id="L266">  }</span>
-
-//  /**
-//   * Saves the specified JavaBeans to the database and returns the keys generated by the
-//   * database. This method combines the binding and execution phase. Therefore it must be
-//   * called on a &quot;fresh&quot; instance. That is, it must not contain any bound values, beans or
-//   * maps yet &amp;#8212; which would be the case if the instance has just been created, or
-//   * you have just executed the INSERT statement (which resets the instance), or you have
-//   * explicitly called {@link #reset()}.
-//   *
-//   * @param &lt;U&gt; the type of the beans
-//   * @param idProperty the name of the property corresponding to the primary key
-//   * @param beans the beans to save
-//   * @return the keys generated by the database
-//   */
-//  public &lt;U&gt; long[] insertAllAndGetIDs(String idProperty, Collection&lt;U&gt; beans) {
-//    Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));
-//    long[] keys = new long[beans.size()];
-//    try {
-//      int i = 0;
-//      for (U bean : beans) {
-//        keys[i++] = bind(bean, idProperty).executeAndGetID();
-//      }
-//    } catch (Throwable t) {
-//      throw KlojangSQLException.wrap(t, sqlInfo);
-//    }
-//    return keys;
-//  }
-
-  @Override
-  void initialize() {
-<span class="fc" id="L297">    idProperties.clear();</span>
-    try {
-<span class="fc" id="L299">      ps.clearParameters();</span>
-<span class="nc" id="L300">    } catch (SQLException e) {</span>
-<span class="nc" id="L301">      throw KlojangSQLException.wrap(e, sqlInfo);</span>
-<span class="fc" id="L302">    }</span>
-<span class="fc" id="L303">  }</span>
-
-  /**
-   * Releases all resources held by this instance. You cannot reuse this instance after a
-   * call to this method.
-   */
-  @Override
-  public void close() {
-<span class="fc" id="L311">    close(ps);</span>
-<span class="fc" id="L312">  }</span>
-
-  private void exec(boolean generateKeys) throws Throwable {
-<span class="fc bfc" id="L315" title="All 2 branches covered.">    int x = generateKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
-<span class="fc bfc" id="L316" title="All 2 branches covered.">    if (ps == null) {</span>
-<span class="fc" id="L317">      ps = con.prepareStatement(sqlInfo.jdbcSQL(), x);</span>
-<span class="pc bpc" id="L318" title="1 of 2 branches missed.">    } else if (this.generateKeys != generateKeys) {</span>
-<span class="nc" id="L319">      ps.close();</span>
-<span class="nc" id="L320">      ps = con.prepareStatement(sqlInfo.jdbcSQL(), x);</span>
+    /**
+     * Saves the specified JavaBeans to the database and returns the keys generated by the
+     * database. This method combines the binding and execution phase. Therefore it must
+     * be called on a &quot;fresh&quot; instance. That is, it must not contain any bound values,
+     * beans or maps yet &amp;#8212;. This will be the case if the instance has just been
+     * created or if you just executed the INSERT statement (which resets the instance) or
+     * if you just called {@link #reset()}.
+     *
+     * &lt;p&gt;For large batches consider using the {@link SQLBatchInsert} class as it is
+     * likely to be more performant.
+     *
+     * @param beans the beans to save
+     * @param &lt;U&gt; the type of the beans
+     * @return the keys generated by the database
+     */
+    public &lt;U&gt; long[] insertBatchAndGetIDs(Collection&lt;U&gt; beans) {
+<span class="fc" id="L227">        Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
+<span class="fc" id="L228">        long[] keys = new long[beans.size()];</span>
+        try {
+<span class="fc" id="L230">            int i = 0;</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">            for (U bean : beans) {</span>
+<span class="fc" id="L232">                bind(bean).exec(true);</span>
+<span class="fc" id="L233">                keys[i++] = JDBC.getGeneratedKeys(ps, 1)[0];</span>
+<span class="fc" id="L234">                reset();</span>
+<span class="fc" id="L235">            }</span>
+<span class="nc" id="L236">        } catch (Throwable t) {</span>
+<span class="nc" id="L237">            throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="fc" id="L238">        }</span>
+<span class="fc" id="L239">        return keys;</span>
     }
-<span class="fc" id="L322">    this.generateKeys = generateKeys;</span>
-<span class="fc" id="L323">    applyBindings(ps);</span>
-<span class="fc" id="L324">    ps.executeUpdate();</span>
-<span class="fc" id="L325">  }</span>
 
- }
+    /**
+     * Saves the specified JavaBeans to the database and sets the specified ID property in
+     * each of them to the key generated by the database. This method combines the binding
+     * and execution phase. Therefore it must be called on a &quot;fresh&quot; instance. That is, it
+     * must not contain any bound values, beans or maps yet &amp;#8212; which would be the
+     * case if the instance has just been created, or you have just executed the INSERT
+     * statement (which resets the instance), or you have explicitly called
+     * {@link #reset()}.
+     *
+     * @param &lt;U&gt; the type of the beans
+     * @param idProperty the name of the property corresponding to the primary key
+     * @param beans the beans to save
+     */
+    public &lt;U&gt; void insertBatchAndSetIDs(String idProperty, Collection&lt;U&gt; beans) {
+<span class="fc" id="L256">        Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
+        try {
+<span class="fc bfc" id="L258" title="All 2 branches covered.">            for (U bean : beans) {</span>
+<span class="fc" id="L259">                bind(bean, idProperty).exec(true);</span>
+<span class="fc" id="L260">                long key = JDBC.getGeneratedKeys(ps, 1)[0];</span>
+<span class="fc" id="L261">                JDBC.setID(bean, idProperty, key);</span>
+<span class="fc" id="L262">                reset();</span>
+<span class="fc" id="L263">            }</span>
+<span class="nc" id="L264">        } catch (Throwable t) {</span>
+<span class="nc" id="L265">            throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="fc" id="L266">        }</span>
+<span class="fc" id="L267">    }</span>
+
+    @Override
+    void initialize() {
+<span class="fc" id="L271">        idProperties.clear();</span>
+        try {
+<span class="fc" id="L273">            ps.clearParameters();</span>
+<span class="nc" id="L274">        } catch (SQLException e) {</span>
+<span class="nc" id="L275">            throw KlojangSQLException.wrap(e, sqlInfo);</span>
+<span class="fc" id="L276">        }</span>
+<span class="fc" id="L277">    }</span>
+
+    /**
+     * Releases all resources held by this instance. You cannot reuse this instance after
+     * a call to this method.
+     */
+    @Override
+    public void close() {
+<span class="fc" id="L285">        close(ps);</span>
+<span class="fc" id="L286">    }</span>
+
+    private void exec(boolean generateKeys) throws Throwable {
+<span class="fc bfc" id="L289" title="All 2 branches covered.">        int x = generateKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
+<span class="fc bfc" id="L290" title="All 2 branches covered.">        if (ps == null) {</span>
+<span class="fc" id="L291">            ps = con.prepareStatement(sqlInfo.jdbcSQL(), x);</span>
+<span class="pc bpc" id="L292" title="1 of 2 branches missed.">        } else if (this.generateKeys != generateKeys) {</span>
+<span class="nc" id="L293">            ps.close();</span>
+<span class="nc" id="L294">            ps = con.prepareStatement(sqlInfo.jdbcSQL(), x);</span>
+        }
+<span class="fc" id="L296">        this.generateKeys = generateKeys;</span>
+<span class="fc" id="L297">        applyBindings(ps);</span>
+<span class="fc" id="L298">        ps.executeUpdate();</span>
+<span class="fc" id="L299">    }</span>
+
+}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

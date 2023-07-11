@@ -396,7 +396,12 @@
                     <execution>
                         <id>attach-javadocs</id>
                         <configuration>
-                            <windowtitle>SQL Templates</windowtitle>
+                            <windowtitle>Klojang JDBC</windowtitle>
+                            <links>
+                                <link>https://docs.oracle.com/en/java/javase/19/docs/api</link>
+                                <link>https://klojang4j.github.io/klojang-templates/1/api</link>
+                                <link>https://klojang4j.github.io/klojang-util/1/api/</link>
+                            </links>
                             <excludePackageNames>org.klojang.jdbc.x</excludePackageNames>
                         </configuration>
                         <goals>
