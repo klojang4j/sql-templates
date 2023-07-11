@@ -48,19 +48,19 @@ import java.sql.Connection;
  * Templates</i> variables look like this: <b>{@code ~%fooBar%}</b>.)
  *
  * <p>An instance of this implementation can be obtained via the
- * {@link #template(String) SQL.template()} method. <i>Klojang
- * JDBC</i> is agnostic about, and has no opinion on what gets parametrized this way. You
- * could also parametrize the table(s) in the FROM clause for example.
+ * {@link #template(String) SQL.template()} method. <i>Klojang JDBC</i> is agnostic about,
+ * and has no opinion on what gets parametrized this way. You could also parametrize the
+ * table(s) in the FROM clause for example.
  *
  * <h2>SQL Skeletons</h2>
- * <p>The implementation obtained via the {@link #skeleton(String) skeleton()} methods
- * allows for very dynamically generated SQL. As with SQL templates, the SQL is provided
- * in the form of a Klojang template (that is: it may contain <i>Klojang Templates</i>
- * variables). However, SQL skeletons explicitly allow you to set template variables to
- * values that are themselves chunks of SQL. More importantly: these chunks of SQL may
- * again contain named parameters. Named parameters are only extracted <i>after</i> the
- * SQL template has been rendered. This makes SQL skeletons less efficient, but more
- * dynamic than SQL templates.
+ * <p>The implementation obtained via the {@link #skeleton(String) SQL.skeleton()}
+ * methods allows for very dynamically generated SQL. As with SQL templates, the SQL is
+ * provided in the form of a Klojang template (that is: it may contain <i>Klojang
+ * Templates</i> variables). However, SQL skeletons explicitly allow you to set template
+ * variables to values that are themselves chunks of SQL. More importantly: these chunks
+ * of SQL may again contain named parameters. Named parameters are only extracted
+ * <i>after</i> the SQL template has been rendered. This makes SQL skeletons less
+ * efficient, but more dynamic than SQL templates.
  *
  * <h2>SQL Injection</h2>
  * <p>As mentioned, named parameters are ultimately just placeholders for standard JDBC
@@ -78,8 +78,7 @@ import java.sql.Connection;
 public sealed interface SQL permits AbstractSQL {
     /**
      * Returns an {@code SQL} implementation that allows for named parameters, but not
-     * for
-     * <i>Klojang Templates</i> variables.
+     * for <i>Klojang Templates</i> variables.
      *
      * @param sql the SQL query string
      * @return an instance of an {@code SQL} implementation that behaves as described
@@ -91,8 +90,7 @@ public sealed interface SQL permits AbstractSQL {
 
     /**
      * Returns an {@code SQL} implementation that allows for named parameters, but not
-     * for
-     * <i>Klojang Templates</i> variables.
+     * for <i>Klojang Templates</i> variables.
      *
      * @param sql the SQL query string
      * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how values
