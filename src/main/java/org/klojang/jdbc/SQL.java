@@ -9,10 +9,10 @@ import org.klojang.jdbc.x.sql.SQLTemplate;
 import java.sql.Connection;
 
 /**
- * <p>Encapsulates a user-provided SQL query. The query string can be parametrized in
- * three qualitatively ways. For each of these variants a different implementation is
- * provided. The implementations are hidden from view. Instances of them are obtained via
- * static factory methods on the {@code SQL} interface itself.
+ * <p>Encapsulates a user-provided SQL statement. The statement can be parametrized in
+ * three qualitatively different ways. For each variant a different implementation of the
+ * {@code SQL} interface is provided. The implementations are hidden from view. Instances
+ * of them are obtained via static factory methods on the {@code SQL} interface itself.
  *
  * <h2>Named Parameters</h2>
  * <p>The simplest implementation supports the use of named parameters within SQL query
@@ -27,9 +27,8 @@ import java.sql.Connection;
  * <p>Named parameters are placeholders for, and will ultimately be replaced by regular
  * JDBC parameters (that is: question marks). Thus, named parameters can and should be
  * used wherever you would ordinarily use regular JDBC parameters. An instance of this
- * implementation can be obtained via the {@link #basic(String) parametrized()} methods of
- * the {@code SQL} interface. You should also preferably use this implementation for
- * completely static SQL.
+ * implementation can be obtained via the {@link #basic(String) SQL.basic()} method. You
+ * should also preferably use this implementation for completely static SQL.
  *
  * <h2>SQL Templates</h2>
  * <p>A classic example of something that you often want to, but cannot parametrize with
@@ -49,7 +48,7 @@ import java.sql.Connection;
  * Templates</i> variables look like this: <b>{@code ~%fooBar%}</b>.)
  *
  * <p>An instance of this implementation can be obtained via the
- * {@link #template(String) template()} methods of the {@code SQL} interface. <i>Klojang
+ * {@link #template(String) SQL.template()} method. <i>Klojang
  * JDBC</i> is agnostic about, and has no opinion on what gets parametrized this way. You
  * could also parametrize the table(s) in the FROM clause for example.
  *

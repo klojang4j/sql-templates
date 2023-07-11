@@ -9,10 +9,10 @@ import org.klojang.jdbc.x.sql.SQLTemplate;
 import java.sql.Connection;
 
 /**
- * &lt;p&gt;Encapsulates a user-provided SQL query. The query string can be parametrized in
- * three qualitatively ways. For each of these variants a different implementation is
- * provided. The implementations are hidden from view. Instances of them are obtained via
- * static factory methods on the {@code SQL} interface itself.
+ * &lt;p&gt;Encapsulates a user-provided SQL statement. The statement can be parametrized in
+ * three qualitatively different ways. For each variant a different implementation of the
+ * {@code SQL} interface is provided. The implementations are hidden from view. Instances
+ * of them are obtained via static factory methods on the {@code SQL} interface itself.
  *
  * &lt;h2&gt;Named Parameters&lt;/h2&gt;
  * &lt;p&gt;The simplest implementation supports the use of named parameters within SQL query
@@ -27,9 +27,8 @@ import java.sql.Connection;
  * &lt;p&gt;Named parameters are placeholders for, and will ultimately be replaced by regular
  * JDBC parameters (that is: question marks). Thus, named parameters can and should be
  * used wherever you would ordinarily use regular JDBC parameters. An instance of this
- * implementation can be obtained via the {@link #basic(String) parametrized()} methods of
- * the {@code SQL} interface. You should also preferably use this implementation for
- * completely static SQL.
+ * implementation can be obtained via the {@link #basic(String) SQL.basic()} method. You
+ * should also preferably use this implementation for completely static SQL.
  *
  * &lt;h2&gt;SQL Templates&lt;/h2&gt;
  * &lt;p&gt;A classic example of something that you often want to, but cannot parametrize with
@@ -49,7 +48,7 @@ import java.sql.Connection;
  * Templates&lt;/i&gt; variables look like this: &lt;b&gt;{@code ~%fooBar%}&lt;/b&gt;.)
  *
  * &lt;p&gt;An instance of this implementation can be obtained via the
- * {@link #template(String) template()} methods of the {@code SQL} interface. &lt;i&gt;Klojang
+ * {@link #template(String) SQL.template()} method. &lt;i&gt;Klojang
  * JDBC&lt;/i&gt; is agnostic about, and has no opinion on what gets parametrized this way. You
  * could also parametrize the table(s) in the FROM clause for example.
  *
@@ -87,7 +86,7 @@ public sealed interface SQL permits AbstractSQL {
      * above
      */
     static SQL basic(String sql) {
-<span class="fc" id="L90">        return basic(sql, new BindInfo() {});</span>
+<span class="fc" id="L89">        return basic(sql, new BindInfo() {});</span>
     }
 
     /**
@@ -102,7 +101,7 @@ public sealed interface SQL permits AbstractSQL {
      * above
      */
     static SQL basic(String sql, BindInfo bindInfo) {
-<span class="fc" id="L105">        return new BasicSQL(sql, bindInfo);</span>
+<span class="fc" id="L104">        return new BasicSQL(sql, bindInfo);</span>
     }
 
     /**
@@ -114,7 +113,7 @@ public sealed interface SQL permits AbstractSQL {
      * above
      */
     static SQL template(String sql) {
-<span class="nc" id="L117">        return template(sql, new BindInfo() {});</span>
+<span class="nc" id="L116">        return template(sql, new BindInfo() {});</span>
     }
 
     /**
@@ -128,7 +127,7 @@ public sealed interface SQL permits AbstractSQL {
      * above
      */
     static SQL template(String sql, BindInfo bindInfo) {
-<span class="nc" id="L131">        return new SQLTemplate(sql, bindInfo);</span>
+<span class="nc" id="L130">        return new SQLTemplate(sql, bindInfo);</span>
     }
 
     /**
@@ -142,7 +141,7 @@ public sealed interface SQL permits AbstractSQL {
      * above
      */
     static SQL skeleton(String sql) {
-<span class="nc" id="L145">        return skeleton(sql, new BindInfo() {});</span>
+<span class="nc" id="L144">        return skeleton(sql, new BindInfo() {});</span>
     }
 
     /**
@@ -158,7 +157,7 @@ public sealed interface SQL permits AbstractSQL {
      * above
      */
     static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L161">        return new SQLSkeleton(sql, bindInfo);</span>
+<span class="nc" id="L160">        return new SQLSkeleton(sql, bindInfo);</span>
     }
 
     /**
@@ -177,7 +176,7 @@ public sealed interface SQL permits AbstractSQL {
      * @return a {@code SQLQuery} instance
      */
     static SQLQuery prepareQuery(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L180">        return basic(sql, bindInfo).session().prepareQuery(con);</span>
+<span class="nc" id="L179">        return basic(sql, bindInfo).session().prepareQuery(con);</span>
     }
 
     /**
@@ -196,7 +195,7 @@ public sealed interface SQL permits AbstractSQL {
      * @return a {@code SQLInsert} instance
      */
     static SQLInsert prepareInsert(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L199">        return basic(sql, bindInfo).session().prepareInsert(con);</span>
+<span class="nc" id="L198">        return basic(sql, bindInfo).session().prepareInsert(con);</span>
     }
 
     /**
@@ -215,7 +214,7 @@ public sealed interface SQL permits AbstractSQL {
      * @return a {@code SQLUpdate} instance
      */
     static SQLUpdate prepareUpdate(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L218">        return basic(sql, bindInfo).session().prepareUpdate(con);</span>
+<span class="nc" id="L217">        return basic(sql, bindInfo).session().prepareUpdate(con);</span>
     }
 
     /**
@@ -226,7 +225,7 @@ public sealed interface SQL permits AbstractSQL {
      * INSERT statement
      */
     static SQLInsertBuilder prepareInsert() {
-<span class="fc" id="L229">        return new SQLInsertBuilder();</span>
+<span class="fc" id="L228">        return new SQLInsertBuilder();</span>
     }
 
     /**
@@ -237,7 +236,7 @@ public sealed interface SQL permits AbstractSQL {
      * batch inserts.
      */
     static SQLBatchInsertBuilder prepareBatchInsert() {
-<span class="fc" id="L240">        return new SQLBatchInsertBuilder();</span>
+<span class="fc" id="L239">        return new SQLBatchInsertBuilder();</span>
     }
 
     /**
@@ -257,7 +256,7 @@ public sealed interface SQL permits AbstractSQL {
      * @see Quoter
      */
     static Object expression(String expression) {
-<span class="nc" id="L260">        return new SQLExpression(expression);</span>
+<span class="nc" id="L259">        return new SQLExpression(expression);</span>
     }
 
     /**
