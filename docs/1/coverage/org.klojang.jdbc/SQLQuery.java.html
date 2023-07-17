@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLQuery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLQuery.java</span></div><h1>SQLQuery.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderFinder;
 import org.klojang.jdbc.x.sql.AbstractSQLSession;
@@ -22,7 +21,7 @@ import java.util.function.Supplier;
 
 /**
  * &lt;p&gt;Facilitates the execution of SQL SELECT statements. {@code SQLQuery} instances are
- * obtained via {@link SQLSession#prepareQuery(Connection) SQLSession.prepareQuery()}. You
+ * obtained via {@link SQLSession#prepareQuery() SQLSession.prepareQuery()}. You
  * should always obtain them using a try-with-resources block. Here is a simple example of
  * how you can use the {@code SQLQuery} class:
  *
@@ -55,21 +54,18 @@ import java.util.function.Supplier;
  */
 public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
 
-<span class="fc" id="L58">  private static final Logger LOG = LoggerFactory.getLogger(SQLQuery.class);</span>
+<span class="fc" id="L57">  private static final Logger LOG = LoggerFactory.getLogger(SQLQuery.class);</span>
 
-  private final PreparedStatement ps;
-
-<span class="fc" id="L62">  private NameMapper mapper = NameMapper.AS_IS;</span>
+<span class="fc" id="L59">  private NameMapper mapper = NameMapper.AS_IS;</span>
   private ResultSet resultSet;
 
   /**
    * For internal use only.
    */
   @ModulePrivate
-  public SQLQuery(Connection con, AbstractSQLSession sql, SQLInfo sqlInfo) {
-<span class="fc" id="L70">    super(con, sql, sqlInfo);</span>
-<span class="fc" id="L71">    this.ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="fc" id="L72">  }</span>
+  public SQLQuery(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
+<span class="fc" id="L67">    super(ps, sql, sqlInfo);</span>
+<span class="fc" id="L68">  }</span>
 
   /**
    * Sets the column-to-property mapper to be used when populating JavaBeans or maps from
@@ -80,8 +76,8 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @return this {@code SQLQuery} instance
    */
   public SQLQuery withMapper(NameMapper columnMapper) {
-<span class="nc" id="L83">    this.mapper = Check.notNull(columnMapper).ok();</span>
-<span class="nc" id="L84">    return this;</span>
+<span class="nc" id="L79">    this.mapper = Check.notNull(columnMapper).ok();</span>
+<span class="nc" id="L80">    return this;</span>
   }
 
   /**
@@ -92,10 +88,10 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public ResultSet getResultSet() {
     try {
-<span class="nc" id="L95">      executeQuery();</span>
-<span class="nc" id="L96">      return resultSet;</span>
-<span class="nc" id="L97">    } catch (Throwable t) {</span>
-<span class="nc" id="L98">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L91">      executeQuery();</span>
+<span class="nc" id="L92">      return resultSet;</span>
+<span class="nc" id="L93">    } catch (Throwable t) {</span>
+<span class="nc" id="L94">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }
   }
 
@@ -112,14 +108,14 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; T lookup(Class&lt;T&gt; clazz) {
     try {
-<span class="nc" id="L115">      executeAndNext();</span>
-<span class="nc" id="L116">      int sqlType = resultSet.getMetaData().getColumnType(1);</span>
-<span class="nc" id="L117">      return ColumnReaderFinder</span>
-<span class="nc" id="L118">          .getInstance()</span>
-<span class="nc" id="L119">          .findReader(clazz, sqlType)</span>
-<span class="nc" id="L120">          .getValue(resultSet, 1, clazz);</span>
-<span class="nc" id="L121">    } catch (Throwable t) {</span>
-<span class="nc" id="L122">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L111">      executeAndNext();</span>
+<span class="nc" id="L112">      int sqlType = resultSet.getMetaData().getColumnType(1);</span>
+<span class="nc" id="L113">      return ColumnReaderFinder</span>
+<span class="nc" id="L114">            .getInstance()</span>
+<span class="nc" id="L115">            .findReader(clazz, sqlType)</span>
+<span class="nc" id="L116">            .getValue(resultSet, 1, clazz);</span>
+<span class="nc" id="L117">    } catch (Throwable t) {</span>
+<span class="nc" id="L118">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }
   }
 
@@ -134,10 +130,10 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public int getInt() throws KlojangSQLException {
     try {
-<span class="fc" id="L137">      executeAndNext();</span>
-<span class="fc" id="L138">      return resultSet.getInt(1);</span>
-<span class="nc" id="L139">    } catch (Throwable t) {</span>
-<span class="nc" id="L140">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="fc" id="L133">      executeAndNext();</span>
+<span class="fc" id="L134">      return resultSet.getInt(1);</span>
+<span class="nc" id="L135">    } catch (Throwable t) {</span>
+<span class="nc" id="L136">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }
   }
 
@@ -152,10 +148,10 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public String getString() throws KlojangSQLException {
     try {
-<span class="nc" id="L155">      executeAndNext();</span>
-<span class="nc" id="L156">      return resultSet.getString(1);</span>
-<span class="nc" id="L157">    } catch (Throwable t) {</span>
-<span class="nc" id="L158">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L151">      executeAndNext();</span>
+<span class="nc" id="L152">      return resultSet.getString(1);</span>
+<span class="nc" id="L153">    } catch (Throwable t) {</span>
+<span class="nc" id="L154">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }
   }
 
@@ -165,7 +161,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    *
    * @return the values of the first column in the result set
    */
-<span class="fc" id="L168">  public List&lt;String&gt; firstColumn() { return firstColumn(String.class); }</span>
+<span class="fc" id="L164">  public List&lt;String&gt; firstColumn() {return firstColumn(String.class);}</span>
 
   /**
    * Executes the query and returns a {@code List} of all values in the first column of
@@ -176,7 +172,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @param clazz the desired class of the values
    * @return the values of the first column in the result set
    */
-<span class="fc" id="L179">  public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz) { return firstColumn(clazz, 10); }</span>
+<span class="fc" id="L175">  public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz) {return firstColumn(clazz, 10);}</span>
 
   /**
    * Executes the query and returns a {@code List} of the all values in the first column.
@@ -189,20 +185,20 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz, int sizeEstimate) {
     try {
-<span class="fc" id="L192">      executeQuery();</span>
-<span class="pc bpc" id="L193" title="1 of 2 branches missed.">      if (!resultSet.next()) {</span>
-<span class="nc" id="L194">        return Collections.emptyList();</span>
+<span class="fc" id="L188">      executeQuery();</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">      if (!resultSet.next()) {</span>
+<span class="nc" id="L190">        return Collections.emptyList();</span>
       }
-<span class="fc" id="L196">      int sqlType = resultSet.getMetaData().getColumnType(1);</span>
-<span class="fc" id="L197">      ColumnReader&lt;?, T&gt; reader = ColumnReaderFinder.getInstance()</span>
-<span class="fc" id="L198">          .findReader(clazz, sqlType);</span>
-<span class="fc" id="L199">      List&lt;T&gt; list = new ArrayList&lt;&gt;(sizeEstimate);</span>
+<span class="fc" id="L192">      int sqlType = resultSet.getMetaData().getColumnType(1);</span>
+<span class="fc" id="L193">      ColumnReader&lt;?, T&gt; reader = ColumnReaderFinder.getInstance()</span>
+<span class="fc" id="L194">            .findReader(clazz, sqlType);</span>
+<span class="fc" id="L195">      List&lt;T&gt; list = new ArrayList&lt;&gt;(sizeEstimate);</span>
       do {
-<span class="fc" id="L201">        list.add(reader.getValue(resultSet, 1, clazz));</span>
-<span class="fc bfc" id="L202" title="All 2 branches covered.">      } while (resultSet.next());</span>
-<span class="fc" id="L203">      return list;</span>
-<span class="nc" id="L204">    } catch (Throwable t) {</span>
-<span class="nc" id="L205">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="fc" id="L197">        list.add(reader.getValue(resultSet, 1, clazz));</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">      } while (resultSet.next());</span>
+<span class="fc" id="L199">      return list;</span>
+<span class="nc" id="L200">    } catch (Throwable t) {</span>
+<span class="nc" id="L201">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }
   }
 
@@ -212,17 +208,17 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * objects.
    *
    * @return a {@code ResultSetMappifier} that you can use to convert the rows in the
-   *     {@link ResultSet} into {@code Map&lt;String, Object&gt;} pseudo objects.
+   * {@link ResultSet} into {@code Map&lt;String, Object&gt;} pseudo objects.
    */
   public ResultSetMappifier getMappifier() {
     try {
-<span class="nc" id="L219">      executeQuery();</span>
-<span class="nc" id="L220">      return session</span>
-<span class="nc" id="L221">          .getSQL()</span>
-<span class="nc" id="L222">          .getMappifierFactory(mapper)</span>
-<span class="nc" id="L223">          .getMappifier(resultSet);</span>
-<span class="nc" id="L224">    } catch (Throwable t) {</span>
-<span class="nc" id="L225">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L215">      executeQuery();</span>
+<span class="nc" id="L216">      return session</span>
+<span class="nc" id="L217">            .getSQL()</span>
+<span class="nc" id="L218">            .getMappifierFactory(mapper)</span>
+<span class="nc" id="L219">            .getMappifier(resultSet);</span>
+<span class="nc" id="L220">    } catch (Throwable t) {</span>
+<span class="nc" id="L221">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }
   }
 
@@ -233,17 +229,17 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @param &lt;T&gt; the type of the JavaBeans
    * @param beanClass the class of the JavaBeans
    * @return a {@code ResultSetBeanifier} that you can use to convert the rows in the
-   *     {@link ResultSet} into JavaBeans.
+   * {@link ResultSet} into JavaBeans.
    */
   public &lt;T&gt; ResultSetBeanifier&lt;T&gt; getBeanifier(Class&lt;T&gt; beanClass) {
     try {
-<span class="nc" id="L240">      executeQuery();</span>
-<span class="nc" id="L241">      return session</span>
-<span class="nc" id="L242">          .getSQL()</span>
-<span class="nc" id="L243">          .getBeanifierFactory(beanClass, mapper)</span>
-<span class="nc" id="L244">          .getBeanifier(resultSet);</span>
-<span class="nc" id="L245">    } catch (Throwable t) {</span>
-<span class="nc" id="L246">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L236">      executeQuery();</span>
+<span class="nc" id="L237">      return session</span>
+<span class="nc" id="L238">            .getSQL()</span>
+<span class="nc" id="L239">            .getBeanifierFactory(beanClass, mapper)</span>
+<span class="nc" id="L240">            .getBeanifier(resultSet);</span>
+<span class="nc" id="L241">    } catch (Throwable t) {</span>
+<span class="nc" id="L242">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }
   }
 
@@ -254,22 +250,22 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @param &lt;T&gt; the type of the JavaBeans
    * @param beanClass the class of the JavaBeans
    * @param beanSupplier the supplier of the JavaBean instances. This would ordinarily
-   *     be a method reference to the constructor of the JavaBean (like
-   *     {@code Person::new})
+   * be a method reference to the constructor of the JavaBean (like
+   * {@code Person::new})
    * @return a {@code ResultSetBeanifier} that you can use to convert the rows in the
-   *     {@link ResultSet} into JavaBeans.
+   * {@link ResultSet} into JavaBeans.
    */
   public &lt;T&gt; ResultSetBeanifier&lt;T&gt; getBeanifier(
-      Class&lt;T&gt; beanClass,
-      Supplier&lt;T&gt; beanSupplier) {
+        Class&lt;T&gt; beanClass,
+        Supplier&lt;T&gt; beanSupplier) {
     try {
-<span class="nc" id="L266">      executeQuery();</span>
-<span class="nc" id="L267">      return session</span>
-<span class="nc" id="L268">          .getSQL()</span>
-<span class="nc" id="L269">          .getBeanifierFactory(beanClass, beanSupplier, mapper)</span>
-<span class="nc" id="L270">          .getBeanifier(resultSet);</span>
-<span class="nc" id="L271">    } catch (Throwable t) {</span>
-<span class="nc" id="L272">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L262">      executeQuery();</span>
+<span class="nc" id="L263">      return session</span>
+<span class="nc" id="L264">            .getSQL()</span>
+<span class="nc" id="L265">            .getBeanifierFactory(beanClass, beanSupplier, mapper)</span>
+<span class="nc" id="L266">            .getBeanifier(resultSet);</span>
+<span class="nc" id="L267">    } catch (Throwable t) {</span>
+<span class="nc" id="L268">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }
   }
 
@@ -279,36 +275,36 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   @Override
   public void close() {
-<span class="fc" id="L282">    close(ps);</span>
-<span class="fc" id="L283">  }</span>
+<span class="fc" id="L278">    close(ps);</span>
+<span class="fc" id="L279">  }</span>
 
   @Override
   void initialize() {
     try {
-<span class="nc bnc" id="L288" title="All 2 branches missed.">      if (resultSet != null) {</span>
-<span class="nc" id="L289">        resultSet.close();</span>
-<span class="nc" id="L290">        resultSet = null;</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">      if (resultSet != null) {</span>
+<span class="nc" id="L285">        resultSet.close();</span>
+<span class="nc" id="L286">        resultSet = null;</span>
       }
-<span class="nc" id="L292">      ps.clearParameters();</span>
-<span class="nc" id="L293">    } catch (SQLException e) {</span>
-<span class="nc" id="L294">      throw new KlojangSQLException(e);</span>
-<span class="nc" id="L295">    }</span>
-<span class="nc" id="L296">  }</span>
+<span class="nc" id="L288">      ps.clearParameters();</span>
+<span class="nc" id="L289">    } catch (SQLException e) {</span>
+<span class="nc" id="L290">      throw new KlojangSQLException(e);</span>
+<span class="nc" id="L291">    }</span>
+<span class="nc" id="L292">  }</span>
 
   private void executeAndNext() throws Throwable {
-<span class="fc" id="L299">    executeQuery();</span>
-<span class="pc bpc" id="L300" title="1 of 2 branches missed.">    if (!resultSet.next()) {</span>
-<span class="nc" id="L301">      throw new KlojangSQLException(&quot;query returned zero rows&quot;);</span>
+<span class="fc" id="L295">    executeQuery();</span>
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">    if (!resultSet.next()) {</span>
+<span class="nc" id="L297">      throw new KlojangSQLException(&quot;query returned zero rows&quot;);</span>
     }
-<span class="fc" id="L303">  }</span>
+<span class="fc" id="L299">  }</span>
 
   private void executeQuery() throws Throwable {
-<span class="pc bpc" id="L306" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
-<span class="fc" id="L307">      LOG.trace(&quot;Executing query&quot;);</span>
-<span class="fc" id="L308">      applyBindings(ps);</span>
-<span class="fc" id="L309">      resultSet = ps.executeQuery();</span>
+<span class="pc bpc" id="L302" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
+<span class="fc" id="L303">      LOG.trace(&quot;Executing query&quot;);</span>
+<span class="fc" id="L304">      applyBindings(ps);</span>
+<span class="fc" id="L305">      resultSet = ps.executeQuery();</span>
     }
-<span class="fc" id="L311">  }</span>
+<span class="fc" id="L307">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -41,12 +41,12 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *
    * @param varName the name of the template variable
    * @param value the value to set the variable to. If the value is an array or
-   *     collection, it will be "imploded" to a string, using {@code ", " } to separate
-   *     the elements in the array or collection.
+   * collection, it will be "imploded" to a string, using {@code ", " } to separate
+   * the elements in the array or collection.
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *     obtained via the {@link SQL#basic(String) basic()} methods of the {@link SQL}
-   *     class.
+   * obtained via the {@link SQL#basic(String) basic()} methods of the {@link SQL}
+   * class.
    * @see org.klojang.templates.RenderSession#set(String, Object)
    */
   SQLSession set(String varName, Object value) throws UnsupportedOperationException;
@@ -60,8 +60,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @param sortColumn the column(s) to sort on
    * @return this {@code SQLSession} instance
    */
-  default SQLSession setOrderBy(Object sortColumn)
-      throws UnsupportedOperationException {
+  default SQLSession setOrderBy(Object sortColumn) throws UnsupportedOperationException {
     return set("sortColumn", sortColumn);
   }
 
@@ -76,11 +75,10 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @param sortOrder the sort order
    * @return this {@code SQLSession} instance
    */
-  default SQLSession setSortOrder(Object sortOrder)
-      throws UnsupportedOperationException {
+  default SQLSession setSortOrder(Object sortOrder) throws UnsupportedOperationException {
     return (sortOrder instanceof Boolean)
-        ? setDescending((Boolean) sortOrder)
-        : set("sortOrder", sortOrder);
+          ? setDescending((Boolean) sortOrder)
+          : set("sortOrder", sortOrder);
   }
 
   /**
@@ -91,7 +89,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @return this {@code SQLSession} instance
    */
   default SQLSession setDescending(boolean isDescending)
-      throws UnsupportedOperationException {
+        throws UnsupportedOperationException {
     return set("sortOrder", isDescending ? "DESC" : "ASC");
   }
 
@@ -103,7 +101,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @return this {@code SQLSession} instance
    */
   default SQLSession setOrderBy(Object sortColumn, Object sortOrder)
-      throws UnsupportedOperationException {
+        throws UnsupportedOperationException {
     return setOrderBy(sortColumn).setSortOrder(sortOrder);
   }
 
@@ -115,7 +113,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @return this {@code SQLSession} instance
    */
   default SQLSession setOrderBy(Object sortColumn, boolean isDescending)
-      throws UnsupportedOperationException {
+        throws UnsupportedOperationException {
     return setOrderBy(sortColumn).setDescending(isDescending);
   }
 
@@ -123,27 +121,28 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * Returns a {@code SQLQuery} instance that allows you to provide values for named
    * parameters ("binding") and then execute the query.
    *
-   * @param con the JDBC connection to use for the query
    * @return a {@code SQLQuery} instance
    */
-  SQLQuery prepareQuery(Connection con);
+  SQLQuery prepareQuery();
+
+  default SQLInsert prepareInsert() {
+    return prepareInsert(true);
+  }
 
   /**
    * Returns a {@code SQLInsert} instance that allows you to provide values for named
    * parameters ("binding") and then execute the INSERT statement.
    *
-   * @param con the JDBC connection to use for the query
    * @return a {@code SQLInsert} instance
    */
-  SQLInsert prepareInsert(Connection con);
+  SQLInsert prepareInsert(boolean retrieveAutoKeys);
 
   /**
    * Returns a {@code SQLUpdate} instance that allows you to provide values for named
    * parameters ("binding") and then execute the UPDATE or DELETE statement.
    *
-   * @param con the JDBC connection to use for the query
    * @return a {@code SQLUpdate} instance
    */
-  SQLUpdate prepareUpdate(Connection con);
+  SQLUpdate prepareUpdate();
 
 }

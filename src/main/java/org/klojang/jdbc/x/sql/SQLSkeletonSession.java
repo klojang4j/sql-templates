@@ -1,13 +1,14 @@
 package org.klojang.jdbc.x.sql;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.SQLSession;
-import org.klojang.jdbc.SQLStatement;
+import org.klojang.jdbc.*;
+import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
 import org.klojang.util.CollectionMethods;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.Collection;
 
 import static org.klojang.check.CommonChecks.empty;
@@ -17,8 +18,8 @@ final class SQLSkeletonSession extends AbstractSQLSession {
 
   private final RenderSession session;
 
-  SQLSkeletonSession(AbstractSQL sql, RenderSession session) {
-    super(sql);
+  SQLSkeletonSession(Connection con, AbstractSQL sql, RenderSession session) {
+    super(con, sql);
     this.session = session;
   }
 
@@ -36,11 +37,26 @@ final class SQLSkeletonSession extends AbstractSQLSession {
     return this;
   }
 
-  @Override
-  <T extends SQLStatement<?>> T prepare(Connection con, StatementFactory<T> constructor) {
-    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));
+  public SQLQuery prepareQuery() {
     SQLNormalizer normalizer = new SQLNormalizer(session.render());
     SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
-    return constructor.create(con, this, sqlInfo);
+    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
+    return new SQLQuery(ps, this, sqlInfo);
   }
-}
+
+  public SQLInsert prepareInsert(boolean retrieveAutoKeys) {
+    SQLNormalizer normalizer = new SQLNormalizer(session.render());
+    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
+    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveAutoKeys);
+    return new SQLInsert(ps, this, sqlInfo);
+  }
+
+  public SQLUpdate prepareUpdate() {
+    SQLNormalizer normalizer = new SQLNormalizer(session.render());
+    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
+    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
+    return new SQLUpdate(ps, this, sqlInfo);
+  }
+
+
+ }

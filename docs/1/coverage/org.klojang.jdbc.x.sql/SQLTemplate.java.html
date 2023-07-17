@@ -6,25 +6,26 @@ import org.klojang.jdbc.SQLSession;
 import org.klojang.templates.ParseException;
 import org.klojang.templates.Template;
 
+import java.sql.Connection;
+
 public final class SQLTemplate extends AbstractSQL {
 
+  private final Template template;
+  private final SQLNormalizer normalizer;
 
-    private final Template template;
-    private final SQLNormalizer normalizer;
-
-    public SQLTemplate(String sql, BindInfo bindInfo) {
-<span class="nc" id="L16">        super(sql, bindInfo);</span>
-<span class="nc" id="L17">        normalizer = new SQLNormalizer(sql);</span>
-        try {
-<span class="nc" id="L19">            template = Template.fromString(normalizer.getNormalizedSQL());</span>
-<span class="nc" id="L20">        } catch (ParseException e) {</span>
-<span class="nc" id="L21">            throw new KlojangSQLException(e);</span>
-<span class="nc" id="L22">        }</span>
+  public SQLTemplate(String sql, BindInfo bindInfo) {
+<span class="nc" id="L17">    super(sql, bindInfo);</span>
+<span class="nc" id="L18">    normalizer = new SQLNormalizer(sql);</span>
+    try {
+<span class="nc" id="L20">      template = Template.fromString(normalizer.getNormalizedSQL());</span>
+<span class="nc" id="L21">    } catch (ParseException e) {</span>
+<span class="nc" id="L22">      throw new KlojangSQLException(e);</span>
 <span class="nc" id="L23">    }</span>
+<span class="nc" id="L24">  }</span>
 
-    public SQLSession session() {
-<span class="nc" id="L26">        return new SQLTemplateSession(this, normalizer, template.newRenderSession());</span>
-    }
+  public SQLSession session(Connection con) {
+<span class="nc" id="L27">    return new SQLTemplateSession(con, this, normalizer, template.newRenderSession());</span>
+  }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

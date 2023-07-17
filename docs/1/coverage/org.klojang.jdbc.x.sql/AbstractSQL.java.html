@@ -16,65 +16,67 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public abstract sealed class AbstractSQL implements SQL
-    permits BasicSQL, SQLTemplate, SQLSkeleton {
+      permits BasicSQL, SQLTemplate, SQLSkeleton {
 
   @SuppressWarnings({&quot;unused&quot;})
 <span class="fc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);</span>
 
-<span class="fc" id="L24">  private final Map&lt;Class&lt;?&gt;, BeanBinder&lt;?&gt;&gt; beanBinders = new HashMap&lt;&gt;(4);</span>
-<span class="fc" id="L25">  private final Map&lt;Tuple2&lt;Class&lt;?&gt;, NameMapper&gt;, BeanifierFactory&lt;?&gt;&gt; beanifiers =</span>
-      new HashMap&lt;&gt;(4);
-<span class="fc" id="L27">  private final Map&lt;NameMapper, MappifierFactory&gt; mappifiers = new HashMap&lt;&gt;(4);</span>
+<span class="fc" id="L24">  private final Map&lt;Class&lt;?&gt;, BeanBinder&lt;?&gt;&gt; beanBinders</span>
+        = new HashMap&lt;&gt;(4);
+<span class="fc" id="L26">  private final Map&lt;Tuple2&lt;Class&lt;?&gt;, NameMapper&gt;, BeanifierFactory&lt;?&gt;&gt; beanifiers</span>
+        = new HashMap&lt;&gt;(4);
+<span class="fc" id="L28">  private final Map&lt;NameMapper, MappifierFactory&gt; mappifiers</span>
+        = new HashMap&lt;&gt;(4);
 
 
   private final String unparsedSQL;
   private final BindInfo bindInfo;
 
-<span class="fc" id="L33">  public AbstractSQL(String sql, BindInfo bindInfo) {</span>
-<span class="fc" id="L34">    this.unparsedSQL = sql;</span>
-<span class="fc" id="L35">    this.bindInfo = Check.notNull(bindInfo, &quot;bindInfo&quot;).ok();</span>
-<span class="fc" id="L36">  }</span>
+<span class="fc" id="L35">  public AbstractSQL(String sql, BindInfo bindInfo) {</span>
+<span class="fc" id="L36">    this.unparsedSQL = sql;</span>
+<span class="fc" id="L37">    this.bindInfo = Check.notNull(bindInfo, &quot;bindInfo&quot;).ok();</span>
+<span class="fc" id="L38">  }</span>
 
   public String getUnparsedSQL() {
-<span class="nc" id="L39">    return unparsedSQL;</span>
+<span class="nc" id="L41">    return unparsedSQL;</span>
   }
 
   public BindInfo getBindInfo() {
-<span class="fc" id="L43">    return bindInfo;</span>
+<span class="fc" id="L45">    return bindInfo;</span>
   }
 
   public BeanBinder&lt;?&gt; getBeanBinder(Class&lt;?&gt; beanClass, SQLInfo sqlInfo) {
-<span class="fc" id="L47">    BeanBinder&lt;?&gt; binder = beanBinders.get(beanClass);</span>
-<span class="fc bfc" id="L48" title="All 2 branches covered.">    if (binder == null) {</span>
-<span class="fc" id="L49">      binder = new BeanBinder&lt;&gt;(beanClass, sqlInfo.parameters(), bindInfo);</span>
-<span class="fc" id="L50">      beanBinders.put(beanClass, binder);</span>
+<span class="fc" id="L49">    BeanBinder&lt;?&gt; binder = beanBinders.get(beanClass);</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">    if (binder == null) {</span>
+<span class="fc" id="L51">      binder = new BeanBinder&lt;&gt;(beanClass, sqlInfo.parameters(), bindInfo);</span>
+<span class="fc" id="L52">      beanBinders.put(beanClass, binder);</span>
     }
-<span class="fc" id="L52">    return binder;</span>
+<span class="fc" id="L54">    return binder;</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
   public &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(Class&lt;T&gt; clazz, NameMapper mapper) {
-<span class="nc" id="L57">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
-<span class="nc" id="L58">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
-<span class="nc bnc" id="L59" title="All 2 branches missed.">    if (bf == null) {</span>
-<span class="nc" id="L60">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, mapper));</span>
+<span class="nc" id="L59">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
+<span class="nc" id="L60">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">    if (bf == null) {</span>
+<span class="nc" id="L62">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, mapper));</span>
     }
-<span class="nc" id="L62">    return bf;</span>
+<span class="nc" id="L64">    return bf;</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
   public &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(
-      Class&lt;T&gt; clazz, Supplier&lt;T&gt; supplier, NameMapper mapper) {
-<span class="nc" id="L68">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
-<span class="nc" id="L69">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
-<span class="nc bnc" id="L70" title="All 2 branches missed.">    if (bf == null) {</span>
-<span class="nc" id="L71">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, supplier, mapper));</span>
+        Class&lt;T&gt; clazz, Supplier&lt;T&gt; supplier, NameMapper mapper) {
+<span class="nc" id="L70">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
+<span class="nc" id="L71">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">    if (bf == null) {</span>
+<span class="nc" id="L73">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, supplier, mapper));</span>
     }
-<span class="nc" id="L73">    return bf;</span>
+<span class="nc" id="L75">    return bf;</span>
   }
 
   public MappifierFactory getMappifierFactory(NameMapper mapper) {
-<span class="nc" id="L77">    return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);</span>
+<span class="nc" id="L79">    return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);</span>
   }
 
 }

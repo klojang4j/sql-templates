@@ -7,7 +7,6 @@ import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.klojang.jdbc.x.sql.SQLInfo;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
@@ -24,15 +23,15 @@ import static org.klojang.util.CollectionMethods.collectionToSet;
  * (if present) and then execute it.
  *
  * @param <T> the {@code SQLStatement} subtype returned by various methods in the
- *     fluent API.
+ * fluent API.
  */
 public abstract sealed class SQLStatement<T extends SQLStatement<T>>
-    implements AutoCloseable permits SQLQuery, SQLUpdate, SQLInsert {
+      implements AutoCloseable permits SQLQuery, SQLUpdate, SQLInsert {
 
   private static final String NO_SUCH_PARAM = "no such parameter: \"${arg}\"";
   private static final String DIRTY_INSTANCE = "statement already executed; call reset() first()";
 
-  final Connection con;
+  final PreparedStatement ps;
   final AbstractSQLSession session;
   final SQLInfo sqlInfo;
   final List<Object> bindings;
@@ -40,8 +39,8 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
 
   private boolean fresh = true;
 
-  SQLStatement(Connection con, AbstractSQLSession session, SQLInfo sqlInfo) {
-    this.con = con;
+  SQLStatement(PreparedStatement ps, AbstractSQLSession session, SQLInfo sqlInfo) {
+    this.ps = ps;
     this.session = session;
     this.sqlInfo = sqlInfo;
     this.bindings = new ArrayList<>(5);
@@ -68,7 +67,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    * {@code Integer}, {@code String} or array) is undefined.
    *
    * @param bean The bean whose values to bind to the named parameters within the SQL
-   *     statement
+   * statement
    * @return this {@code SQLStatement} instance
    */
   @SuppressWarnings("unchecked")
@@ -83,7 +82,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    * Keys that do not correspond to named parameters will be ignored.
    *
    * @param map the map whose values to bind to the named parameters within the SQL
-   *     statement
+   * statement
    * @return this {@code SQLStatement} instance
    */
   @SuppressWarnings("unchecked")
@@ -111,8 +110,8 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     for (Object obj : bindings) {
       if (obj instanceof Map map) {
         MapBinder binder = new MapBinder(
-            sqlInfo.parameters(),
-            session.getSQL().getBindInfo());
+              sqlInfo.parameters(),
+              session.getSQL().getBindInfo());
         binder.bindMap(map, ps, bound);
       } else {
         BeanBinder binder = session.getSQL().getBeanBinder(obj.getClass(), sqlInfo);

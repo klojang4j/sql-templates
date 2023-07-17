@@ -1,12 +1,10 @@
 package org.klojang.jdbc;
 
-import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.util.ExceptionMethods;
 import org.klojang.util.ModulePrivate;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -15,15 +13,13 @@ import java.sql.SQLException;
  */
 public final class SQLUpdate extends SQLStatement<SQLUpdate> {
 
-  private final PreparedStatement ps;
 
   /**
    * For internal use only.
    */
   @ModulePrivate
-  public SQLUpdate(Connection con, AbstractSQLSession sql, SQLInfo sqlInfo) {
-    super(con, sql, sqlInfo);
-    ps = JDBC.getPreparedStatement(con, sqlInfo);
+  public SQLUpdate(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
+    super(ps, sql, sqlInfo);
   }
 
   /**

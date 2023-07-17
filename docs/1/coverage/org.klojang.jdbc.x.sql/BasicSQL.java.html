@@ -3,18 +3,20 @@
 import org.klojang.jdbc.BindInfo;
 import org.klojang.jdbc.SQLSession;
 
+import java.sql.Connection;
+
 public final class BasicSQL extends AbstractSQL {
 
-    private final SQLInfo sqlInfo;
+  private final SQLInfo sqlInfo;
 
-    public BasicSQL(String sql, BindInfo bindInfo) {
-<span class="fc" id="L11">        super(sql, bindInfo);</span>
-<span class="fc" id="L12">        sqlInfo = new SQLInfo(new SQLNormalizer(sql));</span>
-<span class="fc" id="L13">    }</span>
+  public BasicSQL(String sql, BindInfo bindInfo) {
+<span class="fc" id="L13">    super(sql, bindInfo);</span>
+<span class="fc" id="L14">    sqlInfo = new SQLInfo(new SQLNormalizer(sql));</span>
+<span class="fc" id="L15">  }</span>
 
-    public SQLSession session() {
-<span class="fc" id="L16">        return new BasicSQLSession(this, sqlInfo);</span>
-    }
+  public SQLSession session(Connection con) {
+<span class="fc" id="L18">    return new BasicSQLSession(con, this, sqlInfo);</span>
+  }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

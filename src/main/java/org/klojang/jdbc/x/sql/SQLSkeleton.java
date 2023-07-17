@@ -6,6 +6,8 @@ import org.klojang.jdbc.SQLSession;
 import org.klojang.templates.ParseException;
 import org.klojang.templates.Template;
 
+import java.sql.Connection;
+
 public final class SQLSkeleton extends AbstractSQL {
 
     private final Template template;
@@ -19,8 +21,8 @@ public final class SQLSkeleton extends AbstractSQL {
         }
     }
 
-    public SQLSession session() {
-        return new SQLSkeletonSession(this, template.newRenderSession());
+    public SQLSession session(Connection con) {
+        return new SQLSkeletonSession(con, this, template.newRenderSession());
     }
 
 }

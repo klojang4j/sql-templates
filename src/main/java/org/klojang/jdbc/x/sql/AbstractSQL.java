@@ -16,15 +16,17 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public abstract sealed class AbstractSQL implements SQL
-    permits BasicSQL, SQLTemplate, SQLSkeleton {
+      permits BasicSQL, SQLTemplate, SQLSkeleton {
 
   @SuppressWarnings({"unused"})
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);
 
-  private final Map<Class<?>, BeanBinder<?>> beanBinders = new HashMap<>(4);
-  private final Map<Tuple2<Class<?>, NameMapper>, BeanifierFactory<?>> beanifiers =
-      new HashMap<>(4);
-  private final Map<NameMapper, MappifierFactory> mappifiers = new HashMap<>(4);
+  private final Map<Class<?>, BeanBinder<?>> beanBinders
+        = new HashMap<>(4);
+  private final Map<Tuple2<Class<?>, NameMapper>, BeanifierFactory<?>> beanifiers
+        = new HashMap<>(4);
+  private final Map<NameMapper, MappifierFactory> mappifiers
+        = new HashMap<>(4);
 
 
   private final String unparsedSQL;
@@ -64,7 +66,7 @@ public abstract sealed class AbstractSQL implements SQL
 
   @SuppressWarnings("unchecked")
   public <T> BeanifierFactory<T> getBeanifierFactory(
-      Class<T> clazz, Supplier<T> supplier, NameMapper mapper) {
+        Class<T> clazz, Supplier<T> supplier, NameMapper mapper) {
     Tuple2<Class<?>, NameMapper> key = Tuple2.of(clazz, mapper);
     BeanifierFactory<T> bf = (BeanifierFactory<T>) beanifiers.get(key);
     if (bf == null) {

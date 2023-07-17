@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -48,7 +47,7 @@ public class SQLUpdateTest {
     }
   }
 
-  public SQLUpdateTest() { }
+  public SQLUpdateTest() {}
 
   @BeforeEach
   public void before() throws IOException, SQLException {
@@ -92,9 +91,9 @@ public class SQLUpdateTest {
   public void test01() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = Collections.singletonMap("name", "John");
-    SQLSession sql = SQL.basic(s).session();
+    SQLSession sql = SQL.basic(s).session(MY_CON.get());
     long id = Long.MIN_VALUE;
-    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
+    try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(data);
       id = insert.executeAndGetID();
       assertTrue(id != Long.MIN_VALUE);
@@ -105,9 +104,9 @@ public class SQLUpdateTest {
   public void test02() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
-    SQLSession sql = SQL.basic(s).session();
+    SQLSession sql = SQL.basic(s).session(MY_CON.get());
     long id = Long.MIN_VALUE;
-    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
+    try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(person);
       id = insert.executeAndGetID();
       assertTrue(id != Long.MIN_VALUE);

@@ -9,6 +9,8 @@ import org.klojang.jdbc.x.sql.SQLInfo;
 import java.sql.*;
 import java.util.Map;
 
+import static java.sql.Statement.NO_GENERATED_KEYS;
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.convert.NumberMethods.convert;
 import static org.klojang.invoke.NoSuchPropertyException.noSuchProperty;
@@ -18,7 +20,7 @@ public final class JDBC {
   private static final String NO_KEYS_GENERATED = "no keys were generated";
   private static final String MULTIPLE_AUTO_KEYS = "multiple auto-increment keys not supported";
 
-  private JDBC() { throw new UnsupportedOperationException(); }
+  private JDBC() {throw new UnsupportedOperationException();}
 
   public static String[] getColumnNames(ResultSet rs) {
     try {
@@ -42,14 +44,25 @@ public final class JDBC {
     }
   }
 
+  public static PreparedStatement getPreparedStatement(Connection con,
+        SQLInfo sqlInfo,
+        boolean retrieveAutoKeys) {
+    int x = retrieveAutoKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
+    try {
+      return con.prepareStatement(sqlInfo.jdbcSQL(), x);
+    } catch (SQLException e) {
+      throw new KlojangSQLException(e);
+    }
+  }
+
   public static long[] getGeneratedKeys(Statement stmt, int rowCount)
-      throws SQLException {
+        throws SQLException {
     long[] keys = new long[rowCount];
     try (ResultSet rs = stmt.getGeneratedKeys()) {
       Check.that(rs.next()).is(yes(),
-          () -> new KlojangSQLException(NO_KEYS_GENERATED));
+            () -> new KlojangSQLException(NO_KEYS_GENERATED));
       Check.that(rs.getMetaData().getColumnCount()).is(eq(), 1,
-          () -> new KlojangSQLException(MULTIPLE_AUTO_KEYS));
+            () -> new KlojangSQLException(MULTIPLE_AUTO_KEYS));
       keys[0] = rs.getLong(1);
       for (int i = 1; i < rowCount; ++i) {
         rs.next();
@@ -61,7 +74,7 @@ public final class JDBC {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static void setID(Object bean, String idProperty, long value)
-      throws Throwable {
+        throws Throwable {
     SetterFactory sf = SetterFactory.INSTANCE;
     Map<String, Setter> setters = sf.getSetters(bean.getClass());
     Check.that(idProperty).is(keyIn(), setters, () -> noSuchProperty(bean, idProperty));

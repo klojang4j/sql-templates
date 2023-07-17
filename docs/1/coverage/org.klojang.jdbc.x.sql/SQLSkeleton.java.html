@@ -6,21 +6,23 @@ import org.klojang.jdbc.SQLSession;
 import org.klojang.templates.ParseException;
 import org.klojang.templates.Template;
 
+import java.sql.Connection;
+
 public final class SQLSkeleton extends AbstractSQL {
 
     private final Template template;
 
     public SQLSkeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L14">        super(sql, bindInfo);</span>
+<span class="nc" id="L16">        super(sql, bindInfo);</span>
         try {
-<span class="nc" id="L16">            template = Template.fromString(sql);</span>
-<span class="nc" id="L17">        } catch (ParseException e) {</span>
-<span class="nc" id="L18">            throw new KlojangSQLException(e);</span>
-<span class="nc" id="L19">        }</span>
-<span class="nc" id="L20">    }</span>
+<span class="nc" id="L18">            template = Template.fromString(sql);</span>
+<span class="nc" id="L19">        } catch (ParseException e) {</span>
+<span class="nc" id="L20">            throw new KlojangSQLException(e);</span>
+<span class="nc" id="L21">        }</span>
+<span class="nc" id="L22">    }</span>
 
-    public SQLSession session() {
-<span class="nc" id="L23">        return new SQLSkeletonSession(this, template.newRenderSession());</span>
+    public SQLSession session(Connection con) {
+<span class="nc" id="L25">        return new SQLSkeletonSession(con, this, template.newRenderSession());</span>
     }
 
 }

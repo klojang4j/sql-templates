@@ -49,7 +49,7 @@ public class SQLInsertTest {
     }
   }
 
-  public SQLInsertTest() { }
+  public SQLInsertTest() {}
 
   @BeforeEach
   public void before() throws IOException, SQLException {
@@ -93,9 +93,9 @@ public class SQLInsertTest {
   public void executeAndGetID01() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = Collections.singletonMap("name", "John");
-    SQLSession sql = SQL.basic(s).session();
+    SQLSession sql = SQL.basic(s).session(MY_CON.get());
     long id = Long.MIN_VALUE;
-    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
+    try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(data);
       id = insert.executeAndGetID();
       assertTrue(id != Long.MIN_VALUE);
@@ -106,9 +106,9 @@ public class SQLInsertTest {
   public void executeAndGetID02() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
-    SQLSession sql = SQL.basic(s).session();
+    SQLSession sql = SQL.basic(s).session(MY_CON.get());
     long id = Long.MIN_VALUE;
-    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
+    try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(person);
       id = insert.executeAndGetID();
       assertTrue(id != Long.MIN_VALUE);
@@ -119,8 +119,8 @@ public class SQLInsertTest {
   public void executeAndSetID00() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = new HashMap<>(Collections.singletonMap("name", "John"));
-    SQLSession sql = SQL.basic(s).session();
-    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
+    SQLSession sql = SQL.basic(s).session(MY_CON.get());
+    try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(data, "id");
       insert.executeAndSetID();
       assertTrue(data.containsKey("id"));
@@ -132,8 +132,8 @@ public class SQLInsertTest {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
-    SQLSession sql = SQL.basic(s).session();
-    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
+    SQLSession sql = SQL.basic(s).session(MY_CON.get());
+    try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(person, "id");
       insert.executeAndSetID();
       assertTrue(person.getId() != Integer.MIN_VALUE);
@@ -145,11 +145,11 @@ public class SQLInsertTest {
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
     try (SQLInsert insert = SQL
-        .prepareInsert()
-        .of(Person.class)
-        .into("TEST")
-        .excluding("id")
-        .prepare(MY_CON.get())) {
+          .prepareInsert()
+          .of(Person.class)
+          .into("TEST")
+          .excluding("id")
+          .prepare(MY_CON.get())) {
       insert.bind(person, "id");
       insert.executeAndSetID();
       assertTrue(person.getId() != Integer.MIN_VALUE);
@@ -159,18 +159,18 @@ public class SQLInsertTest {
   @Test
   public void insertBatch00() {
     try (SQLInsert insert = SQL
-        .prepareInsert()
-        .of(Person.class)
-        .into("TEST")
-        .excluding("id")
-        .prepare(MY_CON.get())) {
+          .prepareInsert()
+          .of(Person.class)
+          .into("TEST")
+          .excluding("id")
+          .prepare(MY_CON.get())) {
       insert.insertBatch(List.of(new Person("John"),
-          new Person("Mark"),
-          new Person("Edward")));
+            new Person("Mark"),
+            new Person("Edward")));
     }
     try (SQLQuery query = SQL.basic("SELECT COUNT(*) FROM TEST")
-        .session()
-        .prepareQuery(MY_CON.get())) {
+          .session(MY_CON.get())
+          .prepareQuery()) {
       assertEquals(3, query.getInt());
     }
   }
@@ -179,20 +179,20 @@ public class SQLInsertTest {
   public void insertAllAndGetIDs00() {
     long[] ids;
     try (SQLInsert insert = SQL
-        .prepareInsert()
-        .of(Person.class)
-        .into("TEST")
-        .excluding("id")
-        .prepare(MY_CON.get())) {
+          .prepareInsert()
+          .of(Person.class)
+          .into("TEST")
+          .excluding("id")
+          .prepare(MY_CON.get())) {
       ids = insert.insertBatchAndGetIDs(
-          List.of(new Person("John"),
-              new Person("Mark"),
-              new Person("Edward")));
+            List.of(new Person("John"),
+                  new Person("Mark"),
+                  new Person("Edward")));
     }
     assertEquals(3, ids.length);
     try (SQLQuery query = SQL.basic("SELECT ID FROM TEST")
-        .session()
-        .prepareQuery(MY_CON.get())) {
+          .session(MY_CON.get())
+          .prepareQuery()) {
       long[] actual = Morph.convert(query.firstColumn(), long[].class);
       assertArrayEquals(ids, actual);
     }
@@ -201,20 +201,20 @@ public class SQLInsertTest {
   @Test
   public void insertAllAndSetIDs00() {
     List<Person> beans = List.of(new Person("John"),
-        new Person("Mark"),
-        new Person("Edward"));
+          new Person("Mark"),
+          new Person("Edward"));
     try (SQLInsert insert = SQL
-        .prepareInsert()
-        .of(Person.class)
-        .into("TEST")
-        .excluding("id")
-        .prepare(MY_CON.get())) {
+          .prepareInsert()
+          .of(Person.class)
+          .into("TEST")
+          .excluding("id")
+          .prepare(MY_CON.get())) {
       insert.insertBatchAndSetIDs("id", beans);
     }
     int[] ids = beans.stream().mapToInt(Person::getId).toArray();
     try (SQLQuery query = SQL.basic("SELECT ID FROM TEST")
-        .session()
-        .prepareQuery(MY_CON.get())) {
+          .session(MY_CON.get())
+          .prepareQuery()) {
       int[] actual = Morph.convert(query.firstColumn(), int[].class);
       assertArrayEquals(ids, actual);
     }
