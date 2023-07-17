@@ -97,7 +97,7 @@ public class SQLInsertTest {
     long id = Long.MIN_VALUE;
     try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(data);
-      id = insert.executeAndGetID();
+      id = insert.execute();
       assertTrue(id != Long.MIN_VALUE);
     }
   }
@@ -110,7 +110,7 @@ public class SQLInsertTest {
     long id = Long.MIN_VALUE;
     try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(person);
-      id = insert.executeAndGetID();
+      id = insert.execute();
       assertTrue(id != Long.MIN_VALUE);
     }
   }

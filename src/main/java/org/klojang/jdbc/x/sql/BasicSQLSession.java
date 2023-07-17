@@ -1,6 +1,9 @@
 package org.klojang.jdbc.x.sql;
 
-import org.klojang.jdbc.*;
+import org.klojang.jdbc.SQLInsert;
+import org.klojang.jdbc.SQLQuery;
+import org.klojang.jdbc.SQLSession;
+import org.klojang.jdbc.SQLUpdate;
 import org.klojang.jdbc.x.JDBC;
 
 import java.sql.Connection;
@@ -27,7 +30,7 @@ final class BasicSQLSession extends AbstractSQLSession {
 
   public SQLInsert prepareInsert(boolean retrieveAutoKeys) {
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveAutoKeys);
-    return new SQLInsert(ps, this, sqlInfo);
+    return new SQLInsert(ps, this, sqlInfo, retrieveAutoKeys);
   }
 
   public SQLUpdate prepareUpdate() {

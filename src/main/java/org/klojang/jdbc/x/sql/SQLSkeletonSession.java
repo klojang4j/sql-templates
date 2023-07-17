@@ -1,7 +1,10 @@
 package org.klojang.jdbc.x.sql;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.*;
+import org.klojang.jdbc.SQLInsert;
+import org.klojang.jdbc.SQLQuery;
+import org.klojang.jdbc.SQLSession;
+import org.klojang.jdbc.SQLUpdate;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
@@ -11,7 +14,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Collection;
 
-import static org.klojang.check.CommonChecks.empty;
 import static org.klojang.check.Tag.VALUE;
 
 final class SQLSkeletonSession extends AbstractSQLSession {
@@ -48,7 +50,7 @@ final class SQLSkeletonSession extends AbstractSQLSession {
     SQLNormalizer normalizer = new SQLNormalizer(session.render());
     SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveAutoKeys);
-    return new SQLInsert(ps, this, sqlInfo);
+    return new SQLInsert(ps, this, sqlInfo, retrieveAutoKeys);
   }
 
   public SQLUpdate prepareUpdate() {
@@ -59,4 +61,4 @@ final class SQLSkeletonSession extends AbstractSQLSession {
   }
 
 
- }
+}

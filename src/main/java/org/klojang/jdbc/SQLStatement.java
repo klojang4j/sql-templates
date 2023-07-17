@@ -34,6 +34,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   final PreparedStatement ps;
   final AbstractSQLSession session;
   final SQLInfo sqlInfo;
+
   final List<Object> bindings;
   final Set<NamedParameter> bound;
 
@@ -122,7 +123,12 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     Check.that(bound.size()).is(eq(), sqlInfo.parameters().size(), incompleteBindings());
   }
 
-  void close(PreparedStatement ps) {
+  /**
+   * Releases all resources held by this instance. You cannot reuse this instance after a
+   * call to this method.
+   */
+  @Override
+  public void close() {
     try {
       ps.close();
     } catch (SQLException e) {

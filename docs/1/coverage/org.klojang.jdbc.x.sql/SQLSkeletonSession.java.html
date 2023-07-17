@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLSkeletonSession.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.sql</a> &gt; <span class="el_source">SQLSkeletonSession.java</span></div><h1>SQLSkeletonSession.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.sql;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.*;
+import org.klojang.jdbc.SQLInsert;
+import org.klojang.jdbc.SQLQuery;
+import org.klojang.jdbc.SQLSession;
+import org.klojang.jdbc.SQLUpdate;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
@@ -11,7 +14,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Collection;
 
-import static org.klojang.check.CommonChecks.empty;
 import static org.klojang.check.Tag.VALUE;
 
 final class SQLSkeletonSession extends AbstractSQLSession {
@@ -19,45 +21,45 @@ final class SQLSkeletonSession extends AbstractSQLSession {
   private final RenderSession session;
 
   SQLSkeletonSession(Connection con, AbstractSQL sql, RenderSession session) {
-<span class="nc" id="L22">    super(con, sql);</span>
-<span class="nc" id="L23">    this.session = session;</span>
-<span class="nc" id="L24">  }</span>
+<span class="nc" id="L24">    super(con, sql);</span>
+<span class="nc" id="L25">    this.session = session;</span>
+<span class="nc" id="L26">  }</span>
 
   @Override
   public SQLSession set(String varName, Object value) {
-<span class="nc" id="L28">    Check.notNull(varName, &quot;varName&quot;);</span>
-<span class="nc" id="L29">    Check.notNull(value, VALUE);</span>
-<span class="nc bnc" id="L30" title="All 2 branches missed.">    if (value instanceof Collection&lt;?&gt; c) {</span>
-<span class="nc" id="L31">      session.set(varName, CollectionMethods.implode(c));</span>
-<span class="nc bnc" id="L32" title="All 2 branches missed.">    } else if (value.getClass().isArray()) {</span>
-<span class="nc" id="L33">      session.set(varName, ArrayMethods.implodeAny(value));</span>
+<span class="nc" id="L30">    Check.notNull(varName, &quot;varName&quot;);</span>
+<span class="nc" id="L31">    Check.notNull(value, VALUE);</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">    if (value instanceof Collection&lt;?&gt; c) {</span>
+<span class="nc" id="L33">      session.set(varName, CollectionMethods.implode(c));</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">    } else if (value.getClass().isArray()) {</span>
+<span class="nc" id="L35">      session.set(varName, ArrayMethods.implodeAny(value));</span>
     } else {
-<span class="nc" id="L35">      session.set(varName, value);</span>
+<span class="nc" id="L37">      session.set(varName, value);</span>
     }
-<span class="nc" id="L37">    return this;</span>
+<span class="nc" id="L39">    return this;</span>
   }
 
   public SQLQuery prepareQuery() {
-<span class="nc" id="L41">    SQLNormalizer normalizer = new SQLNormalizer(session.render());</span>
-<span class="nc" id="L42">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
-<span class="nc" id="L43">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="nc" id="L44">    return new SQLQuery(ps, this, sqlInfo);</span>
+<span class="nc" id="L43">    SQLNormalizer normalizer = new SQLNormalizer(session.render());</span>
+<span class="nc" id="L44">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
+<span class="nc" id="L45">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="nc" id="L46">    return new SQLQuery(ps, this, sqlInfo);</span>
   }
 
   public SQLInsert prepareInsert(boolean retrieveAutoKeys) {
-<span class="nc" id="L48">    SQLNormalizer normalizer = new SQLNormalizer(session.render());</span>
-<span class="nc" id="L49">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
-<span class="nc" id="L50">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveAutoKeys);</span>
-<span class="nc" id="L51">    return new SQLInsert(ps, this, sqlInfo);</span>
+<span class="nc" id="L50">    SQLNormalizer normalizer = new SQLNormalizer(session.render());</span>
+<span class="nc" id="L51">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
+<span class="nc" id="L52">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveAutoKeys);</span>
+<span class="nc" id="L53">    return new SQLInsert(ps, this, sqlInfo, retrieveAutoKeys);</span>
   }
 
   public SQLUpdate prepareUpdate() {
-<span class="nc" id="L55">    SQLNormalizer normalizer = new SQLNormalizer(session.render());</span>
-<span class="nc" id="L56">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
-<span class="nc" id="L57">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="nc" id="L58">    return new SQLUpdate(ps, this, sqlInfo);</span>
+<span class="nc" id="L57">    SQLNormalizer normalizer = new SQLNormalizer(session.render());</span>
+<span class="nc" id="L58">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
+<span class="nc" id="L59">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="nc" id="L60">    return new SQLUpdate(ps, this, sqlInfo);</span>
   }
 
 
- }
+}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

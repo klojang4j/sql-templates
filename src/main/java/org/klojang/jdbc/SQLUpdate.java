@@ -45,12 +45,4 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
     }
   }
 
-  /**
-   * Releases all resources held by this instance. You cannot reuse this instance after a
-   * call to this method.
-   */
-  @Override
-  public void close() {
-    close(ps);
-  }
 }

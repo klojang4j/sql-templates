@@ -1,7 +1,10 @@
 package org.klojang.jdbc.x.sql;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.*;
+import org.klojang.jdbc.SQLInsert;
+import org.klojang.jdbc.SQLQuery;
+import org.klojang.jdbc.SQLSession;
+import org.klojang.jdbc.SQLUpdate;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
@@ -60,7 +63,7 @@ final class SQLTemplateSession extends AbstractSQLSession {
     Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));
     SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveAutoKeys);
-    return new SQLInsert(ps, this, sqlInfo);
+    return new SQLInsert(ps, this, sqlInfo, retrieveAutoKeys);
   }
 
   public SQLUpdate prepareUpdate() {
@@ -69,7 +72,6 @@ final class SQLTemplateSession extends AbstractSQLSession {
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
     return new SQLUpdate(ps, this, sqlInfo);
   }
-
 
 
 }

@@ -10,7 +10,6 @@ import org.klojang.util.ModulePrivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -267,15 +266,6 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
     } catch (Throwable t) {
       throw KlojangSQLException.wrap(t, sqlInfo);
     }
-  }
-
-  /**
-   * Releases all resources held by this instance. You cannot reuse this instance after a
-   * call to this method.
-   */
-  @Override
-  public void close() {
-    close(ps);
   }
 
   @Override
