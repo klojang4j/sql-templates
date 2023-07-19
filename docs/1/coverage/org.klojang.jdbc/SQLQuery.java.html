@@ -19,9 +19,9 @@ import java.util.function.Supplier;
 
 /**
  * &lt;p&gt;Facilitates the execution of SQL SELECT statements. {@code SQLQuery} instances are
- * obtained via {@link SQLSession#prepareQuery() SQLSession.prepareQuery()}. You
- * should always obtain them using a try-with-resources block. Here is a simple example of
- * how you can use the {@code SQLQuery} class:
+ * obtained via {@link SQLSession#prepareQuery() SQLSession.prepareQuery()}. You should
+ * always obtain them using a try-with-resources block. Here is a simple example of how
+ * you can use the {@code SQLQuery} class:
  *
  * &lt;blockquote&gt;&lt;pre&gt;{@code
  * SQL sql = SQL.basic(&quot;SELECT * FROM PERSON WHERE FIRST_NAME = :firstName&quot;);
@@ -70,11 +70,11 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * a {@link ResultSet}. Beware of the direction of the mappings: &lt;i&gt;from&lt;/i&gt; column
    * names &lt;i&gt;to&lt;/i&gt; bean properties (or map keys).
    *
-   * @param columnMapper the column-to-property mapper to be used
+   * @param columnToPropertyMapper the column-to-property mapper to be used
    * @return this {@code SQLQuery} instance
    */
-  public SQLQuery withMapper(NameMapper columnMapper) {
-<span class="fc" id="L77">    this.mapper = Check.notNull(columnMapper).ok();</span>
+  public SQLQuery withNameMapper(NameMapper columnToPropertyMapper) {
+<span class="fc" id="L77">    this.mapper = Check.notNull(columnToPropertyMapper).ok();</span>
 <span class="fc" id="L78">    return this;</span>
   }
 
@@ -247,9 +247,8 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    *
    * @param &lt;T&gt; the type of the JavaBeans
    * @param beanClass the class of the JavaBeans
-   * @param beanSupplier the supplier of the JavaBean instances. This would ordinarily
-   * be a method reference to the constructor of the JavaBean (like
-   * {@code Person::new})
+   * @param beanSupplier the supplier of the JavaBean instances. This would ordinarily be
+   * a method reference to the constructor of the JavaBean (like {@code Person::new})
    * @return a {@code ResultSetBeanifier} that you can use to convert the rows in the
    * {@link ResultSet} into JavaBeans.
    */
@@ -257,43 +256,43 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
         Class&lt;T&gt; beanClass,
         Supplier&lt;T&gt; beanSupplier) {
     try {
-<span class="nc" id="L260">      executeQuery();</span>
-<span class="nc" id="L261">      return session</span>
-<span class="nc" id="L262">            .getSQL()</span>
-<span class="nc" id="L263">            .getBeanifierFactory(beanClass, beanSupplier, mapper)</span>
-<span class="nc" id="L264">            .getBeanifier(resultSet);</span>
-<span class="nc" id="L265">    } catch (Throwable t) {</span>
-<span class="nc" id="L266">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
+<span class="nc" id="L259">      executeQuery();</span>
+<span class="nc" id="L260">      return session</span>
+<span class="nc" id="L261">            .getSQL()</span>
+<span class="nc" id="L262">            .getBeanifierFactory(beanClass, beanSupplier, mapper)</span>
+<span class="nc" id="L263">            .getBeanifier(resultSet);</span>
+<span class="nc" id="L264">    } catch (Throwable t) {</span>
+<span class="nc" id="L265">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }
   }
 
   @Override
   void initialize() {
     try {
-<span class="nc bnc" id="L273" title="All 2 branches missed.">      if (resultSet != null) {</span>
-<span class="nc" id="L274">        resultSet.close();</span>
-<span class="nc" id="L275">        resultSet = null;</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">      if (resultSet != null) {</span>
+<span class="nc" id="L273">        resultSet.close();</span>
+<span class="nc" id="L274">        resultSet = null;</span>
       }
-<span class="nc" id="L277">      ps.clearParameters();</span>
-<span class="nc" id="L278">    } catch (SQLException e) {</span>
-<span class="nc" id="L279">      throw new KlojangSQLException(e);</span>
-<span class="nc" id="L280">    }</span>
-<span class="nc" id="L281">  }</span>
+<span class="nc" id="L276">      ps.clearParameters();</span>
+<span class="nc" id="L277">    } catch (SQLException e) {</span>
+<span class="nc" id="L278">      throw new KlojangSQLException(e);</span>
+<span class="nc" id="L279">    }</span>
+<span class="nc" id="L280">  }</span>
 
   private void executeAndNext() throws Throwable {
-<span class="fc" id="L284">    executeQuery();</span>
-<span class="pc bpc" id="L285" title="1 of 2 branches missed.">    if (!resultSet.next()) {</span>
-<span class="nc" id="L286">      throw new KlojangSQLException(&quot;query returned zero rows&quot;);</span>
+<span class="fc" id="L283">    executeQuery();</span>
+<span class="pc bpc" id="L284" title="1 of 2 branches missed.">    if (!resultSet.next()) {</span>
+<span class="nc" id="L285">      throw new KlojangSQLException(&quot;query returned zero rows&quot;);</span>
     }
-<span class="fc" id="L288">  }</span>
+<span class="fc" id="L287">  }</span>
 
   private void executeQuery() throws Throwable {
-<span class="pc bpc" id="L291" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
-<span class="fc" id="L292">      LOG.trace(&quot;Executing query&quot;);</span>
-<span class="fc" id="L293">      applyBindings(ps);</span>
-<span class="fc" id="L294">      resultSet = ps.executeQuery();</span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
+<span class="fc" id="L291">      LOG.trace(&quot;Executing query&quot;);</span>
+<span class="fc" id="L292">      applyBindings(ps);</span>
+<span class="fc" id="L293">      resultSet = ps.executeQuery();</span>
     }
-<span class="fc" id="L296">  }</span>
+<span class="fc" id="L295">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

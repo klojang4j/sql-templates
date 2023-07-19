@@ -35,6 +35,7 @@
  *    new Person("Peter", "Peterson", LocalDate.of(1963, 5, 3)),
  *    new Person("Joe", "Peterson", LocalDate.of(1998, 9, 23))
  * );
+ *
  * SQLBatchInsert bi = SQL.prepareBatchInsert()
  *    .of(Person.class)
  *    .into("PERSON")
@@ -49,11 +50,13 @@
  *     WHERE LAST_NAME = :lastName
  *     ORDER BY ~%column% ~%direction%
  *    """;
- * SQLSession session = SQL.template(sql).session(MY_CON.get());
+ *
+ * SQLSession session = SQL.template(sql).session(con);
  * session.set("column", "LAST_NAME").set("direction", "DESC");
+ *
  * try (SQLQuery query = session.prepareQuery()) {
  *  List<Person> persons = query
- *    .withMapper(new SnakeCaseToCamelCase())
+ *    .withNameMapper(new SnakeCaseToCamelCase())
  *    .bind("lastName", "Smith")
  *    .getBeanifier(Person.class)
  *    .beanifyAll();

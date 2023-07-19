@@ -19,9 +19,9 @@ import java.util.function.Supplier;
 
 /**
  * <p>Facilitates the execution of SQL SELECT statements. {@code SQLQuery} instances are
- * obtained via {@link SQLSession#prepareQuery() SQLSession.prepareQuery()}. You
- * should always obtain them using a try-with-resources block. Here is a simple example of
- * how you can use the {@code SQLQuery} class:
+ * obtained via {@link SQLSession#prepareQuery() SQLSession.prepareQuery()}. You should
+ * always obtain them using a try-with-resources block. Here is a simple example of how
+ * you can use the {@code SQLQuery} class:
  *
  * <blockquote><pre>{@code
  * SQL sql = SQL.basic("SELECT * FROM PERSON WHERE FIRST_NAME = :firstName");
@@ -70,11 +70,11 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * a {@link ResultSet}. Beware of the direction of the mappings: <i>from</i> column
    * names <i>to</i> bean properties (or map keys).
    *
-   * @param columnMapper the column-to-property mapper to be used
+   * @param columnToPropertyMapper the column-to-property mapper to be used
    * @return this {@code SQLQuery} instance
    */
-  public SQLQuery withMapper(NameMapper columnMapper) {
-    this.mapper = Check.notNull(columnMapper).ok();
+  public SQLQuery withNameMapper(NameMapper columnToPropertyMapper) {
+    this.mapper = Check.notNull(columnToPropertyMapper).ok();
     return this;
   }
 
@@ -247,9 +247,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    *
    * @param <T> the type of the JavaBeans
    * @param beanClass the class of the JavaBeans
-   * @param beanSupplier the supplier of the JavaBean instances. This would ordinarily
-   * be a method reference to the constructor of the JavaBean (like
-   * {@code Person::new})
+   * @param beanSupplier the supplier of the JavaBean instances. This would ordinarily be
+   * a method reference to the constructor of the JavaBean (like {@code Person::new})
    * @return a {@code ResultSetBeanifier} that you can use to convert the rows in the
    * {@link ResultSet} into JavaBeans.
    */
