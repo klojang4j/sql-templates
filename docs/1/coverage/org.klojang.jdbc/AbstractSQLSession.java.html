@@ -2,7 +2,7 @@
 
 import java.sql.Connection;
 
-public abstract sealed class AbstractSQLSession implements SQLSession
+abstract sealed class AbstractSQLSession implements SQLSession
       permits BasicSQLSession, SQLTemplateSession, SQLSkeletonSession {
 
   final Connection con;
@@ -13,7 +13,7 @@ public abstract sealed class AbstractSQLSession implements SQLSession
 <span class="fc" id="L13">    this.sql = sql;</span>
 <span class="fc" id="L14">  }</span>
 
-  public AbstractSQL getSQL() {
+  AbstractSQL getSQL() {
 <span class="fc" id="L17">    return sql;</span>
   }
 

@@ -2,7 +2,7 @@ package org.klojang.jdbc;
 
 import java.sql.Connection;
 
-public abstract sealed class AbstractSQLSession implements SQLSession
+abstract sealed class AbstractSQLSession implements SQLSession
       permits BasicSQLSession, SQLTemplateSession, SQLSkeletonSession {
 
   final Connection con;
@@ -13,7 +13,7 @@ public abstract sealed class AbstractSQLSession implements SQLSession
     this.sql = sql;
   }
 
-  public AbstractSQL getSQL() {
+  AbstractSQL getSQL() {
     return sql;
   }
 

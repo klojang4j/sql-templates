@@ -18,6 +18,11 @@ public final class SQLExpression {
     this.expression = expression;
   }
 
+  /**
+   * Returns the SQL expression.
+   *
+   * @return the SQL expression
+   */
   @Override
   public String toString() {return expression;}
 }

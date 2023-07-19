@@ -1,6 +1,5 @@
 package org.klojang.jdbc;
 
-import org.klojang.check.Check;
 import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.NameMapper;
@@ -12,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public abstract sealed class AbstractSQL implements SQL
+abstract sealed class AbstractSQL implements SQL
       permits BasicSQL, SQLTemplate, SQLSkeleton {
 
   @SuppressWarnings({"unused"})
@@ -25,24 +24,23 @@ public abstract sealed class AbstractSQL implements SQL
   private final Map<NameMapper, MappifierFactory> mappifiers
         = new HashMap<>(4);
 
-
   private final String unparsedSQL;
   private final BindInfo bindInfo;
 
-  public AbstractSQL(String sql, BindInfo bindInfo) {
+  AbstractSQL(String sql, BindInfo bindInfo) {
     this.unparsedSQL = sql;
-    this.bindInfo = Check.notNull(bindInfo, "bindInfo").ok();
+    this.bindInfo = bindInfo;
   }
 
-  public String getUnparsedSQL() {
+  String getUnparsedSQL() {
     return unparsedSQL;
   }
 
-  public BindInfo getBindInfo() {
+  BindInfo getBindInfo() {
     return bindInfo;
   }
 
-  public BeanBinder<?> getBeanBinder(Class<?> beanClass, SQLInfo sqlInfo) {
+  BeanBinder<?> getBeanBinder(Class<?> beanClass, SQLInfo sqlInfo) {
     BeanBinder<?> binder = beanBinders.get(beanClass);
     if (binder == null) {
       binder = new BeanBinder<>(beanClass, sqlInfo.parameters(), bindInfo);
@@ -52,7 +50,7 @@ public abstract sealed class AbstractSQL implements SQL
   }
 
   @SuppressWarnings("unchecked")
-  public <T> BeanifierFactory<T> getBeanifierFactory(Class<T> clazz, NameMapper mapper) {
+  <T> BeanifierFactory<T> getBeanifierFactory(Class<T> clazz, NameMapper mapper) {
     Tuple2<Class<?>, NameMapper> key = Tuple2.of(clazz, mapper);
     BeanifierFactory<T> bf = (BeanifierFactory<T>) beanifiers.get(key);
     if (bf == null) {
@@ -62,8 +60,10 @@ public abstract sealed class AbstractSQL implements SQL
   }
 
   @SuppressWarnings("unchecked")
-  public <T> BeanifierFactory<T> getBeanifierFactory(
-        Class<T> clazz, Supplier<T> supplier, NameMapper mapper) {
+  <T> BeanifierFactory<T> getBeanifierFactory(
+        Class<T> clazz,
+        Supplier<T> supplier,
+        NameMapper mapper) {
     Tuple2<Class<?>, NameMapper> key = Tuple2.of(clazz, mapper);
     BeanifierFactory<T> bf = (BeanifierFactory<T>) beanifiers.get(key);
     if (bf == null) {
@@ -72,7 +72,7 @@ public abstract sealed class AbstractSQL implements SQL
     return bf;
   }
 
-  public MappifierFactory getMappifierFactory(NameMapper mapper) {
+  MappifierFactory getMappifierFactory(NameMapper mapper) {
     return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);
   }
 
