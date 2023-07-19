@@ -204,6 +204,9 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
     sql.append(')');
   }
 
+  /**
+   * This is a no-op for {@code SQLBatchInsert}.
+   */
   @Override
   public void close() {}
 

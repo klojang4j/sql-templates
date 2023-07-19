@@ -204,27 +204,30 @@ public final class SQLBatchInsert&lt;T&gt; implements AutoCloseable {
 <span class="fc" id="L204">    sql.append(')');</span>
 <span class="fc" id="L205">  }</span>
 
+  /**
+   * This is a no-op for {@code SQLBatchInsert}.
+   */
   @Override
-<span class="fc" id="L208">  public void close() {}</span>
+<span class="fc" id="L211">  public void close() {}</span>
 
   private void commit() throws SQLException {
-<span class="pc bpc" id="L211" title="1 of 2 branches missed.">    if (cfg.commitPerChunk()) {</span>
-<span class="fc" id="L212">      cfg.connection().commit();</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">    if (cfg.commitPerChunk()) {</span>
+<span class="fc" id="L215">      cfg.connection().commit();</span>
     }
-<span class="fc" id="L214">  }</span>
+<span class="fc" id="L217">  }</span>
 
   private static String getSqlBase(BatchInsertConfig&lt;?&gt; cfg) {
-<span class="fc" id="L217">    String cols = Arrays.stream(cfg.getters())</span>
-<span class="fc" id="L218">          .map(Getter::getProperty)</span>
-<span class="fc" id="L219">          .map(cfg.mapper()::map)</span>
-<span class="fc" id="L220">          .collect(joining(&quot;,&quot;));</span>
-<span class="fc" id="L221">    StringBuilder sb = new StringBuilder(cols.length() + 40);</span>
-<span class="fc" id="L222">    append(sb, &quot;INSERT INTO &quot;, cfg.tableName(), '(', cols, &quot;)VALUES&quot;);</span>
-<span class="fc" id="L223">    return sb.toString();</span>
+<span class="fc" id="L220">    String cols = Arrays.stream(cfg.getters())</span>
+<span class="fc" id="L221">          .map(Getter::getProperty)</span>
+<span class="fc" id="L222">          .map(cfg.mapper()::map)</span>
+<span class="fc" id="L223">          .collect(joining(&quot;,&quot;));</span>
+<span class="fc" id="L224">    StringBuilder sb = new StringBuilder(cols.length() + 40);</span>
+<span class="fc" id="L225">    append(sb, &quot;INSERT INTO &quot;, cfg.tableName(), '(', cols, &quot;)VALUES&quot;);</span>
+<span class="fc" id="L226">    return sb.toString();</span>
   }
 
   private int getSQLLengthEstimate(List&lt;T&gt; beans) {
-<span class="fc" id="L227">    return cfg.getters().length * beans.size() * 12 + 50;</span>
+<span class="fc" id="L230">    return cfg.getters().length * beans.size() * 12 + 50;</span>
   }
 
 }
