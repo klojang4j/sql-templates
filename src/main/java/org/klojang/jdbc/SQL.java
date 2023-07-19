@@ -51,20 +51,11 @@ import java.sql.Connection;
  * methods allows for very dynamically generated SQL. As with SQL templates, the SQL is
  * provided in the form of a Klojang template (that is: it may contain <i>Klojang
  * Templates</i> variables). However, SQL skeletons explicitly allow you to set template
- * variables to values that are themselves chunks of SQL. More importantly: these chunks
- * of SQL may again contain named parameters. Named parameters are only extracted
+ * variables to values that are themselves chunks of SQL again. More importantly: if these
+ * SQL chunks contain named parameters, they will be picked up by <i>Klojang JDBC</i>,
+ * just like named parameters in the SQL skeleton. Named parameters are only extracted
  * <i>after</i> the SQL template has been rendered. This makes SQL skeletons less
  * efficient, but more dynamic than SQL templates.
- *
- * <h2>SQL Injection</h2>
- * <p>As mentioned, named parameters are ultimately just placeholders for standard JDBC
- * parameters (question marks). Therefore, using them carries no risk of SQL injection.
- * This is not the case for SQL templates &#8212; that is, SQL containing
- * <i>Klojang Templates</i> variables. They can appear anywhere in a SQL template, and
- * <i>Klojang JDBC</i> does not make any attempt to parse, analyse or escape them.
- * Therefore, the values you provide for SQL template variables should preferably be
- * hard-coded somewhere in your own program. Accepting values of unknown origin is a bad
- * idea.
  *
  * @see org.klojang.templates.Template
  * @see org.klojang.templates.RenderSession
