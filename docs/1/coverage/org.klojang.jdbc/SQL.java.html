@@ -71,29 +71,27 @@ import java.sql.Connection;
  */
 public sealed interface SQL permits AbstractSQL {
   /**
-   * Returns an {@code SQL} implementation that allows for named parameters, but not
-   * for &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
+   * Returns an {@code SQL} implementation that allows for named parameters, but not for
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL query string
-   * @return an instance of an {@code SQL} implementation that behaves as described
-   * above
+   * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql) {
-<span class="fc" id="L82">    return basic(sql, new BindInfo() {});</span>
+<span class="fc" id="L81">    return basic(sql, new BindInfo() {});</span>
   }
 
   /**
-   * Returns an {@code SQL} implementation that allows for named parameters, but not
-   * for &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
+   * Returns an {@code SQL} implementation that allows for named parameters, but not for
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL query string
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how values
-   * are bound into the underlying {@link java.sql.PreparedStatement}
-   * @return an instance of an {@code SQL} implementation that behaves as described
-   * above
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how values are
+   * bound into the underlying {@link java.sql.PreparedStatement}
+   * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql, BindInfo bindInfo) {
-<span class="fc" id="L96">    return new BasicSQL(sql, bindInfo);</span>
+<span class="fc" id="L94">    return new BasicSQL(sql, bindInfo);</span>
   }
 
   /**
@@ -101,11 +99,10 @@ public sealed interface SQL permits AbstractSQL {
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL query string
-   * @return an instance of an {@code SQL} implementation that behaves as described
-   * above
+   * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql) {
-<span class="fc" id="L108">    return template(sql, new BindInfo() {});</span>
+<span class="fc" id="L105">    return template(sql, new BindInfo() {});</span>
   }
 
   /**
@@ -113,13 +110,12 @@ public sealed interface SQL permits AbstractSQL {
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL query string
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how values
-   * are bound into the underlying {@link java.sql.PreparedStatement}
-   * @return an instance of an {@code SQL} implementation that behaves as described
-   * above
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how values are
+   * bound into the underlying {@link java.sql.PreparedStatement}
+   * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql, BindInfo bindInfo) {
-<span class="fc" id="L122">    return new SQLTemplate(sql, bindInfo);</span>
+<span class="fc" id="L118">    return new SQLTemplate(sql, bindInfo);</span>
   }
 
   /**
@@ -129,11 +125,10 @@ public sealed interface SQL permits AbstractSQL {
    * detected and extracted by &lt;i&gt;Klojang JDBC&lt;/i&gt;.
    *
    * @param sql the SQL query string
-   * @return an instance of an {@code SQL} implementation that behaves as described
-   * above
+   * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql) {
-<span class="nc" id="L136">    return skeleton(sql, new BindInfo() {});</span>
+<span class="nc" id="L131">    return skeleton(sql, new BindInfo() {});</span>
   }
 
   /**
@@ -143,13 +138,12 @@ public sealed interface SQL permits AbstractSQL {
    * detected and extracted by &lt;i&gt;Klojang JDBC&lt;/i&gt;.
    *
    * @param sql the SQL query string
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how values
-   * are bound into the underlying {@link java.sql.PreparedStatement}
-   * @return an instance of an {@code SQL} implementation that behaves as described
-   * above
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how values are
+   * bound into the underlying {@link java.sql.PreparedStatement}
+   * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L152">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="nc" id="L146">    return new SQLSkeleton(sql, bindInfo);</span>
   }
 
   /**
@@ -160,7 +154,7 @@ public sealed interface SQL permits AbstractSQL {
    * INSERT statement
    */
   static SQLInsertBuilder prepareInsert() {
-<span class="fc" id="L163">    return new SQLInsertBuilder();</span>
+<span class="fc" id="L157">    return new SQLInsertBuilder();</span>
   }
 
   /**
@@ -171,18 +165,18 @@ public sealed interface SQL permits AbstractSQL {
    * batch inserts.
    */
   static SQLBatchInsertBuilder prepareBatchInsert() {
-<span class="fc" id="L174">    return new SQLBatchInsertBuilder();</span>
+<span class="fc" id="L168">    return new SQLBatchInsertBuilder();</span>
   }
 
   /**
    * Returns a special object that signals to &lt;i&gt;Klojang JDBC&lt;/i&gt; that the specified
-   * string is to be treated as an SQL expression and hence must not be quoted or
-   * escaped. You can use this when
-   * {@link SQLBatchInsertBuilder#withTransformer specifying transformers} for beans to
-   * be saved in a {@link SQLBatchInsert batch insert}. Note that this makes you
-   * responsible for ensuring that the specified string does not and cannot suffer from
-   * SQL injection. Use a {@link Quoter} to ensure that all strings in the expression
-   * are properly quoted and escaped.
+   * string is to be treated as an SQL expression and hence must not be quoted or escaped.
+   * You can use this when
+   * {@link SQLBatchInsertBuilder#withTransformer specifying transformers} for beans to be
+   * saved in a {@link SQLBatchInsert batch insert}. Note that this makes you responsible
+   * for ensuring that the specified string does not and cannot suffer from SQL injection.
+   * Use a {@link Quoter} to ensure that all strings in the expression are properly quoted
+   * and escaped.
    *
    * @param expression the string to be wrapped into the signal object
    * @return a special object that signals to &lt;i&gt;Klojang JDBC&lt;/i&gt; that the specified
@@ -190,8 +184,8 @@ public sealed interface SQL permits AbstractSQL {
    * @see java.sql.Statement#enquoteLiteral(String)
    * @see Quoter
    */
-  static Object expression(String expression) {
-<span class="nc" id="L194">    return new SQLExpression(expression);</span>
+  static SQLExpression expression(String expression) {
+<span class="nc" id="L188">    return new SQLExpression(expression);</span>
   }
 
   /**
