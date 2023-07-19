@@ -1,6 +1,6 @@
 /**
- * <i>Klojang JDBC</i> is a thin, transparent abstraction layer around standard JDBC. It
- * builds on
+ * <p><i>Klojang JDBC</i> is a thin, transparent abstraction layer around standard JDBC.
+ * It builds on
  * <a href="https://klojang4j.github.io/klojang-templates/1/api">Klojang Templates</a> to
  * provide functionality not commonly found in JDBC extension libraries. It provides the
  * following functionality:
@@ -18,8 +18,53 @@
  *   <li>Special attention has been paid to persisting Java objects in potentially very
  *   large batches.
  * </ol>
+ *
+ * <p>Here is an example that goes full-circle from INSERT to SELECT:
+ *
+ * <blockquote><pre>{@code
+ * Connection con = DriverManager.getConnection("jdbc:h2:/tmp/h2/test");
+ * List<Person> persons = List.of(
+ *    new Person("John", "Smith", LocalDate.of(1960, 4, 15)),
+ *    new Person("Mary", "Smith", LocalDate.of(1980, 10, 5)),
+ *    new Person("Joan", "de Santos", LocalDate.of(1977, 5, 23)),
+ *    new Person("Jill", "Kriel", LocalDate.of(1977, 2, 10)),
+ *    new Person("Stephen", "Bester", LocalDate.of(2001, 2, 8)),
+ *    new Person("Carlos", "Smith", LocalDate.of(2004, 2, 8)),
+ *    new Person("Mary", "Bear", LocalDate.of(1956, 11, 7)),
+ *    new Person("Dieter", "Washington", LocalDate.of(1989, 2, 4)),
+ *    new Person("Peter", "Peterson", LocalDate.of(1963, 5, 3)),
+ *    new Person("Joe", "Peterson", LocalDate.of(1998, 9, 23))
+ * );
+ * SQLBatchInsert bi = SQL.prepareBatchInsert()
+ *    .of(Person.class)
+ *    .into("PERSON")
+ *    .excluding("personId")
+ *    .withNameMapper(new CamelCaseToSnakeUpperCase())
+ *    .prepare(con);
+ * bi.insertBatchAndSetIDs("personId", persons);
+ *
+ *
+ * String sql = """
+ *    SELECT * FROM PERSON
+ *     WHERE LAST_NAME = :lastName
+ *     ORDER BY ~%column% ~%direction%
+ *    """;
+ * SQLSession session = SQL.template(sql).session(MY_CON.get());
+ * session.set("column", "LAST_NAME").set("direction", "DESC");
+ * try (SQLQuery query = session.prepareQuery()) {
+ *  List<Person> persons = query
+ *    .withMapper(new SnakeCaseToCamelCase())
+ *    .bind("lastName", "Smith")
+ *    .getBeanifier(Person.class)
+ *    .beanifyAll();
+ *  for (Person person : persons) {
+ *    System.out.println(person);
+ *  }
+ * }
+ *
+ * }</pre></blockquote>
  */
-module org.klojang.db {
+module org.klojang.jdbc {
 
   exports org.klojang.jdbc;
 

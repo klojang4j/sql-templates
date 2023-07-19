@@ -19,24 +19,24 @@ public final class ColumnReader<COLUMN_TYPE, FIELD_TYPE> {
   }
 
   public ColumnReader(
-      ResultSetMethod<COLUMN_TYPE> method,
-      Function<? super COLUMN_TYPE, FIELD_TYPE> adapter) {
+        ResultSetMethod<COLUMN_TYPE> method,
+        Function<? super COLUMN_TYPE, FIELD_TYPE> adapter) {
     this(method, (x, y) -> ifNotNull(x, adapter::apply));
   }
 
   public ColumnReader(
-      ResultSetMethod<COLUMN_TYPE> method,
-      Adapter<? super COLUMN_TYPE, FIELD_TYPE> adapter) {
+        ResultSetMethod<COLUMN_TYPE> method,
+        Adapter<? super COLUMN_TYPE, FIELD_TYPE> adapter) {
     this.method = method;
     this.adapter = adapter;
   }
 
   @SuppressWarnings("unchecked")
   public FIELD_TYPE getValue(ResultSet rs, int columnIndex, Class<FIELD_TYPE> toType)
-      throws Throwable {
+  throws Throwable {
     COLUMN_TYPE val = method.invoke(rs, columnIndex);
     if (adapter == null) {
-      return toType.cast(val); // use Class.cast() for fail-fast behaviour
+      return (FIELD_TYPE) val;
     }
     return adapter.adapt(val, toType);
   }

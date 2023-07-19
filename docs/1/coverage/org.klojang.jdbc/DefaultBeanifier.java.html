@@ -17,7 +17,7 @@ import static org.klojang.jdbc.x.rs.BeanChannel.toBean;
 final class DefaultBeanifier&lt;T&gt; implements ResultSetBeanifier&lt;T&gt; {
 
   @SuppressWarnings(&quot;unused&quot;)
-<span class="nc" id="L20">  private static final Logger LOG = LoggerFactory.getLogger(DefaultBeanifier.class);</span>
+<span class="fc" id="L20">  private static final Logger LOG = LoggerFactory.getLogger(DefaultBeanifier.class);</span>
 
   private static class BeanIterator&lt;T&gt; implements Iterator&lt;T&gt; {
 
@@ -45,11 +45,11 @@ final class DefaultBeanifier&lt;T&gt; implements ResultSetBeanifier&lt;T&gt; {
 
   private boolean empty;
 
-<span class="nc" id="L48">  DefaultBeanifier(ResultSet rs, BeanChannel&lt;?, ?&gt;[] channels, Supplier&lt;T&gt; supplier) {</span>
-<span class="nc" id="L49">    this.rs = rs;</span>
-<span class="nc" id="L50">    this.channels = channels;</span>
-<span class="nc" id="L51">    this.beanSupplier = supplier;</span>
-<span class="nc" id="L52">  }</span>
+<span class="fc" id="L48">  DefaultBeanifier(ResultSet rs, BeanChannel&lt;?, ?&gt;[] channels, Supplier&lt;T&gt; supplier) {</span>
+<span class="fc" id="L49">    this.rs = rs;</span>
+<span class="fc" id="L50">    this.channels = channels;</span>
+<span class="fc" id="L51">    this.beanSupplier = supplier;</span>
+<span class="fc" id="L52">  }</span>
 
   @Override
   public Optional&lt;T&gt; beanify() {
@@ -85,25 +85,25 @@ final class DefaultBeanifier&lt;T&gt; implements ResultSetBeanifier&lt;T&gt; {
 
   @Override
   public List&lt;T&gt; beanifyAll() {
-<span class="nc" id="L88">    return beanifyAll(10);</span>
+<span class="fc" id="L88">    return beanifyAll(10);</span>
   }
 
   @Override
   public List&lt;T&gt; beanifyAll(int sizeEstimate) {
-<span class="nc" id="L93">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
-<span class="nc bnc" id="L94" title="All 2 branches missed.">    if (empty) {</span>
+<span class="fc" id="L93">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">    if (empty) {</span>
 <span class="nc" id="L95">      return Collections.emptyList();</span>
     }
-<span class="nc" id="L97">    List&lt;T&gt; beans = new ArrayList&lt;&gt;(sizeEstimate);</span>
+<span class="fc" id="L97">    List&lt;T&gt; beans = new ArrayList&lt;&gt;(sizeEstimate);</span>
     try {
       do {
-<span class="nc" id="L100">        beans.add(toBean(rs, beanSupplier, channels));</span>
-<span class="nc bnc" id="L101" title="All 2 branches missed.">      } while (rs.next());</span>
+<span class="fc" id="L100">        beans.add(toBean(rs, beanSupplier, channels));</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">      } while (rs.next());</span>
 <span class="nc" id="L102">    } catch (Throwable t) {</span>
 <span class="nc" id="L103">      throw new KlojangSQLException(t);</span>
-<span class="nc" id="L104">    }</span>
-<span class="nc" id="L105">    empty = true;</span>
-<span class="nc" id="L106">    return beans;</span>
+<span class="fc" id="L104">    }</span>
+<span class="fc" id="L105">    empty = true;</span>
+<span class="fc" id="L106">    return beans;</span>
   }
 
   @Override

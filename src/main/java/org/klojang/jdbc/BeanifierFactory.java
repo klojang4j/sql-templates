@@ -99,8 +99,7 @@ public class BeanifierFactory<T> {
             NameMapper columnToPropertyMapper) {
         this.beanClass = Check.notNull(beanClass, "beanClass").ok();
         this.beanSupplier = Check.notNull(beanSupplier, "beanSupplier").ok();
-        this.mapper = Check.notNull(columnToPropertyMapper,
-                "columnToPropertyMapper").ok();
+        this.mapper = Check.notNull(columnToPropertyMapper, "columnToPropertyMapper").ok();
     }
 
     /**

@@ -19,24 +19,24 @@ public final class ColumnReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
 <span class="fc" id="L19">  }</span>
 
   public ColumnReader(
-      ResultSetMethod&lt;COLUMN_TYPE&gt; method,
-      Function&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {
+        ResultSetMethod&lt;COLUMN_TYPE&gt; method,
+        Function&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {
 <span class="fc" id="L24">    this(method, (x, y) -&gt; ifNotNull(x, adapter::apply));</span>
 <span class="fc" id="L25">  }</span>
 
   public ColumnReader(
-      ResultSetMethod&lt;COLUMN_TYPE&gt; method,
-<span class="fc" id="L29">      Adapter&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {</span>
+        ResultSetMethod&lt;COLUMN_TYPE&gt; method,
+<span class="fc" id="L29">        Adapter&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {</span>
 <span class="fc" id="L30">    this.method = method;</span>
 <span class="fc" id="L31">    this.adapter = adapter;</span>
 <span class="fc" id="L32">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
   public FIELD_TYPE getValue(ResultSet rs, int columnIndex, Class&lt;FIELD_TYPE&gt; toType)
-      throws Throwable {
+  throws Throwable {
 <span class="fc" id="L37">    COLUMN_TYPE val = method.invoke(rs, columnIndex);</span>
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">    if (adapter == null) {</span>
-<span class="nc" id="L39">      return toType.cast(val); // use Class.cast() for fail-fast behaviour</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">    if (adapter == null) {</span>
+<span class="fc" id="L39">      return (FIELD_TYPE) val;</span>
     }
 <span class="fc" id="L41">    return adapter.adapt(val, toType);</span>
   }

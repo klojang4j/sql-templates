@@ -13,7 +13,7 @@ import static org.klojang.util.ObjectMethods.ifNotNull;
 public final class LocalDateReaderLookup extends ColumnReaderLookup&lt;LocalDate&gt; {
 
 <span class="fc" id="L15">  public LocalDateReaderLookup() {</span>
-<span class="pc" id="L16">    add(DATE, new ColumnReader&lt;&gt;(ResultSetMethod.GET_DATE, x -&gt; ifNotNull(x, Date::toLocalDate)));</span>
+<span class="fc" id="L16">    add(DATE, new ColumnReader&lt;&gt;(ResultSetMethod.GET_DATE, x -&gt; ifNotNull(x, Date::toLocalDate)));</span>
 <span class="fc" id="L17">    add(TIMESTAMP, new ColumnReader&lt;&gt;(ResultSetMethod.objectGetter(LocalDate.class)));</span>
 <span class="fc" id="L18">  }</span>
 }

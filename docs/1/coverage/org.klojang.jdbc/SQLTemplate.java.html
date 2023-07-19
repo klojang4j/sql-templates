@@ -12,18 +12,18 @@ final class SQLTemplate extends AbstractSQL {
   private final SQLNormalizer normalizer;
 
   SQLTemplate(String sql, BindInfo bindInfo) {
-<span class="nc" id="L15">    super(sql, bindInfo);</span>
-<span class="nc" id="L16">    normalizer = new SQLNormalizer(sql);</span>
+<span class="fc" id="L15">    super(sql, bindInfo);</span>
+<span class="fc" id="L16">    normalizer = new SQLNormalizer(sql);</span>
     try {
-<span class="nc" id="L18">      template = Template.fromString(normalizer.getNormalizedSQL());</span>
+<span class="fc" id="L18">      template = Template.fromString(normalizer.getNormalizedSQL());</span>
 <span class="nc" id="L19">    } catch (ParseException e) {</span>
 <span class="nc" id="L20">      throw new KlojangSQLException(e);</span>
-<span class="nc" id="L21">    }</span>
-<span class="nc" id="L22">  }</span>
+<span class="fc" id="L21">    }</span>
+<span class="fc" id="L22">  }</span>
 
   @Override
   public SQLSession session(Connection con) {
-<span class="nc" id="L26">    return new SQLTemplateSession(con, this, normalizer, template.newRenderSession());</span>
+<span class="fc" id="L26">    return new SQLTemplateSession(con, this, normalizer, template.newRenderSession());</span>
   }
 
 }

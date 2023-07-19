@@ -51,12 +51,12 @@ abstract sealed class AbstractSQL implements SQL
 
   @SuppressWarnings(&quot;unchecked&quot;)
   &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(Class&lt;T&gt; clazz, NameMapper mapper) {
-<span class="nc" id="L54">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
-<span class="nc" id="L55">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
-<span class="nc bnc" id="L56" title="All 2 branches missed.">    if (bf == null) {</span>
-<span class="nc" id="L57">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, mapper));</span>
+<span class="fc" id="L54">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
+<span class="fc" id="L55">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">    if (bf == null) {</span>
+<span class="fc" id="L57">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, mapper));</span>
     }
-<span class="nc" id="L59">    return bf;</span>
+<span class="fc" id="L59">    return bf;</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)

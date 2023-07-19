@@ -74,8 +74,8 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @return this {@code SQLQuery} instance
    */
   public SQLQuery withMapper(NameMapper columnMapper) {
-<span class="nc" id="L77">    this.mapper = Check.notNull(columnMapper).ok();</span>
-<span class="nc" id="L78">    return this;</span>
+<span class="fc" id="L77">    this.mapper = Check.notNull(columnMapper).ok();</span>
+<span class="fc" id="L78">    return this;</span>
   }
 
   /**
@@ -231,11 +231,11 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; ResultSetBeanifier&lt;T&gt; getBeanifier(Class&lt;T&gt; beanClass) {
     try {
-<span class="nc" id="L234">      executeQuery();</span>
-<span class="nc" id="L235">      return session</span>
-<span class="nc" id="L236">            .getSQL()</span>
-<span class="nc" id="L237">            .getBeanifierFactory(beanClass, mapper)</span>
-<span class="nc" id="L238">            .getBeanifier(resultSet);</span>
+<span class="fc" id="L234">      executeQuery();</span>
+<span class="fc" id="L235">      return session</span>
+<span class="fc" id="L236">            .getSQL()</span>
+<span class="fc" id="L237">            .getBeanifierFactory(beanClass, mapper)</span>
+<span class="fc" id="L238">            .getBeanifier(resultSet);</span>
 <span class="nc" id="L239">    } catch (Throwable t) {</span>
 <span class="nc" id="L240">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     }

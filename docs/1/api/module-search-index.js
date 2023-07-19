@@ -1,1 +1,1 @@
-moduleSearchIndex = [{"l":"org.klojang.db"}];updateSearchResults();
+moduleSearchIndex = [{"l":"org.klojang.jdbc"}];updateSearchResults();

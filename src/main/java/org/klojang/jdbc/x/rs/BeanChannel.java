@@ -23,9 +23,9 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
 
   @SuppressWarnings("rawtypes")
   public static <U> U toBean(ResultSet rs,
-      Supplier<U> beanSupplier,
-      BeanChannel[] channels)
-      throws Throwable {
+        Supplier<U> beanSupplier,
+        BeanChannel[] channels)
+        throws Throwable {
     U bean = beanSupplier.get();
     for (BeanChannel channel : channels) {
       channel.copy(rs, bean);
@@ -35,7 +35,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
 
   @SuppressWarnings("rawtypes")
   public static BeanChannel[] createChannels(
-      ResultSet rs, Class<?> beanClass, NameMapper nameMapper) {
+        ResultSet rs, Class<?> beanClass, NameMapper nameMapper) {
     Map<String, Setter> setters = SetterFactory.INSTANCE.getSetters(beanClass);
     if (LOG.isTraceEnabled()) {
       LOG.trace("Mapping ResultSet to {}", beanClass.getSimpleName());
@@ -73,28 +73,27 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
     }
   }
 
-  private final ColumnReader<COLUMN_TYPE, FIELD_TYPE> extractor;
+  private final ColumnReader<COLUMN_TYPE, FIELD_TYPE> reader;
   private final Setter setter;
   private final int jdbcIdx;
   private final int sqlType;
 
   private BeanChannel(
-      ColumnReader<COLUMN_TYPE, FIELD_TYPE> extractor,
-      Setter setter,
-      int jdbcIdx,
-      int sqlType) {
-    this.extractor = extractor;
+        ColumnReader<COLUMN_TYPE, FIELD_TYPE> reader,
+        Setter setter,
+        int jdbcIdx,
+        int sqlType) {
+    this.reader = reader;
     this.setter = setter;
     this.jdbcIdx = jdbcIdx;
     this.sqlType = sqlType;
   }
 
   @Override
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void copy(ResultSet rs, Object bean) throws Throwable {
-    FIELD_TYPE val = extractor.getValue(rs,
-        jdbcIdx,
-        (Class<FIELD_TYPE>) setter.getParamType());
+    Class clazz = setter.getParamType();
+    Object val = reader.getValue(rs, jdbcIdx, clazz);
     setter.write(bean, val);
   }
 

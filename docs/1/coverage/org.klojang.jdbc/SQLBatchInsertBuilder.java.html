@@ -108,9 +108,9 @@ public final class SQLBatchInsertBuilder&lt;T&gt; {
      * @return this {@code SQLBatchInsertBuilder}
      */
     public SQLBatchInsertBuilder&lt;T&gt; withNameMapper(NameMapper propertyToColumnMapper) {
-<span class="nc" id="L111">        Check.notNull(propertyToColumnMapper);</span>
-<span class="nc" id="L112">        this.nameMapper = propertyToColumnMapper;</span>
-<span class="nc" id="L113">        return this;</span>
+<span class="fc" id="L111">        Check.notNull(propertyToColumnMapper);</span>
+<span class="fc" id="L112">        this.nameMapper = propertyToColumnMapper;</span>
+<span class="fc" id="L113">        return this;</span>
     }
 
     /**

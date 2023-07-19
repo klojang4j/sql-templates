@@ -41,8 +41,8 @@ import static org.klojang.jdbc.x.rs.BeanChannel.createChannels;
 @SuppressWarnings(&quot;rawtypes&quot;)
 public class BeanifierFactory&lt;T&gt; {
 
-<span class="nc" id="L44">    private final AtomicReference&lt;BeanChannel[]&gt; ref = new AtomicReference&lt;&gt;();</span>
-<span class="nc" id="L45">    private final ReentrantLock lock = new ReentrantLock();</span>
+<span class="fc" id="L44">    private final AtomicReference&lt;BeanChannel[]&gt; ref = new AtomicReference&lt;&gt;();</span>
+<span class="fc" id="L45">    private final ReentrantLock lock = new ReentrantLock();</span>
 
     private final Class&lt;T&gt; beanClass;
     private final Supplier&lt;T&gt; beanSupplier;
@@ -81,8 +81,8 @@ public class BeanifierFactory&lt;T&gt; {
      * names
      */
     public BeanifierFactory(Class&lt;T&gt; beanClass, NameMapper columnToPropertyMapper) {
-<span class="nc" id="L84">        this(beanClass, () -&gt; newInstance(beanClass), columnToPropertyMapper);</span>
-<span class="nc" id="L85">    }</span>
+<span class="fc" id="L84">        this(beanClass, () -&gt; newInstance(beanClass), columnToPropertyMapper);</span>
+<span class="fc" id="L85">    }</span>
 
     /**
      * Creates a new {@code BeanifierFactory}.
@@ -96,12 +96,11 @@ public class BeanifierFactory&lt;T&gt; {
     public BeanifierFactory(
             Class&lt;T&gt; beanClass,
             Supplier&lt;T&gt; beanSupplier,
-<span class="nc" id="L99">            NameMapper columnToPropertyMapper) {</span>
-<span class="nc" id="L100">        this.beanClass = Check.notNull(beanClass, &quot;beanClass&quot;).ok();</span>
-<span class="nc" id="L101">        this.beanSupplier = Check.notNull(beanSupplier, &quot;beanSupplier&quot;).ok();</span>
-<span class="nc" id="L102">        this.mapper = Check.notNull(columnToPropertyMapper,</span>
-<span class="nc" id="L103">                &quot;columnToPropertyMapper&quot;).ok();</span>
-<span class="nc" id="L104">    }</span>
+<span class="fc" id="L99">            NameMapper columnToPropertyMapper) {</span>
+<span class="fc" id="L100">        this.beanClass = Check.notNull(beanClass, &quot;beanClass&quot;).ok();</span>
+<span class="fc" id="L101">        this.beanSupplier = Check.notNull(beanSupplier, &quot;beanSupplier&quot;).ok();</span>
+<span class="fc" id="L102">        this.mapper = Check.notNull(columnToPropertyMapper, &quot;columnToPropertyMapper&quot;).ok();</span>
+<span class="fc" id="L103">    }</span>
 
     /**
      * Returns a {@code ResultSetBeanifier} that will convert the rows in the specified
@@ -113,28 +112,28 @@ public class BeanifierFactory&lt;T&gt; {
      * @throws SQLException
      */
     public ResultSetBeanifier&lt;T&gt; getBeanifier(ResultSet rs) throws SQLException {
-<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (!rs.next()) {</span>
-<span class="nc" id="L117">            return EmptyBeanifier.INSTANCE;</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if (!rs.next()) {</span>
+<span class="nc" id="L116">            return EmptyBeanifier.INSTANCE;</span>
         }
         BeanChannel[] channels;
-<span class="nc bnc" id="L120" title="All 2 branches missed.">        if ((channels = ref.getPlain()) == null) {</span>
-<span class="nc" id="L121">            lock.lock();</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if ((channels = ref.getPlain()) == null) {</span>
+<span class="fc" id="L120">            lock.lock();</span>
             try {
-<span class="nc bnc" id="L123" title="All 2 branches missed.">                if (ref.get() == null) {</span>
-<span class="nc" id="L124">                    ref.set(channels = createChannels(rs, beanClass, mapper));</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">                if (ref.get() == null) {</span>
+<span class="fc" id="L123">                    ref.set(channels = createChannels(rs, beanClass, mapper));</span>
                 }
             } finally {
-<span class="nc" id="L127">                lock.unlock();</span>
+<span class="fc" id="L126">                lock.unlock();</span>
             }
         }
-<span class="nc" id="L130">        return new DefaultBeanifier&lt;&gt;(rs, channels, beanSupplier);</span>
+<span class="fc" id="L129">        return new DefaultBeanifier&lt;&gt;(rs, channels, beanSupplier);</span>
     }
 
     private static &lt;U&gt; U newInstance(Class&lt;U&gt; beanClass) {
         try {
-<span class="nc" id="L135">            return InvokeMethods.newInstance(beanClass);</span>
-<span class="nc" id="L136">        } catch (Exception e) {</span>
-<span class="nc" id="L137">            throw ExceptionMethods.uncheck(e);</span>
+<span class="fc" id="L134">            return InvokeMethods.newInstance(beanClass);</span>
+<span class="nc" id="L135">        } catch (Exception e) {</span>
+<span class="nc" id="L136">            throw ExceptionMethods.uncheck(e);</span>
         }
     }
 }

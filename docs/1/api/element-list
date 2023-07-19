@@ -1,2 +1,2 @@
-module:org.klojang.db
+module:org.klojang.jdbc
 org.klojang.jdbc
