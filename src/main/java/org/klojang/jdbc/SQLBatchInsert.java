@@ -3,7 +3,6 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.invoke.Getter;
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.jdbc.x.SQLExpression;
 import org.klojang.jdbc.x.sql.BatchInsertConfig;
 
 import java.sql.PreparedStatement;

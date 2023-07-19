@@ -1,11 +1,5 @@
 package org.klojang.jdbc;
 
-import org.klojang.jdbc.x.SQLExpression;
-import org.klojang.jdbc.x.sql.AbstractSQL;
-import org.klojang.jdbc.x.sql.BasicSQL;
-import org.klojang.jdbc.x.sql.SQLSkeleton;
-import org.klojang.jdbc.x.sql.SQLTemplate;
-
 import java.sql.Connection;
 
 /**

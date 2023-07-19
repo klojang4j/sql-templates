@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractSQL.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">AbstractSQL.java</span></div><h1>AbstractSQL.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.check.Check;
+import org.klojang.jdbc.x.ps.BeanBinder;
+import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.templates.NameMapper;
+import org.klojang.util.Tuple2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
+public abstract sealed class AbstractSQL implements SQL
+      permits BasicSQL, SQLTemplate, SQLSkeleton {
+
+  @SuppressWarnings({&quot;unused&quot;})
+<span class="fc" id="L19">  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);</span>
+
+<span class="fc" id="L21">  private final Map&lt;Class&lt;?&gt;, BeanBinder&lt;?&gt;&gt; beanBinders</span>
+        = new HashMap&lt;&gt;(4);
+<span class="fc" id="L23">  private final Map&lt;Tuple2&lt;Class&lt;?&gt;, NameMapper&gt;, BeanifierFactory&lt;?&gt;&gt; beanifiers</span>
+        = new HashMap&lt;&gt;(4);
+<span class="fc" id="L25">  private final Map&lt;NameMapper, MappifierFactory&gt; mappifiers</span>
+        = new HashMap&lt;&gt;(4);
+
+
+  private final String unparsedSQL;
+  private final BindInfo bindInfo;
+
+<span class="fc" id="L32">  public AbstractSQL(String sql, BindInfo bindInfo) {</span>
+<span class="fc" id="L33">    this.unparsedSQL = sql;</span>
+<span class="fc" id="L34">    this.bindInfo = Check.notNull(bindInfo, &quot;bindInfo&quot;).ok();</span>
+<span class="fc" id="L35">  }</span>
+
+  public String getUnparsedSQL() {
+<span class="nc" id="L38">    return unparsedSQL;</span>
+  }
+
+  public BindInfo getBindInfo() {
+<span class="fc" id="L42">    return bindInfo;</span>
+  }
+
+  public BeanBinder&lt;?&gt; getBeanBinder(Class&lt;?&gt; beanClass, SQLInfo sqlInfo) {
+<span class="fc" id="L46">    BeanBinder&lt;?&gt; binder = beanBinders.get(beanClass);</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">    if (binder == null) {</span>
+<span class="fc" id="L48">      binder = new BeanBinder&lt;&gt;(beanClass, sqlInfo.parameters(), bindInfo);</span>
+<span class="fc" id="L49">      beanBinders.put(beanClass, binder);</span>
+    }
+<span class="fc" id="L51">    return binder;</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(Class&lt;T&gt; clazz, NameMapper mapper) {
+<span class="nc" id="L56">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
+<span class="nc" id="L57">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">    if (bf == null) {</span>
+<span class="nc" id="L59">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, mapper));</span>
+    }
+<span class="nc" id="L61">    return bf;</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(
+        Class&lt;T&gt; clazz, Supplier&lt;T&gt; supplier, NameMapper mapper) {
+<span class="nc" id="L67">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
+<span class="nc" id="L68">    BeanifierFactory&lt;T&gt; bf = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">    if (bf == null) {</span>
+<span class="nc" id="L70">      beanifiers.put(key, bf = new BeanifierFactory&lt;&gt;(clazz, supplier, mapper));</span>
+    }
+<span class="nc" id="L72">    return bf;</span>
+  }
+
+  public MappifierFactory getMappifierFactory(NameMapper mapper) {
+<span class="nc" id="L76">    return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,19 +1,20 @@
-package org.klojang.jdbc.x.sql;
+package org.klojang.jdbc;
 
-import org.klojang.jdbc.BindInfo;
-import org.klojang.jdbc.SQLSession;
+import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.SQLNormalizer;
 
 import java.sql.Connection;
 
-public final class BasicSQL extends AbstractSQL {
+final class BasicSQL extends AbstractSQL {
 
   private final SQLInfo sqlInfo;
 
-  public BasicSQL(String sql, BindInfo bindInfo) {
+  BasicSQL(String sql, BindInfo bindInfo) {
     super(sql, bindInfo);
     sqlInfo = new SQLInfo(new SQLNormalizer(sql));
   }
 
+  @Override
   public SQLSession session(Connection con) {
     return new BasicSQLSession(con, this, sqlInfo);
   }

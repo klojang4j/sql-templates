@@ -2,7 +2,6 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.util.ModulePrivate;
 import org.slf4j.Logger;

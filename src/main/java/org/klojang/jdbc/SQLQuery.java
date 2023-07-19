@@ -3,7 +3,6 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderFinder;
-import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.NameMapper;
 import org.klojang.util.ModulePrivate;

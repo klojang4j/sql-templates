@@ -1,19 +1,17 @@
-package org.klojang.jdbc.x.sql;
+package org.klojang.jdbc;
 
-import org.klojang.jdbc.BindInfo;
-import org.klojang.jdbc.KlojangSQLException;
-import org.klojang.jdbc.SQLSession;
+import org.klojang.jdbc.x.sql.SQLNormalizer;
 import org.klojang.templates.ParseException;
 import org.klojang.templates.Template;
 
 import java.sql.Connection;
 
-public final class SQLTemplate extends AbstractSQL {
+final class SQLTemplate extends AbstractSQL {
 
   private final Template template;
   private final SQLNormalizer normalizer;
 
-  public SQLTemplate(String sql, BindInfo bindInfo) {
+  SQLTemplate(String sql, BindInfo bindInfo) {
     super(sql, bindInfo);
     normalizer = new SQLNormalizer(sql);
     try {
@@ -23,6 +21,7 @@ public final class SQLTemplate extends AbstractSQL {
     }
   }
 
+  @Override
   public SQLSession session(Connection con) {
     return new SQLTemplateSession(con, this, normalizer, template.newRenderSession());
   }

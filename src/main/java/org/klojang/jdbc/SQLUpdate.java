@@ -1,6 +1,5 @@
 package org.klojang.jdbc;
 
-import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.util.ExceptionMethods;
 import org.klojang.util.ModulePrivate;

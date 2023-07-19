@@ -3,7 +3,6 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.ps.MapBinder;
-import org.klojang.jdbc.x.sql.AbstractSQLSession;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.klojang.jdbc.x.sql.SQLInfo;
 

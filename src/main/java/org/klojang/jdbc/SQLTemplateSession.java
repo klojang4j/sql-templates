@@ -1,11 +1,9 @@
-package org.klojang.jdbc.x.sql;
+package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.SQLInsert;
-import org.klojang.jdbc.SQLQuery;
-import org.klojang.jdbc.SQLSession;
-import org.klojang.jdbc.SQLUpdate;
 import org.klojang.jdbc.x.JDBC;
+import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.SQLNormalizer;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
 import org.klojang.util.CollectionMethods;
@@ -43,9 +41,9 @@ final class SQLTemplateSession extends AbstractSQLSession {
     Check.notNull(varName, "varName");
     Check.notNull(value, VALUE);
     if (value instanceof Collection<?> c) {
-      session.set(varName, CollectionMethods.implode(c));
+      session.set(varName, CollectionMethods.implode(c, ","));
     } else if (value.getClass().isArray()) {
-      session.set(varName, ArrayMethods.implodeAny(value));
+      session.set(varName, ArrayMethods.implodeAny(value, ","));
     } else {
       session.set(varName, value);
     }
@@ -72,6 +70,5 @@ final class SQLTemplateSession extends AbstractSQLSession {
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
     return new SQLUpdate(ps, this, sqlInfo);
   }
-
 
 }

@@ -1,6 +1,4 @@
-package org.klojang.jdbc.x.sql;
-
-import org.klojang.jdbc.SQLSession;
+package org.klojang.jdbc;
 
 import java.sql.Connection;
 

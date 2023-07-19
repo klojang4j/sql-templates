@@ -1,11 +1,8 @@
-package org.klojang.jdbc.x.sql;
+package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.BeanifierFactory;
-import org.klojang.jdbc.BindInfo;
-import org.klojang.jdbc.MappifierFactory;
-import org.klojang.jdbc.SQL;
 import org.klojang.jdbc.x.ps.BeanBinder;
+import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.NameMapper;
 import org.klojang.util.Tuple2;
 import org.slf4j.Logger;

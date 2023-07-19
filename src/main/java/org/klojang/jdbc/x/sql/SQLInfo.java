@@ -12,14 +12,14 @@ public final class SQLInfo {
     private final List<NamedParameter> parameters;
     private final Map<String, IntList> parameterPositions;
 
-    SQLInfo(SQLNormalizer normalizer) {
+    public SQLInfo(SQLNormalizer normalizer) {
         this.normalizedSQL = normalizer.getNormalizedSQL();
         this.jdbcSQL = normalizer.getNormalizedSQL();
         this.parameters = normalizer.getParameters();
         this.parameterPositions = normalizer.getParameterPositions();
     }
 
-    SQLInfo(String jdbcSQL, SQLNormalizer normalizer) {
+    public SQLInfo(String jdbcSQL, SQLNormalizer normalizer) {
         this.normalizedSQL = normalizer.getNormalizedSQL();
         this.jdbcSQL = jdbcSQL;
         this.parameters = normalizer.getParameters();

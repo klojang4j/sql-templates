@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BindInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">BindInfo.java</span></div><h1>BindInfo.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
 import java.sql.PreparedStatement;
-import java.util.function.BiConsumer;
 
 /**
- * {@code BindInfo} objects allow you to override how values should be bound into a
+ * {@code BindInfo} objects allow you to determine how values are bound into a
  * {@link PreparedStatement}. Ordinarily &lt;i&gt;Klojang JDBC&lt;/i&gt; will have enough context to
- * figure this out without intervention from the user. However, if you want or need to,
- * this class enables you to intervene anyhow.
+ * figure this out automatically. However, if you want or need to, this class enables you
+ * to override the default behaviour.
  *
  * @author Ayco Holleman
  */
@@ -18,28 +17,28 @@ public interface BindInfo {
    * {@code null} or one of the constants in {@link java.sql.Types} (like
    * {@link java.sql.Types#VARCHAR VARCHAR}). {@code null} means you leave it to
    * &lt;i&gt;Klojang JDBC&lt;/i&gt; to determine the mapping. The default implementation returns
-   * {@code null}. You may ignore any argument that you don't need to determine the SQL
-   * type. For example, in most cases just the type of the property will likely be enough
-   * to determine the corresponding SQL type.
+   * {@code null}. You may ignore any argument that you don't need in order to determine
+   * the storage type. For example, in many cases just the Java type of a property will
+   * likely be enough to determine the corresponding SQL type.
    *
    * @param beanType the class containing the property whose SQL type to determine
    * @param propertyName the name of the property whose SQL type to determine
-   * @param propertyType the type of the property whose SQL type to determine
+   * @param javaType the type of the property whose SQL type to determine
    * @return one of the class constants of the {@link java.sql.Types} class or
-   *     {@code null}
+   * {@code null}
    */
   default Integer getSqlType(
-      Class&lt;?&gt; beanType,
-      String propertyName,
-      Class&lt;?&gt; propertyType) {
-<span class="fc" id="L35">    return null;</span>
+        Class&lt;?&gt; beanType,
+        String propertyName,
+        Class&lt;?&gt; javaType) {
+<span class="fc" id="L34">    return null;</span>
   }
 
   /**
-   * Whether to save enums as strings (by calling their {@code toString()} or as ints (by
-   * calling their {@code ordinal()} method. The default implementation return
-   * {@code false}, meaning that by default &lt;i&gt;Klojang JDBC&lt;/i&gt; will attempt to save enums
-   * as ints. You can ignore any argument that you don't need to determine the storage
+   * Whether to save enums as strings (by calling their {@code toString()} method) or as
+   * ints (by calling their {@code ordinal()} method). The default implementation return
+   * {@code false}, meaning that by default &lt;i&gt;Klojang JDBC&lt;/i&gt; will save enums as ints.
+   * You can ignore any argument that you don't need in order to determine the storage
    * type. To save all enums in your application are strings, simply return {@code true}
    * straight away.
    *
@@ -48,7 +47,7 @@ public interface BindInfo {
    * @return whether to bind enums as strings or as ints
    */
   default boolean saveEnumAsString(Class&lt;?&gt; beanType, String enumProperty) {
-<span class="nc" id="L51">    return false;</span>
+<span class="nc" id="L50">    return false;</span>
   }
 
 }

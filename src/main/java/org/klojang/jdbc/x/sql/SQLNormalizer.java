@@ -21,7 +21,7 @@ import static org.klojang.util.CollectionMethods.collectionToList;
  * Extracts named parameters from a SQL query string and replaces them with positional
  * parameters (question marks).
  */
-final class SQLNormalizer {
+public final class SQLNormalizer {
 
   private static final String ERR_ADJACENT_PARAMS =
       "adjacent parameters at positions ${0} and ${1} cannot yield valid SQL";
@@ -36,7 +36,7 @@ final class SQLNormalizer {
   private final Map<String, IntList> positions;
   private final List<NamedParameter> params;
 
-  SQLNormalizer(String sql) {
+  public SQLNormalizer(String sql) {
     final StringBuilder normalized = new StringBuilder(sql.length());
     final Map<String, IntList> positions = new LinkedHashMap<>();
     final MutableInt counter = new MutableInt(); // parameter counter

@@ -1,9 +1,5 @@
 package org.klojang.jdbc;
 
-import org.klojang.jdbc.x.sql.AbstractSQLSession;
-
-import java.sql.Connection;
-
 /**
  * <p>An {@code SQLSession} is used to initiate and partly prepare the execution of SQL.
  * It allows the user to set SQL <i>template variables</i> within the SQL and then obtain
@@ -34,22 +30,26 @@ public sealed interface SQLSession permits AbstractSQLSession {
 
   /**
    * Sets the value of a template variable. This method will throw an
-   * {@link UnsupportedOperationException} for {@link SQL#basic(String) SQL.basic()}
-   * sessions since these are not based on <a
+   * {@link UnsupportedOperationException} for
+   * {@linkplain SQL#basic(String) basic SQL sessions} since these are not based on <a
    * href="https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html">Klojang
-   * Template</a>.
+   * Templates</a>.
    *
    * @param varName the name of the template variable
    * @param value the value to set the variable to. If the value is an array or
-   * collection, it will be "imploded" to a string, using {@code ", " } to separate
+   * collection, it will be "imploded" to a string, using {@code "," } (comma) to separate
    * the elements in the array or collection.
    * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   * obtained via the {@link SQL#basic(String) basic()} methods of the {@link SQL}
-   * class.
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
+   * via the {@link SQL#basic(String) SQL.basic()} method
+   * @see org.klojang.templates.Template
    * @see org.klojang.templates.RenderSession#set(String, Object)
    */
-  SQLSession set(String varName, Object value) throws UnsupportedOperationException;
+  default SQLSession set(String varName, Object value)
+        throws UnsupportedOperationException {
+    throw new UnsupportedOperationException();
+  }
+
 
   /**
    * Sets a template variable name "sortColumn" to the specified value. This presumes and
@@ -59,6 +59,8 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *
    * @param sortColumn the column(s) to sort on
    * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
+   * via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setOrderBy(Object sortColumn) throws UnsupportedOperationException {
     return set("sortColumn", sortColumn);
@@ -74,6 +76,8 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *
    * @param sortOrder the sort order
    * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
+   * via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setSortOrder(Object sortOrder) throws UnsupportedOperationException {
     return (sortOrder instanceof Boolean)
@@ -87,6 +91,8 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *
    * @param isDescending whether to sort in descending order
    * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
+   * via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setDescending(boolean isDescending)
         throws UnsupportedOperationException {
@@ -99,6 +105,8 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @param sortColumn the column to sort on
    * @param sortOrder the sort order
    * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
+   * via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setOrderBy(Object sortColumn, Object sortOrder)
         throws UnsupportedOperationException {
@@ -111,6 +119,8 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @param sortColumn the column to sort on
    * @param isDescending whether to sort in descending order
    * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
+   * via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setOrderBy(Object sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
@@ -125,6 +135,13 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   SQLQuery prepareQuery();
 
+  /**
+   * Returns a {@code SQLInsert} instance that allows you to provide values for named
+   * parameters ("binding") and then execute the INSERT statement. Auto-generated keys
+   * will be made available to the client.
+   *
+   * @return a {@code SQLInsert} instance
+   */
   default SQLInsert prepareInsert() {
     return prepareInsert(true);
   }
@@ -133,6 +150,8 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * Returns a {@code SQLInsert} instance that allows you to provide values for named
    * parameters ("binding") and then execute the INSERT statement.
    *
+   * @param retrieveAutoKeys whether to retrieve the keys that were generated by the
+   * database
    * @return a {@code SQLInsert} instance
    */
   SQLInsert prepareInsert(boolean retrieveAutoKeys);
