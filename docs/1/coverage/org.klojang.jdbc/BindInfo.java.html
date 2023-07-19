@@ -13,13 +13,13 @@ import java.sql.PreparedStatement;
 public interface BindInfo {
 
   /**
-   * Allows you to specify the storage type for a property. The return value must be
-   * {@code null} or one of the constants in {@link java.sql.Types} (like
-   * {@link java.sql.Types#VARCHAR VARCHAR}). {@code null} means you leave it to
-   * &lt;i&gt;Klojang JDBC&lt;/i&gt; to determine the mapping. The default implementation returns
-   * {@code null}. You may ignore any argument that you don't need in order to determine
-   * the storage type. For example, in many cases just the Java type of a property will
-   * likely be enough to determine the corresponding SQL type.
+   * Allows you to specify the storage type for a property. The return value must either
+   * be one of the constants in {@link java.sql.Types} (like
+   * {@link java.sql.Types#VARCHAR VARCHAR}) or {@code null}. Returning {@code null} means
+   * you leave it to &lt;i&gt;Klojang JDBC&lt;/i&gt; to determine the mapping. The default
+   * implementation returns {@code null}. You may ignore any argument that you don't need
+   * in order to determine the storage type. For example, in many cases the Java type of a
+   * property will likely be enough to determine the corresponding SQL type.
    *
    * @param beanType the class containing the property whose SQL type to determine
    * @param propertyName the name of the property whose SQL type to determine
@@ -39,8 +39,8 @@ public interface BindInfo {
    * ints (by calling their {@code ordinal()} method). The default implementation return
    * {@code false}, meaning that by default &lt;i&gt;Klojang JDBC&lt;/i&gt; will save enums as ints.
    * You can ignore any argument that you don't need in order to determine the storage
-   * type. To save all enums in your application are strings, simply return {@code true}
-   * straight away.
+   * type. To save &lt;i&gt;all&lt;/i&gt; enums in your application are strings, simply return
+   * {@code true} straight away.
    *
    * @param beanType the class containing the enum property
    * @param enumProperty the enum property for which to specify the storage type.

@@ -53,8 +53,7 @@ import java.sql.Connection;
  * Templates&lt;/i&gt; variables). However, SQL skeletons explicitly allow you to set template
  * variables to values that are themselves chunks of SQL again. More importantly: if these
  * SQL chunks contain named parameters, they will be picked up by &lt;i&gt;Klojang JDBC&lt;/i&gt;,
- * just like named parameters in the SQL skeleton. Named parameters are only extracted
- * &lt;i&gt;after&lt;/i&gt; the SQL template has been rendered. This makes SQL skeletons less
+ * just like named parameters in the SQL skeleton. This makes SQL skeletons less
  * efficient, but more dynamic than SQL templates.
  *
  * @see org.klojang.templates.Template
@@ -69,7 +68,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql) {
-<span class="fc" id="L72">    return basic(sql, new BindInfo() {});</span>
+<span class="fc" id="L71">    return basic(sql, new BindInfo() {});</span>
   }
 
   /**
@@ -82,7 +81,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql, BindInfo bindInfo) {
-<span class="fc" id="L85">    return new BasicSQL(sql, bindInfo);</span>
+<span class="fc" id="L84">    return new BasicSQL(sql, bindInfo);</span>
   }
 
   /**
@@ -93,7 +92,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql) {
-<span class="fc" id="L96">    return template(sql, new BindInfo() {});</span>
+<span class="fc" id="L95">    return template(sql, new BindInfo() {});</span>
   }
 
   /**
@@ -106,7 +105,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql, BindInfo bindInfo) {
-<span class="fc" id="L109">    return new SQLTemplate(sql, bindInfo);</span>
+<span class="fc" id="L108">    return new SQLTemplate(sql, bindInfo);</span>
   }
 
   /**
@@ -119,7 +118,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql) {
-<span class="nc" id="L122">    return skeleton(sql, new BindInfo() {});</span>
+<span class="nc" id="L121">    return skeleton(sql, new BindInfo() {});</span>
   }
 
   /**
@@ -134,7 +133,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L137">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="nc" id="L136">    return new SQLSkeleton(sql, bindInfo);</span>
   }
 
   /**
@@ -145,7 +144,7 @@ public sealed interface SQL permits AbstractSQL {
    * INSERT statement
    */
   static SQLInsertBuilder prepareInsert() {
-<span class="fc" id="L148">    return new SQLInsertBuilder();</span>
+<span class="fc" id="L147">    return new SQLInsertBuilder();</span>
   }
 
   /**
@@ -156,7 +155,7 @@ public sealed interface SQL permits AbstractSQL {
    * batch inserts.
    */
   static SQLBatchInsertBuilder prepareBatchInsert() {
-<span class="fc" id="L159">    return new SQLBatchInsertBuilder();</span>
+<span class="fc" id="L158">    return new SQLBatchInsertBuilder();</span>
   }
 
   /**
@@ -176,7 +175,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see Quoter
    */
   static SQLExpression expression(String expression) {
-<span class="nc" id="L179">    return new SQLExpression(expression);</span>
+<span class="nc" id="L178">    return new SQLExpression(expression);</span>
   }
 
   /**

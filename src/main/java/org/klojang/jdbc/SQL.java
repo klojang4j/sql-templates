@@ -53,8 +53,7 @@ import java.sql.Connection;
  * Templates</i> variables). However, SQL skeletons explicitly allow you to set template
  * variables to values that are themselves chunks of SQL again. More importantly: if these
  * SQL chunks contain named parameters, they will be picked up by <i>Klojang JDBC</i>,
- * just like named parameters in the SQL skeleton. Named parameters are only extracted
- * <i>after</i> the SQL template has been rendered. This makes SQL skeletons less
+ * just like named parameters in the SQL skeleton. This makes SQL skeletons less
  * efficient, but more dynamic than SQL templates.
  *
  * @see org.klojang.templates.Template
