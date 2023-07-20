@@ -38,14 +38,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> {
         ResultSet rs, Class<?> beanClass, NameMapper nameMapper) {
     Map<String, Setter> setters = SetterFactory.INSTANCE.getSetters(beanClass);
     if (LOG.isTraceEnabled()) {
-      LOG.trace("Mapping ResultSet to {}", beanClass.getSimpleName());
-      Comparator<String> cmp = Comparator.comparing(String::toLowerCase);
-      Set<String> cols = new TreeSet<>(cmp);
-      cols.addAll(Arrays.asList(JDBC.getColumnNames(rs)));
-      Set<String> props = new TreeSet<>(cmp);
-      props.addAll(setters.keySet());
-      LOG.trace("Columns ......: {}", implode(cols));
-      LOG.trace("Properties ...: {}", implode(props));
+      log(beanClass, rs, setters);
     }
     ColumnReaderFinder negotiator = ColumnReaderFinder.getInstance();
     try {
@@ -53,9 +46,9 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> {
       int sz = rsmd.getColumnCount();
       List<BeanChannel<?, ?>> channels = new ArrayList<>(sz);
       for (int idx = 0; idx < sz; ++idx) {
-        int jdbcIdx = idx + 1; // JDBC is one-based
-        int sqlType = rsmd.getColumnType(jdbcIdx);
-        String label = rsmd.getColumnLabel(jdbcIdx);
+        int columnIndex = idx + 1; // JDBC is one-based
+        int sqlType = rsmd.getColumnType(columnIndex);
+        String label = rsmd.getColumnLabel(columnIndex);
         String property = nameMapper.map(label);
         Setter setter = setters.get(property);
         if (setter == null) {
@@ -65,7 +58,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> {
         }
         Class<?> javaType = setter.getParamType();
         ColumnReader<?, ?> reader = negotiator.findReader(javaType, sqlType);
-        channels.add(new BeanChannel<>(reader, setter, jdbcIdx));
+        channels.add(new BeanChannel<>(reader, columnIndex, setter));
       }
       return channels.toArray(BeanChannel[]::new);
     } catch (SQLException e) {
@@ -74,23 +67,38 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> {
   }
 
   private final ColumnReader<COLUMN_TYPE, FIELD_TYPE> reader;
+  private final int columnIndex;
   private final Setter setter;
-  private final int jdbcIdx;
 
   private BeanChannel(
         ColumnReader<COLUMN_TYPE, FIELD_TYPE> reader,
-        Setter setter,
-        int jdbcIdx) {
+        int columnIndex,
+        Setter setter) {
     this.reader = reader;
+    this.columnIndex = columnIndex;
     this.setter = setter;
-    this.jdbcIdx = jdbcIdx;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void copy(ResultSet rs, Object bean) throws Throwable {
+  public void copy(ResultSet resultset, Object bean) throws Throwable {
     Class cls = setter.getParamType();
-    Object val = reader.getValue(rs, jdbcIdx, cls);
+    Object val = reader.getValue(resultset, columnIndex, cls);
     setter.write(bean, val);
   }
+
+  private static void log(
+        Class<?> beanClass,
+        ResultSet resultset,
+        Map<String, Setter> setters) {
+    LOG.trace("Mapping ResultSet to {}", beanClass.getSimpleName());
+    Comparator<String> cmp = Comparator.comparing(String::toLowerCase);
+    Set<String> cols = new TreeSet<>(cmp);
+    cols.addAll(Arrays.asList(JDBC.getColumnNames(resultset)));
+    Set<String> props = new TreeSet<>(cmp);
+    props.addAll(setters.keySet());
+    LOG.trace("Columns ......: {}", implode(cols));
+    LOG.trace("Properties ...: {}", implode(props));
+  }
+
 
 }

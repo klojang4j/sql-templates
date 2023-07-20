@@ -36,7 +36,9 @@ import java.util.Optional;
  * Make sure the record has a constructor for those record components that map to columns
  * in the SELECT clause. Also, the encounter order of the record components within the
  * constructor must match the encounter order of the corresponding columns in the SELECT
- * clause.
+ * clause. They don't need to pair-wise line up, though. Not all record components must be
+ * mappable to columns in the SELECT clause and not columns in the SELECT clause must be
+ * mappable to record components.
  *
  * @param <T> the type of the JavaBeans produced by the {@code ResultSetBeanifier}
  * @author Ayco Holleman

@@ -44,7 +44,8 @@ public final class RecordFactory<T extends Record> {
 
 
   private static <T extends Record> FactoryConfig createChannels(
-        Class<T> recordClass, ResultSet resultset,
+        Class<T> recordClass,
+        ResultSet resultset,
         NameMapper mapper) {
     Map<String, RecordComponent> components = getComponents(recordClass);
     ColumnReaderFinder negotiator = ColumnReaderFinder.getInstance();
@@ -68,7 +69,7 @@ public final class RecordFactory<T extends Record> {
         }
         Class<?> javaType = component.getType();
         ColumnReader reader = negotiator.findReader(javaType, sqlType);
-        RecordChannel channel = new RecordChannel(reader, javaType, jdbcIdx);
+        RecordChannel channel = new RecordChannel(reader, jdbcIdx, javaType);
         paramTypes.add(javaType);
         channels.add(channel);
       }

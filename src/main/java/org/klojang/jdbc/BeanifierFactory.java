@@ -14,6 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import static org.klojang.jdbc.x.rs.BeanChannel.createChannels;
+import static org.klojang.templates.NameMapper.AS_IS;
 
 /**
  * <p>A factory for {@link ResultSetBeanifier} instances. Generally you would create one
@@ -28,9 +29,9 @@ import static org.klojang.jdbc.x.rs.BeanChannel.createChannels;
  * <p>(More precisely: all result sets must have the same number of columns and the same
  * column types in the same order. Column names do in fact not matter. The
  * column-to-property mapping is set up and fixed during the first call to
- * {@code getBeanifier()}. Thus, strictly speaking, the SQL query itself is not the
- * defining factor for the result sets passed to {@code getBeanifier()}. You could, in
- * principle, even share a single {@code BeanifierFactory} among multiple SQL queries
+ * {@code getBeanifier()}. Thus, strictly speaking, the SQL query itself is not what
+ * should always be the same for the result sets passed to {@code getBeanifier()}. You
+ * could, in principle, share a single {@code BeanifierFactory} among multiple SQL queries
  * &#8212; for example if they all select an "ID" column and a "NAME" column from
  * different tables in your application. This might be the case for web applications that
  * need to fill {@code <select>}) boxes.)
@@ -40,7 +41,12 @@ import static org.klojang.jdbc.x.rs.BeanChannel.createChannels;
  * @author Ayco Holleman
  */
 @SuppressWarnings("rawtypes")
-public class BeanifierFactory<T> {
+public final class BeanifierFactory<T> {
+
+  private static final String BEAN_CLASS = "bean class";
+  private static final String BEAN_SUPPLIER = "bean supplier";
+  private static final String COLUMN_TO_PROPERTY_MAPPER = "column-to-property mapper";
+  private static final String BEAN_SUPPLIER_NOT_SUPPORTED = "bean supplier not supported for records";
 
   /**
    * The object held by the AtomicReference will either be a RecordFactory in case the
@@ -61,7 +67,10 @@ public class BeanifierFactory<T> {
    * obtained from this {@code BeanifierFactory}
    */
   public BeanifierFactory(Class<T> beanClass) {
-    this(beanClass, () -> newInstance(beanClass), NameMapper.AS_IS);
+    Check.notNull(beanClass, BEAN_CLASS);
+    this.beanClass = beanClass;
+    beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
+    mapper = AS_IS;
   }
 
   /**
@@ -74,7 +83,12 @@ public class BeanifierFactory<T> {
    * reference to the constructor of the JavaBean (e.g. {@code Employee::new})
    */
   public BeanifierFactory(Class<T> beanClass, Supplier<T> beanSupplier) {
-    this(beanClass, beanSupplier, NameMapper.AS_IS);
+    Check.notNull(beanClass, BEAN_CLASS);
+    Check.that(beanClass).isNot(Class::isRecord, BEAN_SUPPLIER_NOT_SUPPORTED);
+    Check.notNull(beanSupplier, BEAN_SUPPLIER);
+    this.beanClass = beanClass;
+    this.beanSupplier = beanSupplier;
+    this.mapper = AS_IS;
   }
 
   /**
@@ -86,7 +100,11 @@ public class BeanifierFactory<T> {
    * names
    */
   public BeanifierFactory(Class<T> beanClass, NameMapper columnToPropertyMapper) {
-    this(beanClass, () -> newInstance(beanClass), columnToPropertyMapper);
+    Check.notNull(beanClass, BEAN_CLASS);
+    Check.notNull(columnToPropertyMapper, COLUMN_TO_PROPERTY_MAPPER);
+    this.beanClass = beanClass;
+    beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
+    mapper = columnToPropertyMapper;
   }
 
   /**
@@ -102,9 +120,13 @@ public class BeanifierFactory<T> {
         Class<T> beanClass,
         Supplier<T> beanSupplier,
         NameMapper columnToPropertyMapper) {
-    this.beanClass = Check.notNull(beanClass, "beanClass").ok();
-    this.beanSupplier = Check.notNull(beanSupplier, "beanSupplier").ok();
-    this.mapper = Check.notNull(columnToPropertyMapper, "columnToPropertyMapper").ok();
+    Check.notNull(beanClass, BEAN_CLASS);
+    Check.that(beanClass).isNot(Class::isRecord, BEAN_SUPPLIER_NOT_SUPPORTED);
+    Check.notNull(beanSupplier, BEAN_SUPPLIER);
+    Check.notNull(columnToPropertyMapper, COLUMN_TO_PROPERTY_MAPPER);
+    this.beanClass = beanClass;
+    this.beanSupplier = beanSupplier;
+    this.mapper = columnToPropertyMapper;
   }
 
   /**
@@ -114,8 +136,9 @@ public class BeanifierFactory<T> {
    * @param rs the {@code ResultSet}
    * @return A {@code ResultSetBeanifier} that will convert the rows in the specified
    * {@code ResultSet} into JavaBeans of type {@code <T>}
-   * @throws SQLException
+   * @throws SQLException if a database error occurs
    */
+  @SuppressWarnings("unchecked")
   public ResultSetBeanifier<T> getBeanifier(ResultSet rs) throws SQLException {
     if (!rs.next()) {
       return EmptyBeanifier.INSTANCE;
@@ -141,6 +164,7 @@ public class BeanifierFactory<T> {
     return new DefaultBeanifier<>(rs, channels, beanSupplier);
   }
 
+  @SuppressWarnings("unchecked")
   private RecordBeanifier getRecordBeanifier(ResultSet rs) {
     RecordFactory recordFactory;
     if ((recordFactory = (RecordFactory) ref.getPlain()) == null) {

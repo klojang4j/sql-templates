@@ -15,29 +15,29 @@ import java.util.Map;
 @SuppressWarnings("rawtypes")
 public class MapChannel<COLUMN_TYPE> {
 
-  public static Map<String, Object> toMap(ResultSet rs, MapChannel[] channels)
+  public static Map<String, Object> toMap(ResultSet resultset, MapChannel[] channels)
   throws Throwable {
     // Allow for some extra data to be inserted into the map by the user
     Map<String, Object> map = HashMap.newHashMap(channels.length + 4);
     for (MapChannel channel : channels) {
-      channel.copy(rs, map);
+      channel.copy(resultset, map);
     }
     return map;
   }
 
-  public static MapChannel[] createChannels(ResultSet rs, NameMapper mapper) {
+  public static MapChannel[] createChannels(ResultSet resultset, NameMapper mapper) {
     ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();
     try {
-      ResultSetMetaData rsmd = rs.getMetaData();
+      ResultSetMetaData rsmd = resultset.getMetaData();
       int sz = rsmd.getColumnCount();
       MapChannel[] channels = new MapChannel[sz];
       for (int idx = 0; idx < sz; ++idx) {
-        int jdbcIdx = idx + 1; // JDBC is one-based
-        int sqlType = rsmd.getColumnType(jdbcIdx);
+        int columnIndex = idx + 1; // JDBC is one-based
+        int sqlType = rsmd.getColumnType(columnIndex);
         ResultSetMethod<?> method = methods.getMethod(sqlType);
-        String label = rsmd.getColumnLabel(jdbcIdx);
+        String label = rsmd.getColumnLabel(columnIndex);
         String key = mapper.map(label);
-        channels[idx] = new MapChannel<>(method, jdbcIdx, key);
+        channels[idx] = new MapChannel<>(method, columnIndex, key);
       }
       return channels;
     } catch (SQLException e) {
@@ -46,17 +46,17 @@ public class MapChannel<COLUMN_TYPE> {
   }
 
   private final ResultSetMethod<COLUMN_TYPE> method;
-  private final int jdbcIdx;
+  private final int columnIndex;
   private final String key;
 
-  private MapChannel(ResultSetMethod<COLUMN_TYPE> method, int jdbcIdx, String key) {
+  private MapChannel(ResultSetMethod<COLUMN_TYPE> method, int columnIndex, String key) {
     this.method = method;
-    this.jdbcIdx = jdbcIdx;
+    this.columnIndex = columnIndex;
     this.key = key;
   }
 
-  public void copy(ResultSet rs, Map<String, Object> map) throws Throwable {
-    map.put(key, method.invoke(rs, jdbcIdx));
+  public void copy(ResultSet resultset, Map<String, Object> map) throws Throwable {
+    map.put(key, method.invoke(resultset, columnIndex));
   }
 
 }

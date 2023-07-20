@@ -5,7 +5,7 @@ SQL Templates,org.klojang.jdbc.x.rs,MapChannel,106,0,4,0,25,0,6,0,4,0
 SQL Templates,org.klojang.jdbc.x.rs,RecordFactory,57,157,2,6,15,33,3,9,1,7
 SQL Templates,org.klojang.jdbc.x.rs,ColumnReaderLookup,0,24,0,0,0,6,0,4,0,4
 SQL Templates,org.klojang.jdbc.x.rs,ResultSetMethod,20,117,2,2,5,41,2,6,0,6
-SQL Templates,org.klojang.jdbc.x.rs,BeanChannel,43,143,1,7,10,34,1,9,0,6
+SQL Templates,org.klojang.jdbc.x.rs,BeanChannel,48,143,1,7,12,34,2,9,1,6
 SQL Templates,org.klojang.jdbc.x.rs,ColumnReader,0,49,0,2,0,14,0,6,0,5
 SQL Templates,org.klojang.jdbc.x.rs,ColumnReaderFinder,0,133,0,2,0,28,0,6,0,5
 SQL Templates,org.klojang.jdbc.x.rs,ResultSetMethodLookup,180,0,2,0,33,0,5,0,4,0
@@ -37,7 +37,7 @@ SQL Templates,org.klojang.jdbc,AbstractSQL,37,85,3,3,7,19,5,6,3,5
 SQL Templates,org.klojang.jdbc,EmptyBeanifier,17,0,0,0,7,0,7,0,7,0
 SQL Templates,org.klojang.jdbc,AbstractSQLSession,0,12,0,0,0,5,0,2,0,2
 SQL Templates,org.klojang.jdbc,SQLStatement,18,208,0,4,2,43,1,10,1,8
-SQL Templates,org.klojang.jdbc,BeanifierFactory,22,134,5,7,7,26,8,8,3,7
+SQL Templates,org.klojang.jdbc,BeanifierFactory,121,129,7,9,26,26,10,8,4,6
 SQL Templates,org.klojang.jdbc,BindInfo,2,2,0,0,1,1,1,1,1,1
 SQL Templates,org.klojang.jdbc,BasicSQL,0,22,0,0,0,4,0,2,0,2
 SQL Templates,org.klojang.jdbc,MappifierFactory,60,0,6,0,15,0,6,0,3,0

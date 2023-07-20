@@ -5,19 +5,19 @@ import java.sql.ResultSet;
 final class RecordChannel<COLUMN_TYPE, COMPONENT_TYPE> {
 
   private final ColumnReader<COLUMN_TYPE, COMPONENT_TYPE> reader;
+  private final int columnIndex;
   private final Class<COMPONENT_TYPE> componentType;
-  private final int jdbcIdx;
 
   RecordChannel(
         ColumnReader<COLUMN_TYPE, COMPONENT_TYPE> reader,
-        Class<COMPONENT_TYPE> componentType,
-        int jdbcIdx) {
+        int columnIndex,
+        Class<COMPONENT_TYPE> componentType) {
     this.reader = reader;
+    this.columnIndex = columnIndex;
     this.componentType = componentType;
-    this.jdbcIdx = jdbcIdx;
   }
 
-  COMPONENT_TYPE readValue(ResultSet rs) throws Throwable {
-    return reader.getValue(rs, jdbcIdx, componentType);
+  COMPONENT_TYPE readValue(ResultSet resultset) throws Throwable {
+    return reader.getValue(resultset, columnIndex, componentType);
   }
 }

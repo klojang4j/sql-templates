@@ -15,29 +15,29 @@ import java.util.Map;
 @SuppressWarnings(&quot;rawtypes&quot;)
 public class MapChannel&lt;COLUMN_TYPE&gt; {
 
-  public static Map&lt;String, Object&gt; toMap(ResultSet rs, MapChannel[] channels)
+  public static Map&lt;String, Object&gt; toMap(ResultSet resultset, MapChannel[] channels)
   throws Throwable {
     // Allow for some extra data to be inserted into the map by the user
 <span class="nc" id="L21">    Map&lt;String, Object&gt; map = HashMap.newHashMap(channels.length + 4);</span>
 <span class="nc bnc" id="L22" title="All 2 branches missed.">    for (MapChannel channel : channels) {</span>
-<span class="nc" id="L23">      channel.copy(rs, map);</span>
+<span class="nc" id="L23">      channel.copy(resultset, map);</span>
     }
 <span class="nc" id="L25">    return map;</span>
   }
 
-  public static MapChannel[] createChannels(ResultSet rs, NameMapper mapper) {
+  public static MapChannel[] createChannels(ResultSet resultset, NameMapper mapper) {
 <span class="nc" id="L29">    ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();</span>
     try {
-<span class="nc" id="L31">      ResultSetMetaData rsmd = rs.getMetaData();</span>
+<span class="nc" id="L31">      ResultSetMetaData rsmd = resultset.getMetaData();</span>
 <span class="nc" id="L32">      int sz = rsmd.getColumnCount();</span>
 <span class="nc" id="L33">      MapChannel[] channels = new MapChannel[sz];</span>
 <span class="nc bnc" id="L34" title="All 2 branches missed.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
-<span class="nc" id="L35">        int jdbcIdx = idx + 1; // JDBC is one-based</span>
-<span class="nc" id="L36">        int sqlType = rsmd.getColumnType(jdbcIdx);</span>
+<span class="nc" id="L35">        int columnIndex = idx + 1; // JDBC is one-based</span>
+<span class="nc" id="L36">        int sqlType = rsmd.getColumnType(columnIndex);</span>
 <span class="nc" id="L37">        ResultSetMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
-<span class="nc" id="L38">        String label = rsmd.getColumnLabel(jdbcIdx);</span>
+<span class="nc" id="L38">        String label = rsmd.getColumnLabel(columnIndex);</span>
 <span class="nc" id="L39">        String key = mapper.map(label);</span>
-<span class="nc" id="L40">        channels[idx] = new MapChannel&lt;&gt;(method, jdbcIdx, key);</span>
+<span class="nc" id="L40">        channels[idx] = new MapChannel&lt;&gt;(method, columnIndex, key);</span>
       }
 <span class="nc" id="L42">      return channels;</span>
 <span class="nc" id="L43">    } catch (SQLException e) {</span>
@@ -46,17 +46,17 @@ public class MapChannel&lt;COLUMN_TYPE&gt; {
   }
 
   private final ResultSetMethod&lt;COLUMN_TYPE&gt; method;
-  private final int jdbcIdx;
+  private final int columnIndex;
   private final String key;
 
-<span class="nc" id="L52">  private MapChannel(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int jdbcIdx, String key) {</span>
+<span class="nc" id="L52">  private MapChannel(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int columnIndex, String key) {</span>
 <span class="nc" id="L53">    this.method = method;</span>
-<span class="nc" id="L54">    this.jdbcIdx = jdbcIdx;</span>
+<span class="nc" id="L54">    this.columnIndex = columnIndex;</span>
 <span class="nc" id="L55">    this.key = key;</span>
 <span class="nc" id="L56">  }</span>
 
-  public void copy(ResultSet rs, Map&lt;String, Object&gt; map) throws Throwable {
-<span class="nc" id="L59">    map.put(key, method.invoke(rs, jdbcIdx));</span>
+  public void copy(ResultSet resultset, Map&lt;String, Object&gt; map) throws Throwable {
+<span class="nc" id="L59">    map.put(key, method.invoke(resultset, columnIndex));</span>
 <span class="nc" id="L60">  }</span>
 
 }
