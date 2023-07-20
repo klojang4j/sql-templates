@@ -20,15 +20,15 @@ import static org.klojang.util.StringMethods.append;
 
 /**
  * &lt;p&gt;{@code SQLBatchInsert} specializes in saving potentially very large batches of
- * JavaBeans to be saved to the database. {@code SQLBatchInsert} is not a subclass of
- * {@link SQLStatement}. It is not underpinned by prepared statements (i.e. the
- * {@link PreparedStatement} class). It still protects against SQL injection, though, as
- * all values except numbers and booleans are quoted and escaped using the target
- * database's quoting and escaping rules.
+ * JavaBeans to be saved to the database. Contrary to {@link SQLInsert}
+ * {@code SQLBatchInsert} is not a subclass of {@link SQLStatement}. It is not underpinned
+ * by prepared statements (i.e. the {@link PreparedStatement} class). It still protects
+ * against SQL injection, though, as all values except numbers and booleans are quoted and
+ * escaped using the target database's quoting and escaping rules.
  *
  * &lt;p&gt;{@code SQLBatchInsert} implements {@link AutoCloseable} in order to stay aligned
  * with {@link SQLStatement} and its subclasses, and more specifically so you can easily
- * change between {@link SQLInsert} and {@code SQLBatchInsert} within your code. However,
+ * switch between {@link SQLInsert} and {@code SQLBatchInsert} within your code. However,
  * its {@code close()} method currently is a no-op. It is not necessary to use a
  * try-with-resource block with {@code SQLBatchInsert}.
  *
@@ -131,7 +131,7 @@ public final class SQLBatchInsert&lt;T&gt; implements AutoCloseable {
 <span class="fc" id="L131">  }</span>
 
   private void insertChunk(List&lt;T&gt; beans) throws Throwable {
-<span class="fc" id="L134">    StringBuilder sql = new StringBuilder(getSQLLengthEstimate(beans));</span>
+<span class="fc" id="L134">    StringBuilder sql = new StringBuilder(guessSize(beans));</span>
 <span class="fc" id="L135">    sql.append(sqlBase);</span>
 <span class="fc" id="L136">    try (Statement stmt = cfg.connection().createStatement()) {</span>
 <span class="fc" id="L137">      addRows(sql, stmt, beans);</span>
@@ -142,7 +142,7 @@ public final class SQLBatchInsert&lt;T&gt; implements AutoCloseable {
 
   private long[] insertChunkAndGetIDs(List&lt;T&gt; beans) throws Throwable {
     long[] keys;
-<span class="fc" id="L145">    StringBuilder sql = new StringBuilder(getSQLLengthEstimate(beans));</span>
+<span class="fc" id="L145">    StringBuilder sql = new StringBuilder(guessSize(beans));</span>
 <span class="fc" id="L146">    sql.append(sqlBase);</span>
 <span class="fc" id="L147">    try (Statement stmt = cfg.connection().createStatement()) {</span>
 <span class="fc" id="L148">      addRows(sql, stmt, beans);</span>
@@ -154,7 +154,7 @@ public final class SQLBatchInsert&lt;T&gt; implements AutoCloseable {
   }
 
   private void insertChunkAndSetIDs(List&lt;T&gt; beans, String idProperty) throws Throwable {
-<span class="fc" id="L157">    StringBuilder sql = new StringBuilder(getSQLLengthEstimate(beans));</span>
+<span class="fc" id="L157">    StringBuilder sql = new StringBuilder(guessSize(beans));</span>
 <span class="fc" id="L158">    sql.append(sqlBase);</span>
 <span class="fc" id="L159">    try (Statement stmt = cfg.connection().createStatement()) {</span>
 <span class="fc" id="L160">      addRows(sql, stmt, beans);</span>
@@ -226,8 +226,8 @@ public final class SQLBatchInsert&lt;T&gt; implements AutoCloseable {
 <span class="fc" id="L226">    return sb.toString();</span>
   }
 
-  private int getSQLLengthEstimate(List&lt;T&gt; beans) {
-<span class="fc" id="L230">    return cfg.getters().length * beans.size() * 12 + 50;</span>
+  private int guessSize(List&lt;T&gt; beans) {
+<span class="fc" id="L230">    return 50 + (cfg.getters().length * beans.size() * 12);</span>
   }
 
 }
