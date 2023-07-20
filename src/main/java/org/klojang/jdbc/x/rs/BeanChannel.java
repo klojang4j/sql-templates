@@ -65,7 +65,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
         }
         Class<?> javaType = setter.getParamType();
         ColumnReader<?, ?> reader = negotiator.findReader(javaType, sqlType);
-        channels.add(new BeanChannel<>(reader, setter, jdbcIdx, sqlType));
+        channels.add(new BeanChannel<>(reader, setter, jdbcIdx));
       }
       return channels.toArray(BeanChannel[]::new);
     } catch (SQLException e) {
@@ -76,24 +76,21 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
   private final ColumnReader<COLUMN_TYPE, FIELD_TYPE> reader;
   private final Setter setter;
   private final int jdbcIdx;
-  private final int sqlType;
 
   private BeanChannel(
         ColumnReader<COLUMN_TYPE, FIELD_TYPE> reader,
         Setter setter,
-        int jdbcIdx,
-        int sqlType) {
+        int jdbcIdx) {
     this.reader = reader;
     this.setter = setter;
     this.jdbcIdx = jdbcIdx;
-    this.sqlType = sqlType;
   }
 
   @Override
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void copy(ResultSet rs, Object bean) throws Throwable {
-    Class clazz = setter.getParamType();
-    Object val = reader.getValue(rs, jdbcIdx, clazz);
+    Class cls = setter.getParamType();
+    Object val = reader.getValue(rs, jdbcIdx, cls);
     setter.write(bean, val);
   }
 

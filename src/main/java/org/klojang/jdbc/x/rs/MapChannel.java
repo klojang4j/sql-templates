@@ -30,16 +30,16 @@ public class MapChannel<COLUMN_TYPE> implements Channel<Map<String, Object>> {
     try {
       ResultSetMetaData rsmd = rs.getMetaData();
       int sz = rsmd.getColumnCount();
-      MapChannel[] transporters = new MapChannel[sz];
+      MapChannel[] channels = new MapChannel[sz];
       for (int idx = 0; idx < sz; ++idx) {
         int jdbcIdx = idx + 1; // JDBC is one-based
         int sqlType = rsmd.getColumnType(jdbcIdx);
         ResultSetMethod<?> method = methods.getMethod(sqlType);
         String label = rsmd.getColumnLabel(jdbcIdx);
         String key = mapper.map(label);
-        transporters[idx] = new MapChannel<>(method, jdbcIdx, sqlType, key);
+        channels[idx] = new MapChannel<>(method, jdbcIdx, key);
       }
-      return transporters;
+      return channels;
     } catch (SQLException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -47,17 +47,11 @@ public class MapChannel<COLUMN_TYPE> implements Channel<Map<String, Object>> {
 
   private final ResultSetMethod<COLUMN_TYPE> method;
   private final int jdbcIdx;
-  private final int sqlType;
   private final String key;
 
-  private MapChannel(
-        ResultSetMethod<COLUMN_TYPE> method,
-        int jdbcIdx,
-        int sqlType,
-        String key) {
+  private MapChannel(ResultSetMethod<COLUMN_TYPE> method, int jdbcIdx, String key) {
     this.method = method;
     this.jdbcIdx = jdbcIdx;
-    this.sqlType = sqlType;
     this.key = key;
   }
 

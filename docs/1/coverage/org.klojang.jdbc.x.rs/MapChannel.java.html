@@ -30,16 +30,16 @@ public class MapChannel&lt;COLUMN_TYPE&gt; implements Channel&lt;Map&lt;String, 
     try {
 <span class="nc" id="L31">      ResultSetMetaData rsmd = rs.getMetaData();</span>
 <span class="nc" id="L32">      int sz = rsmd.getColumnCount();</span>
-<span class="nc" id="L33">      MapChannel[] transporters = new MapChannel[sz];</span>
+<span class="nc" id="L33">      MapChannel[] channels = new MapChannel[sz];</span>
 <span class="nc bnc" id="L34" title="All 2 branches missed.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
 <span class="nc" id="L35">        int jdbcIdx = idx + 1; // JDBC is one-based</span>
 <span class="nc" id="L36">        int sqlType = rsmd.getColumnType(jdbcIdx);</span>
 <span class="nc" id="L37">        ResultSetMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
 <span class="nc" id="L38">        String label = rsmd.getColumnLabel(jdbcIdx);</span>
 <span class="nc" id="L39">        String key = mapper.map(label);</span>
-<span class="nc" id="L40">        transporters[idx] = new MapChannel&lt;&gt;(method, jdbcIdx, sqlType, key);</span>
+<span class="nc" id="L40">        channels[idx] = new MapChannel&lt;&gt;(method, jdbcIdx, key);</span>
       }
-<span class="nc" id="L42">      return transporters;</span>
+<span class="nc" id="L42">      return channels;</span>
 <span class="nc" id="L43">    } catch (SQLException e) {</span>
 <span class="nc" id="L44">      throw ExceptionMethods.uncheck(e);</span>
     }
@@ -47,24 +47,18 @@ public class MapChannel&lt;COLUMN_TYPE&gt; implements Channel&lt;Map&lt;String, 
 
   private final ResultSetMethod&lt;COLUMN_TYPE&gt; method;
   private final int jdbcIdx;
-  private final int sqlType;
   private final String key;
 
-  private MapChannel(
-        ResultSetMethod&lt;COLUMN_TYPE&gt; method,
-        int jdbcIdx,
-        int sqlType,
-<span class="nc" id="L57">        String key) {</span>
-<span class="nc" id="L58">    this.method = method;</span>
-<span class="nc" id="L59">    this.jdbcIdx = jdbcIdx;</span>
-<span class="nc" id="L60">    this.sqlType = sqlType;</span>
-<span class="nc" id="L61">    this.key = key;</span>
-<span class="nc" id="L62">  }</span>
+<span class="nc" id="L52">  private MapChannel(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int jdbcIdx, String key) {</span>
+<span class="nc" id="L53">    this.method = method;</span>
+<span class="nc" id="L54">    this.jdbcIdx = jdbcIdx;</span>
+<span class="nc" id="L55">    this.key = key;</span>
+<span class="nc" id="L56">  }</span>
 
   @Override
   public void copy(ResultSet rs, Map&lt;String, Object&gt; map) throws Throwable {
-<span class="nc" id="L66">    map.put(key, method.invoke(rs, jdbcIdx));</span>
-<span class="nc" id="L67">  }</span>
+<span class="nc" id="L60">    map.put(key, method.invoke(rs, jdbcIdx));</span>
+<span class="nc" id="L61">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
