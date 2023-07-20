@@ -16,7 +16,7 @@ import java.util.Map;
 public class MapChannel<COLUMN_TYPE> implements Channel<Map<String, Object>> {
 
   public static Map<String, Object> toMap(ResultSet rs, MapChannel[] channels)
-        throws Throwable {
+  throws Throwable {
     // Allow for some extra data to be inserted into the map by the user
     Map<String, Object> map = HashMap.newHashMap(channels.length + 4);
     for (MapChannel channel : channels) {
@@ -66,8 +66,4 @@ public class MapChannel<COLUMN_TYPE> implements Channel<Map<String, Object>> {
     map.put(key, method.invoke(rs, jdbcIdx));
   }
 
-  @Override
-  public int getSqlType() {
-    return sqlType;
-  }
 }

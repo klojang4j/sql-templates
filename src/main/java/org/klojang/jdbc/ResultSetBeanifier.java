@@ -13,7 +13,7 @@ import java.util.Optional;
  * {@code ResultSetBeanifier} is agnostic about, and has no opinion on where you got the
  * {@link ResultSet} from. In that sense it is closer to the JDBC metal than the
  * {@code SQLQuery} class. It certainly does not pretend to be an ORM-like class. It just
- * converts result sets into (flat) JavaBeans, to be carried across the boundary of your
+ * converts result sets into (flat) JavaBeans, to be carried across the boundary of the
  * data access module (and into the view layer). The JavaBeans may have nested structures,
  * but only top-level properties will be populated.
  *
@@ -32,11 +32,11 @@ import java.util.Optional;
  * When converting a row to a JavaBean, a {@code ResultSetBeanifier} will always use the
  * setters on the JavaBean to populate it. There is no way to populate the bean via its
  * constructors. When converting to a record, a {@code ResultSetBeanifier} will obviously
- * always one of its constructors to populate the record (since records don't have
- * setters). Make sure the record has a constructor for those record components that map
- * to columns in the SELECT clause.
- *
- * <p>A {@code ResultSetBeanifier}
+ * always use one of its constructors to populate it (since records don't have setters).
+ * Make sure the record has a constructor for those record components that map to columns
+ * in the SELECT clause. Also, the encounter order of the record components within the
+ * constructor must match the encounter order of the corresponding columns in the SELECT
+ * clause.
  *
  * @param <T> the type of the JavaBeans produced by the {@code ResultSetBeanifier}
  * @author Ayco Holleman

@@ -25,7 +25,7 @@ public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; implements Channel&lt;Ob
   public static &lt;U&gt; U toBean(ResultSet rs,
         Supplier&lt;U&gt; beanSupplier,
         BeanChannel[] channels)
-        throws Throwable {
+  throws Throwable {
 <span class="fc" id="L29">    U bean = beanSupplier.get();</span>
 <span class="fc bfc" id="L30" title="All 2 branches covered.">    for (BeanChannel channel : channels) {</span>
 <span class="fc" id="L31">      channel.copy(rs, bean);</span>
@@ -96,11 +96,6 @@ public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; implements Channel&lt;Ob
 <span class="fc" id="L96">    Object val = reader.getValue(rs, jdbcIdx, clazz);</span>
 <span class="fc" id="L97">    setter.write(bean, val);</span>
 <span class="fc" id="L98">  }</span>
-
-  @Override
-  public int getSqlType() {
-<span class="nc" id="L102">    return sqlType;</span>
-  }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

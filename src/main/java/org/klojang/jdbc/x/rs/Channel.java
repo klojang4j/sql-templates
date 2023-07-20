@@ -7,7 +7,6 @@ import java.sql.ResultSet;
  */
 interface Channel<T> {
 
-   void copy(ResultSet rs, T target) throws Throwable;
+  void copy(ResultSet rs, T target) throws Throwable;
 
-  int getSqlType();
 }

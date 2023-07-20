@@ -25,7 +25,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
   public static <U> U toBean(ResultSet rs,
         Supplier<U> beanSupplier,
         BeanChannel[] channels)
-        throws Throwable {
+  throws Throwable {
     U bean = beanSupplier.get();
     for (BeanChannel channel : channels) {
       channel.copy(rs, bean);
@@ -95,11 +95,6 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
     Class clazz = setter.getParamType();
     Object val = reader.getValue(rs, jdbcIdx, clazz);
     setter.write(bean, val);
-  }
-
-  @Override
-  public int getSqlType() {
-    return sqlType;
   }
 
 }

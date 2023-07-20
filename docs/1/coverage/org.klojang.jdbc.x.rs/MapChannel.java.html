@@ -16,7 +16,7 @@ import java.util.Map;
 public class MapChannel&lt;COLUMN_TYPE&gt; implements Channel&lt;Map&lt;String, Object&gt;&gt; {
 
   public static Map&lt;String, Object&gt; toMap(ResultSet rs, MapChannel[] channels)
-        throws Throwable {
+  throws Throwable {
     // Allow for some extra data to be inserted into the map by the user
 <span class="nc" id="L21">    Map&lt;String, Object&gt; map = HashMap.newHashMap(channels.length + 4);</span>
 <span class="nc bnc" id="L22" title="All 2 branches missed.">    for (MapChannel channel : channels) {</span>
@@ -66,9 +66,5 @@ public class MapChannel&lt;COLUMN_TYPE&gt; implements Channel&lt;Map&lt;String, 
 <span class="nc" id="L66">    map.put(key, method.invoke(rs, jdbcIdx));</span>
 <span class="nc" id="L67">  }</span>
 
-  @Override
-  public int getSqlType() {
-<span class="nc" id="L71">    return sqlType;</span>
-  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
