@@ -6,39 +6,40 @@ import java.util.function.Function;
 import static org.klojang.util.ObjectMethods.ifNotNull;
 
 /*
- * Extracts a single value from a ResultSet, possibly after first converting it to the appropriate type.
+ * Extracts a single value from a ResultSet, possibly after first converting it to the
+ * appropriate type.
  */
 public final class ColumnReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
 
   private final ResultSetMethod&lt;COLUMN_TYPE&gt; method;
   private final Adapter&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter;
 
-<span class="fc" id="L16">  public ColumnReader(ResultSetMethod&lt;COLUMN_TYPE&gt; method) {</span>
-<span class="fc" id="L17">    this.method = method;</span>
-<span class="fc" id="L18">    this.adapter = null;</span>
-<span class="fc" id="L19">  }</span>
+<span class="fc" id="L17">  public ColumnReader(ResultSetMethod&lt;COLUMN_TYPE&gt; method) {</span>
+<span class="fc" id="L18">    this.method = method;</span>
+<span class="fc" id="L19">    this.adapter = null;</span>
+<span class="fc" id="L20">  }</span>
 
   public ColumnReader(
         ResultSetMethod&lt;COLUMN_TYPE&gt; method,
         Function&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {
-<span class="fc" id="L24">    this(method, (x, y) -&gt; ifNotNull(x, adapter::apply));</span>
-<span class="fc" id="L25">  }</span>
+<span class="fc" id="L25">    this(method, (x, y) -&gt; ifNotNull(x, adapter::apply));</span>
+<span class="fc" id="L26">  }</span>
 
   public ColumnReader(
         ResultSetMethod&lt;COLUMN_TYPE&gt; method,
-<span class="fc" id="L29">        Adapter&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {</span>
-<span class="fc" id="L30">    this.method = method;</span>
-<span class="fc" id="L31">    this.adapter = adapter;</span>
-<span class="fc" id="L32">  }</span>
+<span class="fc" id="L30">        Adapter&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {</span>
+<span class="fc" id="L31">    this.method = method;</span>
+<span class="fc" id="L32">    this.adapter = adapter;</span>
+<span class="fc" id="L33">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
   public FIELD_TYPE getValue(ResultSet rs, int columnIndex, Class&lt;FIELD_TYPE&gt; toType)
   throws Throwable {
-<span class="fc" id="L37">    COLUMN_TYPE val = method.invoke(rs, columnIndex);</span>
-<span class="fc bfc" id="L38" title="All 2 branches covered.">    if (adapter == null) {</span>
-<span class="fc" id="L39">      return (FIELD_TYPE) val;</span>
+<span class="fc" id="L38">    COLUMN_TYPE val = method.invoke(rs, columnIndex);</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">    if (adapter == null) {</span>
+<span class="fc" id="L40">      return (FIELD_TYPE) val;</span>
     }
-<span class="fc" id="L41">    return adapter.adapt(val, toType);</span>
+<span class="fc" id="L42">    return adapter.adapt(val, toType);</span>
   }
 
 }

@@ -18,7 +18,7 @@ import static java.lang.invoke.MethodType.methodType;
 import static org.klojang.util.CollectionMethods.implode;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class RecordFactory<T extends Record> {
+public final class RecordFactory<T extends Record> {
 
   private record FactoryConfig(MethodHandle constructor, RecordChannel[] channels) {}
 
@@ -39,7 +39,7 @@ public class RecordFactory<T extends Record> {
     for (int i = 0; i < channels.length; ++i) {
       args[i] = channels[i].readValue(rs);
     }
-    return (T) constructor.invoke(args);
+    return (T) constructor.invokeWithArguments(args);
   }
 
 
@@ -74,7 +74,7 @@ public class RecordFactory<T extends Record> {
       }
       MethodHandle mh = publicLookup().findConstructor(
             recordClass,
-            methodType(void.class, paramTypes));
+            methodType(void.class, paramTypes.toArray(Class[]::new)));
       return new FactoryConfig(mh, channels.toArray(RecordChannel[]::new));
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);

@@ -6,7 +6,8 @@ import java.util.function.Function;
 import static org.klojang.util.ObjectMethods.ifNotNull;
 
 /*
- * Extracts a single value from a ResultSet, possibly after first converting it to the appropriate type.
+ * Extracts a single value from a ResultSet, possibly after first converting it to the
+ * appropriate type.
  */
 public final class ColumnReader<COLUMN_TYPE, FIELD_TYPE> {
 

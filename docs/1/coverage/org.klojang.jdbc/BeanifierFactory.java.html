@@ -120,8 +120,8 @@ public class BeanifierFactory&lt;T&gt; {
 <span class="pc bpc" id="L120" title="1 of 2 branches missed.">    if (!rs.next()) {</span>
 <span class="nc" id="L121">      return EmptyBeanifier.INSTANCE;</span>
     }
-<span class="pc bpc" id="L123" title="1 of 2 branches missed.">    if (beanClass.isRecord()) {</span>
-<span class="nc" id="L124">      return getRecordBeanifier(rs);</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">    if (beanClass.isRecord()) {</span>
+<span class="fc" id="L124">      return getRecordBeanifier(rs);</span>
     }
 <span class="fc" id="L126">    return getDefaultBeanifier(rs);</span>
   }
@@ -143,17 +143,17 @@ public class BeanifierFactory&lt;T&gt; {
 
   private RecordBeanifier getRecordBeanifier(ResultSet rs) {
     RecordFactory recordFactory;
-<span class="nc bnc" id="L146" title="All 2 branches missed.">    if ((recordFactory = (RecordFactory) ref.getPlain()) == null) {</span>
-<span class="nc" id="L147">      lock.lock();</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">    if ((recordFactory = (RecordFactory) ref.getPlain()) == null) {</span>
+<span class="fc" id="L147">      lock.lock();</span>
       try {
-<span class="nc bnc" id="L149" title="All 2 branches missed.">        if (ref.get() == null) {</span>
-<span class="nc" id="L150">          ref.set(recordFactory = new RecordFactory&lt;&gt;((Class) beanClass, rs, mapper));</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if (ref.get() == null) {</span>
+<span class="fc" id="L150">          ref.set(recordFactory = new RecordFactory&lt;&gt;((Class) beanClass, rs, mapper));</span>
         }
       } finally {
-<span class="nc" id="L153">        lock.unlock();</span>
+<span class="fc" id="L153">        lock.unlock();</span>
       }
     }
-<span class="nc" id="L156">    return new RecordBeanifier&lt;&gt;(rs, recordFactory);</span>
+<span class="fc" id="L156">    return new RecordBeanifier&lt;&gt;(rs, recordFactory);</span>
   }
 
   private static &lt;U&gt; U newInstance(Class&lt;U&gt; beanClass) {
