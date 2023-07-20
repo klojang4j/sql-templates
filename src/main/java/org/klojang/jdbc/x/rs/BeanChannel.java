@@ -51,7 +51,7 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
     try {
       ResultSetMetaData rsmd = rs.getMetaData();
       int sz = rsmd.getColumnCount();
-      List<BeanChannel<?, ?>> transporters = new ArrayList<>(sz);
+      List<BeanChannel<?, ?>> channels = new ArrayList<>(sz);
       for (int idx = 0; idx < sz; ++idx) {
         int jdbcIdx = idx + 1; // JDBC is one-based
         int sqlType = rsmd.getColumnType(jdbcIdx);
@@ -64,10 +64,10 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
           continue;
         }
         Class<?> javaType = setter.getParamType();
-        ColumnReader<?, ?> extractor = negotiator.findReader(javaType, sqlType);
-        transporters.add(new BeanChannel<>(extractor, setter, jdbcIdx, sqlType));
+        ColumnReader<?, ?> reader = negotiator.findReader(javaType, sqlType);
+        channels.add(new BeanChannel<>(reader, setter, jdbcIdx, sqlType));
       }
-      return transporters.toArray(BeanChannel[]::new);
+      return channels.toArray(BeanChannel[]::new);
     } catch (SQLException e) {
       throw ExceptionMethods.uncheck(e);
     }

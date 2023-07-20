@@ -51,7 +51,7 @@ public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; implements Channel&lt;Ob
     try {
 <span class="fc" id="L52">      ResultSetMetaData rsmd = rs.getMetaData();</span>
 <span class="fc" id="L53">      int sz = rsmd.getColumnCount();</span>
-<span class="fc" id="L54">      List&lt;BeanChannel&lt;?, ?&gt;&gt; transporters = new ArrayList&lt;&gt;(sz);</span>
+<span class="fc" id="L54">      List&lt;BeanChannel&lt;?, ?&gt;&gt; channels = new ArrayList&lt;&gt;(sz);</span>
 <span class="fc bfc" id="L55" title="All 2 branches covered.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
 <span class="fc" id="L56">        int jdbcIdx = idx + 1; // JDBC is one-based</span>
 <span class="fc" id="L57">        int sqlType = rsmd.getColumnType(jdbcIdx);</span>
@@ -64,10 +64,10 @@ public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; implements Channel&lt;Ob
 <span class="fc" id="L64">          continue;</span>
         }
 <span class="fc" id="L66">        Class&lt;?&gt; javaType = setter.getParamType();</span>
-<span class="fc" id="L67">        ColumnReader&lt;?, ?&gt; extractor = negotiator.findReader(javaType, sqlType);</span>
-<span class="fc" id="L68">        transporters.add(new BeanChannel&lt;&gt;(extractor, setter, jdbcIdx, sqlType));</span>
+<span class="fc" id="L67">        ColumnReader&lt;?, ?&gt; reader = negotiator.findReader(javaType, sqlType);</span>
+<span class="fc" id="L68">        channels.add(new BeanChannel&lt;&gt;(reader, setter, jdbcIdx, sqlType));</span>
       }
-<span class="fc" id="L70">      return transporters.toArray(BeanChannel[]::new);</span>
+<span class="fc" id="L70">      return channels.toArray(BeanChannel[]::new);</span>
 <span class="nc" id="L71">    } catch (SQLException e) {</span>
 <span class="nc" id="L72">      throw ExceptionMethods.uncheck(e);</span>
     }
