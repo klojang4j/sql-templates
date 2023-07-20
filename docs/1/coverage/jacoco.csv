@@ -1,5 +1,8 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+SQL Templates,org.klojang.jdbc.x.rs,RecordChannel,21,0,0,0,6,0,2,0,2,0
+SQL Templates,org.klojang.jdbc.x.rs,RecordFactory.FactoryConfig,15,0,0,0,1,0,3,0,3,0
 SQL Templates,org.klojang.jdbc.x.rs,MapChannel,113,0,4,0,27,0,7,0,5,0
+SQL Templates,org.klojang.jdbc.x.rs,RecordFactory,207,0,8,0,48,0,11,0,7,0
 SQL Templates,org.klojang.jdbc.x.rs,ColumnReaderLookup,0,24,0,0,0,6,0,4,0,4
 SQL Templates,org.klojang.jdbc.x.rs,ResultSetMethod,20,117,2,2,5,41,2,6,0,6
 SQL Templates,org.klojang.jdbc.x.rs,BeanChannel,46,147,1,7,11,35,2,9,1,6
@@ -34,7 +37,7 @@ SQL Templates,org.klojang.jdbc,AbstractSQL,37,85,3,3,7,19,5,6,3,5
 SQL Templates,org.klojang.jdbc,EmptyBeanifier,17,0,0,0,7,0,7,0,7,0
 SQL Templates,org.klojang.jdbc,AbstractSQLSession,0,12,0,0,0,5,0,2,0,2
 SQL Templates,org.klojang.jdbc,SQLStatement,18,208,0,4,2,43,1,10,1,8
-SQL Templates,org.klojang.jdbc,BeanifierFactory,22,86,3,3,7,17,6,5,3,5
+SQL Templates,org.klojang.jdbc,BeanifierFactory,62,94,8,4,14,19,10,6,4,6
 SQL Templates,org.klojang.jdbc,BindInfo,2,2,0,0,1,1,1,1,1,1
 SQL Templates,org.klojang.jdbc,BasicSQL,0,22,0,0,0,4,0,2,0,2
 SQL Templates,org.klojang.jdbc,MappifierFactory,60,0,6,0,15,0,6,0,3,0
@@ -42,8 +45,10 @@ SQL Templates,org.klojang.jdbc,SQLTemplateSession,85,73,2,2,10,16,4,4,2,4
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
 SQL Templates,org.klojang.jdbc,SQL.new BindInfo() {...},3,0,0,0,1,0,1,0,1,0
+SQL Templates,org.klojang.jdbc,RecordBeanifier,146,0,16,0,37,0,16,0,8,0
 SQL Templates,org.klojang.jdbc,SQLSkeletonSession,133,0,4,0,23,0,7,0,5,0
 SQL Templates,org.klojang.jdbc,Quoter,30,0,8,0,10,0,6,0,2,0
+SQL Templates,org.klojang.jdbc,RecordBeanifier.BeanIterator,32,0,2,0,6,0,4,0,3,0
 SQL Templates,org.klojang.jdbc,SQLSkeleton,25,0,0,0,7,0,2,0,2,0
 SQL Templates,org.klojang.jdbc,SQLSession,44,4,4,0,8,1,8,1,6,1
 SQL Templates,org.klojang.jdbc,DefaultMappifier,146,0,16,0,37,0,16,0,8,0

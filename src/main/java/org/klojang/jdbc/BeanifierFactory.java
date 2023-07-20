@@ -2,6 +2,7 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.rs.BeanChannel;
+import org.klojang.jdbc.x.rs.RecordFactory;
 import org.klojang.templates.NameMapper;
 import org.klojang.util.ExceptionMethods;
 import org.klojang.util.InvokeMethods;
@@ -41,99 +42,125 @@ import static org.klojang.jdbc.x.rs.BeanChannel.createChannels;
 @SuppressWarnings("rawtypes")
 public class BeanifierFactory<T> {
 
-    private final AtomicReference<BeanChannel[]> ref = new AtomicReference<>();
-    private final ReentrantLock lock = new ReentrantLock();
+  /**
+   * The object held by the AtomicReference will either be a RecordFactory in case the
+   * bean class is a record type or a BeanChannel[] in any other case.
+   */
+  private final AtomicReference<Object> ref = new AtomicReference<>();
+  private final ReentrantLock lock = new ReentrantLock();
 
-    private final Class<T> beanClass;
-    private final Supplier<T> beanSupplier;
-    private final NameMapper mapper;
+  private final Class<T> beanClass;
+  private final Supplier<T> beanSupplier;
+  private final NameMapper mapper;
 
-    /**
-     * Creates a new {@code BeanifierFactory}. Column names will be mapped as-is to
-     * property names.
-     *
-     * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-     * obtained from this {@code BeanifierFactory}
-     */
-    public BeanifierFactory(Class<T> beanClass) {
-        this(beanClass, () -> newInstance(beanClass), NameMapper.AS_IS);
+  /**
+   * Creates a new {@code BeanifierFactory}. Column names will be mapped as-is to property
+   * names.
+   *
+   * @param beanClass the class of the JavaBeans that will be produced by beanifiers
+   * obtained from this {@code BeanifierFactory}
+   */
+  public BeanifierFactory(Class<T> beanClass) {
+    this(beanClass, () -> newInstance(beanClass), NameMapper.AS_IS);
+  }
+
+  /**
+   * Creates a new {@code BeanifierFactory}. Column names will be mapped as-is to property
+   * names.
+   *
+   * @param beanClass the class of the JavaBeans that the {@code BeanifierFactory} will be
+   * catering for
+   * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a method
+   * reference to the constructor of the JavaBean (e.g. {@code Employee::new})
+   */
+  public BeanifierFactory(Class<T> beanClass, Supplier<T> beanSupplier) {
+    this(beanClass, beanSupplier, NameMapper.AS_IS);
+  }
+
+  /**
+   * Creates a new {@code BeanifierFactory}.
+   *
+   * @param beanClass the class of the JavaBeans that will be produced by beanifiers
+   * obtained from this {@code BeanifierFactory}
+   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to property
+   * names
+   */
+  public BeanifierFactory(Class<T> beanClass, NameMapper columnToPropertyMapper) {
+    this(beanClass, () -> newInstance(beanClass), columnToPropertyMapper);
+  }
+
+  /**
+   * Creates a new {@code BeanifierFactory}.
+   *
+   * @param beanClass the class of the JavaBeans that will be produced by beanifiers
+   * obtained from this {@code BeanifierFactory}
+   * @param beanSupplier the supplier of the JavaBeans
+   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to property
+   * names
+   */
+  public BeanifierFactory(
+        Class<T> beanClass,
+        Supplier<T> beanSupplier,
+        NameMapper columnToPropertyMapper) {
+    this.beanClass = Check.notNull(beanClass, "beanClass").ok();
+    this.beanSupplier = Check.notNull(beanSupplier, "beanSupplier").ok();
+    this.mapper = Check.notNull(columnToPropertyMapper, "columnToPropertyMapper").ok();
+  }
+
+  /**
+   * Returns a {@code ResultSetBeanifier} that will convert the rows in the specified
+   * {@code ResultSet} into JavaBeans of type {@code <T>}.
+   *
+   * @param rs the {@code ResultSet}
+   * @return A {@code ResultSetBeanifier} that will convert the rows in the specified
+   * {@code ResultSet} into JavaBeans of type {@code <T>}
+   * @throws SQLException
+   */
+  public ResultSetBeanifier<T> getBeanifier(ResultSet rs) throws SQLException {
+    if (!rs.next()) {
+      return EmptyBeanifier.INSTANCE;
     }
-
-    /**
-     * Creates a new {@code BeanifierFactory}. Column names will be mapped as-is to
-     * property names.
-     *
-     * @param beanClass the class of the JavaBeans that the {@code BeanifierFactory} will
-     * be catering for
-     * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a
-     * method reference to the constructor of the JavaBean (e.g. {@code Employee::new})
-     */
-    public BeanifierFactory(Class<T> beanClass, Supplier<T> beanSupplier) {
-        this(beanClass, beanSupplier, NameMapper.AS_IS);
+    if (beanClass.isRecord()) {
+      return getRecordBeanifier(rs);
     }
+    return getDefaultBeanifier(rs);
+  }
 
-    /**
-     * Creates a new {@code BeanifierFactory}.
-     *
-     * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-     * obtained from this {@code BeanifierFactory}
-     * @param columnToPropertyMapper a {@code NameMapper} mapping column names to property
-     * names
-     */
-    public BeanifierFactory(Class<T> beanClass, NameMapper columnToPropertyMapper) {
-        this(beanClass, () -> newInstance(beanClass), columnToPropertyMapper);
-    }
-
-    /**
-     * Creates a new {@code BeanifierFactory}.
-     *
-     * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-     * obtained from this {@code BeanifierFactory}
-     * @param beanSupplier the supplier of the JavaBeans
-     * @param columnToPropertyMapper a {@code NameMapper} mapping column names to property
-     * names
-     */
-    public BeanifierFactory(
-            Class<T> beanClass,
-            Supplier<T> beanSupplier,
-            NameMapper columnToPropertyMapper) {
-        this.beanClass = Check.notNull(beanClass, "beanClass").ok();
-        this.beanSupplier = Check.notNull(beanSupplier, "beanSupplier").ok();
-        this.mapper = Check.notNull(columnToPropertyMapper, "columnToPropertyMapper").ok();
-    }
-
-    /**
-     * Returns a {@code ResultSetBeanifier} that will convert the rows in the specified
-     * {@code ResultSet} into JavaBeans of type {@code <T>}.
-     *
-     * @param rs the {@code ResultSet}
-     * @return A {@code ResultSetBeanifier} that will convert the rows in the specified
-     * {@code ResultSet} into JavaBeans of type {@code <T>}
-     * @throws SQLException
-     */
-    public ResultSetBeanifier<T> getBeanifier(ResultSet rs) throws SQLException {
-        if (!rs.next()) {
-            return EmptyBeanifier.INSTANCE;
+  private DefaultBeanifier<T> getDefaultBeanifier(ResultSet rs) {
+    BeanChannel[] channels;
+    if ((channels = (BeanChannel[]) ref.getPlain()) == null) {
+      lock.lock();
+      try {
+        if (ref.get() == null) {
+          ref.set(channels = createChannels(rs, beanClass, mapper));
         }
-        BeanChannel[] channels;
-        if ((channels = ref.getPlain()) == null) {
-            lock.lock();
-            try {
-                if (ref.get() == null) {
-                    ref.set(channels = createChannels(rs, beanClass, mapper));
-                }
-            } finally {
-                lock.unlock();
-            }
-        }
-        return new DefaultBeanifier<>(rs, channels, beanSupplier);
+      } finally {
+        lock.unlock();
+      }
     }
+    return new DefaultBeanifier<>(rs, channels, beanSupplier);
+  }
 
-    private static <U> U newInstance(Class<U> beanClass) {
-        try {
-            return InvokeMethods.newInstance(beanClass);
-        } catch (Exception e) {
-            throw ExceptionMethods.uncheck(e);
+  private RecordBeanifier getRecordBeanifier(ResultSet rs) {
+    RecordFactory recordFactory;
+    if ((recordFactory = (RecordFactory) ref.getPlain()) == null) {
+      lock.lock();
+      try {
+        if (ref.get() == null) {
+          ref.set(recordFactory = new RecordFactory<>((Class) beanClass, rs, mapper));
         }
+      } finally {
+        lock.unlock();
+      }
     }
+    return new RecordBeanifier<>(rs, recordFactory);
+  }
+
+  private static <U> U newInstance(Class<U> beanClass) {
+    try {
+      return InvokeMethods.newInstance(beanClass);
+    } catch (Exception e) {
+      throw ExceptionMethods.uncheck(e);
+    }
+  }
 }

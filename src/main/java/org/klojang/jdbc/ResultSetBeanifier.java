@@ -34,7 +34,7 @@ import java.util.Optional;
  * @see ResultSetMappifier
  */
 public sealed interface ResultSetBeanifier<T> extends Iterable<T>
-        permits DefaultBeanifier, EmptyBeanifier {
+      permits DefaultBeanifier, EmptyBeanifier, RecordBeanifier {
 
     /**
      * Converts the current row within the {@code ResultSet} into a JavaBean. If the
