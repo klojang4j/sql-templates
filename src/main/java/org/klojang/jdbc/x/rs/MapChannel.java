@@ -13,7 +13,7 @@ import java.util.Map;
  * Transports a single value from a ResultSet to a Map<String, Object>
  */
 @SuppressWarnings("rawtypes")
-public class MapChannel<COLUMN_TYPE> implements Channel<Map<String, Object>> {
+public class MapChannel<COLUMN_TYPE> {
 
   public static Map<String, Object> toMap(ResultSet rs, MapChannel[] channels)
   throws Throwable {
@@ -55,7 +55,6 @@ public class MapChannel<COLUMN_TYPE> implements Channel<Map<String, Object>> {
     this.key = key;
   }
 
-  @Override
   public void copy(ResultSet rs, Map<String, Object> map) throws Throwable {
     map.put(key, method.invoke(rs, jdbcIdx));
   }

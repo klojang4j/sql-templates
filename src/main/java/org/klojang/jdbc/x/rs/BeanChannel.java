@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 import static org.klojang.util.CollectionMethods.implode;
 
 /* Transports a single value from a ResultSet to a bean */
-public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
+public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> {
 
   private static final Logger LOG = LoggerFactory.getLogger(BeanChannel.class);
 
@@ -86,7 +86,6 @@ public class BeanChannel<COLUMN_TYPE, FIELD_TYPE> implements Channel<Object> {
     this.jdbcIdx = jdbcIdx;
   }
 
-  @Override
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void copy(ResultSet rs, Object bean) throws Throwable {
     Class cls = setter.getParamType();

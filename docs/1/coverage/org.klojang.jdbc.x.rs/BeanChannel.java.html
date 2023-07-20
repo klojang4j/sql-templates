@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 import static org.klojang.util.CollectionMethods.implode;
 
 /* Transports a single value from a ResultSet to a bean */
-public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; implements Channel&lt;Object&gt; {
+public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
 
 <span class="fc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(BeanChannel.class);</span>
 
@@ -86,13 +86,12 @@ public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; implements Channel&lt;Ob
 <span class="fc" id="L86">    this.jdbcIdx = jdbcIdx;</span>
 <span class="fc" id="L87">  }</span>
 
-  @Override
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   public void copy(ResultSet rs, Object bean) throws Throwable {
-<span class="fc" id="L92">    Class cls = setter.getParamType();</span>
-<span class="fc" id="L93">    Object val = reader.getValue(rs, jdbcIdx, cls);</span>
-<span class="fc" id="L94">    setter.write(bean, val);</span>
-<span class="fc" id="L95">  }</span>
+<span class="fc" id="L91">    Class cls = setter.getParamType();</span>
+<span class="fc" id="L92">    Object val = reader.getValue(rs, jdbcIdx, cls);</span>
+<span class="fc" id="L93">    setter.write(bean, val);</span>
+<span class="fc" id="L94">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
