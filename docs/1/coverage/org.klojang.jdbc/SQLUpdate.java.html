@@ -2,24 +2,18 @@
 
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.util.ExceptionMethods;
-import org.klojang.util.ModulePrivate;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * Facilitates the execution of SQL UPDATE and DELETE statements.
+ * Facilitates the execution of UPDATE, DELETE and DDL statements.
  */
 public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
 
-
-  /**
-   * For internal use only.
-   */
-  @ModulePrivate
-  public SQLUpdate(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
-<span class="nc" id="L21">    super(ps, sql, sqlInfo);</span>
-<span class="nc" id="L22">  }</span>
+  SQLUpdate(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
+<span class="nc" id="L15">    super(ps, sql, sqlInfo);</span>
+<span class="nc" id="L16">  }</span>
 
   /**
    * Executes the UPDATE or DELETE statement and return the number of affected rows.
@@ -28,21 +22,21 @@ public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
    */
   public int execute() {
     try {
-<span class="nc" id="L31">      applyBindings(ps);</span>
-<span class="nc" id="L32">      return ps.executeUpdate();</span>
-<span class="nc" id="L33">    } catch (Throwable t) {</span>
-<span class="nc" id="L34">      throw ExceptionMethods.uncheck(t);</span>
+<span class="nc" id="L25">      applyBindings(ps);</span>
+<span class="nc" id="L26">      return ps.executeUpdate();</span>
+<span class="nc" id="L27">    } catch (Throwable t) {</span>
+<span class="nc" id="L28">      throw ExceptionMethods.uncheck(t);</span>
     }
   }
 
   @Override
   void initialize() {
     try {
-<span class="nc" id="L41">      ps.clearParameters();</span>
-<span class="nc" id="L42">    } catch (SQLException e) {</span>
-<span class="nc" id="L43">      throw KlojangSQLException.wrap(e, sqlInfo);</span>
-<span class="nc" id="L44">    }</span>
-<span class="nc" id="L45">  }</span>
+<span class="nc" id="L35">      ps.clearParameters();</span>
+<span class="nc" id="L36">    } catch (SQLException e) {</span>
+<span class="nc" id="L37">      throw KlojangSQLException.wrap(e, sqlInfo);</span>
+<span class="nc" id="L38">    }</span>
+<span class="nc" id="L39">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

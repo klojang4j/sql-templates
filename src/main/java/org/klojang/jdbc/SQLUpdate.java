@@ -2,22 +2,16 @@ package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.util.ExceptionMethods;
-import org.klojang.util.ModulePrivate;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * Facilitates the execution of SQL UPDATE and DELETE statements.
+ * Facilitates the execution of UPDATE, DELETE and DDL statements.
  */
 public final class SQLUpdate extends SQLStatement<SQLUpdate> {
 
-
-  /**
-   * For internal use only.
-   */
-  @ModulePrivate
-  public SQLUpdate(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
+  SQLUpdate(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
     super(ps, sql, sqlInfo);
   }
 

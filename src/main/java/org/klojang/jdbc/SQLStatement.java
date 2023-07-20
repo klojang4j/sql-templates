@@ -21,8 +21,8 @@ import static org.klojang.util.CollectionMethods.collectionToSet;
  * {@code SQLStatement} allows you to bind the named parameters within the SQL statement
  * (if present) and then execute it.
  *
- * @param <T> the {@code SQLStatement} subtype returned by various methods in the
- * fluent API.
+ * @param <T> the {@code SQLStatement} subtype returned by various methods in the fluent
+ * API.
  */
 public abstract sealed class SQLStatement<T extends SQLStatement<T>>
       implements AutoCloseable permits SQLQuery, SQLUpdate, SQLInsert {
@@ -123,7 +123,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   }
 
   /**
-   * Releases all resources held by this instance. You cannot reuse this instance after a
+   * Releases all resources held by this instance. You cannot reuse the instance after a
    * call to this method.
    */
   @Override

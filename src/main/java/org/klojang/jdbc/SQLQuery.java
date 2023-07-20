@@ -5,7 +5,6 @@ import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderFinder;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.NameMapper;
-import org.klojang.util.ModulePrivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,11 +56,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   private NameMapper mapper = NameMapper.AS_IS;
   private ResultSet resultSet;
 
-  /**
-   * For internal use only.
-   */
-  @ModulePrivate
-  public SQLQuery(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
+  SQLQuery(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
     super(ps, sql, sqlInfo);
   }
 
@@ -188,7 +183,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
         return Collections.emptyList();
       }
       int sqlType = resultSet.getMetaData().getColumnType(1);
-      ColumnReader<?, T> reader = ColumnReaderFinder.getInstance()
+      ColumnReader<?, T> reader = ColumnReaderFinder
+            .getInstance()
             .findReader(clazz, sqlType);
       List<T> list = new ArrayList<>(sizeEstimate);
       do {

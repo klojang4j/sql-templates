@@ -3,7 +3,6 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.sql.SQLInfo;
-import org.klojang.util.ModulePrivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +38,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
 
   private final boolean retrieveAutoKeys;
 
-  /**
-   * For internal use only.
-   */
-  @ModulePrivate
-  public SQLInsert(PreparedStatement ps,
+  SQLInsert(PreparedStatement ps,
         AbstractSQLSession sql,
         SQLInfo sqlInfo,
         boolean retrieveAutoKeys) {
@@ -57,7 +52,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
    * ignored. The effect of passing anything other than a proper JavaBean (e.g. an
    * {@code Integer}, {@code String} or array) is undefined.
    *
-   * @param bean The bean whose values to bind to the named parameters within the SQL
+   * @param bean the bean whose values to bind to the named parameters within the SQL
    * statement
    * @return this {@code SQLInsert} instance
    */
