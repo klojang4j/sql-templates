@@ -39,15 +39,13 @@ public class RecordBeanifierTest {
     Files.createDirectories(Path.of(DB_DIR));
     Connection con = DriverManager.getConnection("jdbc:h2:" + DB_DIR + "/test");
     String sql = """
-          CREATE LOCAL TEMPORARY TABLE PERSON(
+          CREATE TABLE PERSON(
             PERSON_ID INT AUTO_INCREMENT, 
             FIRST_NAME VARCHAR(255),
             LAST_NAME VARCHAR(255),
             BIRTH_DATE DATE)
           """;
-    try (Statement stmt = con.createStatement()) {
-      stmt.executeUpdate(sql);
-    }
+    SQL.basic(sql).session(con).prepareUpdate().execute();
     List<Person> persons = List.of(
           new Person(0, "John", "Smith", LocalDate.of(1960, 4, 15)),
           new Person(0, "Mary", "Smith", LocalDate.of(1980, 10, 5)),

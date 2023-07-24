@@ -8,7 +8,7 @@ import java.sql.Statement;
  * rules. Quoters can be used when executing {@link SQLBatchInsert batch inserts}. You
  * don't normally need to concern yourself with quoting and escaping unless you want to
  * {@link Transformer#transform(Object, Object, Quoter) tranform} a value into a
- * {@linkplain SQLExpression} SQL expression} before saving it to the database. SQL
+ * {@linkplain SQLExpression SQL expression} before saving it to the database. SQL
  * expressions will be injected as-is into the INSERT statement. <i>Klojang JDBC</i> will
  * not attempt to "understand" them. That makes you responsible for protecting yourself
  * against SQL injection. Using a {@code Quoter} gives you just as much protection as

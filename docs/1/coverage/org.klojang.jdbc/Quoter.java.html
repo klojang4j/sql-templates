@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Quoter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SQL Templates</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">Quoter.java</span></div><h1>Quoter.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Quoter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">Quoter.java</span></div><h1>Quoter.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -8,7 +8,7 @@ import java.sql.Statement;
  * rules. Quoters can be used when executing {@link SQLBatchInsert batch inserts}. You
  * don't normally need to concern yourself with quoting and escaping unless you want to
  * {@link Transformer#transform(Object, Object, Quoter) tranform} a value into a
- * {@linkplain SQLExpression} SQL expression} before saving it to the database. SQL
+ * {@linkplain SQLExpression SQL expression} before saving it to the database. SQL
  * expressions will be injected as-is into the INSERT statement. &lt;i&gt;Klojang JDBC&lt;/i&gt; will
  * not attempt to &quot;understand&quot; them. That makes you responsible for protecting yourself
  * against SQL injection. Using a {@code Quoter} gives you just as much protection as

@@ -27,9 +27,9 @@ import java.sql.Connection;
  * <h2>SQL Templates</h2>
  * <p>A classic example of something that you often want to, but cannot parametrize with
  * JDBC are the column(s) in the ORDER BY clause. <i>Klojang JDBC</i> lets you do this
- * using <a
+ * using <b><a
  * href="https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html">Klojang
- * Template</a> variables. For example:
+ * Templates</a></b> variables. For example:
  * <blockquote><pre>{@code
  * SELECT *
  *   FROM PERSON

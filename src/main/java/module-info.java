@@ -1,9 +1,9 @@
 /**
- * <p><i>Klojang JDBC</i> is a thin, transparent abstraction layer around standard JDBC.
- * It builds on
+ * <p><i>Klojang JDBC</i> is a thin, non-intrusive abstraction layer around standard JDBC
+ * that builds on
  * <a href="https://klojang4j.github.io/klojang-templates/1/api">Klojang Templates</a> to
- * provide functionality not commonly found in JDBC extension libraries. It provides the
- * following functionality:
+ * provide functionality not commonly found in JDBC extension libraries. These are its
+ * main features:
  *
  * <ol>
  *   <li>Convert {@link java.sql.ResultSet ResultSet} rows into JavaBeans or
@@ -23,6 +23,16 @@
  *
  * <blockquote><pre>{@code
  * Connection con = DriverManager.getConnection("jdbc:h2:/tmp/h2/test");
+ *
+ * String sql = """
+ *      CREATE TABLE PERSON(
+ *          PERSON_ID INT AUTO_INCREMENT,
+ *          FIRST_NAME VARCHAR(255),
+ *          LAST_NAME VARCHAR(255),
+ *          BIRTH_DATE DATE)
+ *      """;
+ * SQL.basic(sql).session(con).prepareUpdate().execute();
+ *
  * List<Person> persons = List.of(
  *    new Person("John", "Smith", LocalDate.of(1960, 4, 15)),
  *    new Person("Mary", "Smith", LocalDate.of(1980, 10, 5)),
@@ -44,8 +54,7 @@
  *    .prepare(con);
  * bi.insertBatchAndSetIDs("personId", persons);
  *
- *
- * String sql = """
+ * sql = """
  *    SELECT * FROM PERSON
  *     WHERE LAST_NAME = :lastName
  *     ORDER BY ~%column% ~%direction%
@@ -66,6 +75,9 @@
  * }
  *
  * }</pre></blockquote>
+ *
+ * @see org.klojang.templates.name.SnakeCaseToCamelCase
+ * @see org.klojang.templates.name.CamelCaseToSnakeUpperCase
  */
 module org.klojang.jdbc {
 

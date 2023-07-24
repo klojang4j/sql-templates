@@ -10,9 +10,11 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>SQL Templates</name>
+    <name>Klojang JDBC</name>
     <description>
-        Builds on Klojang Templates to provide a light-touch, non-intrusive JDBC extensions library
+        A light-touch, non-intrusive JDBC extensions library that builds on Klojang Templates
+        to provide parametrization of parts of SQL that cannot be parametrized with JDBC
+        alone.
     </description>
     <url>https://klojang4j.github.io/klojng-jdbc/</url>
 
