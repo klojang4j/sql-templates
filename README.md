@@ -1,7 +1,8 @@
 # Klojang JDBC
 
-Klojang JDBC is a thin, non-intrusive abstraction layer around standard JDBC that builds
-on Klojang Templates to provide functionality not commonly found in JDBC extension
+<i>Klojang JDBC</i> is a thin, non-intrusive abstraction layer around standard JDBC that builds
+on <i>[Klojang Templates](https://github.com/klojang4j/klojang-templates)</i> to provide
+functionality not commonly found in JDBC extension
 libraries. These are some of its main features:
 
 1. Enable parametrization of parts of SQL that cannot be parametrized using prepared
