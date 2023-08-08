@@ -14,6 +14,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -86,7 +87,7 @@ public class SQLBatchInsertTest {
     try (SQLQuery query = SQL.basic("SELECT COUNT(*) FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
-      assertEquals(3, query.getInt());
+      assertEquals(OptionalInt.of(3), query.getInt());
     }
   }
 

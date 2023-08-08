@@ -5,11 +5,10 @@ package org.klojang.jdbc;
  * It allows the user to set SQL <i>template variables</i> within the SQL and then obtain
  * a {@link SQLStatement} object that can be used to set (a.k.a. "bind") the <i>named
  * parameters</i> within the SQL. The difference between template variables and named
- * parameters is explained in the comments for the {@link SQL} interface. Note that one of
- * the implementations of {@code SQLSession} (the one you get from
- * {@link SQL#basic(String) SQL.basic()}) does not support template variables and
- * therefore calls to its {@link #set(String, Object) set()} method will throw an
- * {@link UnsupportedOperationException}.
+ * parameters is explained in the comments for the {@link SQL} interface. Note that the
+ * {@code SQLSession} implementation you get from {@link SQL#basic(String) SQL.basic()})
+ * does not support template variables. This leaves you no choice but to retrieve a
+ * {@code SQLStatement} from it straight away.
  *
  * <p>Probably the most common use case for using template variables is to parametrize
  * the ORDER BY column and sort order ("ASC" or "DESC"). Therefore the {@code SQLSession}
@@ -46,7 +45,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @see org.klojang.templates.RenderSession#set(String, Object)
    */
   default SQLSession set(String varName, Object value)
-        throws UnsupportedOperationException {
+  throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }
 
@@ -95,7 +94,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setDescending(boolean isDescending)
-        throws UnsupportedOperationException {
+  throws UnsupportedOperationException {
     return set("sortOrder", isDescending ? "DESC" : "ASC");
   }
 
@@ -109,7 +108,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setOrderBy(Object sortColumn, Object sortOrder)
-        throws UnsupportedOperationException {
+  throws UnsupportedOperationException {
     return setOrderBy(sortColumn).setSortOrder(sortOrder);
   }
 
@@ -123,7 +122,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setOrderBy(Object sortColumn, boolean isDescending)
-        throws UnsupportedOperationException {
+  throws UnsupportedOperationException {
     return setOrderBy(sortColumn).setDescending(isDescending);
   }
 

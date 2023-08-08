@@ -10,10 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static org.junit.jupiter.api.Assertions.*;
@@ -171,7 +168,7 @@ public class SQLInsertTest {
     try (SQLQuery query = SQL.basic("SELECT COUNT(*) FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
-      assertEquals(3, query.getInt());
+      assertEquals(OptionalInt.of(3), query.getInt());
     }
   }
 

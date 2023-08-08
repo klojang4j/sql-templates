@@ -77,13 +77,13 @@ String sql = """
      new Person("Peter", "Peterson", LocalDate.of(1963, 5, 3)),
      new Person("Joe", "Peterson", LocalDate.of(1998, 9, 23)));
  
- SQLBatchInsert bi = SQL.prepareBatchInsert()
+ SQLBatchInsert sbi = SQL.prepareBatchInsert()
      .of(Person.class)
      .into("PERSON")
      .excluding("personId")
      .withNameMapper(new CamelCaseToSnakeUpperCase())
      .prepare(con);
- bi.insertBatch(persons);
+ sbi.insertBatch(persons);
 
  sql = """
        SELECT * FROM PERSON

@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.check.aux.Result;
 import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderFinder;
 import org.klojang.jdbc.x.sql.SQLInfo;
@@ -14,6 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.function.Supplier;
 
 /**
@@ -91,22 +93,26 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Executes the query and returns the value of the first column in the first row. The
    * second time you call this method, you get the value of the first column in the second
-   * row, and so on. A {@link KlojangSQLException} is thrown if the query returned zero
-   * rows or if there are no more rows in the {@code ResultSet}.
+   * row, and so on, until there are no more rows in the If there are no (more) rows in
+   * the {@code ResultSet}. If there are no (more) rows in the {@code ResultSet},
+   * {@link Result#notAvailable()} is returned.
    *
    * @param <T> the type of the value to be returned
    * @param clazz the class of the value to be returned
    * @return the value of the first column in the first row
-   * @throws KlojangSQLException if the query returned zero rows
    */
-  public <T> T lookup(Class<T> clazz) {
+  public <T> Result<T> lookup(Class<T> clazz) {
     try {
-      executeAndNext();
-      int sqlType = resultSet.getMetaData().getColumnType(1);
-      return ColumnReaderFinder
-            .getInstance()
-            .findReader(clazz, sqlType)
-            .getValue(resultSet, 1, clazz);
+      executeQuery();
+      if (resultSet.next()) {
+        int sqlType = resultSet.getMetaData().getColumnType(1);
+        T val = ColumnReaderFinder
+              .getInstance()
+              .findReader(clazz, sqlType)
+              .getValue(resultSet, 1, clazz);
+        return Result.of(val);
+      }
+      return Result.notAvailable();
     } catch (Throwable t) {
       throw KlojangSQLException.wrap(t, sqlInfo);
     }
@@ -115,16 +121,20 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Executes the query and returns the value of the first column in the first row as an
    * {@code int}. The second time you call this method, you get the value of the first
-   * column in the second row, and so on. A {@link KlojangSQLException} is thrown if the
-   * query returned zero rows or if there are no more rows in the {@code ResultSet}.
+   * column in the second row, and so on, until there are no more rows in the If there are
+   * no (more) rows in the {@code ResultSet}. If there are no (more) rows in the
+   * {@code ResultSet}, {@link OptionalInt#empty()} is returned.
    *
    * @return the value of the first column in the first row as an integer
    * @throws KlojangSQLException if the query returned zero rows
    */
-  public int getInt() throws KlojangSQLException {
+  public OptionalInt getInt() throws KlojangSQLException {
     try {
-      executeAndNext();
-      return resultSet.getInt(1);
+      executeQuery();
+      if (resultSet.next()) {
+        return OptionalInt.of(resultSet.getInt(1));
+      }
+      return OptionalInt.empty();
     } catch (Throwable t) {
       throw KlojangSQLException.wrap(t, sqlInfo);
     }
@@ -133,19 +143,15 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Executes the query and returns the value of the first column of the first row as a
    * {@code String}. The second time you call this method, you get the value of the first
-   * column in the second row, and so on. A {@link KlojangSQLException} is thrown if the
-   * query returned zero rows or if there are no more rows in the {@code ResultSet}.
+   * column in the second row, and so on, until there are no more rows in the
+   * {@code ResultSet}. If there are no (more) rows in the {@code ResultSet},
+   * {@link Result#notAvailable()} is returned.
    *
    * @return the value of the first column of the first row as aa {@code String}
    * @throws KlojangSQLException If the query returned zero rows
    */
-  public String getString() throws KlojangSQLException {
-    try {
-      executeAndNext();
-      return resultSet.getString(1);
-    } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
-    }
+  public Result<String> getString() throws KlojangSQLException {
+    return lookup(String.class);
   }
 
   /**
@@ -272,13 +278,6 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       ps.clearParameters();
     } catch (SQLException e) {
       throw new KlojangSQLException(e);
-    }
-  }
-
-  private void executeAndNext() throws Throwable {
-    executeQuery();
-    if (!resultSet.next()) {
-      throw new KlojangSQLException("query returned zero rows");
     }
   }
 
