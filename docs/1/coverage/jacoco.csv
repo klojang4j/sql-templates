@@ -54,7 +54,7 @@ Klojang JDBC,org.klojang.jdbc,SQLSession,44,4,4,0,8,1,8,1,6,1
 Klojang JDBC,org.klojang.jdbc,DefaultMappifier,146,0,16,0,37,0,16,0,8,0
 Klojang JDBC,org.klojang.jdbc,SQL,17,32,0,0,3,6,3,6,3,6
 Klojang JDBC,org.klojang.jdbc,KlojangSQLException,50,0,4,0,13,0,8,0,6,0
-Klojang JDBC,org.klojang.jdbc,SQLQuery,128,108,7,5,45,30,11,10,6,9
+Klojang JDBC,org.klojang.jdbc,SQLQuery,140,108,7,5,49,30,12,10,7,9
 Klojang JDBC,org.klojang.jdbc,SQLTemplate,6,29,0,0,2,6,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,LongWriterLookup,0,77,0,0,0,11,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,BooleanWriterLookup,10,39,4,0,1,6,3,2,1,2

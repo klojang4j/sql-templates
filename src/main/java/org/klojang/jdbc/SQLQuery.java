@@ -155,12 +155,26 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
+   * Returns whether the query yielded at least one row.
+   *
+   * @return whether the query yielded at least one row
+   */
+  public boolean exists() {
+    try {
+      executeQuery();
+      return resultSet.next();
+    } catch (Throwable t) {
+      throw KlojangSQLException.wrap(t, sqlInfo);
+    }
+  }
+
+  /**
    * Executes the query and returns a {@code List} of all values in the first column of
    * the result set. Equivalent to {@link #firstColumn(Class) firstColumn(String.class)}.
    *
    * @return the values of the first column in the result set
    */
-  public List<String> firstColumn() {return firstColumn(String.class);}
+  public List<String> firstColumn() { return firstColumn(String.class); }
 
   /**
    * Executes the query and returns a {@code List} of all values in the first column of
@@ -171,7 +185,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * @param clazz the desired class of the values
    * @return the values of the first column in the result set
    */
-  public <T> List<T> firstColumn(Class<T> clazz) {return firstColumn(clazz, 10);}
+  public <T> List<T> firstColumn(Class<T> clazz) { return firstColumn(clazz, 10); }
 
   /**
    * Executes the query and returns a {@code List} of the all values in the first column.
