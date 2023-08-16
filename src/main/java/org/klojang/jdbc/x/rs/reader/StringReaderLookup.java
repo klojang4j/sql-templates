@@ -13,6 +13,7 @@ public final class StringReaderLookup extends ColumnReaderLookup<String> {
   public StringReaderLookup() {
     put(VARCHAR, new ColumnReader<>(GET_STRING));
     put(CHAR, new ColumnReader<>(GET_STRING));
+    put(OTHER, new ColumnReader<>(GET_STRING));
     put(INTEGER, new ColumnReader<>(GET_INT, ObjectMethods::stringify));
   }
 

@@ -42,10 +42,10 @@ public class ColumnReaderFinder {
     // Implicitly checks that the specified int is one of the
     // static final int constants in java.sql.Types
     String sqlTypeName = getTypeName(sqlType);
-    Map<Integer, ColumnReader> extractors = Check.that(all.get(fieldType))
+    Map<Integer, ColumnReader> readers = Check.that(all.get(fieldType))
           .is(notNull(), "type not supported: ${0}", className(fieldType))
           .ok();
-    return Check.that(extractors.get(sqlType))
+    return Check.that(readers.get(sqlType))
           .is(notNull(), "cannot convert ${0} to ${1}", sqlTypeName, className(fieldType))
           .ok();
   }

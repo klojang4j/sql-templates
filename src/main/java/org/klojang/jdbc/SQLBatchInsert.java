@@ -211,7 +211,7 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
   public void close() {}
 
   private void commit() throws SQLException {
-    if (cfg.commitPerChunk()) {
+    if (cfg.commitPerChunk() && !cfg.connection().getAutoCommit()) {
       cfg.connection().commit();
     }
   }

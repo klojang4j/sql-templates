@@ -22,23 +22,21 @@ import static org.klojang.util.ObjectMethods.isEmpty;
 /**
  * A builder class for {@link SQLBatchInsert} instances. {@code SQLBatchInsertBuilder}
  * instances are obtained via {@link SQL#prepareBatchInsert()}.
- *
- * @param <T> the type of the beans to be saved
  */
-public final class SQLBatchInsertBuilder<T> {
+public final class SQLBatchInsertBuilder {
 
-  private final Map<String, Transformer<T>> transformers = new HashMap<>();
+  private final Map<String, Transformer<?>> transformers = new HashMap<>();
 
   private NameMapper nameMapper = NameMapper.AS_IS;
   private int chunkSize = -1;
   boolean commitPerChunk = true;
 
-  private Class<T> beanClass;
+  private Class<?> beanClass;
   private String tableName;
   private String[] properties;
   private boolean exclude;
 
-  SQLBatchInsertBuilder() {}
+  SQLBatchInsertBuilder() { }
 
   /**
    * Sets the type of the beans to be saved.
@@ -46,7 +44,7 @@ public final class SQLBatchInsertBuilder<T> {
    * @param beanClass the type of the beans to be saved
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder<T> of(Class<T> beanClass) {
+  public SQLBatchInsertBuilder of(Class<?> beanClass) {
     this.beanClass = Check.notNull(beanClass).ok();
     return this;
   }
@@ -58,7 +56,7 @@ public final class SQLBatchInsertBuilder<T> {
    * @param tableName the table name to insert the data into
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder<T> into(String tableName) {
+  public SQLBatchInsertBuilder into(String tableName) {
     this.tableName = Check.that(tableName).isNot(empty()).ok();
     return this;
   }
@@ -75,7 +73,7 @@ public final class SQLBatchInsertBuilder<T> {
    * INSERT statement
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder<T> excluding(String... properties) {
+  public SQLBatchInsertBuilder excluding(String... properties) {
     Check.that(properties).is(deepNotEmpty());
     this.properties = properties;
     this.exclude = true;
@@ -92,7 +90,7 @@ public final class SQLBatchInsertBuilder<T> {
    * statement
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder<T> including(String... properties) {
+  public SQLBatchInsertBuilder including(String... properties) {
     Check.that(properties).is(deepNotEmpty());
     this.properties = properties;
     this.exclude = false;
@@ -107,7 +105,7 @@ public final class SQLBatchInsertBuilder<T> {
    * @param propertyToColumnMapper the property-to-column mapper
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder<T> withNameMapper(NameMapper propertyToColumnMapper) {
+  public SQLBatchInsertBuilder withNameMapper(NameMapper propertyToColumnMapper) {
     Check.notNull(propertyToColumnMapper);
     this.nameMapper = propertyToColumnMapper;
     return this;
@@ -121,7 +119,7 @@ public final class SQLBatchInsertBuilder<T> {
    * @param chunkSize the number of beans that will be saved at a time
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder<T> withChunkSize(int chunkSize) {
+  public SQLBatchInsertBuilder withChunkSize(int chunkSize) {
     Check.that(chunkSize).is(gt(), 0);
     this.chunkSize = chunkSize;
     return this;
@@ -136,7 +134,7 @@ public final class SQLBatchInsertBuilder<T> {
    * the database
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder<T> withCommitPerChunk(boolean commitPerChunk) {
+  public SQLBatchInsertBuilder withCommitPerChunk(boolean commitPerChunk) {
     this.commitPerChunk = commitPerChunk;
     return this;
   }
@@ -154,9 +152,9 @@ public final class SQLBatchInsertBuilder<T> {
    * @return this {@code SQLBatchInsertBuilder}
    * @see java.sql.Statement#enquoteLiteral(String)
    */
-  public SQLBatchInsertBuilder<T> withTransformer(
+  public SQLBatchInsertBuilder withTransformer(
         String property,
-        Transformer<T> transformer) {
+        Transformer<?> transformer) {
     Check.notNull(property, PROPERTY);
     Check.notNull(transformer, "transformer");
     this.transformers.put(property, transformer);
@@ -168,10 +166,12 @@ public final class SQLBatchInsertBuilder<T> {
    * the other methods
    *
    * @param con the JDBC {@code Connection} to use for the INSERT statement
-   * @return a {@code SQLInsert} instance
+   * @param <T> the type of the beans or records to be saved by the {@code SQLBatchInsert}
+   * instance
+   * @return a {@code SQLBatchInsert} instance
    */
-  @SuppressWarnings("rawtypes")
-  public SQLBatchInsert<T> prepare(Connection con) {
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public <T> SQLBatchInsert<T> prepare(Connection con) {
     Check.notNull(con);
     Check.on(STATE, beanClass, "beanClass").is(notNull());
     Map<String, Getter> getters = GetterFactory.INSTANCE.getGetters(beanClass, true);
@@ -197,7 +197,7 @@ public final class SQLBatchInsertBuilder<T> {
           .map(Getter::getProperty)
           .map(transformers::get)
           .toArray(Transformer[]::new);
-    BatchInsertConfig<T> cfg = new BatchInsertConfig<>(
+    BatchInsertConfig<T> cfg = (BatchInsertConfig<T>) new BatchInsertConfig<>(
           con,
           beanClass,
           tableName,

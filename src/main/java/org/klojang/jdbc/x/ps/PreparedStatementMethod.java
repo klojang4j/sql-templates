@@ -84,7 +84,7 @@ public final class PreparedStatementMethod<PARAM_TYPE> {
 
   void bindValue(PreparedStatement ps, int paramIndex, PARAM_TYPE paramValue)
         throws Throwable {
-    LOG.trace("-----> Parameter {}: {}", lpad(paramIndex, 2), paramValue);
+    LOG.trace("-----> Parameter {}: {}", paramIndex, paramValue);
     if (paramValue == null) {
       SET_STRING.method.invoke(ps, paramIndex, (String) null);
     } else if (sqlType == null) {

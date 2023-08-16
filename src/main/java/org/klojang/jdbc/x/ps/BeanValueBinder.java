@@ -84,10 +84,10 @@ class BeanValueBinder<FIELD_TYPE, PARAM_TYPE> {
     FIELD_TYPE beanValue = (FIELD_TYPE) getter.read(bean);
     PARAM_TYPE paramValue = writer.getParamValue(beanValue);
     if (beanValue == paramValue) { // No adapter defined
-      LOG.debug("-> Parameter \"{}\": {}", getter.getProperty(), paramValue);
+      LOG.trace("-> Parameter \"{}\": {}", getter.getProperty(), paramValue);
     } else {
       String fmt = "-> Parameter \"{}\": {} (bean value: {})";
-      LOG.debug(fmt, param.name(), paramValue, beanValue);
+      LOG.trace(fmt, param.name(), paramValue, beanValue);
     }
     param.positions().forEachThrowing(i -> writer.bind(ps, i, paramValue));
   }

@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -58,7 +57,7 @@ public class RecordBeanifierTest {
           new Person(0, "Peter", "Peterson", LocalDate.of(1963, 5, 3)),
           new Person(0, "Joe", "Peterson", LocalDate.of(1998, 9, 23))
     );
-    SQLBatchInsert bi = SQL.prepareBatchInsert()
+    SQLBatchInsert<Person> bi = SQL.prepareBatchInsert()
           .of(Person.class)
           .into("PERSON")
           .excluding("personId")

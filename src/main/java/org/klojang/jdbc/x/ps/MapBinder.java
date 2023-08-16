@@ -51,9 +51,9 @@ public final class MapBinder {
         Object output = writer.getParamValue(value);
         if (LOG.isDebugEnabled()) {
           if (value == output) {
-            LOG.debug("-> Parameter \"{}\": {}", key, output);
+            LOG.trace("-> Parameter \"{}\": {}", key, output);
           } else {
-            LOG.debug("-> Parameter \"{}\": {} (map value: {})", key, output, value);
+            LOG.trace("-> Parameter \"{}\": {} (map value: {})", key, output, value);
           }
         }
         param.positions().forEachThrowing(i -> writer.bind(ps, i, output));
