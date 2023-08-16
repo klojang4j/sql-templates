@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NamedParameter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.sql</a> &gt; <span class="el_source">NamedParameter.java</span></div><h1>NamedParameter.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.sql;
+
+import org.klojang.util.collection.IntList;
+
+/**
+ * &lt;p&gt;Represents a single named parameter within a SQL statement. The {@code positions}
+ * component of this record contains the positions of the parameter within the SQL
+ * statement. For example, in the following (nonsensical) query:
+ *
+ * &lt;blockquote&gt;&lt;pre&gt;{@code
+ * SELECT *
+ *   FROM person
+ *  WHERE first_name = :firstName
+ *     OR last_name = :lastName
+ *     OR full_name = :fullName
+ *     OR full_name LIKE :firstName
+ *     OR full_name LIKE :lastName
+ * }&lt;/pre&gt;&lt;/blockquote&gt;
+ *
+ * &lt;p&gt;the {@code firstName} parameter occurs at positions 0 and 3, the {@code firstName}
+ * parameter occurs at positions 1 and 4, and the {@code fullName} parameter occurs at
+ * position 2. In other words: &lt;i&gt;these are not string indices!&lt;/i&gt;
+ *
+ * @param name the name of the parameters
+ * @param positions the positions at which the parameter can be found. For example, in
+ * {@code SELECT * FROM person WHERE first_name = :firstName or last_name = :lastName}
+ */
+<span class="fc" id="L28">public record NamedParameter(String name, IntList positions) {</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

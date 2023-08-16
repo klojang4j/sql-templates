@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmptyMappifier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">EmptyMappifier.java</span></div><h1>EmptyMappifier.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import java.util.*;
+
+<span class="nc" id="L5">final class EmptyMappifier implements ResultSetMappifier {</span>
+
+<span class="nc" id="L7">  static final EmptyMappifier INSTANCE = new EmptyMappifier();</span>
+
+  @Override
+  public Optional&lt;Map&lt;String,Object&gt;&gt; mappify() {
+<span class="nc" id="L11">    return Optional.empty();</span>
+  }
+
+  @Override
+  public List&lt;Map&lt;String,Object&gt;&gt; mappify(int limit) {
+<span class="nc" id="L16">    return Collections.emptyList();</span>
+  }
+
+  @Override
+  public List&lt;Map&lt;String,Object&gt;&gt; mappifyAll() {
+<span class="nc" id="L21">    return Collections.emptyList();</span>
+  }
+
+  @Override
+  public List&lt;Map&lt;String,Object&gt;&gt; mappifyAll(int sizeEstimate) {
+<span class="nc" id="L26">    return Collections.emptyList();</span>
+  }
+
+  @Override
+  public boolean isEmpty() {
+<span class="nc" id="L31">    return true;</span>
+  }
+
+  @Override
+  public Iterator&lt;Map&lt;String,Object&gt;&gt; iterator() {
+<span class="nc" id="L36">    return Collections.emptyIterator();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

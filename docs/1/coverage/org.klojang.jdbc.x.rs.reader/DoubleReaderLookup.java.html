@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DoubleReaderLookup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs.reader</a> &gt; <span class="el_source">DoubleReaderLookup.java</span></div><h1>DoubleReaderLookup.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs.reader;
+
+import org.klojang.convert.NumberMethods;
+import org.klojang.jdbc.x.rs.ColumnReader;
+import org.klojang.jdbc.x.rs.ColumnReaderLookup;
+
+import static java.sql.Types.*;
+import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
+
+public final class DoubleReaderLookup extends ColumnReaderLookup&lt;Double&gt; {
+
+<span class="fc" id="L12">  public DoubleReaderLookup() {</span>
+<span class="fc" id="L13">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE), FLOAT, DOUBLE);</span>
+    // We don't really need to add the conversion functions (like  Integer::doubleValue)
+    // because the compiler can figure this out by itself. But we like to be explicit.
+<span class="fc" id="L16">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT, Integer::doubleValue));</span>
+<span class="fc" id="L17">    add(SMALLINT, new ColumnReader&lt;&gt;(GET_SHORT, Short::doubleValue));</span>
+<span class="fc" id="L18">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE, Byte::doubleValue));</span>
+<span class="fc" id="L19">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, Float::doubleValue));</span>
+<span class="fc" id="L20">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, Long::doubleValue));</span>
+<span class="pc bnc" id="L21" title="All 2 branches missed.">    add(BOOLEAN, new ColumnReader&lt;&gt;(GET_BOOLEAN, x -&gt; x ? 1.0 : 0));</span>
+<span class="fc" id="L22">    addMultiple(</span>
+          new ColumnReader&lt;&gt;(GET_BIG_DECIMAL, NumberMethods::convert),
+          NUMERIC,
+          DECIMAL);
+<span class="fc" id="L26">    add(VARCHAR, new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse));</span>
+<span class="fc" id="L27">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResultSetMethod.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">ResultSetMethod.java</span></div><h1>ResultSetMethod.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
+
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.Time;
+import java.sql.Timestamp;
+
+import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.util.ExceptionMethods;
+
+import static java.lang.invoke.MethodHandles.lookup;
+
+/*
+ * Represents one of the get methods of ResultSet, like ResultSet.getString(columnIndex)
+ */
+public final class ResultSetMethod&lt;COLUMN_TYPE&gt; {
+
+<span class="fc" id="L21">  public static final ResultSetMethod&lt;String&gt; GET_STRING</span>
+<span class="fc" id="L22">        = getter(&quot;getString&quot;, String.class);</span>
+<span class="fc" id="L23">  public static final ResultSetMethod&lt;Integer&gt; GET_INT</span>
+<span class="fc" id="L24">        = getter(&quot;getInt&quot;, int.class);</span>
+<span class="fc" id="L25">  public static final ResultSetMethod&lt;Float&gt; GET_FLOAT</span>
+<span class="fc" id="L26">        = getter(&quot;getFloat&quot;, float.class);</span>
+<span class="fc" id="L27">  public static final ResultSetMethod&lt;Double&gt; GET_DOUBLE</span>
+<span class="fc" id="L28">        = getter(&quot;getDouble&quot;, double.class);</span>
+<span class="fc" id="L29">  public static final ResultSetMethod&lt;Long&gt; GET_LONG</span>
+<span class="fc" id="L30">        = getter(&quot;getLong&quot;, long.class);</span>
+<span class="fc" id="L31">  public static final ResultSetMethod&lt;Short&gt; GET_SHORT</span>
+<span class="fc" id="L32">        = getter(&quot;getShort&quot;, short.class);</span>
+<span class="fc" id="L33">  public static final ResultSetMethod&lt;Byte&gt; GET_BYTE</span>
+<span class="fc" id="L34">        = getter(&quot;getByte&quot;, byte.class);</span>
+<span class="fc" id="L35">  public static final ResultSetMethod&lt;Boolean&gt; GET_BOOLEAN</span>
+<span class="fc" id="L36">        = getter(&quot;getBoolean&quot;, boolean.class);</span>
+<span class="fc" id="L37">  public static final ResultSetMethod&lt;Date&gt; GET_DATE</span>
+<span class="fc" id="L38">        = getter(&quot;getDate&quot;, Date.class);</span>
+<span class="fc" id="L39">  public static final ResultSetMethod&lt;Time&gt; GET_TIME</span>
+<span class="fc" id="L40">        = getter(&quot;getTime&quot;, Time.class);</span>
+<span class="fc" id="L41">  public static final ResultSetMethod&lt;Timestamp&gt; GET_TIMESTAMP</span>
+<span class="fc" id="L42">        = getter(&quot;getTimestamp&quot;, Timestamp.class);</span>
+<span class="fc" id="L43">  public static final ResultSetMethod&lt;BigDecimal&gt; GET_BIG_DECIMAL</span>
+<span class="fc" id="L44">        = getter(&quot;getBigDecimal&quot;, BigDecimal.class);</span>
+
+  // Invokes &lt;T&gt; ResultSet.getObject(columnIndex, Class&lt;T&gt;)
+  public static &lt;T&gt; ResultSetMethod&lt;T&gt; objectGetter(Class&lt;T&gt; returnType) {
+<span class="fc" id="L48">    MethodType mt = MethodType.methodType(Object.class, int.class, Class.class);</span>
+    MethodHandle mh;
+    try {
+<span class="fc" id="L51">      mh = lookup().findVirtual(ResultSet.class, &quot;getObject&quot;, mt);</span>
+<span class="nc" id="L52">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
+<span class="nc" id="L53">      throw ExceptionMethods.uncheck(e);</span>
+<span class="fc" id="L54">    }</span>
+<span class="fc" id="L55">    return new ResultSetMethod&lt;&gt;(mh, returnType);</span>
+  }
+
+  private final MethodHandle method;
+
+  // If this is ResultSetMethod invokes ResultSet.getObject(int, Class), then
+  // classArg will be the Class object passed in as the second argument to the
+  // getObject() method. In any other case classArg will be null.
+  private final Class&lt;?&gt; classArg;
+
+  private ResultSetMethod(MethodHandle method) {
+<span class="fc" id="L66">    this(method, null);</span>
+<span class="fc" id="L67">  }</span>
+
+<span class="fc" id="L69">  private ResultSetMethod(MethodHandle method, Class&lt;?&gt; classArg) {</span>
+<span class="fc" id="L70">    this.method = method;</span>
+<span class="fc" id="L71">    this.classArg = classArg;</span>
+<span class="fc" id="L72">  }</span>
+
+  public COLUMN_TYPE invoke(ResultSet rs, int columnIndex) throws Throwable {
+    COLUMN_TYPE val;
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">    if (classArg == null) {</span>
+<span class="fc" id="L77">      val = (COLUMN_TYPE) method.invoke(rs, columnIndex);</span>
+    } else {
+<span class="nc" id="L79">      val = (COLUMN_TYPE) method.invoke(rs, columnIndex, classArg);</span>
+    }
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">    return rs.wasNull() ? null : val;</span>
+  }
+
+  private static &lt;T&gt; ResultSetMethod&lt;T&gt; getter(String methodName, Class&lt;T&gt; returnType) {
+<span class="fc" id="L85">    MethodType mt = MethodType.methodType(returnType, int.class);</span>
+    MethodHandle mh;
+    try {
+<span class="fc" id="L88">      mh = lookup().findVirtual(ResultSet.class, methodName, mt);</span>
+<span class="nc" id="L89">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
+<span class="nc" id="L90">      throw new KlojangSQLException(e);</span>
+<span class="fc" id="L91">    }</span>
+<span class="fc" id="L92">    return new ResultSetMethod&lt;&gt;(mh);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
