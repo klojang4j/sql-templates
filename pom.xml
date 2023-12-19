@@ -7,7 +7,7 @@
 
     <groupId>org.klojang</groupId>
     <artifactId>klojang-jdbc</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.8</version>
     <packaging>jar</packaging>
 
     <name>Klojang JDBC</name>
@@ -56,29 +56,29 @@
         <!-- ==================================================================== -->
         <!-- *** Build settings                                               *** -->
         <!-- ==================================================================== -->
-        <maven.compiler.source>19</maven.compiler.source>
-        <maven.compiler.target>19</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- ==================================================================== -->
         <!-- *** Maven plugin versions                                        *** -->
         <!-- *** Check for updates: mvn versions:display-plugin-updates       *** -->
         <!-- ==================================================================== -->
-        <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
-        <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
-        <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
-        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-        <maven-dependency-plugin.version>3.3.0</maven-dependency-plugin.version>
-        <maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
-        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+        <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
+        <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
+        <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
+        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+        <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
         <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
-        <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
-        <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
-        <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
+        <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
+        <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
+        <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
         <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
-        <jacoco.version>0.8.8</jacoco.version>
-        <owasp-dependency-check.version>7.3.0</owasp-dependency-check.version>
+        <jacoco-plugin.version>0.8.11</jacoco-plugin.version>
+        <owasp-plugin.version>9.0.3</owasp-plugin.version>
+        <nexus-plugin.version>1.6.13</nexus-plugin.version>
 
 
         <!-- ==================================================================== -->
@@ -86,18 +86,18 @@
         <!-- *** Check for updates: mvn versions:display-dependency-updates   *** -->
         <!-- *** Check dependencies: mvn dependency:analyze                   *** -->
         <!-- ==================================================================== -->
-        <klojang-check.version>2.1.3</klojang-check.version>
-        <klojang-util.version>1.1.4</klojang-util.version>
-        <klojang-collections.version>2.0.4</klojang-collections.version>
-        <klojang-convert.version>1.0.4</klojang-convert.version>
-        <klojang-invoke.version>1.0.4</klojang-invoke.version>
-        <klojang-templates.version>1.0.4</klojang-templates.version>
+        <klojang-check.version>3.0.2-jdk21</klojang-check.version>
+        <klojang-util.version>1.1.7</klojang-util.version>
+        <klojang-collections.version>2.0.8</klojang-collections.version>
+        <klojang-convert.version>1.0.7</klojang-convert.version>
+        <klojang-invoke.version>2.0.3</klojang-invoke.version>
+        <klojang-templates.version>1.0.9</klojang-templates.version>
 
-        <commons-text.version>1.10.0</commons-text.version>
+        <commons-text.version>1.11.0</commons-text.version>
         <apache-httpclient.version>4.5.14</apache-httpclient.version>
         <slf4j.version>2.0.6</slf4j.version>
-        <junit.version>5.9.2</junit.version>
-        <h2.version>2.1.214</h2.version>
+        <junit.version>5.10.1</junit.version>
+        <h2.version>2.2.224</h2.version>
 
     </properties>
 
@@ -272,19 +272,19 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>docs/1/api</directory>
+                            <directory>docs/api</directory>
                             <includes>
                                 <include>**/*</include>
                             </includes>
                         </fileset>
                         <fileset>
-                            <directory>docs/1/coverage</directory>
+                            <directory>docs/coverage</directory>
                             <includes>
                                 <include>**/*</include>
                             </includes>
                         </fileset>
                         <fileset>
-                            <directory>docs/1/vulnerabilities</directory>
+                            <directory>docs/vulnerabilities</directory>
                             <includes>
                                 <include>**/*</include>
                             </includes>
@@ -345,9 +345,10 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>${owasp-dependency-check.version}</version>
+                <version>${owasp-plugin.version}</version>
                 <configuration>
                     <failBuildOnCVSS>7</failBuildOnCVSS>
+                    <nvdApiKey>29bb9b20-8dba-4ae7-94b4-6656e154e6e1</nvdApiKey>
                 </configuration>
                 <executions>
                     <execution>
@@ -361,7 +362,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
+                <version>${jacoco-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -401,8 +402,12 @@
                             <windowtitle>Klojang JDBC</windowtitle>
                             <links>
                                 <link>https://docs.oracle.com/en/java/javase/19/docs/api</link>
-                                <link>https://klojang4j.github.io/klojang-templates/1/api</link>
-                                <link>https://klojang4j.github.io/klojang-util/1/api/</link>
+                                <link>https://klojang4j.github.io/klojang-check/api</link>
+                                <link>https://klojang4j.github.io/klojang-util/api/</link>
+                                <link>https://klojang4j.github.io/klojang-collections/api</link>
+                                <link>https://klojang4j.github.io/klojang-convert/api</link>
+                                <link>https://klojang4j.github.io/klojang-invoke/api</link>
+                                <link>https://klojang4j.github.io/klojang-templates/api</link>
                             </links>
                             <excludePackageNames>org.klojang.jdbc.x</excludePackageNames>
                         </configuration>
@@ -423,7 +428,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>docs/1/api</outputDirectory>
+                            <outputDirectory>docs/api</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>target/apidocs</directory>
@@ -438,7 +443,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>docs/1/coverage</outputDirectory>
+                            <outputDirectory>docs/coverage</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>target/site/jacoco</directory>
@@ -453,7 +458,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>docs/1/vulnerabilities</outputDirectory>
+                            <outputDirectory>docs/vulnerabilities</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>target</directory>
@@ -493,7 +498,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>${nexus-staging-maven-plugin.version}</version>
+                <version>${nexus-plugin.version}</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>

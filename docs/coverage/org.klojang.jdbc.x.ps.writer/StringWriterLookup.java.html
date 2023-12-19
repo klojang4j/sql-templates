@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StringWriterLookup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.ps.writer</a> &gt; <span class="el_source">StringWriterLookup.java</span></div><h1>StringWriterLookup.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.ps.writer;
+
+import org.klojang.convert.Bool;
+import org.klojang.convert.NumberMethods;
+import org.klojang.jdbc.x.ps.PreparedStatementMethod;
+import org.klojang.jdbc.x.ps.ColumnWriter;
+import org.klojang.jdbc.x.ps.ColumnWriterLookup;
+
+import java.math.BigDecimal;
+
+import static java.sql.Types.*;
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
+
+public final class StringWriterLookup extends ColumnWriterLookup&lt;String&gt; {
+
+<span class="fc" id="L16">  public static final ColumnWriter&lt;String, String&gt; DEFAULT = new ColumnWriter&lt;&gt;(PreparedStatementMethod.SET_STRING);</span>
+
+<span class="fc" id="L18">  public StringWriterLookup() {</span>
+<span class="fc" id="L19">    put(VARCHAR, DEFAULT);</span>
+<span class="fc" id="L20">    put(CHAR, DEFAULT);</span>
+<span class="fc" id="L21">    put(INTEGER, new ColumnWriter&lt;String, Integer&gt;(SET_INT, NumberMethods::parse));</span>
+<span class="fc" id="L22">    put(SMALLINT, new ColumnWriter&lt;String, Short&gt;(SET_SHORT, NumberMethods::parse));</span>
+<span class="fc" id="L23">    put(TINYINT, new ColumnWriter&lt;String, Byte&gt;(SET_BYTE, NumberMethods::parse));</span>
+<span class="fc" id="L24">    put(BIGINT, new ColumnWriter&lt;String, Long&gt;(SET_LONG, NumberMethods::parse));</span>
+<span class="fc" id="L25">    put(NUMERIC,</span>
+          new ColumnWriter&lt;String, BigDecimal&gt;(SET_BIG_DECIMAL, NumberMethods::parse));
+<span class="fc" id="L27">    put(REAL, new ColumnWriter&lt;String, Float&gt;(SET_FLOAT, NumberMethods::parse));</span>
+<span class="fc" id="L28">    put(FLOAT, new ColumnWriter&lt;String, Double&gt;(SET_DOUBLE, NumberMethods::parse));</span>
+<span class="fc" id="L29">    put(DOUBLE, new ColumnWriter&lt;String, Double&gt;(SET_DOUBLE, NumberMethods::parse));</span>
+<span class="fc" id="L30">    put(BOOLEAN, new ColumnWriter&lt;String, Boolean&gt;(SET_BOOLEAN, Bool::from));</span>
+<span class="fc" id="L31">    put(BIT, new ColumnWriter&lt;Integer, Boolean&gt;(SET_BOOLEAN, Bool::from));</span>
+<span class="fc" id="L32">  }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

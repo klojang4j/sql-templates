@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultMappifier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">DefaultMappifier.java</span></div><h1>DefaultMappifier.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.check.Check;
+import org.klojang.jdbc.x.rs.MapChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.util.*;
+
+import static org.klojang.check.CommonChecks.gt;
+import static org.klojang.check.CommonChecks.no;
+import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.jdbc.x.rs.MapChannel.toMap;
+
+final class DefaultMappifier implements ResultSetMappifier {
+
+  @SuppressWarnings(&quot;unused&quot;)
+<span class="nc" id="L19">  private static final Logger LOG = LoggerFactory.getLogger(DefaultMappifier.class);</span>
+
+  private static class MapIterator implements Iterator&lt;Map&lt;String, Object&gt;&gt; {
+
+    private final DefaultMappifier dm;
+
+<span class="nc" id="L25">    MapIterator(DefaultMappifier dm) {</span>
+<span class="nc" id="L26">      this.dm = dm;</span>
+<span class="nc" id="L27">    }</span>
+
+    @Override
+    public boolean hasNext() {
+<span class="nc bnc" id="L31" title="All 2 branches missed.">      return !dm.empty;</span>
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; next() {
+<span class="nc" id="L36">      Check.on(STATE, dm.empty).is(no(), &quot;no more rows in result set&quot;);</span>
+<span class="nc" id="L37">      return dm.mappify().get();</span>
+    }
+  }
+
+  private final ResultSet rs;
+  private final MapChannel&lt;?&gt;[] channels;
+
+  private boolean empty;
+
+<span class="nc" id="L46">  DefaultMappifier(ResultSet rs, MapChannel&lt;?&gt;[] channels) {</span>
+<span class="nc" id="L47">    this.rs = rs;</span>
+<span class="nc" id="L48">    this.channels = channels;</span>
+<span class="nc" id="L49">  }</span>
+
+  @Override
+  public Optional&lt;Map&lt;String, Object&gt;&gt; mappify() {
+<span class="nc bnc" id="L53" title="All 2 branches missed.">    if (empty) {</span>
+<span class="nc" id="L54">      return Optional.empty();</span>
+    }
+    try {
+<span class="nc" id="L57">      Optional&lt;Map&lt;String, Object&gt;&gt; row = Optional.of(toMap(rs, channels));</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">      empty = !rs.next();</span>
+<span class="nc" id="L59">      return row;</span>
+<span class="nc" id="L60">    } catch (Throwable t) {</span>
+<span class="nc" id="L61">      throw new KlojangSQLException(t);</span>
+    }
+  }
+
+  @Override
+  public List&lt;Map&lt;String, Object&gt;&gt; mappify(int limit) {
+<span class="nc" id="L67">    Check.that(limit, &quot;limit&quot;).is(gt(), 0);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">    if (empty) {</span>
+<span class="nc" id="L69">      return Collections.emptyList();</span>
+    }
+<span class="nc" id="L71">    List&lt;Map&lt;String, Object&gt;&gt; all = new ArrayList&lt;&gt;(limit);</span>
+<span class="nc" id="L72">    int i = 0;</span>
+    try {
+      do {
+<span class="nc" id="L75">        all.add(toMap(rs, channels));</span>
+<span class="nc bnc" id="L76" title="All 6 branches missed.">      } while (++i &lt; limit &amp;&amp; (empty = !rs.next()));</span>
+<span class="nc" id="L77">    } catch (Throwable t) {</span>
+<span class="nc" id="L78">      throw new KlojangSQLException(t);</span>
+<span class="nc" id="L79">    }</span>
+<span class="nc" id="L80">    return all;</span>
+  }
+
+  @Override
+  public List&lt;Map&lt;String, Object&gt;&gt; mappifyAll() {
+<span class="nc" id="L85">    return mappifyAll(10);</span>
+  }
+
+  @Override
+  public List&lt;Map&lt;String, Object&gt;&gt; mappifyAll(int sizeEstimate) {
+<span class="nc" id="L90">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">    if (empty) {</span>
+<span class="nc" id="L92">      return Collections.emptyList();</span>
+    }
+<span class="nc" id="L94">    List&lt;Map&lt;String, Object&gt;&gt; all = new ArrayList&lt;&gt;(sizeEstimate);</span>
+    try {
+      do {
+<span class="nc" id="L97">        all.add(toMap(rs, channels));</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">      } while (rs.next());</span>
+<span class="nc" id="L99">    } catch (Throwable t) {</span>
+<span class="nc" id="L100">      throw new KlojangSQLException(t);</span>
+<span class="nc" id="L101">    }</span>
+<span class="nc" id="L102">    empty = true;</span>
+<span class="nc" id="L103">    return all;</span>
+  }
+
+  @Override
+  public boolean isEmpty() {
+<span class="nc" id="L108">    return empty;</span>
+  }
+
+  @Override
+  public Iterator&lt;Map&lt;String, Object&gt;&gt; iterator() {
+<span class="nc" id="L113">    return new MapIterator(this);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

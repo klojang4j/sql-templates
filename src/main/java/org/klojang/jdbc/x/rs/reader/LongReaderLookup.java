@@ -14,7 +14,7 @@ public final class LongReaderLookup extends ColumnReaderLookup<Long> {
     add(INTEGER, new ColumnReader<>(GET_INT));
     add(SMALLINT, new ColumnReader<>(GET_SHORT));
     add(TINYINT, new ColumnReader<>(GET_BYTE));
-    add(REAL, new ColumnReader<Float, Long>(GET_FLOAT, NumberMethods::convert));
+    add(REAL, new ColumnReader<>(GET_FLOAT, NumberMethods::convert));
     addMultiple(new ColumnReader<>(GET_DOUBLE, NumberMethods::convert),
           FLOAT,
           DOUBLE);

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLNormalizer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.sql</a> &gt; <span class="el_source">SQLNormalizer.java</span></div><h1>SQLNormalizer.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.sql;
+
+import org.klojang.check.Check;
+import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.util.CollectionMethods;
+import org.klojang.util.MutableInt;
+import org.klojang.util.collection.IntArrayList;
+import org.klojang.util.collection.IntList;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.klojang.check.Check.fail;
+import static org.klojang.check.CommonChecks.ne;
+import static org.klojang.check.CommonProperties.strlen;
+import static org.klojang.util.CollectionMethods.collectionToList;
+
+/*
+ * Extracts named parameters from a SQL query string and replaces them with positional
+ * parameters (question marks).
+ */
+public final class SQLNormalizer {
+
+  private static final String ERR_ADJACENT_PARAMS =
+      &quot;adjacent parameters at positions ${0} and ${1} cannot yield valid SQL&quot;;
+  private static final String ERR_EMPTY_NAME =
+      &quot;zero-length parameter name at position ${0}&quot;;
+
+  private static final char QUOTE = '\'';
+  private static final char COLON = ':';
+  private static final char BACKSLASH = '\\';
+
+  private final String normalized;
+  private final Map&lt;String, IntList&gt; positions;
+  private final List&lt;NamedParameter&gt; params;
+
+<span class="fc" id="L39">  public SQLNormalizer(String sql) {</span>
+<span class="fc" id="L40">    final StringBuilder normalized = new StringBuilder(sql.length());</span>
+<span class="fc" id="L41">    final Map&lt;String, IntList&gt; positions = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L42">    final MutableInt counter = new MutableInt(); // parameter counter</span>
+<span class="fc" id="L43">    final StringBuilder name = new StringBuilder(); // parameter name</span>
+<span class="fc" id="L44">    int position = -1; // parameter start position</span>
+<span class="fc" id="L45">    boolean insideString = false;</span>
+<span class="fc" id="L46">    boolean escaped = false;</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">    for (int i = 0; i &lt; sql.length(); ++i) {</span>
+<span class="fc" id="L48">      char c = sql.charAt(i);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">      if (insideString) {</span>
+<span class="fc" id="L50">        normalized.append(c);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (c == QUOTE) {</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">          if (!escaped) {</span>
+<span class="fc" id="L53">            insideString = false;</span>
+          }
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        } else if (c == BACKSLASH) {</span>
+<span class="fc" id="L56">          escaped = true;</span>
+        } else {
+<span class="fc" id="L58">          escaped = false;</span>
+        }
+<span class="fc bfc" id="L60" title="All 2 branches covered.">      } else if (position != -1) { // we are assembling a parameter name</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (isParamChar(c)) {</span>
+<span class="fc" id="L62">          name.append(c);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">          if (i == sql.length() - 1) {</span>
+<span class="fc" id="L64">            addParam(name, position, positions, counter);</span>
+          }
+        } else {
+<span class="fc" id="L67">          addParam(name, position, positions, counter);</span>
+<span class="fc" id="L68">          normalized.append(c);</span>
+<span class="fc" id="L69">          position = -1;</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">          if (c == QUOTE) {</span>
+<span class="nc" id="L71">            insideString = true;</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">          } else if (c == COLON) {</span>
+<span class="nc" id="L73">            fail(KlojangSQLException::new, ERR_ADJACENT_PARAMS, position, i);</span>
+          }
+        }
+<span class="fc bfc" id="L76" title="All 2 branches covered.">      } else if (c == COLON) {</span>
+<span class="fc" id="L77">        normalized.append('?');</span>
+<span class="fc" id="L78">        position = i;</span>
+<span class="fc" id="L79">        name.setLength(0);</span>
+      } else {
+<span class="fc" id="L81">        normalized.append(c);</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (c == QUOTE) {</span>
+<span class="fc" id="L83">          insideString = true;</span>
+        }
+      }
+    }
+<span class="fc" id="L87">    this.normalized = normalized.toString();</span>
+<span class="fc" id="L88">    this.positions = CollectionMethods.freeze(positions, IntList::copyOf);</span>
+<span class="fc" id="L89">    this.params = collectionToList(positions.entrySet(), this::toNamedParam);</span>
+<span class="fc" id="L90">  }</span>
+
+  /*
+   * Returns SQL in which all named parameters have been replaced with question marks
+   * (i.e. standard JDBC positional parameters).
+   */
+  public String getNormalizedSQL() {
+<span class="fc" id="L97">    return normalized;</span>
+  }
+
+  public List&lt;NamedParameter&gt; getParameters() {
+<span class="fc" id="L101">    return params;</span>
+  }
+
+  public Map&lt;String, IntList&gt; getParameterPositions() {
+<span class="fc" id="L105">    return positions;</span>
+  }
+
+  private static boolean isParamChar(char c) {
+<span class="pc bpc" id="L109" title="1 of 4 branches missed.">    return Character.isLetterOrDigit(c) || c == '_';</span>
+  }
+
+  private static void addParam(
+      StringBuilder name,
+      int position,
+      Map&lt;String, IntList&gt; positions,
+      MutableInt counter) {
+<span class="fc" id="L117">    Check.on(KlojangSQLException::new, name)</span>
+<span class="fc" id="L118">        .has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);</span>
+<span class="fc" id="L119">    positions</span>
+<span class="fc" id="L120">        .computeIfAbsent(name.toString(), k -&gt; new IntArrayList())</span>
+<span class="fc" id="L121">        .add(counter.ppi());</span>
+<span class="fc" id="L122">  }</span>
+
+  private NamedParameter toNamedParam(Entry&lt;String, IntList&gt; e) {
+<span class="fc" id="L125">    return new NamedParameter(e.getKey(), IntList.copyOf(e.getValue()));</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
