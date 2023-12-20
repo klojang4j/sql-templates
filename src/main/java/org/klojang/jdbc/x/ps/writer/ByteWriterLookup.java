@@ -1,13 +1,13 @@
 package org.klojang.jdbc.x.ps.writer;
 
 import org.klojang.convert.Bool;
+import org.klojang.jdbc.x.ps.ColumnWriterLookup;
 import org.klojang.jdbc.x.ps.PreparedStatementMethod;
 import org.klojang.jdbc.x.ps.ColumnWriter;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
 
 import static java.sql.Types.*;
 
-public class ByteWriterLookup extends ColumnWriterLookup<Byte> {
+public final class ByteWriterLookup extends ColumnWriterLookup<Byte> {
 
   public static final ColumnWriter<Byte, Byte> DEFAULT = new ColumnWriter<>(PreparedStatementMethod.SET_BYTE);
 

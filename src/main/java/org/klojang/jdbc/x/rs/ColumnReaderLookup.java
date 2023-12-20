@@ -11,8 +11,7 @@ import java.util.stream.IntStream;
  * {@link java.sql.Types java.sql.Types}.
  */
 public sealed class ColumnReaderLookup<T> extends HashMap<Integer, ColumnReader<?, ?>>
-      permits
-      BooleanReaderLookup,
+      permits BooleanReaderLookup,
       ByteReaderLookup,
       DoubleReaderLookup,
       EnumReaderLookup,

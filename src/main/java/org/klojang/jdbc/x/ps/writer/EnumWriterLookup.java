@@ -1,8 +1,8 @@
 package org.klojang.jdbc.x.ps.writer;
 
+import org.klojang.jdbc.x.ps.ColumnWriterLookup;
 import org.klojang.jdbc.x.ps.PreparedStatementMethod;
 import org.klojang.jdbc.x.ps.ColumnWriter;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
 
 import static java.sql.Types.*;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
