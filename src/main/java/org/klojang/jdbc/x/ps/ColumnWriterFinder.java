@@ -10,6 +10,7 @@ import java.util.Map;
 
 import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.x.SQLTypeNames.getTypeName;
+import static org.klojang.util.ClassMethods.className;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class ColumnWriterFinder {
@@ -31,36 +32,41 @@ class ColumnWriterFinder {
   }
 
   <T, U> ColumnWriter<T, U> getDefaultWriter(Class<T> fieldType) {
-    ColumnWriter receiver = DefaultWriters.INSTANCE.getDefaultReceiver(fieldType);
-    return Check.that(receiver).is(notNull(), "Type not supported: {type}").ok();
+    ColumnWriter receiver = DefaultWriters.INSTANCE.getDefaultWriter(fieldType);
+    return Check.that(receiver)
+          .is(notNull(), "Type not supported: ${0}", className(fieldType))
+          .ok();
   }
 
-  <T, U> ColumnWriter<T, U> findReceiver(Class<T> fieldType, int sqlType) {
+  <T, U> ColumnWriter<T, U> findWriter(Class<T> fieldType, int sqlType) {
     // This implicitly checks that the specified int is one of the
     // static final int constants in the java.sql.Types class
     String sqlTypeName = getTypeName(sqlType);
-    Map<Integer, ColumnWriter> receivers = all.get(fieldType);
-    Check.that(receivers).is(notNull(), "Type not supported: {type}");
-    ColumnWriter<T, U> receiver = receivers.get(sqlType);
-    Check.that(receiver).is(notNull(), "Cannot convert {0} to {type}", sqlTypeName);
-    return receiver;
+    Map<Integer, ColumnWriter> writers = all.get(fieldType);
+    Check.that(writers).is(notNull(), "Type not supported: ${0}", className(fieldType));
+    ColumnWriter<T, U> writer = writers.get(sqlType);
+    Check.that(writer).is(notNull(),
+          "Cannot convert ${0} to ${1}",
+          sqlTypeName,
+          className(fieldType));
+    return writer;
   }
 
   private static Map createReceivers() {
     return TypeMap.nativeTypeMapBuilder()
-        .autobox(true)
-        .add(String.class, immutable(new StringWriterLookup()))
-        .add(Integer.class, immutable(new IntWriterLookup()))
-        .add(Long.class, immutable(new LongWriterLookup()))
-        .add(Double.class, immutable(new DoubleWriterLookup()))
-        .add(Float.class, immutable(new FloatWriterLookup()))
-        .add(Short.class, immutable(new ShortWriterLookup()))
-        .add(Byte.class, immutable(new ByteWriterLookup()))
-        .add(Boolean.class, immutable(new BooleanWriterLookup()))
-        .add(LocalDate.class, immutable(new LocalDateWriterLookup()))
-        .add(LocalDateTime.class, immutable(new LocalDateTimeReceivers()))
-        .add(Enum.class, immutable(new EnumWriterLookup()))
-        .freeze();
+          .autobox(true)
+          .add(String.class, immutable(new StringWriterLookup()))
+          .add(Integer.class, immutable(new IntWriterLookup()))
+          .add(Long.class, immutable(new LongWriterLookup()))
+          .add(Double.class, immutable(new DoubleWriterLookup()))
+          .add(Float.class, immutable(new FloatWriterLookup()))
+          .add(Short.class, immutable(new ShortWriterLookup()))
+          .add(Byte.class, immutable(new ByteWriterLookup()))
+          .add(Boolean.class, immutable(new BooleanWriterLookup()))
+          .add(LocalDate.class, immutable(new LocalDateWriterLookup()))
+          .add(LocalDateTime.class, immutable(new LocalDateTimeWriterLookup()))
+          .add(Enum.class, immutable(new EnumWriterLookup()))
+          .freeze();
   }
 
   private static Map<Integer, ColumnWriter> immutable(ColumnWriterLookup src) {

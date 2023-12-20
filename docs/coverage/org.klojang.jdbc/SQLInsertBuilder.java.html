@@ -140,7 +140,7 @@ public final class SQLInsertBuilder {
 <span class="fc" id="L140">    Check.on(STATE, beanClass, &quot;beanClass&quot;).is(notNull());</span>
 <span class="fc" id="L141">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
 <span class="fc" id="L142">    Set&lt;String&gt; props = getters.keySet();</span>
-<span class="pc bpc" id="L143" title="1 of 2 branches missed.">    if (!isEmpty(properties)) {</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">    if (!isEmpty(properties)) {</span>
 <span class="pc bpc" id="L144" title="1 of 2 branches missed.">      if (exclude) {</span>
 <span class="fc" id="L145">        props = new LinkedHashSet&lt;&gt;(props);</span>
 <span class="fc bfc" id="L146" title="All 2 branches covered.">        for (String prop : properties) {</span>

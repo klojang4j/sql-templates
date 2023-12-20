@@ -19,9 +19,9 @@ public final class ShortWriterLookup extends ColumnWriterLookup<Short> {
     put(REAL, new ColumnWriter<>(SET_FLOAT));
     put(FLOAT, DoubleWriterLookup.DEFAULT);
     put(DOUBLE, DoubleWriterLookup.DEFAULT);
-    putMultiple(new ColumnWriter<>(SET_BIG_DECIMAL), NUMERIC, DECIMAL);
+    addMultiple(new ColumnWriter<>(SET_BIG_DECIMAL), NUMERIC, DECIMAL);
     put(TINYINT, new ColumnWriter<Short, Byte>(SET_BYTE, NumberMethods::convert));
-    putMultiple(new ColumnWriter<>(SET_BOOLEAN, Bool::from), BOOLEAN, BIT);
+    addMultiple(new ColumnWriter<>(SET_BOOLEAN, Bool::from), BOOLEAN, BIT);
     put(VARCHAR, ColumnWriter.ANY_TO_STRING);
     put(CHAR, ColumnWriter.ANY_TO_STRING);
   }

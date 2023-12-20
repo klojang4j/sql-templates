@@ -59,7 +59,7 @@ class BeanValueBinder<FIELD_TYPE, PARAM_TYPE> {
         if (sqlType == null) {
           writer = negotiator.getDefaultWriter(type);
         } else {
-          writer = negotiator.findReceiver(type, sqlType);
+          writer = negotiator.findWriter(type, sqlType);
         }
       }
       binders.add(new BeanValueBinder<>(getter, writer, param));

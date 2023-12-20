@@ -15,12 +15,12 @@ public final class FloatWriterLookup extends ColumnWriterLookup&lt;Float&gt; {
 
 <span class="fc" id="L16">  public FloatWriterLookup() {</span>
 <span class="fc" id="L17">    put(REAL, DEFAULT);</span>
-<span class="fc" id="L18">    putMultiple(new ColumnWriter&lt;&gt;(SET_DOUBLE, NumberMethods::convert), FLOAT, DOUBLE);</span>
+<span class="fc" id="L18">    addMultiple(new ColumnWriter&lt;&gt;(SET_DOUBLE, NumberMethods::convert), FLOAT, DOUBLE);</span>
 <span class="fc" id="L19">    put(BIGINT, new ColumnWriter&lt;Float, Long&gt;(SET_LONG, NumberMethods::convert));</span>
 <span class="fc" id="L20">    put(INTEGER, new ColumnWriter&lt;Float, Integer&gt;(SET_INT, NumberMethods::convert));</span>
 <span class="fc" id="L21">    put(SMALLINT, new ColumnWriter&lt;Float, Short&gt;(SET_SHORT, NumberMethods::convert));</span>
 <span class="fc" id="L22">    put(TINYINT, new ColumnWriter&lt;Float, Byte&gt;(SET_BYTE, NumberMethods::convert));</span>
-<span class="fc" id="L23">    putMultiple(new ColumnWriter&lt;&gt;(SET_BOOLEAN, Bool::from), BOOLEAN, BIT);</span>
+<span class="fc" id="L23">    addMultiple(new ColumnWriter&lt;&gt;(SET_BOOLEAN, Bool::from), BOOLEAN, BIT);</span>
 <span class="fc" id="L24">    put(VARCHAR, ColumnWriter.ANY_TO_STRING);</span>
 <span class="fc" id="L25">    put(CHAR, ColumnWriter.ANY_TO_STRING);</span>
 <span class="fc" id="L26">  }</span>

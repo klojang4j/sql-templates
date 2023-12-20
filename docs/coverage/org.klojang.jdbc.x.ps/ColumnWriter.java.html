@@ -3,7 +3,9 @@
 import java.sql.PreparedStatement;
 import java.util.function.Function;
 
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
 import static org.klojang.util.ObjectMethods.ifNotEmpty;
+import static org.klojang.util.ObjectMethods.ifNotNull;
 
 /*
  * Binds a single value to a PreparedStatement, possibly after first converting it to the
@@ -12,37 +14,37 @@ import static org.klojang.util.ObjectMethods.ifNotEmpty;
 public final class ColumnWriter&lt;FIELD_TYPE, PARAM_TYPE&gt; {
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
-<span class="fc" id="L15">  public static final ColumnWriter&lt;?, String&gt; ANY_TO_STRING</span>
-        = new ColumnWriter(PreparedStatementMethod.SET_STRING, String::valueOf);
+<span class="fc" id="L17">  public static final ColumnWriter&lt;?, String&gt; ANY_TO_STRING</span>
+<span class="fc" id="L18">        = new ColumnWriter(SET_STRING, x -&gt; ifNotNull(x, Object::toString));</span>
 
   private final PreparedStatementMethod&lt;PARAM_TYPE&gt; setter;
   private final Adapter&lt;FIELD_TYPE, PARAM_TYPE&gt; adapter;
 
-<span class="fc" id="L21">  public ColumnWriter(PreparedStatementMethod&lt;PARAM_TYPE&gt; setter) {</span>
-<span class="fc" id="L22">    this.setter = setter;</span>
-<span class="fc" id="L23">    this.adapter = null;</span>
-<span class="fc" id="L24">  }</span>
+<span class="fc" id="L23">  public ColumnWriter(PreparedStatementMethod&lt;PARAM_TYPE&gt; setter) {</span>
+<span class="fc" id="L24">    this.setter = setter;</span>
+<span class="fc" id="L25">    this.adapter = null;</span>
+<span class="fc" id="L26">  }</span>
 
   public ColumnWriter(PreparedStatementMethod&lt;PARAM_TYPE&gt; setter,
         Function&lt;FIELD_TYPE, PARAM_TYPE&gt; adapter) {
-<span class="pc" id="L28">    this(setter, (x, y) -&gt; ifNotEmpty(x, adapter));</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L30">    this(setter, (x, y) -&gt; ifNotEmpty(x, adapter));</span>
+<span class="fc" id="L31">  }</span>
 
   public ColumnWriter(PreparedStatementMethod&lt;PARAM_TYPE&gt; setter,
-<span class="fc" id="L32">        Adapter&lt;FIELD_TYPE, PARAM_TYPE&gt; adapter) {</span>
-<span class="fc" id="L33">    this.setter = setter;</span>
-<span class="fc" id="L34">    this.adapter = adapter;</span>
-<span class="fc" id="L35">  }</span>
+<span class="fc" id="L34">        Adapter&lt;FIELD_TYPE, PARAM_TYPE&gt; adapter) {</span>
+<span class="fc" id="L35">    this.setter = setter;</span>
+<span class="fc" id="L36">    this.adapter = adapter;</span>
+<span class="fc" id="L37">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
   PARAM_TYPE getParamValue(FIELD_TYPE beanValue) {
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">    return adapter == null</span>
-<span class="fc" id="L40">          ? (PARAM_TYPE) beanValue</span>
-<span class="nc" id="L41">          : adapter.adapt(beanValue, setter.getParamType());</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">    return adapter == null</span>
+<span class="fc" id="L42">          ? (PARAM_TYPE) beanValue</span>
+<span class="fc" id="L43">          : adapter.adapt(beanValue, setter.getParamType());</span>
   }
 
   void bind(PreparedStatement ps, int paramIndex, PARAM_TYPE value) throws Throwable {
-<span class="fc" id="L45">    setter.bindValue(ps, paramIndex, value);</span>
-<span class="fc" id="L46">  }</span>
+<span class="fc" id="L47">    setter.bindValue(ps, paramIndex, value);</span>
+<span class="fc" id="L48">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

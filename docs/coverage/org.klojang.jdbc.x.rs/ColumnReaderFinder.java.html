@@ -4,6 +4,8 @@ import org.klojang.check.Check;
 import org.klojang.collections.TypeMap;
 import org.klojang.jdbc.KlojangSQLException;
 import org.klojang.jdbc.x.rs.reader.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -14,11 +16,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.lang.invoke.MethodType.methodType;
-import static java.util.Arrays.asList;
 import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.x.SQLTypeNames.getTypeName;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.GET_STRING;
+import static org.klojang.util.ArrayMethods.pack;
 import static org.klojang.util.ClassMethods.className;
+import static org.klojang.util.ClassMethods.simpleClassName;
+import static org.klojang.util.ObjectMethods.ifNull;
 
 /**
  * Finds a ColumnReader for a given Java type.
@@ -26,99 +30,126 @@ import static org.klojang.util.ClassMethods.className;
 @SuppressWarnings(&quot;rawtypes&quot;)
 public class ColumnReaderFinder {
 
+<span class="fc" id="L33">  private static final Logger LOG = LoggerFactory.getLogger(ColumnReaderFinder.class);</span>
+
   private static ColumnReaderFinder INSTANCE;
 
   public static ColumnReaderFinder getInstance() {
-<span class="fc bfc" id="L32" title="All 2 branches covered.">    if (INSTANCE == null) {</span>
-<span class="fc" id="L33">      INSTANCE = new ColumnReaderFinder();</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">    if (INSTANCE == null) {</span>
+<span class="fc" id="L39">      INSTANCE = new ColumnReaderFinder();</span>
     }
-<span class="fc" id="L35">    return INSTANCE;</span>
+<span class="fc" id="L41">    return INSTANCE;</span>
   }
 
+  // Predefined ColumnReaders for common types
   private final Map&lt;Class&lt;?&gt;, Map&lt;Integer, ColumnReader&gt;&gt; predefined;
-<span class="fc" id="L39">  private final Map&lt;Class&lt;?&gt;, ColumnReader&gt; adhoc = new HashMap&lt;&gt;();</span>
+  // ColumnReaders that are created on demand
+<span class="fc" id="L47">  private final Map&lt;Class&lt;?&gt;, ColumnReader&gt; adhoc = new HashMap&lt;&gt;();</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
-<span class="fc" id="L42">  private ColumnReaderFinder() {</span>
-<span class="fc" id="L43">    predefined = configure();</span>
-<span class="fc" id="L44">  }</span>
+<span class="fc" id="L50">  private ColumnReaderFinder() {</span>
+<span class="fc" id="L51">    predefined = configure();</span>
+<span class="fc" id="L52">  }</span>
 
   @SuppressWarnings({&quot;unchecked&quot;})
   public &lt;T, U&gt; ColumnReader&lt;T, U&gt; findReader(Class&lt;U&gt; fieldType, int sqlType) {
-<span class="fc" id="L48">    Map&lt;Integer, ColumnReader&gt; readers = predefined.get(fieldType);</span>
+<span class="fc" id="L56">    Map&lt;Integer, ColumnReader&gt; readers = predefined.get(fieldType);</span>
     ColumnReader reader;
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">    if (readers == null) {</span>
-      // We will call ResultSet.getString() and pass the string to a reasonably named
-      // factory method on fieldType; one that takes a string and returns an instance of
-      // fieldType.
-<span class="nc" id="L54">      reader = createUsingFactoryMethod(fieldType);</span>
-<span class="nc" id="L55">      Check.that(reader).is(notNull(), &quot;type not supported: ${0}&quot;, className(fieldType));</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">    if (readers == null) {</span>
+      // Then we'll call ResultSet.getString() and pass the string to a static factory
+      // method on fieldType (or at least something we guess is a static factory method);
+      // one that takes a string and returns an instance of fieldType.
+<span class="fc" id="L62">      reader = createUsingFactoryMethod(fieldType);</span>
+<span class="fc" id="L63">      Check.that(reader).is(notNull(), &quot;type not supported: ${0}&quot;, className(fieldType));</span>
     } else {
       // Implicitly checks that the specified int is one of the
       // static final int constants in java.sql.Types
-<span class="fc" id="L59">      String sqlTypeName = getTypeName(sqlType);</span>
-<span class="fc" id="L60">      reader = readers.get(sqlType);</span>
-<span class="fc" id="L61">      Check.that(reader).is(notNull(),</span>
+<span class="fc" id="L67">      String sqlTypeName = getTypeName(sqlType);</span>
+<span class="fc" id="L68">      reader = readers.get(sqlType);</span>
+<span class="fc" id="L69">      Check.that(reader).is(notNull(),</span>
             &quot;cannot convert ${0} to ${1}&quot;,
             sqlTypeName,
-<span class="fc" id="L64">            className(fieldType));</span>
+<span class="fc" id="L72">            className(fieldType));</span>
     }
-<span class="fc" id="L66">    return reader;</span>
+<span class="fc" id="L74">    return reader;</span>
   }
 
   private static Map configure() {
-<span class="fc" id="L70">    return TypeMap.nativeTypeMapBuilder()</span>
-<span class="fc" id="L71">          .autobox(true)</span>
-<span class="fc" id="L72">          .add(String.class, immutable(new StringReaderLookup()))</span>
-<span class="fc" id="L73">          .add(Integer.class, immutable(new IntReaderLookup()))</span>
-<span class="fc" id="L74">          .add(Double.class, immutable(new DoubleReaderLookup()))</span>
-<span class="fc" id="L75">          .add(Long.class, immutable(new LongReaderLookup()))</span>
-<span class="fc" id="L76">          .add(Float.class, immutable(new FloatReaderLookup()))</span>
-<span class="fc" id="L77">          .add(Short.class, immutable(new ShortReaderLookup()))</span>
-<span class="fc" id="L78">          .add(Byte.class, immutable(new ByteReaderLookup()))</span>
-<span class="fc" id="L79">          .add(Boolean.class, immutable(new BooleanReaderLookup()))</span>
-<span class="fc" id="L80">          .add(LocalDate.class, immutable(new LocalDateReaderLookup()))</span>
-<span class="fc" id="L81">          .add(LocalDateTime.class, immutable(new LocalDateTimeReaderLookup()))</span>
-<span class="fc" id="L82">          .add(Enum.class, immutable(new EnumReaderLookup()))</span>
-<span class="fc" id="L83">          .add(UUID.class, immutable(new UUIDReaderLookup()))</span>
-<span class="fc" id="L84">          .freeze();</span>
+<span class="fc" id="L78">    return TypeMap.nativeTypeMapBuilder()</span>
+<span class="fc" id="L79">          .autobox(true)</span>
+<span class="fc" id="L80">          .add(String.class, immutable(new StringReaderLookup()))</span>
+<span class="fc" id="L81">          .add(Integer.class, immutable(new IntReaderLookup()))</span>
+<span class="fc" id="L82">          .add(Double.class, immutable(new DoubleReaderLookup()))</span>
+<span class="fc" id="L83">          .add(Long.class, immutable(new LongReaderLookup()))</span>
+<span class="fc" id="L84">          .add(Float.class, immutable(new FloatReaderLookup()))</span>
+<span class="fc" id="L85">          .add(Short.class, immutable(new ShortReaderLookup()))</span>
+<span class="fc" id="L86">          .add(Byte.class, immutable(new ByteReaderLookup()))</span>
+<span class="fc" id="L87">          .add(Boolean.class, immutable(new BooleanReaderLookup()))</span>
+<span class="fc" id="L88">          .add(LocalDate.class, immutable(new LocalDateReaderLookup()))</span>
+<span class="fc" id="L89">          .add(LocalDateTime.class, immutable(new LocalDateTimeReaderLookup()))</span>
+<span class="fc" id="L90">          .add(Enum.class, immutable(new EnumReaderLookup()))</span>
+<span class="fc" id="L91">          .add(UUID.class, immutable(new UUIDReaderLookup()))</span>
+<span class="fc" id="L92">          .freeze();</span>
   }
 
   private static Map&lt;Integer, ColumnReader&gt; immutable(ColumnReaderLookup&lt;?&gt; src) {
-<span class="fc" id="L88">    return Map.copyOf(src);</span>
+<span class="fc" id="L96">    return Map.copyOf(src);</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
   private ColumnReader createUsingFactoryMethod(Class cls) {
-<span class="nc" id="L93">    ColumnReader reader = adhoc.get(cls);</span>
-<span class="nc bnc" id="L94" title="All 2 branches missed.">    if (reader == null) {</span>
-<span class="nc" id="L95">      MethodHandles.Lookup lookup = MethodHandles.publicLookup();</span>
-<span class="nc" id="L96">      MethodHandle mh = null;</span>
-<span class="nc bnc" id="L97" title="All 2 branches missed.">      for (String method : asList(&quot;fromString&quot;, &quot;forString&quot;, &quot;parse&quot;, &quot;read&quot;)) {</span>
-        try {
-<span class="nc" id="L99">          mh = lookup.findStatic(cls, method, methodType(cls, String.class));</span>
-<span class="nc" id="L100">          break;</span>
-<span class="nc" id="L101">        } catch (NoSuchMethodException e) {</span>
-          //
-<span class="nc" id="L103">        } catch (IllegalAccessException e) {</span>
-<span class="nc" id="L104">          throw new KlojangSQLException(e);</span>
-<span class="nc" id="L105">        }</span>
-<span class="nc" id="L106">      }</span>
-<span class="nc bnc" id="L107" title="All 2 branches missed.">      if (mh != null) {</span>
-<span class="nc" id="L108">        MethodHandle found = mh;</span>
-<span class="nc" id="L109">        Adapter adapter = (x, y) -&gt; {</span>
-          try {
-<span class="nc" id="L111">            return found.invoke(x);</span>
-<span class="nc" id="L112">          } catch (Throwable t) {</span>
-<span class="nc" id="L113">            throw new KlojangSQLException(t);</span>
-          }
-        };
-<span class="nc" id="L116">        reader = new ColumnReader&lt;&gt;(GET_STRING, adapter);</span>
-<span class="nc" id="L117">        adhoc.put(cls, reader);</span>
-      }
+<span class="fc" id="L101">    ColumnReader reader = adhoc.get(cls);</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">    if (reader != null) {</span>
+<span class="nc" id="L103">      return reader;</span>
     }
-<span class="nc" id="L120">    return reader;</span>
+<span class="fc" id="L105">    LOG.trace(&quot;No standard ColumnReader available for {}. Will try to construct one&quot;,</span>
+<span class="fc" id="L106">          className(cls));</span>
+<span class="fc" id="L107">    MethodHandle mh = ifNull(findFactoryMethod(cls), () -&gt; findConstructor(cls));</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">    if (mh != null) {</span>
+<span class="fc" id="L109">      adhoc.put(cls, reader = new ColumnReader&lt;&gt;(GET_STRING, createAdapter(mh)));</span>
+<span class="fc" id="L110">      return reader;</span>
+    }
+<span class="nc" id="L112">    return null;</span>
   }
 
+<span class="fc" id="L115">  private static final String[] FACTORY_CANDIDATES = pack(&quot;fromString&quot;,</span>
+        &quot;create&quot;,
+        &quot;valueOf&quot;,
+        &quot;from&quot;,
+        &quot;newInstance&quot;,
+        &quot;getInstance&quot;,
+        &quot;parse&quot;);
+
+  private static MethodHandle findFactoryMethod(Class cls) {
+<span class="fc" id="L124">    MethodHandles.Lookup lookup = MethodHandles.publicLookup();</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">    for (String method : FACTORY_CANDIDATES) {</span>
+      try {
+<span class="nc" id="L127">        MethodHandle mh = lookup.findStatic(cls, method, methodType(cls, String.class));</span>
+<span class="nc" id="L128">        LOG.trace(&quot;Will use {}.{}(String arg0)&quot;, simpleClassName(cls), method);</span>
+<span class="nc" id="L129">        return mh;</span>
+<span class="fc" id="L130">      } catch (Exception e) { /* next one, then ... */ }</span>
+    }
+<span class="fc" id="L132">    return null;</span>
+  }
+
+  private static MethodHandle findConstructor(Class cls) {
+<span class="fc" id="L136">    MethodHandles.Lookup lookup = MethodHandles.publicLookup();</span>
+    try {
+<span class="fc" id="L138">      MethodHandle mh = lookup.findConstructor(cls, methodType(void.class, String.class));</span>
+<span class="fc" id="L139">      LOG.trace(&quot;Will use constructor {}(String arg0)&quot;, simpleClassName(cls));</span>
+<span class="fc" id="L140">      return mh;</span>
+<span class="nc" id="L141">    } catch (Exception e) { }</span>
+<span class="nc" id="L142">    return null;</span>
+  }
+
+  private static Adapter createAdapter(MethodHandle mh) {
+<span class="fc" id="L146">    return (x, y) -&gt; {</span>
+      try {
+<span class="fc" id="L148">        return mh.invoke(x);</span>
+<span class="nc" id="L149">      } catch (Throwable t) {</span>
+<span class="nc" id="L150">        throw new KlojangSQLException(t);</span>
+      }
+    };
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

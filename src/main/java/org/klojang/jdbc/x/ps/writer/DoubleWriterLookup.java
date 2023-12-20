@@ -15,12 +15,24 @@ public final class DoubleWriterLookup extends ColumnWriterLookup<Double> {
   public DoubleWriterLookup() {
     put(FLOAT, DEFAULT);
     put(DOUBLE, DEFAULT);
-    put(BIGINT, new ColumnWriter<Double, Long>(PreparedStatementMethod.SET_LONG, NumberMethods::convert));
-    put(REAL, new ColumnWriter<Double, Float>(PreparedStatementMethod.SET_FLOAT, NumberMethods::convert));
-    put(INTEGER, new ColumnWriter<Double, Integer>(PreparedStatementMethod.SET_INT, NumberMethods::convert));
-    put(SMALLINT, new ColumnWriter<Double, Short>(PreparedStatementMethod.SET_SHORT, NumberMethods::convert));
-    put(TINYINT, new ColumnWriter<Double, Byte>(PreparedStatementMethod.SET_BYTE, NumberMethods::convert));
-    putMultiple(new ColumnWriter<Double, Boolean>(PreparedStatementMethod.SET_BOOLEAN, Bool::from), BOOLEAN, BIT);
+    put(BIGINT,
+          new ColumnWriter<Double, Long>(PreparedStatementMethod.SET_LONG,
+                NumberMethods::convert));
+    put(REAL,
+          new ColumnWriter<Double, Float>(PreparedStatementMethod.SET_FLOAT,
+                NumberMethods::convert));
+    put(INTEGER,
+          new ColumnWriter<Double, Integer>(PreparedStatementMethod.SET_INT,
+                NumberMethods::convert));
+    put(SMALLINT,
+          new ColumnWriter<Double, Short>(PreparedStatementMethod.SET_SHORT,
+                NumberMethods::convert));
+    put(TINYINT,
+          new ColumnWriter<Double, Byte>(PreparedStatementMethod.SET_BYTE,
+                NumberMethods::convert));
+    addMultiple(new ColumnWriter<>(PreparedStatementMethod.SET_BOOLEAN, Bool::from),
+          BOOLEAN,
+          BIT);
     put(VARCHAR, ColumnWriter.ANY_TO_STRING);
     put(CHAR, ColumnWriter.ANY_TO_STRING);
   }

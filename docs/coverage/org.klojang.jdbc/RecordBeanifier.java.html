@@ -50,13 +50,13 @@ final class RecordBeanifier&lt;T extends Record&gt; implements ResultSetBeanifie
 
   @Override
   public Optional&lt;T&gt; beanify() {
-<span class="nc bnc" id="L53" title="All 2 branches missed.">    if (empty) {</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">    if (empty) {</span>
 <span class="nc" id="L54">      return Optional.empty();</span>
     }
     try {
-<span class="nc" id="L57">      Optional&lt;T&gt; bean = Optional.of(factory.createRecord(rs));</span>
-<span class="nc bnc" id="L58" title="All 2 branches missed.">      empty = !rs.next();</span>
-<span class="nc" id="L59">      return bean;</span>
+<span class="fc" id="L57">      Optional&lt;T&gt; bean = Optional.of(factory.createRecord(rs));</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">      empty = !rs.next();</span>
+<span class="fc" id="L59">      return bean;</span>
 <span class="nc" id="L60">    } catch (Throwable t) {</span>
 <span class="nc" id="L61">      throw new KlojangSQLException(t);</span>
     }

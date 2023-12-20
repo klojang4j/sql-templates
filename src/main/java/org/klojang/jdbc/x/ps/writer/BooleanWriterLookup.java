@@ -14,7 +14,7 @@ public final class BooleanWriterLookup extends ColumnWriterLookup<Boolean> {
   public BooleanWriterLookup() {
     put(BOOLEAN, DEFAULT);
     put(BIT, DEFAULT);
-    putMultiple(new ColumnWriter<>(SET_STRING, this::asNumberString), VARCHAR, CHAR);
+    addMultiple(new ColumnWriter<>(SET_STRING, this::asNumberString), VARCHAR, CHAR);
   }
 
   private String asNumberString(Boolean b) {

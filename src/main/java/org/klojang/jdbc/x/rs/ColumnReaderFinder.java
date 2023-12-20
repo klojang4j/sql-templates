@@ -4,6 +4,8 @@ import org.klojang.check.Check;
 import org.klojang.collections.TypeMap;
 import org.klojang.jdbc.KlojangSQLException;
 import org.klojang.jdbc.x.rs.reader.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -14,17 +16,21 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.lang.invoke.MethodType.methodType;
-import static java.util.Arrays.asList;
 import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.x.SQLTypeNames.getTypeName;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.GET_STRING;
+import static org.klojang.util.ArrayMethods.pack;
 import static org.klojang.util.ClassMethods.className;
+import static org.klojang.util.ClassMethods.simpleClassName;
+import static org.klojang.util.ObjectMethods.ifNull;
 
 /**
  * Finds a ColumnReader for a given Java type.
  */
 @SuppressWarnings("rawtypes")
 public class ColumnReaderFinder {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ColumnReaderFinder.class);
 
   private static ColumnReaderFinder INSTANCE;
 
@@ -35,7 +41,9 @@ public class ColumnReaderFinder {
     return INSTANCE;
   }
 
+  // Predefined ColumnReaders for common types
   private final Map<Class<?>, Map<Integer, ColumnReader>> predefined;
+  // ColumnReaders that are created on demand
   private final Map<Class<?>, ColumnReader> adhoc = new HashMap<>();
 
   @SuppressWarnings("unchecked")
@@ -48,9 +56,9 @@ public class ColumnReaderFinder {
     Map<Integer, ColumnReader> readers = predefined.get(fieldType);
     ColumnReader reader;
     if (readers == null) {
-      // We will call ResultSet.getString() and pass the string to a reasonably named
-      // factory method on fieldType; one that takes a string and returns an instance of
-      // fieldType.
+      // Then we'll call ResultSet.getString() and pass the string to a static factory
+      // method on fieldType (or at least something we guess is a static factory method);
+      // one that takes a string and returns an instance of fieldType.
       reader = createUsingFactoryMethod(fieldType);
       Check.that(reader).is(notNull(), "type not supported: ${0}", className(fieldType));
     } else {
@@ -91,33 +99,56 @@ public class ColumnReaderFinder {
   @SuppressWarnings("unchecked")
   private ColumnReader createUsingFactoryMethod(Class cls) {
     ColumnReader reader = adhoc.get(cls);
-    if (reader == null) {
-      MethodHandles.Lookup lookup = MethodHandles.publicLookup();
-      MethodHandle mh = null;
-      for (String method : asList("fromString", "forString", "parse", "read")) {
-        try {
-          mh = lookup.findStatic(cls, method, methodType(cls, String.class));
-          break;
-        } catch (NoSuchMethodException e) {
-          //
-        } catch (IllegalAccessException e) {
-          throw new KlojangSQLException(e);
-        }
-      }
-      if (mh != null) {
-        MethodHandle found = mh;
-        Adapter adapter = (x, y) -> {
-          try {
-            return found.invoke(x);
-          } catch (Throwable t) {
-            throw new KlojangSQLException(t);
-          }
-        };
-        reader = new ColumnReader<>(GET_STRING, adapter);
-        adhoc.put(cls, reader);
-      }
+    if (reader != null) {
+      return reader;
     }
-    return reader;
+    LOG.trace("No standard ColumnReader available for {}. Will try to construct one",
+          className(cls));
+    MethodHandle mh = ifNull(findFactoryMethod(cls), () -> findConstructor(cls));
+    if (mh != null) {
+      adhoc.put(cls, reader = new ColumnReader<>(GET_STRING, createAdapter(mh)));
+      return reader;
+    }
+    return null;
   }
 
+  private static final String[] FACTORY_CANDIDATES = pack("fromString",
+        "create",
+        "valueOf",
+        "from",
+        "newInstance",
+        "getInstance",
+        "parse");
+
+  private static MethodHandle findFactoryMethod(Class cls) {
+    MethodHandles.Lookup lookup = MethodHandles.publicLookup();
+    for (String method : FACTORY_CANDIDATES) {
+      try {
+        MethodHandle mh = lookup.findStatic(cls, method, methodType(cls, String.class));
+        LOG.trace("Will use {}.{}(String arg0)", simpleClassName(cls), method);
+        return mh;
+      } catch (Exception e) { /* next one, then ... */ }
+    }
+    return null;
+  }
+
+  private static MethodHandle findConstructor(Class cls) {
+    MethodHandles.Lookup lookup = MethodHandles.publicLookup();
+    try {
+      MethodHandle mh = lookup.findConstructor(cls, methodType(void.class, String.class));
+      LOG.trace("Will use constructor {}(String arg0)", simpleClassName(cls));
+      return mh;
+    } catch (Exception e) { }
+    return null;
+  }
+
+  private static Adapter createAdapter(MethodHandle mh) {
+    return (x, y) -> {
+      try {
+        return mh.invoke(x);
+      } catch (Throwable t) {
+        throw new KlojangSQLException(t);
+      }
+    };
+  }
 }

@@ -10,12 +10,12 @@ import static java.sql.Types.TIMESTAMP;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_TIMESTAMP;
 import static org.klojang.util.ObjectMethods.ifNotNull;
 
-public final class LocalDateTimeReceivers extends ColumnWriterLookup<LocalDateTime> {
+public final class LocalDateTimeWriterLookup extends ColumnWriterLookup<LocalDateTime> {
 
   public static final ColumnWriter<LocalDateTime, Timestamp> DEFAULT =
         new ColumnWriter<>(SET_TIMESTAMP, d -> ifNotNull(d, Timestamp::valueOf));
 
-  public LocalDateTimeReceivers() {
+  public LocalDateTimeWriterLookup() {
     put(TIMESTAMP, DEFAULT);
   }
 

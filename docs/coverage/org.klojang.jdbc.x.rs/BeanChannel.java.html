@@ -38,7 +38,7 @@ public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
         ResultSet rs, Class&lt;?&gt; beanClass, NameMapper nameMapper) {
 <span class="fc" id="L39">    Map&lt;String, Setter&gt; setters = SetterFactory.INSTANCE.getSetters(beanClass);</span>
 <span class="pc bpc" id="L40" title="1 of 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
-<span class="nc" id="L41">      log(beanClass, rs, setters);</span>
+<span class="fc" id="L41">      log(beanClass, rs, setters);</span>
     }
 <span class="fc" id="L43">    ColumnReaderFinder negotiator = ColumnReaderFinder.getInstance();</span>
     try {
@@ -90,15 +90,15 @@ public class BeanChannel&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
         Class&lt;?&gt; beanClass,
         ResultSet resultset,
         Map&lt;String, Setter&gt; setters) {
-<span class="nc" id="L93">    LOG.trace(&quot;Mapping ResultSet to {}&quot;, beanClass.getSimpleName());</span>
-<span class="nc" id="L94">    Comparator&lt;String&gt; cmp = Comparator.comparing(String::toLowerCase);</span>
-<span class="nc" id="L95">    Set&lt;String&gt; cols = new TreeSet&lt;&gt;(cmp);</span>
-<span class="nc" id="L96">    cols.addAll(Arrays.asList(JDBC.getColumnNames(resultset)));</span>
-<span class="nc" id="L97">    Set&lt;String&gt; props = new TreeSet&lt;&gt;(cmp);</span>
-<span class="nc" id="L98">    props.addAll(setters.keySet());</span>
-<span class="nc" id="L99">    LOG.trace(&quot;Columns ......: {}&quot;, implode(cols));</span>
-<span class="nc" id="L100">    LOG.trace(&quot;Properties ...: {}&quot;, implode(props));</span>
-<span class="nc" id="L101">  }</span>
+<span class="fc" id="L93">    LOG.trace(&quot;Mapping ResultSet to {}&quot;, beanClass.getSimpleName());</span>
+<span class="fc" id="L94">    Comparator&lt;String&gt; cmp = Comparator.comparing(String::toLowerCase);</span>
+<span class="fc" id="L95">    Set&lt;String&gt; cols = new TreeSet&lt;&gt;(cmp);</span>
+<span class="fc" id="L96">    cols.addAll(Arrays.asList(JDBC.getColumnNames(resultset)));</span>
+<span class="fc" id="L97">    Set&lt;String&gt; props = new TreeSet&lt;&gt;(cmp);</span>
+<span class="fc" id="L98">    props.addAll(setters.keySet());</span>
+<span class="fc" id="L99">    LOG.trace(&quot;Columns ......: {}&quot;, implode(cols));</span>
+<span class="fc" id="L100">    LOG.trace(&quot;Properties ...: {}&quot;, implode(props));</span>
+<span class="fc" id="L101">  }</span>
 
 
 }

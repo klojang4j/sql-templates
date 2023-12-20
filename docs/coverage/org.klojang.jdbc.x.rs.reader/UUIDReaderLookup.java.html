@@ -13,7 +13,7 @@ public final class UUIDReaderLookup extends ColumnReaderLookup&lt;UUID&gt; {
 
 <span class="fc" id="L14">  public UUIDReaderLookup() {</span>
 <span class="fc" id="L15">    add(OTHER, new ColumnReader&lt;&gt;(ResultSetMethod.objectGetter(UUID.class)));</span>
-<span class="fc" id="L16">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, UUID::fromString), CHAR, VARCHAR);</span>
+<span class="fc" id="L16">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, UUID::fromString), CHAR, VARCHAR, BINARY);</span>
 <span class="fc" id="L17">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

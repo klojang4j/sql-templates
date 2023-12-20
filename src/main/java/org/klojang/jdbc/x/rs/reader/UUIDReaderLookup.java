@@ -13,6 +13,6 @@ public final class UUIDReaderLookup extends ColumnReaderLookup<UUID> {
 
   public UUIDReaderLookup() {
     add(OTHER, new ColumnReader<>(ResultSetMethod.objectGetter(UUID.class)));
-    addMultiple(new ColumnReader<>(GET_STRING, UUID::fromString), CHAR, VARCHAR);
+    addMultiple(new ColumnReader<>(GET_STRING, UUID::fromString), CHAR, VARCHAR, BINARY);
   }
 }

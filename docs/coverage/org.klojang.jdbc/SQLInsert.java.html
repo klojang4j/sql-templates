@@ -139,7 +139,7 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
     try {
 <span class="fc" id="L140">      applyBindings(ps);</span>
 <span class="fc" id="L141">      ps.executeUpdate();</span>
-<span class="pc bpc" id="L142" title="1 of 2 branches missed.">      return retrieveAutoKeys ? JDBC.getGeneratedKeys(ps, 1)[0] : -1;</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">      return retrieveAutoKeys ? JDBC.getGeneratedKeys(ps, 1)[0] : -1;</span>
 <span class="nc" id="L143">    } catch (Throwable t) {</span>
 <span class="nc" id="L144">      throw KlojangSQLException.wrap(t, sqlInfo);</span>
     } finally {

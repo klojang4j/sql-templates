@@ -48,7 +48,7 @@ public final class RecordFactory<T extends Record> {
         ResultSet resultset,
         NameMapper mapper) {
     Map<String, RecordComponent> components = getComponents(recordClass);
-    ColumnReaderFinder negotiator = ColumnReaderFinder.getInstance();
+    ColumnReaderFinder finder = ColumnReaderFinder.getInstance();
     if (LOG.isTraceEnabled()) {
       log(resultset, recordClass, components);
     }
@@ -68,7 +68,7 @@ public final class RecordFactory<T extends Record> {
           continue;
         }
         Class<?> javaType = component.getType();
-        ColumnReader reader = negotiator.findReader(javaType, sqlType);
+        ColumnReader reader = finder.findReader(javaType, sqlType);
         RecordChannel channel = new RecordChannel(reader, jdbcIdx, javaType);
         paramTypes.add(javaType);
         channels.add(channel);

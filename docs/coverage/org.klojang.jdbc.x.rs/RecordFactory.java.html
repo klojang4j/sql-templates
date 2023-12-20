@@ -48,9 +48,9 @@ public final class RecordFactory&lt;T extends Record&gt; {
         ResultSet resultset,
         NameMapper mapper) {
 <span class="fc" id="L50">    Map&lt;String, RecordComponent&gt; components = getComponents(recordClass);</span>
-<span class="fc" id="L51">    ColumnReaderFinder negotiator = ColumnReaderFinder.getInstance();</span>
+<span class="fc" id="L51">    ColumnReaderFinder finder = ColumnReaderFinder.getInstance();</span>
 <span class="pc bpc" id="L52" title="1 of 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
-<span class="nc" id="L53">      log(resultset, recordClass, components);</span>
+<span class="fc" id="L53">      log(resultset, recordClass, components);</span>
     }
 <span class="fc" id="L55">    List&lt;Class&lt;?&gt;&gt; paramTypes = new ArrayList&lt;&gt;(components.size());</span>
 <span class="fc" id="L56">    List&lt;RecordChannel&gt; channels = new ArrayList&lt;&gt;(components.size());</span>
@@ -68,7 +68,7 @@ public final class RecordFactory&lt;T extends Record&gt; {
 <span class="nc" id="L68">          continue;</span>
         }
 <span class="fc" id="L70">        Class&lt;?&gt; javaType = component.getType();</span>
-<span class="fc" id="L71">        ColumnReader reader = negotiator.findReader(javaType, sqlType);</span>
+<span class="fc" id="L71">        ColumnReader reader = finder.findReader(javaType, sqlType);</span>
 <span class="fc" id="L72">        RecordChannel channel = new RecordChannel(reader, jdbcIdx, javaType);</span>
 <span class="fc" id="L73">        paramTypes.add(javaType);</span>
 <span class="fc" id="L74">        channels.add(channel);</span>
@@ -85,15 +85,15 @@ public final class RecordFactory&lt;T extends Record&gt; {
   private static &lt;T extends Record&gt; void log(ResultSet rs,
         Class&lt;T&gt; recordClass,
         Map&lt;String, RecordComponent&gt; components) {
-<span class="nc" id="L88">    LOG.trace(&quot;Mapping ResultSet to {}&quot;, recordClass.getSimpleName());</span>
-<span class="nc" id="L89">    Comparator&lt;String&gt; cmp = Comparator.comparing(String::toLowerCase);</span>
-<span class="nc" id="L90">    Set&lt;String&gt; cols = new TreeSet&lt;&gt;(cmp);</span>
-<span class="nc" id="L91">    cols.addAll(Arrays.asList(JDBC.getColumnNames(rs)));</span>
-<span class="nc" id="L92">    Set&lt;String&gt; props = new TreeSet&lt;&gt;(cmp);</span>
-<span class="nc" id="L93">    props.addAll(components.keySet());</span>
-<span class="nc" id="L94">    LOG.trace(&quot;Columns ......: {}&quot;, implode(cols));</span>
-<span class="nc" id="L95">    LOG.trace(&quot;Properties ...: {}&quot;, implode(props));</span>
-<span class="nc" id="L96">  }</span>
+<span class="fc" id="L88">    LOG.trace(&quot;Mapping ResultSet to {}&quot;, recordClass.getSimpleName());</span>
+<span class="fc" id="L89">    Comparator&lt;String&gt; cmp = Comparator.comparing(String::toLowerCase);</span>
+<span class="fc" id="L90">    Set&lt;String&gt; cols = new TreeSet&lt;&gt;(cmp);</span>
+<span class="fc" id="L91">    cols.addAll(Arrays.asList(JDBC.getColumnNames(rs)));</span>
+<span class="fc" id="L92">    Set&lt;String&gt; props = new TreeSet&lt;&gt;(cmp);</span>
+<span class="fc" id="L93">    props.addAll(components.keySet());</span>
+<span class="fc" id="L94">    LOG.trace(&quot;Columns ......: {}&quot;, implode(cols));</span>
+<span class="fc" id="L95">    LOG.trace(&quot;Properties ...: {}&quot;, implode(props));</span>
+<span class="fc" id="L96">  }</span>
 
   private static Map&lt;String, RecordComponent&gt; getComponents(Class cls) {
 <span class="fc" id="L99">    return CollectionMethods.collectionToMap(</span>

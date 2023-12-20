@@ -17,7 +17,7 @@ public final class IntWriterLookup extends ColumnWriterLookup<Integer> {
     put(INTEGER, DEFAULT);
     put(SMALLINT, new ColumnWriter<Integer, Short>(SET_SHORT, NumberMethods::convert));
     put(TINYINT, new ColumnWriter<Integer, Byte>(SET_BYTE, NumberMethods::convert));
-    putMultiple(new ColumnWriter<>(SET_BOOLEAN, Bool::from), BOOLEAN, BIT);
+    addMultiple(new ColumnWriter<>(SET_BOOLEAN, Bool::from), BOOLEAN, BIT);
     put(VARCHAR, ColumnWriter.ANY_TO_STRING);
     put(CHAR, ColumnWriter.ANY_TO_STRING);
   }

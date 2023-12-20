@@ -15,15 +15,27 @@ public final class DoubleWriterLookup extends ColumnWriterLookup&lt;Double&gt; {
 <span class="fc" id="L15">  public DoubleWriterLookup() {</span>
 <span class="fc" id="L16">    put(FLOAT, DEFAULT);</span>
 <span class="fc" id="L17">    put(DOUBLE, DEFAULT);</span>
-<span class="fc" id="L18">    put(BIGINT, new ColumnWriter&lt;Double, Long&gt;(PreparedStatementMethod.SET_LONG, NumberMethods::convert));</span>
-<span class="fc" id="L19">    put(REAL, new ColumnWriter&lt;Double, Float&gt;(PreparedStatementMethod.SET_FLOAT, NumberMethods::convert));</span>
-<span class="fc" id="L20">    put(INTEGER, new ColumnWriter&lt;Double, Integer&gt;(PreparedStatementMethod.SET_INT, NumberMethods::convert));</span>
-<span class="fc" id="L21">    put(SMALLINT, new ColumnWriter&lt;Double, Short&gt;(PreparedStatementMethod.SET_SHORT, NumberMethods::convert));</span>
-<span class="fc" id="L22">    put(TINYINT, new ColumnWriter&lt;Double, Byte&gt;(PreparedStatementMethod.SET_BYTE, NumberMethods::convert));</span>
-<span class="fc" id="L23">    putMultiple(new ColumnWriter&lt;Double, Boolean&gt;(PreparedStatementMethod.SET_BOOLEAN, Bool::from), BOOLEAN, BIT);</span>
-<span class="fc" id="L24">    put(VARCHAR, ColumnWriter.ANY_TO_STRING);</span>
-<span class="fc" id="L25">    put(CHAR, ColumnWriter.ANY_TO_STRING);</span>
-<span class="fc" id="L26">  }</span>
+<span class="fc" id="L18">    put(BIGINT,</span>
+          new ColumnWriter&lt;Double, Long&gt;(PreparedStatementMethod.SET_LONG,
+                NumberMethods::convert));
+<span class="fc" id="L21">    put(REAL,</span>
+          new ColumnWriter&lt;Double, Float&gt;(PreparedStatementMethod.SET_FLOAT,
+                NumberMethods::convert));
+<span class="fc" id="L24">    put(INTEGER,</span>
+          new ColumnWriter&lt;Double, Integer&gt;(PreparedStatementMethod.SET_INT,
+                NumberMethods::convert));
+<span class="fc" id="L27">    put(SMALLINT,</span>
+          new ColumnWriter&lt;Double, Short&gt;(PreparedStatementMethod.SET_SHORT,
+                NumberMethods::convert));
+<span class="fc" id="L30">    put(TINYINT,</span>
+          new ColumnWriter&lt;Double, Byte&gt;(PreparedStatementMethod.SET_BYTE,
+                NumberMethods::convert));
+<span class="fc" id="L33">    addMultiple(new ColumnWriter&lt;&gt;(PreparedStatementMethod.SET_BOOLEAN, Bool::from),</span>
+          BOOLEAN,
+          BIT);
+<span class="fc" id="L36">    put(VARCHAR, ColumnWriter.ANY_TO_STRING);</span>
+<span class="fc" id="L37">    put(CHAR, ColumnWriter.ANY_TO_STRING);</span>
+<span class="fc" id="L38">  }</span>
 
 
 }

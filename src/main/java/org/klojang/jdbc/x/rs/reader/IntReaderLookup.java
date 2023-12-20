@@ -4,6 +4,8 @@ import org.klojang.convert.NumberMethods;
 import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderLookup;
 
+import java.math.BigDecimal;
+
 import static java.sql.Types.*;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 

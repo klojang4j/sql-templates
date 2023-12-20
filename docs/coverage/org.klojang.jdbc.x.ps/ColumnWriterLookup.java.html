@@ -7,8 +7,8 @@ public abstract class ColumnWriterLookup&lt;T&gt; extends HashMap&lt;Integer, Co
 
 <span class="fc" id="L8">  public ColumnWriterLookup() {}</span>
 
-  public void putMultiple(ColumnWriter&lt;T, ?&gt; receiver, int... sqlTypes) {
-<span class="fc" id="L11">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, receiver));</span>
+  public void addMultiple(ColumnWriter&lt;T, ?&gt; writer, int... sqlTypes) {
+<span class="fc" id="L11">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, writer));</span>
 <span class="fc" id="L12">  }</span>
 
 }

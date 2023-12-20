@@ -3,7 +3,9 @@ package org.klojang.jdbc.x.ps;
 import java.sql.PreparedStatement;
 import java.util.function.Function;
 
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
 import static org.klojang.util.ObjectMethods.ifNotEmpty;
+import static org.klojang.util.ObjectMethods.ifNotNull;
 
 /*
  * Binds a single value to a PreparedStatement, possibly after first converting it to the
@@ -13,7 +15,7 @@ public final class ColumnWriter<FIELD_TYPE, PARAM_TYPE> {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static final ColumnWriter<?, String> ANY_TO_STRING
-        = new ColumnWriter(PreparedStatementMethod.SET_STRING, String::valueOf);
+        = new ColumnWriter(SET_STRING, x -> ifNotNull(x, Object::toString));
 
   private final PreparedStatementMethod<PARAM_TYPE> setter;
   private final Adapter<FIELD_TYPE, PARAM_TYPE> adapter;

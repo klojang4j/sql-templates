@@ -24,13 +24,13 @@ public final class JDBC {
 
   public static String[] getColumnNames(ResultSet rs) {
     try {
-<span class="nc" id="L27">      ResultSetMetaData rsmd = rs.getMetaData();</span>
-<span class="nc" id="L28">      int sz = rsmd.getColumnCount();</span>
-<span class="nc" id="L29">      String[] colNames = new String[sz];</span>
-<span class="nc bnc" id="L30" title="All 2 branches missed.">      for (int i = 0; i &lt; rsmd.getColumnCount(); ++i) {</span>
-<span class="nc" id="L31">        colNames[i] = rsmd.getColumnLabel(i + 1);</span>
+<span class="fc" id="L27">      ResultSetMetaData rsmd = rs.getMetaData();</span>
+<span class="fc" id="L28">      int sz = rsmd.getColumnCount();</span>
+<span class="fc" id="L29">      String[] colNames = new String[sz];</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">      for (int i = 0; i &lt; rsmd.getColumnCount(); ++i) {</span>
+<span class="fc" id="L31">        colNames[i] = rsmd.getColumnLabel(i + 1);</span>
       }
-<span class="nc" id="L33">      return colNames;</span>
+<span class="fc" id="L33">      return colNames;</span>
 <span class="nc" id="L34">    } catch (SQLException e) {</span>
 <span class="nc" id="L35">      throw new KlojangSQLException(e);</span>
     }
@@ -47,7 +47,7 @@ public final class JDBC {
   public static PreparedStatement getPreparedStatement(Connection con,
         SQLInfo sqlInfo,
         boolean retrieveAutoKeys) {
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">    int x = retrieveAutoKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">    int x = retrieveAutoKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
     try {
 <span class="fc" id="L52">      return con.prepareStatement(sqlInfo.jdbcSQL(), x);</span>
 <span class="nc" id="L53">    } catch (SQLException e) {</span>
