@@ -19,8 +19,8 @@ Klojang JDBC,org.klojang.jdbc.x.ps,BeanBinder,0,26,0,0,0,7,0,3,0,3
 Klojang JDBC,org.klojang.jdbc.x.ps,BeanValueBinder,15,177,5,9,4,34,4,10,0,7
 Klojang JDBC,org.klojang.jdbc.x.ps,DefaultWriters,0,59,0,2,0,21,0,4,0,3
 Klojang JDBC,org.klojang.jdbc.x.ps,ColumnWriterLookup,0,17,0,0,0,3,0,3,0,3
-Klojang JDBC,org.klojang.jdbc.x.ps,ColumnWriterFinder,47,109,0,2,7,26,1,6,1,5
-Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod,24,150,2,2,6,47,2,7,0,7
+Klojang JDBC,org.klojang.jdbc.x.ps,ColumnWriterFinder,47,92,0,2,7,22,1,6,1,5
+Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod,26,170,3,3,6,52,3,7,0,7
 Klojang JDBC,org.klojang.jdbc,SQLBatchInsertBuilder,72,198,2,4,16,37,9,10,7,9
 Klojang JDBC,org.klojang.jdbc,EmptyMappifier,20,0,0,0,8,0,8,0,8,0
 Klojang JDBC,org.klojang.jdbc,BasicSQLSession,0,52,0,0,0,9,0,4,0,4

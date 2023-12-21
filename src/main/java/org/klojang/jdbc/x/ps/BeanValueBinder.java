@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Binds a single value from a JavaBean into a PreparedStatement.
  *
- * @param <FIELD_TYPE>
+ * @param <FIELD_TYPE> the type of the bean property
  * @param <PARAM_TYPE>
  * @author Ayco Holleman
  */

@@ -27,15 +27,11 @@ class ColumnWriterFinder {
   private final Map<Class<?>, Map<Integer, ColumnWriter>> all;
 
   private ColumnWriterFinder() {
-    Map tmp = createReceivers(); // to hell with generics
-    all = (Map<Class<?>, Map<Integer, ColumnWriter>>) tmp;
+    all = (Map<Class<?>, Map<Integer, ColumnWriter>>) createColumnWriters();
   }
 
   <T, U> ColumnWriter<T, U> getDefaultWriter(Class<T> fieldType) {
-    ColumnWriter receiver = DefaultWriters.INSTANCE.getDefaultWriter(fieldType);
-    return Check.that(receiver)
-          .is(notNull(), "Type not supported: ${0}", className(fieldType))
-          .ok();
+    return DefaultWriters.INSTANCE.getDefaultWriter(fieldType);
   }
 
   <T, U> ColumnWriter<T, U> findWriter(Class<T> fieldType, int sqlType) {
@@ -52,7 +48,7 @@ class ColumnWriterFinder {
     return writer;
   }
 
-  private static Map createReceivers() {
+  private static Map createColumnWriters() {
     return TypeMap.nativeTypeMapBuilder()
           .autobox(true)
           .add(String.class, immutable(new StringWriterLookup()))

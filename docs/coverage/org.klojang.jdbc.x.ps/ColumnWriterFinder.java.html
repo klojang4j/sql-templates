@@ -27,50 +27,46 @@ class ColumnWriterFinder {
   private final Map&lt;Class&lt;?&gt;, Map&lt;Integer, ColumnWriter&gt;&gt; all;
 
 <span class="fc" id="L29">  private ColumnWriterFinder() {</span>
-<span class="fc" id="L30">    Map tmp = createReceivers(); // to hell with generics</span>
-<span class="fc" id="L31">    all = (Map&lt;Class&lt;?&gt;, Map&lt;Integer, ColumnWriter&gt;&gt;) tmp;</span>
-<span class="fc" id="L32">  }</span>
+<span class="fc" id="L30">    all = (Map&lt;Class&lt;?&gt;, Map&lt;Integer, ColumnWriter&gt;&gt;) createColumnWriters();</span>
+<span class="fc" id="L31">  }</span>
 
   &lt;T, U&gt; ColumnWriter&lt;T, U&gt; getDefaultWriter(Class&lt;T&gt; fieldType) {
-<span class="fc" id="L35">    ColumnWriter receiver = DefaultWriters.INSTANCE.getDefaultWriter(fieldType);</span>
-<span class="fc" id="L36">    return Check.that(receiver)</span>
-<span class="fc" id="L37">          .is(notNull(), &quot;Type not supported: ${0}&quot;, className(fieldType))</span>
-<span class="fc" id="L38">          .ok();</span>
+<span class="fc" id="L34">    return DefaultWriters.INSTANCE.getDefaultWriter(fieldType);</span>
   }
 
   &lt;T, U&gt; ColumnWriter&lt;T, U&gt; findWriter(Class&lt;T&gt; fieldType, int sqlType) {
     // This implicitly checks that the specified int is one of the
     // static final int constants in the java.sql.Types class
-<span class="nc" id="L44">    String sqlTypeName = getTypeName(sqlType);</span>
-<span class="nc" id="L45">    Map&lt;Integer, ColumnWriter&gt; writers = all.get(fieldType);</span>
-<span class="nc" id="L46">    Check.that(writers).is(notNull(), &quot;Type not supported: ${0}&quot;, className(fieldType));</span>
-<span class="nc" id="L47">    ColumnWriter&lt;T, U&gt; writer = writers.get(sqlType);</span>
-<span class="nc" id="L48">    Check.that(writer).is(notNull(),</span>
+<span class="nc" id="L40">    String sqlTypeName = getTypeName(sqlType);</span>
+<span class="nc" id="L41">    Map&lt;Integer, ColumnWriter&gt; writers = all.get(fieldType);</span>
+<span class="nc" id="L42">    Check.that(writers).is(notNull(), &quot;Type not supported: ${0}&quot;, className(fieldType));</span>
+<span class="nc" id="L43">    ColumnWriter&lt;T, U&gt; writer = writers.get(sqlType);</span>
+<span class="nc" id="L44">    Check.that(writer).is(notNull(),</span>
           &quot;Cannot convert ${0} to ${1}&quot;,
           sqlTypeName,
-<span class="nc" id="L51">          className(fieldType));</span>
-<span class="nc" id="L52">    return writer;</span>
+<span class="nc" id="L47">          className(fieldType));</span>
+<span class="nc" id="L48">    return writer;</span>
   }
 
-  private static Map createReceivers() {
-<span class="fc" id="L56">    return TypeMap.nativeTypeMapBuilder()</span>
-<span class="fc" id="L57">          .autobox(true)</span>
-<span class="fc" id="L58">          .add(String.class, immutable(new StringWriterLookup()))</span>
-<span class="fc" id="L59">          .add(Integer.class, immutable(new IntWriterLookup()))</span>
-<span class="fc" id="L60">          .add(Long.class, immutable(new LongWriterLookup()))</span>
-<span class="fc" id="L61">          .add(Double.class, immutable(new DoubleWriterLookup()))</span>
-<span class="fc" id="L62">          .add(Float.class, immutable(new FloatWriterLookup()))</span>
-<span class="fc" id="L63">          .add(Short.class, immutable(new ShortWriterLookup()))</span>
-<span class="fc" id="L64">          .add(Byte.class, immutable(new ByteWriterLookup()))</span>
-<span class="fc" id="L65">          .add(Boolean.class, immutable(new BooleanWriterLookup()))</span>
-<span class="fc" id="L66">          .add(LocalDate.class, immutable(new LocalDateWriterLookup()))</span>
-<span class="fc" id="L67">          .add(LocalDateTime.class, immutable(new LocalDateTimeWriterLookup()))</span>
-<span class="fc" id="L68">          .add(Enum.class, immutable(new EnumWriterLookup()))</span>
-<span class="fc" id="L69">          .freeze();</span>
+  private static Map createColumnWriters() {
+<span class="fc" id="L52">    return TypeMap.nativeTypeMapBuilder()</span>
+<span class="fc" id="L53">          .autobox(true)</span>
+<span class="fc" id="L54">          .add(String.class, immutable(new StringWriterLookup()))</span>
+<span class="fc" id="L55">          .add(Integer.class, immutable(new IntWriterLookup()))</span>
+<span class="fc" id="L56">          .add(Long.class, immutable(new LongWriterLookup()))</span>
+<span class="fc" id="L57">          .add(Double.class, immutable(new DoubleWriterLookup()))</span>
+<span class="fc" id="L58">          .add(Float.class, immutable(new FloatWriterLookup()))</span>
+<span class="fc" id="L59">          .add(Short.class, immutable(new ShortWriterLookup()))</span>
+<span class="fc" id="L60">          .add(Byte.class, immutable(new ByteWriterLookup()))</span>
+<span class="fc" id="L61">          .add(Boolean.class, immutable(new BooleanWriterLookup()))</span>
+<span class="fc" id="L62">          .add(LocalDate.class, immutable(new LocalDateWriterLookup()))</span>
+<span class="fc" id="L63">          .add(LocalDateTime.class, immutable(new LocalDateTimeWriterLookup()))</span>
+<span class="fc" id="L64">          .add(Enum.class, immutable(new EnumWriterLookup()))</span>
+<span class="fc" id="L65">          .freeze();</span>
   }
 
   private static Map&lt;Integer, ColumnWriter&gt; immutable(ColumnWriterLookup src) {
-<span class="fc" id="L73">    return Map.copyOf(src);</span>
+<span class="fc" id="L69">    return Map.copyOf(src);</span>
   }
 
 }
