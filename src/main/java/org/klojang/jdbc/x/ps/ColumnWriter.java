@@ -7,9 +7,13 @@ import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
 import static org.klojang.util.ObjectMethods.ifNotEmpty;
 import static org.klojang.util.ObjectMethods.ifNotNull;
 
-/*
+/**
  * Binds a single value to a PreparedStatement, possibly after first converting it to the
  * appropriate type.
+ *
+ * @param <FIELD_TYPE> the type of the property whose values to bind
+ * @param <PARAM_TYPE> the type of the value passed to
+ *       PreparedStatement.setXXX(parameterIndex, value)
  */
 public final class ColumnWriter<FIELD_TYPE, PARAM_TYPE> {
 

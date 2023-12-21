@@ -23,7 +23,7 @@ import static java.lang.invoke.MethodType.methodType;
  * Represents one of the setXXX() methods of PreparedStatement.
  *
  * @param <PARAM_TYPE> the type of the value passed to
- * PreparedStatement.setXXX(parameterIndex, value)
+ *       PreparedStatement.setXXX(parameterIndex, value)
  */
 public final class PreparedStatementMethod<PARAM_TYPE> {
 

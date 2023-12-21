@@ -13,19 +13,20 @@ import java.sql.PreparedStatement;
 public interface BindInfo {
 
   /**
-   * Allows you to specify the storage type for a property. The return value must either
-   * be one of the constants in {@link java.sql.Types} (like
+   * Allows you to specify the storage type for a bean property or record component. The
+   * return value must either be one of the constants in {@link java.sql.Types} (like
    * {@link java.sql.Types#VARCHAR VARCHAR}) or {@code null}. Returning {@code null} means
-   * you leave it to <i>Klojang JDBC</i> to determine the mapping. The default
+   * you leave it to <i>Klojang JDBC</i> to determine the storage type. The default
    * implementation returns {@code null}. You may ignore any argument that you don't need
-   * in order to determine the storage type. For example, in many cases the Java type of a
-   * property will likely be enough to determine the corresponding SQL type.
+   * in order to determine the storage type. For example, in many cases the type of the
+   * property will be enough to determine the corresponding SQL type; you don't need to
+   * know the type of the bean containing the property.
    *
    * @param beanType the class containing the property whose SQL type to determine
    * @param propertyName the name of the property whose SQL type to determine
    * @param javaType the type of the property whose SQL type to determine
    * @return one of the class constants of the {@link java.sql.Types} class or
-   * {@code null}
+   *       {@code null}
    */
   default Integer getSqlType(
         Class<?> beanType,
