@@ -18,26 +18,26 @@ import static org.klojang.templates.NameMapper.AS_IS;
 
 /**
  * &lt;p&gt;A factory for {@link ResultSetBeanifier} instances. Generally you would create one
- * {@code BeanifierFactory} per SQL query. Possibly more if multiple bean types are
- * extracted from the same {@link ResultSet}. The very first {@code ResultSet} passed to
- * the {@link #getBeanifier(ResultSet) getBeanifier()} method is used to configure the
- * conversion from the {@code ResultSet} into a particular bean type. Subsequent calls to
- * {@code getBeanifier()} will use the same configuration. Passing heterogeneous result
- * sets to one and the same {@code BeanifierFactory} will therefore produce undefined
- * results.
+ * {@code BeanifierFactory} per SQL query. Possibly more if multiple bean  or
+ * {@code record} types are extracted from the same {@link ResultSet}. The very first
+ * {@code ResultSet} passed to the {@link #getBeanifier(ResultSet) getBeanifier()} method
+ * is used to configure the conversion from the {@code ResultSet} to the desired bean or
+ * {@code record} type. Subsequent calls to {@code getBeanifier()} will use that same
+ * configuration. Therefore, although multiple {@code BeanifierFactory} instances may be
+ * instantiated for a single SQL query, a single {@code BeanifierFactory} should never be
+ * used to &quot;beanify&quot; result sets from multiple queries.
  *
- * &lt;p&gt;(More precisely: all result sets must have the same number of columns and the same
- * column types in the same order. Column names do in fact not matter. The
+ * &lt;p&gt;&lt;i&gt;(More precisely: all result sets passed to
+ * {@link #getBeanifier(ResultSet) getBeanifier()} must have the same number of columns
+ * and the same column types in the same order. Column names do in fact not matter. The
  * column-to-property mapping is set up and fixed during the first call to
- * {@code getBeanifier()}. Thus, strictly speaking, the SQL query itself is not what
- * should always be the same for the result sets passed to {@code getBeanifier()}. You
- * could, in principle, share a single {@code BeanifierFactory} among multiple SQL queries
- * &amp;#8212; for example if they all select an &quot;ID&quot; column and a &quot;NAME&quot; column from
- * different tables in your application. This might be the case for web applications that
- * need to fill {@code &lt;select&gt;}) boxes.)
+ * {@code getBeanifier()}. Thus, you could, in fact, use a single {@code BeanifierFactory}
+ * for multiple SQL queries &amp;#8212; for example if they all select an &quot;ID&quot; column and a
+ * &quot;NAME&quot; column from different tables in your application. This might be the case for web
+ * applications that need to fill {@code &lt;select&gt;}) boxes.)&lt;/i&gt;
  *
  * @param &lt;T&gt; the type of JavaBeans produced by the beanifier obtained from the
- * {@code BeanifierFactory}
+ *       {@code BeanifierFactory}
  * @author Ayco Holleman
  */
 @SuppressWarnings(&quot;rawtypes&quot;)
@@ -64,7 +64,7 @@ public final class BeanifierFactory&lt;T&gt; {
    * names.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   * obtained from this {@code BeanifierFactory}
+   *       obtained from this {@code BeanifierFactory}
    */
 <span class="nc" id="L69">  public BeanifierFactory(Class&lt;T&gt; beanClass) {</span>
 <span class="nc" id="L70">    Check.notNull(beanClass, BEAN_CLASS);</span>
@@ -77,57 +77,61 @@ public final class BeanifierFactory&lt;T&gt; {
    * Creates a new {@code BeanifierFactory}. Column names will be mapped as-is to property
    * names.
    *
-   * @param beanClass the class of the JavaBeans that the {@code BeanifierFactory} will be
-   * catering for
-   * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a method
-   * reference to the constructor of the JavaBean (e.g. {@code Employee::new})
+   * @param beanClass the class of the JavaBeans that the {@code BeanifierFactory}
+   *       will be catering for
+   * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a
+   *       method reference to the constructor of the JavaBean (e.g.
+   *       {@code Employee::new}). An {@link IllegalArgumentException} is thrown if
+   *       {@code beanClass} is a {@code record} type.
    */
-<span class="nc" id="L85">  public BeanifierFactory(Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier) {</span>
-<span class="nc" id="L86">    Check.notNull(beanClass, BEAN_CLASS);</span>
-<span class="nc" id="L87">    Check.that(beanClass).isNot(Class::isRecord, BEAN_SUPPLIER_NOT_SUPPORTED);</span>
-<span class="nc" id="L88">    Check.notNull(beanSupplier, BEAN_SUPPLIER);</span>
-<span class="nc" id="L89">    this.beanClass = beanClass;</span>
-<span class="nc" id="L90">    this.beanSupplier = beanSupplier;</span>
-<span class="nc" id="L91">    this.mapper = AS_IS;</span>
-<span class="nc" id="L92">  }</span>
+<span class="nc" id="L87">  public BeanifierFactory(Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier) {</span>
+<span class="nc" id="L88">    Check.notNull(beanClass, BEAN_CLASS);</span>
+<span class="nc" id="L89">    Check.that(beanClass).isNot(Class::isRecord, BEAN_SUPPLIER_NOT_SUPPORTED);</span>
+<span class="nc" id="L90">    Check.notNull(beanSupplier, BEAN_SUPPLIER);</span>
+<span class="nc" id="L91">    this.beanClass = beanClass;</span>
+<span class="nc" id="L92">    this.beanSupplier = beanSupplier;</span>
+<span class="nc" id="L93">    this.mapper = AS_IS;</span>
+<span class="nc" id="L94">  }</span>
 
   /**
    * Creates a new {@code BeanifierFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   * obtained from this {@code BeanifierFactory}
-   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to property
-   * names
+   *       obtained from this {@code BeanifierFactory}
+   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to
+   *       property names
    */
-<span class="fc" id="L102">  public BeanifierFactory(Class&lt;T&gt; beanClass, NameMapper columnToPropertyMapper) {</span>
-<span class="fc" id="L103">    Check.notNull(beanClass, BEAN_CLASS);</span>
-<span class="fc" id="L104">    Check.notNull(columnToPropertyMapper, COLUMN_TO_PROPERTY_MAPPER);</span>
-<span class="fc" id="L105">    this.beanClass = beanClass;</span>
-<span class="fc bfc" id="L106" title="All 2 branches covered.">    beanSupplier = beanClass.isRecord() ? null : () -&gt; newInstance(beanClass);</span>
-<span class="fc" id="L107">    mapper = columnToPropertyMapper;</span>
-<span class="fc" id="L108">  }</span>
+<span class="fc" id="L104">  public BeanifierFactory(Class&lt;T&gt; beanClass, NameMapper columnToPropertyMapper) {</span>
+<span class="fc" id="L105">    Check.notNull(beanClass, BEAN_CLASS);</span>
+<span class="fc" id="L106">    Check.notNull(columnToPropertyMapper, COLUMN_TO_PROPERTY_MAPPER);</span>
+<span class="fc" id="L107">    this.beanClass = beanClass;</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">    beanSupplier = beanClass.isRecord() ? null : () -&gt; newInstance(beanClass);</span>
+<span class="fc" id="L109">    mapper = columnToPropertyMapper;</span>
+<span class="fc" id="L110">  }</span>
 
   /**
    * Creates a new {@code BeanifierFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   * obtained from this {@code BeanifierFactory}
-   * @param beanSupplier the supplier of the JavaBeans
-   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to property
-   * names
+   *       obtained from this {@code BeanifierFactory}
+   * @param beanSupplier the supplier of the JavaBeans. An
+   *       {@link IllegalArgumentException} is thrown if {@code beanClass} is a
+   *       {@code record} type.
+   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to
+   *       property names
    */
   public BeanifierFactory(
         Class&lt;T&gt; beanClass,
         Supplier&lt;T&gt; beanSupplier,
-<span class="nc" id="L122">        NameMapper columnToPropertyMapper) {</span>
-<span class="nc" id="L123">    Check.notNull(beanClass, BEAN_CLASS);</span>
-<span class="nc" id="L124">    Check.that(beanClass).isNot(Class::isRecord, BEAN_SUPPLIER_NOT_SUPPORTED);</span>
-<span class="nc" id="L125">    Check.notNull(beanSupplier, BEAN_SUPPLIER);</span>
-<span class="nc" id="L126">    Check.notNull(columnToPropertyMapper, COLUMN_TO_PROPERTY_MAPPER);</span>
-<span class="nc" id="L127">    this.beanClass = beanClass;</span>
-<span class="nc" id="L128">    this.beanSupplier = beanSupplier;</span>
-<span class="nc" id="L129">    this.mapper = columnToPropertyMapper;</span>
-<span class="nc" id="L130">  }</span>
+<span class="nc" id="L126">        NameMapper columnToPropertyMapper) {</span>
+<span class="nc" id="L127">    Check.notNull(beanClass, BEAN_CLASS);</span>
+<span class="nc" id="L128">    Check.that(beanClass).isNot(Class::isRecord, BEAN_SUPPLIER_NOT_SUPPORTED);</span>
+<span class="nc" id="L129">    Check.notNull(beanSupplier, BEAN_SUPPLIER);</span>
+<span class="nc" id="L130">    Check.notNull(columnToPropertyMapper, COLUMN_TO_PROPERTY_MAPPER);</span>
+<span class="nc" id="L131">    this.beanClass = beanClass;</span>
+<span class="nc" id="L132">    this.beanSupplier = beanSupplier;</span>
+<span class="nc" id="L133">    this.mapper = columnToPropertyMapper;</span>
+<span class="nc" id="L134">  }</span>
 
   /**
    * Returns a {@code ResultSetBeanifier} that will convert the rows in the specified
@@ -135,18 +139,14 @@ public final class BeanifierFactory&lt;T&gt; {
    *
    * @param rs the {@code ResultSet}
    * @return A {@code ResultSetBeanifier} that will convert the rows in the specified
-   * {@code ResultSet} into JavaBeans of type {@code &lt;T&gt;}
+   *       {@code ResultSet} into JavaBeans of type {@code &lt;T&gt;}
    * @throws SQLException if a database error occurs
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public ResultSetBeanifier&lt;T&gt; getBeanifier(ResultSet rs) throws SQLException {
-<span class="pc bpc" id="L143" title="1 of 2 branches missed.">    if (!rs.next()) {</span>
-<span class="nc" id="L144">      return EmptyBeanifier.INSTANCE;</span>
-    }
-<span class="fc bfc" id="L146" title="All 2 branches covered.">    if (beanClass.isRecord()) {</span>
-<span class="fc" id="L147">      return getRecordBeanifier(rs);</span>
-    }
-<span class="fc" id="L149">    return getDefaultBeanifier(rs);</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">    return rs.next()</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">          ? beanClass.isRecord() ? getRecordBeanifier(rs) : getDefaultBeanifier(rs)</span>
+<span class="nc" id="L149">          : EmptyBeanifier.INSTANCE;</span>
   }
 
   private DefaultBeanifier&lt;T&gt; getDefaultBeanifier(ResultSet rs) {

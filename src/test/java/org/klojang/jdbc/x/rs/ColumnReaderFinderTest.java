@@ -55,7 +55,8 @@ public class ColumnReaderFinderTest {
     SQL.prepareInsert()
           .of(Stuff.class)
           .into("STUFF")
-          .prepare(con, false)
+          .returnKeys(false)
+          .prepare(con)
           .bind(stuff)
           .execute();
     MY_CON.set(con);

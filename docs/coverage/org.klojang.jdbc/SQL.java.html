@@ -28,7 +28,7 @@ import java.sql.Connection;
  * &lt;p&gt;A classic example of something that you often want to, but cannot parametrize with
  * JDBC are the column(s) in the ORDER BY clause. &lt;i&gt;Klojang JDBC&lt;/i&gt; lets you do this
  * using &lt;b&gt;&lt;a
- * href=&quot;https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html&quot;&gt;Klojang
+ * href=&quot;https://klojang4j.github.io/klojang-templates/api/org.klojang.templates/module-summary.html&quot;&gt;Klojang
  * Templates&lt;/a&gt;&lt;/b&gt; variables. For example:
  * &lt;blockquote&gt;&lt;pre&gt;{@code
  * SELECT *
@@ -51,10 +51,11 @@ import java.sql.Connection;
  * methods allows for very dynamically generated SQL. As with SQL templates, the SQL is
  * provided in the form of a Klojang template (that is: it may contain &lt;i&gt;Klojang
  * Templates&lt;/i&gt; variables). However, SQL skeletons explicitly allow you to set template
- * variables to values that are themselves chunks of SQL again. More importantly: if these
- * SQL chunks contain named parameters, they will be picked up by &lt;i&gt;Klojang JDBC&lt;/i&gt;,
- * just like named parameters in the SQL skeleton. This makes SQL skeletons less
- * efficient, but more dynamic than SQL templates.
+ * variables to values that are themselves chunks of SQL again. If the SQL chunks contain
+ * named parameters, &lt;i&gt;Klojang JDBC&lt;/i&gt; will register them, and you can provide values
+ * for them just like you can for the named parameters in the SQL skeleton. This is not
+ * possible with the implementation returned by {@code SQL.template()}. This makes SQL
+ * skeletons less efficient, but more dynamic than SQL templates.
  *
  * @see org.klojang.templates.Template
  * @see org.klojang.templates.RenderSession
@@ -68,7 +69,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql) {
-<span class="fc" id="L71">    return basic(sql, new BindInfo() {});</span>
+<span class="fc" id="L72">    return basic(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -76,12 +77,12 @@ public sealed interface SQL permits AbstractSQL {
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL query string
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how values are
-   * bound into the underlying {@link java.sql.PreparedStatement}
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL basic(String sql, BindInfo bindInfo) {
-<span class="fc" id="L84">    return new BasicSQL(sql, bindInfo);</span>
+<span class="fc" id="L85">    return new BasicSQL(sql, bindInfo);</span>
   }
 
   /**
@@ -92,7 +93,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql) {
-<span class="fc" id="L95">    return template(sql, new BindInfo() {});</span>
+<span class="fc" id="L96">    return template(sql, new BindInfo() { });</span>
   }
 
   /**
@@ -100,12 +101,12 @@ public sealed interface SQL permits AbstractSQL {
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL query string
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how values are
-   * bound into the underlying {@link java.sql.PreparedStatement}
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql, BindInfo bindInfo) {
-<span class="fc" id="L108">    return new SQLTemplate(sql, bindInfo);</span>
+<span class="fc" id="L109">    return new SQLTemplate(sql, bindInfo);</span>
   }
 
   /**
@@ -118,22 +119,23 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql) {
-<span class="nc" id="L121">    return skeleton(sql, new BindInfo() {});</span>
+<span class="nc" id="L122">    return skeleton(sql, new BindInfo() { });</span>
   }
 
   /**
    * Returns an {@code SQL} implementation that allows for named parameters and
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. The template variables may be set to strings
-   * that themselves again contain named parameters. These named parameters will be
-   * detected and extracted by &lt;i&gt;Klojang JDBC&lt;/i&gt;.
+   * that again contain named parameters. These named parameters will be detected and
+   * extracted by &lt;i&gt;Klojang JDBC&lt;/i&gt;, and you can bind them in the {@link SQLStatement}
+   * derived from the {@code SQL} implementation.
    *
    * @param sql the SQL query string
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how values are
-   * bound into the underlying {@link java.sql.PreparedStatement}
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L136">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="nc" id="L138">    return new SQLSkeleton(sql, bindInfo);</span>
   }
 
   /**
@@ -141,10 +143,10 @@ public sealed interface SQL permits AbstractSQL {
    * INSERT statement.
    *
    * @return an {@code SQLInsertBuilder} that enables you to easily configure an SQL
-   * INSERT statement
+   *       INSERT statement
    */
   static SQLInsertBuilder prepareInsert() {
-<span class="fc" id="L147">    return new SQLInsertBuilder();</span>
+<span class="fc" id="L149">    return new SQLInsertBuilder();</span>
   }
 
   /**
@@ -152,10 +154,10 @@ public sealed interface SQL permits AbstractSQL {
    * batch inserts.
    *
    * @return an {@code SQLBatchInsertBuilder} that enables you to easily configure large
-   * batch inserts.
+   *       batch inserts.
    */
   static SQLBatchInsertBuilder prepareBatchInsert() {
-<span class="fc" id="L158">    return new SQLBatchInsertBuilder();</span>
+<span class="fc" id="L160">    return new SQLBatchInsertBuilder();</span>
   }
 
   /**
@@ -170,12 +172,12 @@ public sealed interface SQL permits AbstractSQL {
    *
    * @param expression the string to be wrapped into the signal object
    * @return a special object that signals to &lt;i&gt;Klojang JDBC&lt;/i&gt; that the specified
-   * string is to be treated as an SQL expression
+   *       string is to be treated as an SQL expression
    * @see java.sql.Statement#enquoteLiteral(String)
    * @see Quoter
    */
   static SQLExpression expression(String expression) {
-<span class="nc" id="L178">    return new SQLExpression(expression);</span>
+<span class="nc" id="L180">    return new SQLExpression(expression);</span>
   }
 
   /**

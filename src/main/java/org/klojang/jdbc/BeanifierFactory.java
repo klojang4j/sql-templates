@@ -18,26 +18,26 @@ import static org.klojang.templates.NameMapper.AS_IS;
 
 /**
  * <p>A factory for {@link ResultSetBeanifier} instances. Generally you would create one
- * {@code BeanifierFactory} per SQL query. Possibly more if multiple bean types are
- * extracted from the same {@link ResultSet}. The very first {@code ResultSet} passed to
- * the {@link #getBeanifier(ResultSet) getBeanifier()} method is used to configure the
- * conversion from the {@code ResultSet} into a particular bean type. Subsequent calls to
- * {@code getBeanifier()} will use the same configuration. Passing heterogeneous result
- * sets to one and the same {@code BeanifierFactory} will therefore produce undefined
- * results.
+ * {@code BeanifierFactory} per SQL query. Possibly more if multiple bean  or
+ * {@code record} types are extracted from the same {@link ResultSet}. The very first
+ * {@code ResultSet} passed to the {@link #getBeanifier(ResultSet) getBeanifier()} method
+ * is used to configure the conversion from the {@code ResultSet} to the desired bean or
+ * {@code record} type. Subsequent calls to {@code getBeanifier()} will use that same
+ * configuration. Therefore, although multiple {@code BeanifierFactory} instances may be
+ * instantiated for a single SQL query, a single {@code BeanifierFactory} should never be
+ * used to "beanify" result sets from multiple queries.
  *
- * <p>(More precisely: all result sets must have the same number of columns and the same
- * column types in the same order. Column names do in fact not matter. The
+ * <p><i>(More precisely: all result sets passed to
+ * {@link #getBeanifier(ResultSet) getBeanifier()} must have the same number of columns
+ * and the same column types in the same order. Column names do in fact not matter. The
  * column-to-property mapping is set up and fixed during the first call to
- * {@code getBeanifier()}. Thus, strictly speaking, the SQL query itself is not what
- * should always be the same for the result sets passed to {@code getBeanifier()}. You
- * could, in principle, share a single {@code BeanifierFactory} among multiple SQL queries
- * &#8212; for example if they all select an "ID" column and a "NAME" column from
- * different tables in your application. This might be the case for web applications that
- * need to fill {@code <select>}) boxes.)
+ * {@code getBeanifier()}. Thus, you could, in fact, use a single {@code BeanifierFactory}
+ * for multiple SQL queries &#8212; for example if they all select an "ID" column and a
+ * "NAME" column from different tables in your application. This might be the case for web
+ * applications that need to fill {@code <select>}) boxes.)</i>
  *
  * @param <T> the type of JavaBeans produced by the beanifier obtained from the
- * {@code BeanifierFactory}
+ *       {@code BeanifierFactory}
  * @author Ayco Holleman
  */
 @SuppressWarnings("rawtypes")
@@ -64,7 +64,7 @@ public final class BeanifierFactory<T> {
    * names.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   * obtained from this {@code BeanifierFactory}
+   *       obtained from this {@code BeanifierFactory}
    */
   public BeanifierFactory(Class<T> beanClass) {
     Check.notNull(beanClass, BEAN_CLASS);
@@ -77,10 +77,12 @@ public final class BeanifierFactory<T> {
    * Creates a new {@code BeanifierFactory}. Column names will be mapped as-is to property
    * names.
    *
-   * @param beanClass the class of the JavaBeans that the {@code BeanifierFactory} will be
-   * catering for
-   * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a method
-   * reference to the constructor of the JavaBean (e.g. {@code Employee::new})
+   * @param beanClass the class of the JavaBeans that the {@code BeanifierFactory}
+   *       will be catering for
+   * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a
+   *       method reference to the constructor of the JavaBean (e.g.
+   *       {@code Employee::new}). An {@link IllegalArgumentException} is thrown if
+   *       {@code beanClass} is a {@code record} type.
    */
   public BeanifierFactory(Class<T> beanClass, Supplier<T> beanSupplier) {
     Check.notNull(beanClass, BEAN_CLASS);
@@ -95,9 +97,9 @@ public final class BeanifierFactory<T> {
    * Creates a new {@code BeanifierFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   * obtained from this {@code BeanifierFactory}
-   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to property
-   * names
+   *       obtained from this {@code BeanifierFactory}
+   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to
+   *       property names
    */
   public BeanifierFactory(Class<T> beanClass, NameMapper columnToPropertyMapper) {
     Check.notNull(beanClass, BEAN_CLASS);
@@ -111,10 +113,12 @@ public final class BeanifierFactory<T> {
    * Creates a new {@code BeanifierFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   * obtained from this {@code BeanifierFactory}
-   * @param beanSupplier the supplier of the JavaBeans
-   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to property
-   * names
+   *       obtained from this {@code BeanifierFactory}
+   * @param beanSupplier the supplier of the JavaBeans. An
+   *       {@link IllegalArgumentException} is thrown if {@code beanClass} is a
+   *       {@code record} type.
+   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to
+   *       property names
    */
   public BeanifierFactory(
         Class<T> beanClass,
@@ -135,18 +139,14 @@ public final class BeanifierFactory<T> {
    *
    * @param rs the {@code ResultSet}
    * @return A {@code ResultSetBeanifier} that will convert the rows in the specified
-   * {@code ResultSet} into JavaBeans of type {@code <T>}
+   *       {@code ResultSet} into JavaBeans of type {@code <T>}
    * @throws SQLException if a database error occurs
    */
   @SuppressWarnings("unchecked")
   public ResultSetBeanifier<T> getBeanifier(ResultSet rs) throws SQLException {
-    if (!rs.next()) {
-      return EmptyBeanifier.INSTANCE;
-    }
-    if (beanClass.isRecord()) {
-      return getRecordBeanifier(rs);
-    }
-    return getDefaultBeanifier(rs);
+    return rs.next()
+          ? beanClass.isRecord() ? getRecordBeanifier(rs) : getDefaultBeanifier(rs)
+          : EmptyBeanifier.INSTANCE;
   }
 
   private DefaultBeanifier<T> getDefaultBeanifier(ResultSet rs) {

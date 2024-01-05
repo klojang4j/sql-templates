@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * <p>Converts the rows in a JDBC {@link ResultSet} into {@code Map<String, Object}
+ * <p>Converts the rows in a JDBC {@link ResultSet} into {@code Map<String, Object>}
  * pseudo-objects. Instances are obtained via
  * {@link MappifierFactory#getMappifier(ResultSet) MappifierFactory.getMappifier()}.
  *
@@ -18,7 +18,7 @@ public sealed interface ResultSetMappifier extends Iterable<Map<String, Object>>
         permits DefaultMappifier, EmptyMappifier {
 
     /**
-     * Converts the current row in a {@code ResultSet} into a map. If the
+     * Converts the current row in the {@code ResultSet} into a map. If the
      * {@code ResultSet} is empty, or if there are no more rows in the {@code ResultSet},
      * an empty {@code Optional} is returned. You can keep calling {@code mappify()} to
      * successively extract all rows in the result set.
@@ -29,7 +29,7 @@ public sealed interface ResultSetMappifier extends Iterable<Map<String, Object>>
     Optional<Map<String, Object>> mappify();
 
     /**
-     * Converts at most {@code limit} rows in a {@code ResultSet} into maps. If the
+     * Converts at most {@code limit} rows in the {@code ResultSet} into maps. If the
      * {@code ResultSet} is empty, an empty {@code List} is returned.
      *
      * @param limit the maximum number of records to mappify
@@ -39,7 +39,7 @@ public sealed interface ResultSetMappifier extends Iterable<Map<String, Object>>
     List<Map<String, Object>> mappify(int limit);
 
     /**
-     * Converts all remaining rows in a {@code ResultSet} into maps.
+     * Converts all remaining rows in the {@code ResultSet} into maps.
      *
      * @return a {@code List} of {@code Map} objects or an empty {@code List} if the
      * {@code ResultSet} contained no (more) rows

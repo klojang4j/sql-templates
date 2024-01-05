@@ -12,10 +12,10 @@ import java.util.Optional;
  * <p>Contrary to the {@link SQLQuery} class, a
  * {@code ResultSetBeanifier} is agnostic about, and has no opinion on where you got the
  * {@link ResultSet} from. In that sense it is closer to the JDBC metal than the
- * {@code SQLQuery} class. It certainly does not pretend to be an ORM-like class. It just
- * converts result sets into (flat) JavaBeans, to be carried across the boundary of the
- * data access module (and into the view layer). The JavaBeans may have nested structures,
- * but only top-level properties will be populated.
+ * {@code SQLQuery} class. It does not aim to be an ORM-like class. It just converts
+ * result sets into (flat) JavaBeans, to be carried across the boundary of the data access
+ * module (and into the view layer, for example). The JavaBeans may have nested
+ * structures, but only top-level properties will be populated.
  *
  * <p>{@code ResultSetBeanifier} is an extension of the {@link Iterable} interface,
  * enabling you to conveniently extract the JavaBeans in a {@code forEach} loop:
@@ -32,13 +32,13 @@ import java.util.Optional;
  * When converting a row to a JavaBean, a {@code ResultSetBeanifier} will always use the
  * setters on the JavaBean to populate it. There is no way to populate the bean via its
  * constructors. When converting to a record, a {@code ResultSetBeanifier} will obviously
- * always use one of its constructors to populate it (since records don't have setters).
- * Make sure the record has a constructor for those record components that map to columns
- * in the SELECT clause. Also, the encounter order of the record components within the
- * constructor must match the encounter order of the corresponding columns in the SELECT
- * clause. They don't need to pair-wise line up, though. Not all record components must be
- * mappable to columns in the SELECT clause and not columns in the SELECT clause must be
- * mappable to record components.
+ * always use one of its constructors to populate it. Make sure the record has a
+ * constructor for those record components that map to columns in the SELECT clause. Also,
+ * the encounter order of the record components within the constructor must match the
+ * encounter order of the corresponding columns in the SELECT clause. However, it is not
+ * necessary that each record component can be mapped to a column in the SELECT clause,
+ * and neither is it necessary that each column in the SELECT clause can be mapped back to
+ * a record component.
  *
  * @param <T> the type of the JavaBeans produced by the {@code ResultSetBeanifier}
  * @author Ayco Holleman
@@ -55,7 +55,7 @@ public sealed interface ResultSetBeanifier<T> extends Iterable<T>
    * successively extract all rows in the result set.
    *
    * @return an {@code Optional} containing the JavaBean or an empty {@code Optional} if
-   * the {@code ResultSet} contained no (more) rows
+   *       the {@code ResultSet} contained no (more) rows
    */
   Optional<T> beanify();
 
@@ -65,7 +65,7 @@ public sealed interface ResultSetBeanifier<T> extends Iterable<T>
    *
    * @param limit the maximum number of rows to extract and convert
    * @return a {@code List} of JavaBeans or an empty {@code List} if the {@code ResultSet}
-   * contained no (more) rows
+   *       contained no (more) rows
    */
   List<T> beanify(int limit);
 
@@ -73,7 +73,7 @@ public sealed interface ResultSetBeanifier<T> extends Iterable<T>
    * Converts all remaining rows in the {@code ResultSet} into JavaBeans.
    *
    * @return a {@code List} of JavaBeans or an empty {@code List} if the {@code ResultSet}
-   * contained no (more) rows
+   *       contained no (more) rows
    */
   List<T> beanifyAll();
 
@@ -82,7 +82,7 @@ public sealed interface ResultSetBeanifier<T> extends Iterable<T>
    *
    * @param sizeEstimate an estimate of the size of the resulting {@code List}.
    * @return a {@code List} of JavaBeans or an empty {@code List} if the {@code ResultSet}
-   * contained no (more) rows
+   *       contained no (more) rows
    */
   List<T> beanifyAll(int sizeEstimate);
 

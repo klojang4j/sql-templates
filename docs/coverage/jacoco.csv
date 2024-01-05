@@ -13,10 +13,10 @@ Klojang JDBC,org.klojang.jdbc.x.sql,BatchInsertConfig,0,27,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc.x.sql,SQLInfo,3,46,0,0,1,15,1,5,1,5
 Klojang JDBC,org.klojang.jdbc.x.sql,SQLNormalizer,20,199,3,25,2,50,3,19,0,8
 Klojang JDBC,org.klojang.jdbc.x.sql,NamedParameter,0,9,0,0,0,1,0,1,0,1
+Klojang JDBC,org.klojang.jdbc.x.ps,BeanPropertyBinder,15,177,5,9,3,34,4,10,0,7
 Klojang JDBC,org.klojang.jdbc.x.ps,MapBinder,38,90,8,8,4,23,8,5,1,4
 Klojang JDBC,org.klojang.jdbc.x.ps,ColumnWriter,0,59,0,2,0,17,0,9,0,8
 Klojang JDBC,org.klojang.jdbc.x.ps,BeanBinder,0,26,0,0,0,7,0,3,0,3
-Klojang JDBC,org.klojang.jdbc.x.ps,BeanValueBinder,15,177,5,9,3,34,4,10,0,7
 Klojang JDBC,org.klojang.jdbc.x.ps,DefaultWriters,0,59,0,2,0,21,0,4,0,3
 Klojang JDBC,org.klojang.jdbc.x.ps,ColumnWriterLookup,0,17,0,0,0,3,0,3,0,3
 Klojang JDBC,org.klojang.jdbc.x.ps,ColumnWriterFinder,47,92,0,2,7,22,1,6,1,5
@@ -29,7 +29,7 @@ Klojang JDBC,org.klojang.jdbc,DefaultBeanifier,100,55,13,3,23,15,11,5,4,4
 Klojang JDBC,org.klojang.jdbc,SQLBatchInsert,52,442,13,29,11,94,13,24,0,16
 Klojang JDBC,org.klojang.jdbc,SQLInsert,36,344,1,13,12,75,1,19,0,13
 Klojang JDBC,org.klojang.jdbc,SQLUpdate,15,14,0,0,7,4,1,2,1,2
-Klojang JDBC,org.klojang.jdbc,SQLInsertBuilder,72,201,3,5,12,32,5,10,3,8
+Klojang JDBC,org.klojang.jdbc,SQLInsertBuilder,72,193,3,5,12,33,5,10,3,8
 Klojang JDBC,org.klojang.jdbc,DefaultBeanifier.BeanIterator,31,0,2,0,6,0,4,0,3,0
 Klojang JDBC,org.klojang.jdbc,DefaultMappifier.MapIterator,32,0,2,0,6,0,4,0,3,0
 Klojang JDBC,org.klojang.jdbc,SQLInsertBuilder.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
@@ -37,7 +37,7 @@ Klojang JDBC,org.klojang.jdbc,AbstractSQL,37,85,3,3,7,19,5,6,3,5
 Klojang JDBC,org.klojang.jdbc,EmptyBeanifier,17,0,0,0,7,0,7,0,7,0
 Klojang JDBC,org.klojang.jdbc,AbstractSQLSession,0,12,0,0,0,5,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,SQLStatement,18,208,0,4,2,43,1,10,1,8
-Klojang JDBC,org.klojang.jdbc,BeanifierFactory,121,129,7,9,26,26,10,8,4,6
+Klojang JDBC,org.klojang.jdbc,BeanifierFactory,120,130,7,9,26,24,10,8,4,6
 Klojang JDBC,org.klojang.jdbc,BindInfo,2,2,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc,BasicSQL,0,22,0,0,0,4,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,MappifierFactory,60,0,6,0,15,0,6,0,3,0

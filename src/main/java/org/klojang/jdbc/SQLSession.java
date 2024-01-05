@@ -1,11 +1,11 @@
 package org.klojang.jdbc;
 
 /**
- * <p>An {@code SQLSession} is used to initiate and partly prepare the execution of SQL.
- * It allows the user to set SQL <i>template variables</i> within the SQL and then obtain
- * a {@link SQLStatement} object that can be used to set (a.k.a. "bind") the <i>named
+ * <p>An {@code SQLSession} is used to initiate and prepare the execution of SQL.
+ * It allows you to set SQL <i>template variables</i> within the SQL and then obtain a
+ * {@link SQLStatement} object that can be used to set (a.k.a. "bind") the <i>named
  * parameters</i> within the SQL. The difference between template variables and named
- * parameters is explained in the comments for the {@link SQL} interface. Note that the
+ * parameters is explained in the comments for the {@link SQL} interface. The
  * {@code SQLSession} implementation you get from {@link SQL#basic(String) SQL.basic()})
  * does not support template variables. This leaves you no choice but to retrieve a
  * {@code SQLStatement} from it straight away.
@@ -16,6 +16,14 @@ package org.klojang.jdbc;
  * methods assume that the SQL template contains a template variable named "sortColumn"
  * for the ORDER BY column(s), and a template variable name "sortOrder" for the sort
  * order.
+ *
+ * <p>The difference between the {@code SQLSession} you get from
+ * {@link SQL#template(String) SQL.template()} and the one you get from
+ * {@link SQL#skeleton(String) SQL.skeleton()} is that with the latter, named parameters
+ * are extracted from the SQL at the very last moment, just before you retrieve a
+ * {@link SQLStatement} from the session. Thus, if the SQL contained template variables,
+ * and you set one or more of them to text values that again contain named parameters,
+ * these, too, will be available for binding in the {@code SQLStatement}.
  *
  * <p><i>An {@code SQLSession} is not thread-safe and should generally not be reused once
  * you have obtained a {@code SQLStatement} object from it.</i>
@@ -36,37 +44,37 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *
    * @param varName the name of the template variable
    * @param value the value to set the variable to. If the value is an array or
-   * collection, it will be "imploded" to a string, using {@code "," } (comma) to separate
-   * the elements in the array or collection.
+   *       collection, it will be "imploded" to a string, using {@code "," } (comma) to
+   *       separate the elements in the array or collection.
    * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
-   * via the {@link SQL#basic(String) SQL.basic()} method
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    * @see org.klojang.templates.Template
    * @see org.klojang.templates.RenderSession#set(String, Object)
    */
   default SQLSession set(String varName, Object value)
-  throws UnsupportedOperationException {
+        throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }
 
 
   /**
-   * Sets a template variable name "sortColumn" to the specified value. This presumes and
+   * Sets a template variable named "sortColumn" to the specified value. This presumes and
    * requires that the SQL template indeed contains a variable with that name. This is a
    * convenience method facilitating the most common use case for template variables: to
    * parametrize the column(s) in the ORDER BY clause.
    *
    * @param sortColumn the column(s) to sort on
    * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
-   * via the {@link SQL#basic(String) SQL.basic()} method
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setOrderBy(Object sortColumn) throws UnsupportedOperationException {
     return set("sortColumn", sortColumn);
   }
 
   /**
-   * Sets a template variable name "sortOrder" to the specified value. This presumes and
+   * Sets a template variable named "sortOrder" to the specified value. This presumes and
    * requires that the SQL template indeed contains a variable with that name. The
    * provided value supposedly is either "ASC" or "DESC". The value may also be a boolean,
    * in which case {@code true} is translated into "DESC" and {@code false} into "ASC".
@@ -75,8 +83,8 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *
    * @param sortOrder the sort order
    * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
-   * via the {@link SQL#basic(String) SQL.basic()} method
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setSortOrder(Object sortOrder) throws UnsupportedOperationException {
     return (sortOrder instanceof Boolean)
@@ -85,16 +93,16 @@ public sealed interface SQLSession permits AbstractSQLSession {
   }
 
   /**
-   * Sets a template variable name "sortOrder" to "DESC" if the argument equals
+   * Sets a template variable named "sortOrder" to "DESC" if the argument equals
    * {@code true}, else to "ASC".
    *
    * @param isDescending whether to sort in descending order
    * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
-   * via the {@link SQL#basic(String) SQL.basic()} method
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setDescending(boolean isDescending)
-  throws UnsupportedOperationException {
+        throws UnsupportedOperationException {
     return set("sortOrder", isDescending ? "DESC" : "ASC");
   }
 
@@ -104,11 +112,11 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @param sortColumn the column to sort on
    * @param sortOrder the sort order
    * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
-   * via the {@link SQL#basic(String) SQL.basic()} method
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setOrderBy(Object sortColumn, Object sortOrder)
-  throws UnsupportedOperationException {
+        throws UnsupportedOperationException {
     return setOrderBy(sortColumn).setSortOrder(sortOrder);
   }
 
@@ -118,11 +126,11 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @param sortColumn the column to sort on
    * @param isDescending whether to sort in descending order
    * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was obtained
-   * via the {@link SQL#basic(String) SQL.basic()} method
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setOrderBy(Object sortColumn, boolean isDescending)
-  throws UnsupportedOperationException {
+        throws UnsupportedOperationException {
     return setOrderBy(sortColumn).setDescending(isDescending);
   }
 
@@ -150,7 +158,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * parameters ("binding") and then execute the INSERT statement.
    *
    * @param retrieveAutoKeys whether to retrieve the keys that were generated by the
-   * database
+   *       database
    * @return a {@code SQLInsert} instance
    */
   SQLInsert prepareInsert(boolean retrieveAutoKeys);
