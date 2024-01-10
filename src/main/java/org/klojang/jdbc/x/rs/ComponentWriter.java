@@ -2,13 +2,19 @@ package org.klojang.jdbc.x.rs;
 
 import java.sql.ResultSet;
 
-final class RecordChannel<COLUMN_TYPE, COMPONENT_TYPE> {
+/**
+ * Reads a single column in a ResultSet as the value for a record component.
+ *
+ * @param <COLUMN_TYPE>
+ * @param <COMPONENT_TYPE>
+ */
+final class ComponentWriter<COLUMN_TYPE, COMPONENT_TYPE> {
 
   private final ColumnReader<COLUMN_TYPE, COMPONENT_TYPE> reader;
   private final int columnIndex;
   private final Class<COMPONENT_TYPE> componentType;
 
-  RecordChannel(
+  ComponentWriter(
         ColumnReader<COLUMN_TYPE, COMPONENT_TYPE> reader,
         int columnIndex,
         Class<COMPONENT_TYPE> componentType) {

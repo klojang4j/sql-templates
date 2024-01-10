@@ -22,27 +22,27 @@ import static org.klojang.util.ClassMethods.isSubtype;
  *       PreparedStatement.setXXX(parameterIndex, value)
  * @author Ayco Holleman
  */
-final class BeanPropertyBinder<FIELD_TYPE, PARAM_TYPE> {
+final class PropertyReader<FIELD_TYPE, PARAM_TYPE> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(BeanPropertyBinder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PropertyReader.class);
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  static <T> void bindBean(PreparedStatement ps, T bean, BeanPropertyBinder[] binders)
+  static <T> void readAll(PreparedStatement ps, T bean, PropertyReader[] readers)
         throws Throwable {
     LOG.debug("Binding {} to PreparedStatement", bean.getClass().getSimpleName());
-    for (BeanPropertyBinder binder : binders) {
-      binder.bindProperty(ps, bean);
+    for (PropertyReader reader : readers) {
+      reader.bindProperty(ps, bean);
     }
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  static BeanPropertyBinder[] createPropertyBinders(Class beanClass,
+  static PropertyReader[] createReaders(Class beanClass,
         List<NamedParameter> params,
         BindInfo bindInfo,
         List<NamedParameter> bound) {
-    ColumnWriterFinder finder = ColumnWriterFinder.getInstance();
+    ColumnWriterFactory factory = ColumnWriterFactory.getInstance();
     Map<String, Getter> getters = GetterFactory.INSTANCE.getGetters(beanClass, true);
-    List<BeanPropertyBinder> binders = new ArrayList<>(params.size());
+    List<PropertyReader> readers = new ArrayList<>(params.size());
     for (NamedParameter param : params) {
       Getter getter = getters.get(param.name());
       if (getter == null) {
@@ -57,21 +57,21 @@ final class BeanPropertyBinder<FIELD_TYPE, PARAM_TYPE> {
       } else {
         Integer sqlType = bindInfo.getSqlType(beanClass, property, type);
         if (sqlType == null) {
-          writer = finder.getDefaultWriter(type);
+          writer = factory.getDefaultWriter(type);
         } else {
-          writer = finder.findWriter(type, sqlType);
+          writer = factory.getWriter(type, sqlType);
         }
       }
-      binders.add(new BeanPropertyBinder(getter, writer, param));
+      readers.add(new PropertyReader(getter, writer, param));
     }
-    return binders.toArray(BeanPropertyBinder[]::new);
+    return readers.toArray(PropertyReader[]::new);
   }
 
   private final Getter getter;
   private final ColumnWriter<FIELD_TYPE, PARAM_TYPE> writer;
   private final NamedParameter param;
 
-  private BeanPropertyBinder(Getter getter,
+  private PropertyReader(Getter getter,
         ColumnWriter<FIELD_TYPE, PARAM_TYPE> writer,
         NamedParameter param) {
     this.getter = getter;

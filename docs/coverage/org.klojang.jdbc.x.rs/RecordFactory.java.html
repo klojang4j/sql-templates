@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecordFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">RecordFactory.java</span></div><h1>RecordFactory.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
 
+import org.klojang.jdbc.KlojangSQLException;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.NameMapper;
 import org.klojang.util.CollectionMethods;
-import org.klojang.util.ExceptionMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,84 +20,83 @@ import static org.klojang.util.CollectionMethods.implode;
 @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
 public final class RecordFactory&lt;T extends Record&gt; {
 
-<span class="fc" id="L23">  private record FactoryConfig(MethodHandle constructor, RecordChannel[] channels) {}</span>
+<span class="fc" id="L23">  private record WriteConfig(MethodHandle constructor, ComponentWriter[] writers) { }</span>
 
 <span class="fc" id="L25">  private static final Logger LOG = LoggerFactory.getLogger(RecordFactory.class);</span>
 
   private final MethodHandle constructor;
-  private final RecordChannel[] channels;
+  private final ComponentWriter[] writers;
 
 <span class="fc" id="L30">  public RecordFactory(Class&lt;T&gt; recordClass, ResultSet resultset, NameMapper mapper) {</span>
-<span class="fc" id="L31">    FactoryConfig cfg = createChannels(recordClass, resultset, mapper);</span>
+<span class="fc" id="L31">    WriteConfig cfg = createWriters(recordClass, resultset, mapper);</span>
 <span class="fc" id="L32">    constructor = cfg.constructor();</span>
-<span class="fc" id="L33">    channels = cfg.channels();</span>
+<span class="fc" id="L33">    writers = cfg.writers();</span>
 <span class="fc" id="L34">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
   public T createRecord(ResultSet rs) throws Throwable {
-<span class="fc" id="L38">    Object[] args = new Object[channels.length];</span>
-<span class="fc bfc" id="L39" title="All 2 branches covered.">    for (int i = 0; i &lt; channels.length; ++i) {</span>
-<span class="fc" id="L40">      args[i] = channels[i].readValue(rs);</span>
+<span class="fc" id="L38">    Object[] args = new Object[writers.length];</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">    for (int i = 0; i &lt; writers.length; ++i) {</span>
+<span class="fc" id="L40">      args[i] = writers[i].readValue(rs);</span>
     }
 <span class="fc" id="L42">    return (T) constructor.invokeWithArguments(args);</span>
   }
 
-
-  private static &lt;T extends Record&gt; FactoryConfig createChannels(
+  private static &lt;T extends Record&gt; WriteConfig createWriters(
         Class&lt;T&gt; recordClass,
         ResultSet resultset,
         NameMapper mapper) {
-<span class="fc" id="L50">    Map&lt;String, RecordComponent&gt; components = getComponents(recordClass);</span>
-<span class="fc" id="L51">    ColumnReaderFinder finder = ColumnReaderFinder.getInstance();</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
-<span class="fc" id="L53">      log(resultset, recordClass, components);</span>
+<span class="fc" id="L49">    Map&lt;String, RecordComponent&gt; components = getComponents(recordClass);</span>
+<span class="fc" id="L50">    ColumnReaderFactory factory = ColumnReaderFactory.getInstance();</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
+<span class="fc" id="L52">      log(resultset, recordClass, components);</span>
     }
-<span class="fc" id="L55">    List&lt;Class&lt;?&gt;&gt; paramTypes = new ArrayList&lt;&gt;(components.size());</span>
-<span class="fc" id="L56">    List&lt;RecordChannel&gt; channels = new ArrayList&lt;&gt;(components.size());</span>
+<span class="fc" id="L54">    List&lt;Class&lt;?&gt;&gt; paramTypes = new ArrayList&lt;&gt;(components.size());</span>
+<span class="fc" id="L55">    List&lt;ComponentWriter&gt; writers = new ArrayList&lt;&gt;(components.size());</span>
     try {
-<span class="fc" id="L58">      ResultSetMetaData rsmd = resultset.getMetaData();</span>
-<span class="fc bfc" id="L59" title="All 2 branches covered.">      for (int idx = 0; idx &lt; rsmd.getColumnCount(); ++idx) {</span>
-<span class="fc" id="L60">        int jdbcIdx = idx + 1; // JDBC is one-based</span>
-<span class="fc" id="L61">        int sqlType = rsmd.getColumnType(jdbcIdx);</span>
-<span class="fc" id="L62">        String label = rsmd.getColumnLabel(jdbcIdx);</span>
-<span class="fc" id="L63">        String property = mapper.map(label);</span>
-<span class="fc" id="L64">        RecordComponent component = components.get(property);</span>
-<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (component == null) {</span>
-<span class="nc" id="L66">          String fmt = &quot;Column {} cannot be mapped to a property of {}&quot;;</span>
-<span class="nc" id="L67">          LOG.warn(fmt, label, recordClass.getSimpleName());</span>
-<span class="nc" id="L68">          continue;</span>
+<span class="fc" id="L57">      ResultSetMetaData rsmd = resultset.getMetaData();</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">      for (int idx = 0; idx &lt; rsmd.getColumnCount(); ++idx) {</span>
+<span class="fc" id="L59">        int jdbcIdx = idx + 1; // JDBC is one-based</span>
+<span class="fc" id="L60">        int sqlType = rsmd.getColumnType(jdbcIdx);</span>
+<span class="fc" id="L61">        String label = rsmd.getColumnLabel(jdbcIdx);</span>
+<span class="fc" id="L62">        String property = mapper.map(label);</span>
+<span class="fc" id="L63">        RecordComponent component = components.get(property);</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (component == null) {</span>
+<span class="nc" id="L65">          String fmt = &quot;Column {} cannot be mapped to a property of {}&quot;;</span>
+<span class="nc" id="L66">          LOG.warn(fmt, label, recordClass.getSimpleName());</span>
+<span class="nc" id="L67">          continue;</span>
         }
-<span class="fc" id="L70">        Class&lt;?&gt; javaType = component.getType();</span>
-<span class="fc" id="L71">        ColumnReader reader = finder.findReader(javaType, sqlType);</span>
-<span class="fc" id="L72">        RecordChannel channel = new RecordChannel(reader, jdbcIdx, javaType);</span>
-<span class="fc" id="L73">        paramTypes.add(javaType);</span>
-<span class="fc" id="L74">        channels.add(channel);</span>
+<span class="fc" id="L69">        Class&lt;?&gt; javaType = component.getType();</span>
+<span class="fc" id="L70">        ColumnReader reader = factory.getReader(javaType, sqlType);</span>
+<span class="fc" id="L71">        ComponentWriter writer = new ComponentWriter(reader, jdbcIdx, javaType);</span>
+<span class="fc" id="L72">        paramTypes.add(javaType);</span>
+<span class="fc" id="L73">        writers.add(writer);</span>
       }
-<span class="fc" id="L76">      MethodHandle mh = publicLookup().findConstructor(</span>
+<span class="fc" id="L75">      MethodHandle mh = publicLookup().findConstructor(</span>
             recordClass,
-<span class="fc" id="L78">            methodType(void.class, paramTypes.toArray(Class[]::new)));</span>
-<span class="fc" id="L79">      return new FactoryConfig(mh, channels.toArray(RecordChannel[]::new));</span>
-<span class="nc" id="L80">    } catch (Throwable t) {</span>
-<span class="nc" id="L81">      throw ExceptionMethods.uncheck(t);</span>
+<span class="fc" id="L77">            methodType(void.class, paramTypes.toArray(Class[]::new)));</span>
+<span class="fc" id="L78">      return new WriteConfig(mh, writers.toArray(ComponentWriter[]::new));</span>
+<span class="nc" id="L79">    } catch (Throwable t) {</span>
+<span class="nc" id="L80">      throw new KlojangSQLException(t);</span>
     }
   }
 
   private static &lt;T extends Record&gt; void log(ResultSet rs,
         Class&lt;T&gt; recordClass,
         Map&lt;String, RecordComponent&gt; components) {
-<span class="fc" id="L88">    LOG.trace(&quot;Mapping ResultSet to {}&quot;, recordClass.getSimpleName());</span>
-<span class="fc" id="L89">    Comparator&lt;String&gt; cmp = Comparator.comparing(String::toLowerCase);</span>
-<span class="fc" id="L90">    Set&lt;String&gt; cols = new TreeSet&lt;&gt;(cmp);</span>
-<span class="fc" id="L91">    cols.addAll(Arrays.asList(JDBC.getColumnNames(rs)));</span>
-<span class="fc" id="L92">    Set&lt;String&gt; props = new TreeSet&lt;&gt;(cmp);</span>
-<span class="fc" id="L93">    props.addAll(components.keySet());</span>
-<span class="fc" id="L94">    LOG.trace(&quot;Columns ......: {}&quot;, implode(cols));</span>
-<span class="fc" id="L95">    LOG.trace(&quot;Properties ...: {}&quot;, implode(props));</span>
-<span class="fc" id="L96">  }</span>
+<span class="fc" id="L87">    LOG.trace(&quot;Mapping ResultSet to {}&quot;, recordClass.getSimpleName());</span>
+<span class="fc" id="L88">    Comparator&lt;String&gt; cmp = Comparator.comparing(String::toLowerCase);</span>
+<span class="fc" id="L89">    Set&lt;String&gt; cols = new TreeSet&lt;&gt;(cmp);</span>
+<span class="fc" id="L90">    cols.addAll(Arrays.asList(JDBC.getColumnNames(rs)));</span>
+<span class="fc" id="L91">    Set&lt;String&gt; props = new TreeSet&lt;&gt;(cmp);</span>
+<span class="fc" id="L92">    props.addAll(components.keySet());</span>
+<span class="fc" id="L93">    LOG.trace(&quot;Columns ......: {}&quot;, implode(cols));</span>
+<span class="fc" id="L94">    LOG.trace(&quot;Properties ...: {}&quot;, implode(props));</span>
+<span class="fc" id="L95">  }</span>
 
   private static Map&lt;String, RecordComponent&gt; getComponents(Class cls) {
-<span class="fc" id="L99">    return CollectionMethods.collectionToMap(</span>
-<span class="fc" id="L100">          Arrays.asList(cls.getRecordComponents()),</span>
+<span class="fc" id="L98">    return CollectionMethods.collectionToMap(</span>
+<span class="fc" id="L99">          Arrays.asList(cls.getRecordComponents()),</span>
           RecordComponent::getName);
   }
 

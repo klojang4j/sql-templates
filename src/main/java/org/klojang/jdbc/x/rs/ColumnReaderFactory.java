@@ -1,8 +1,8 @@
 package org.klojang.jdbc.x.rs;
 
-import org.klojang.check.Check;
 import org.klojang.collections.TypeMap;
 import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.reader.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,15 +28,17 @@ import static org.klojang.util.ObjectMethods.ifNull;
  * Finds a ColumnReader for a given Java type.
  */
 @SuppressWarnings("rawtypes")
-public class ColumnReaderFinder {
+public class ColumnReaderFactory {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ColumnReaderFinder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ColumnReaderFactory.class);
+  private static final String TYPE_NOT_SUPPORTED = "type not supported: ${0}";
+  private static final String NOT_CONVERTIBLE = "cannot convert ${0} to ${1}";
 
-  private static ColumnReaderFinder INSTANCE;
+  private static ColumnReaderFactory INSTANCE;
 
-  public static ColumnReaderFinder getInstance() {
+  public static ColumnReaderFactory getInstance() {
     if (INSTANCE == null) {
-      INSTANCE = new ColumnReaderFinder();
+      INSTANCE = new ColumnReaderFactory();
     }
     return INSTANCE;
   }
@@ -44,32 +46,30 @@ public class ColumnReaderFinder {
   // Predefined ColumnReaders for common types
   private final Map<Class<?>, Map<Integer, ColumnReader>> predefined;
   // ColumnReaders that are created on demand
-  private final Map<Class<?>, ColumnReader> adhoc = new HashMap<>();
+  private final Map<Class<?>, ColumnReader> onDemand = new HashMap<>();
 
   @SuppressWarnings("unchecked")
-  private ColumnReaderFinder() {
+  private ColumnReaderFactory() {
     predefined = configure();
   }
 
   @SuppressWarnings({"unchecked"})
-  public <T, U> ColumnReader<T, U> findReader(Class<U> fieldType, int sqlType) {
+  public <T, U> ColumnReader<T, U> getReader(Class<U> fieldType, int sqlType) {
     Map<Integer, ColumnReader> readers = predefined.get(fieldType);
     ColumnReader reader;
     if (readers == null) {
       // Then we'll call ResultSet.getString() and pass the string to a static factory
-      // method on fieldType (or at least something we guess is a static factory method);
-      // one that takes a string and returns an instance of fieldType.
-      reader = createUsingFactoryMethod(fieldType);
-      Check.that(reader).is(notNull(), "type not supported: ${0}", className(fieldType));
+      // method or constructor on the provided class, one that takes a single string and
+      // returns an instance of fieldType. Provided such a method or constructor exists
+      // of course. If not, we give up and throw an exception.
+      reader = createOnDemand(fieldType);
+      Utils.check(reader).is(notNull(), TYPE_NOT_SUPPORTED, className(fieldType));
     } else {
       // Implicitly checks that the specified int is one of the
       // static final int constants in java.sql.Types
-      String sqlTypeName = getTypeName(sqlType);
+      String typeName = getTypeName(sqlType);
       reader = readers.get(sqlType);
-      Check.that(reader).is(notNull(),
-            "cannot convert ${0} to ${1}",
-            sqlTypeName,
-            className(fieldType));
+      Utils.check(reader).is(notNull(), NOT_CONVERTIBLE, typeName, className(fieldType));
     }
     return reader;
   }
@@ -97,16 +97,16 @@ public class ColumnReaderFinder {
   }
 
   @SuppressWarnings("unchecked")
-  private ColumnReader createUsingFactoryMethod(Class cls) {
-    ColumnReader reader = adhoc.get(cls);
+  private ColumnReader createOnDemand(Class cls) {
+    ColumnReader reader = onDemand.get(cls);
     if (reader != null) {
       return reader;
     }
-    LOG.trace("No standard ColumnReader available for {}. Will try to construct one",
+    LOG.trace("No predefined ColumnReader available for {}. Will try to construct one",
           className(cls));
     MethodHandle mh = ifNull(findFactoryMethod(cls), () -> findConstructor(cls));
     if (mh != null) {
-      adhoc.put(cls, reader = new ColumnReader<>(GET_STRING, createAdapter(mh)));
+      onDemand.put(cls, reader = new ColumnReader<>(GET_STRING, createAdapter(mh)));
       return reader;
     }
     return null;
@@ -125,7 +125,9 @@ public class ColumnReaderFinder {
     for (String method : FACTORY_CANDIDATES) {
       try {
         MethodHandle mh = lookup.findStatic(cls, method, methodType(cls, String.class));
-        LOG.trace("Will use {}.{}(String arg0)", simpleClassName(cls), method);
+        LOG.trace("Will use static factory method {}.{}(String arg0)",
+              simpleClassName(cls),
+              method);
         return mh;
       } catch (Exception e) { /* next one, then ... */ }
     }

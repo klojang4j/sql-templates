@@ -13,20 +13,20 @@ import static org.klojang.jdbc.x.SQLTypeNames.getTypeName;
 import static org.klojang.util.ClassMethods.className;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-class ColumnWriterFinder {
+final class ColumnWriterFactory {
 
-  private static ColumnWriterFinder INSTANCE;
+  private static ColumnWriterFactory INSTANCE;
 
-  static ColumnWriterFinder getInstance() {
+  static ColumnWriterFactory getInstance() {
     if (INSTANCE == null) {
-      INSTANCE = new ColumnWriterFinder();
+      INSTANCE = new ColumnWriterFactory();
     }
     return INSTANCE;
   }
 
   private final Map<Class<?>, Map<Integer, ColumnWriter>> all;
 
-  private ColumnWriterFinder() {
+  private ColumnWriterFactory() {
     all = (Map<Class<?>, Map<Integer, ColumnWriter>>) createColumnWriters();
   }
 
@@ -34,7 +34,7 @@ class ColumnWriterFinder {
     return DefaultWriters.INSTANCE.getDefaultWriter(fieldType);
   }
 
-  <T, U> ColumnWriter<T, U> findWriter(Class<T> fieldType, int sqlType) {
+  <T, U> ColumnWriter<T, U> getWriter(Class<T> fieldType, int sqlType) {
     // This implicitly checks that the specified int is one of the
     // static final int constants in the java.sql.Types class
     String sqlTypeName = getTypeName(sqlType);

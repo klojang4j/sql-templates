@@ -14,7 +14,8 @@ public interface BindInfo {
 
   /**
    * Allows you to specify the storage type for a bean property or record component. The
-   * return value must either be one of the constants in {@link java.sql.Types} (like
+   * return value must either be one of the constants in the
+   * {@link java.sql.Types java.sql.Types} class (like
    * {@link java.sql.Types#VARCHAR VARCHAR}) or {@code null}. Returning {@code null} means
    * you leave it to <i>Klojang JDBC</i> to determine the storage type. The default
    * implementation returns {@code null}. You may ignore any argument that you don't need

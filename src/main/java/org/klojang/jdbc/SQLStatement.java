@@ -18,11 +18,11 @@ import static org.klojang.util.CollectionMethods.collectionToSet;
 
 /**
  * Abstract base class for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate}. An
- * {@code SQLStatement} allows you to bind the named parameters within the SQL statement
+ * {@code SQLStatement} allows you to bind the named parameters within the underlying SQL
  * (if present) and then execute it.
  *
- * @param <T> the {@code SQLStatement} subtype returned by various methods in the fluent
- * API.
+ * @param <T> the {@code SQLStatement} subtype returned by various methods in the
+ *       fluent API.
  */
 public abstract sealed class SQLStatement<T extends SQLStatement<T>>
       implements AutoCloseable permits SQLQuery, SQLUpdate, SQLInsert {
@@ -61,13 +61,12 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   }
 
   /**
-   * Binds the values in the specified JavaBean to the parameters within the SQL
-   * statement. Bean properties that do not correspond to named parameters will be
-   * ignored. The effect of passing anything other than a proper JavaBean (e.g. an
-   * {@code Integer}, {@code String} or array) is undefined.
+   * Binds the properties of the specified JavaBean to the parameters within the SQL
+   * statement. Properties that do not correspond to named parameters are ignored. The
+   * effect of passing anything other than a proper JavaBean (e.g. an {@code Integer},
+   * {@code String} or array) is undefined.
    *
-   * @param bean The bean whose values to bind to the named parameters within the SQL
-   * statement
+   * @param bean the bean
    * @return this {@code SQLStatement} instance
    */
   @SuppressWarnings("unchecked")
@@ -78,11 +77,25 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   }
 
   /**
+   * Binds the components of the specified record to the parameters within the SQL
+   * statement. Components that do not correspond to named parameters are ignored.
+   *
+   * @param record the record
+   * @return this {@code SQLStatement} instance
+   */
+  @SuppressWarnings("unchecked")
+  public T bind(Record record) {
+    Check.that(fresh).is(yes(), DIRTY_INSTANCE);
+    Check.notNull(record, "record").then(bindings::add);
+    return (T) this;
+  }
+
+  /**
    * Binds the values in the specified map to the parameters within the SQL statement.
    * Keys that do not correspond to named parameters will be ignored.
    *
    * @param map the map whose values to bind to the named parameters within the SQL
-   * statement
+   *       statement
    * @return this {@code SQLStatement} instance
    */
   @SuppressWarnings("unchecked")

@@ -7,9 +7,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.klojang.check.Check;
 import org.klojang.templates.NameMapper;
-import org.klojang.jdbc.x.rs.MapChannel;
+import org.klojang.jdbc.x.rs.KeyWriter;
 
-import static org.klojang.jdbc.x.rs.MapChannel.createChannels;
+import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
 
 /**
  * <p>A factory for {@link ResultSetMappifier} instances.
@@ -31,7 +31,7 @@ import static org.klojang.jdbc.x.rs.MapChannel.createChannels;
  */
 public final class MappifierFactory {
 
-  private final AtomicReference<MapChannel<?>[]> ref = new AtomicReference<>();
+  private final AtomicReference<KeyWriter<?>[]> ref = new AtomicReference<>();
   private final ReentrantLock lock = new ReentrantLock();
 
   private final NameMapper mapper;
@@ -57,12 +57,12 @@ public final class MappifierFactory {
     if (!rs.next()) {
       return EmptyMappifier.INSTANCE;
     }
-    MapChannel<?>[] channels;
+    KeyWriter<?>[] channels;
     if ((channels = ref.getPlain()) == null) {
       lock.lock();
       try {
         if (ref.get() == null) {
-          ref.set(channels = createChannels(rs, mapper));
+          ref.set(channels = createWriters(rs, mapper));
         }
       } finally {
         lock.unlock();

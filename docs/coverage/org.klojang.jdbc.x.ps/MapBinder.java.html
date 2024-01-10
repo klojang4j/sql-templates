@@ -31,7 +31,7 @@ public final class MapBinder {
       PreparedStatement ps,
       Collection&lt;NamedParameter&gt; bound)
       throws Throwable {
-<span class="fc" id="L34">    ColumnWriterFinder writerFinder = ColumnWriterFinder.getInstance();</span>
+<span class="fc" id="L34">    ColumnWriterFactory writerFinder = ColumnWriterFactory.getInstance();</span>
 <span class="fc bfc" id="L35" title="All 2 branches covered.">    for (NamedParameter param : params) {</span>
 <span class="fc" id="L36">      String key = param.name();</span>
 <span class="pc bpc" id="L37" title="1 of 2 branches missed.">      if (!map.containsKey(key)) {</span>

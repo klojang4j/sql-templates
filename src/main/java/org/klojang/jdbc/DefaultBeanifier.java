@@ -1,7 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.x.rs.BeanChannel;
+import org.klojang.jdbc.x.rs.PropertyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +12,6 @@ import java.util.function.Supplier;
 import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
-import static org.klojang.jdbc.x.rs.BeanChannel.toBean;
 
 final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
@@ -40,14 +39,14 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
   }
 
   private final ResultSet rs;
-  private final BeanChannel<?, ?>[] channels;
+  private final PropertyWriter<?, ?>[] writers;
   private final Supplier<T> beanSupplier;
 
   private boolean empty;
 
-  DefaultBeanifier(ResultSet rs, BeanChannel<?, ?>[] channels, Supplier<T> supplier) {
+  DefaultBeanifier(ResultSet rs, PropertyWriter<?, ?>[] writers, Supplier<T> supplier) {
     this.rs = rs;
-    this.channels = channels;
+    this.writers = writers;
     this.beanSupplier = supplier;
   }
 
@@ -57,7 +56,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
       return Optional.empty();
     }
     try {
-      Optional<T> bean = Optional.of(toBean(rs, beanSupplier, channels));
+      Optional<T> bean = Optional.of(PropertyWriter.writeAll(rs, beanSupplier, writers));
       empty = !rs.next();
       return bean;
     } catch (Throwable t) {
@@ -75,7 +74,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
     int i = 0;
     try {
       do {
-        beans.add(toBean(rs, beanSupplier, channels));
+        beans.add(PropertyWriter.writeAll(rs, beanSupplier, writers));
       } while (++i < limit && (empty = !rs.next()));
     } catch (Throwable t) {
       throw new KlojangSQLException(t);
@@ -97,7 +96,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
     List<T> beans = new ArrayList<>(sizeEstimate);
     try {
       do {
-        beans.add(toBean(rs, beanSupplier, channels));
+        beans.add(PropertyWriter.writeAll(rs, beanSupplier, writers));
       } while (rs.next());
     } catch (Throwable t) {
       throw new KlojangSQLException(t);

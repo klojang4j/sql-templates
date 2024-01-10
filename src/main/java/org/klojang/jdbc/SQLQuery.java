@@ -3,7 +3,7 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.check.aux.Result;
 import org.klojang.jdbc.x.rs.ColumnReader;
-import org.klojang.jdbc.x.rs.ColumnReaderFinder;
+import org.klojang.jdbc.x.rs.ColumnReaderFactory;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.NameMapper;
 import org.slf4j.Logger;
@@ -93,9 +93,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Executes the query and returns the value of the first column in the first row. The
    * second time you call this method, you get the value of the first column in the second
-   * row, and so on, until there are no more rows in the If there are no (more) rows in
-   * the {@code ResultSet}. If there are no (more) rows in the {@code ResultSet},
-   * {@link Result#notAvailable()} is returned.
+   * row, and so on. If there are no (more) rows in the {@code ResultSet}. If there are no
+   * (more) rows in the {@code ResultSet}, {@link Result#notAvailable()} is returned.
    *
    * @param <T> the type of the value to be returned
    * @param clazz the class of the value to be returned
@@ -106,9 +105,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       executeQuery();
       if (resultSet.next()) {
         int sqlType = resultSet.getMetaData().getColumnType(1);
-        T val = ColumnReaderFinder
+        T val = ColumnReaderFactory
               .getInstance()
-              .findReader(clazz, sqlType)
+              .getReader(clazz, sqlType)
               .getValue(resultSet, 1, clazz);
         return Result.of(val);
       }
@@ -121,8 +120,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Executes the query and returns the value of the first column in the first row as an
    * {@code int}. The second time you call this method, you get the value of the first
-   * column in the second row, and so on, until there are no more rows in the If there are
-   * no (more) rows in the {@code ResultSet}. If there are no (more) rows in the
+   * column in the second row, and so on. If there are no (more) rows in the
    * {@code ResultSet}, {@link OptionalInt#empty()} is returned.
    *
    * @return the value of the first column in the first row as an integer
@@ -143,9 +141,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Executes the query and returns the value of the first column of the first row as a
    * {@code String}. The second time you call this method, you get the value of the first
-   * column in the second row, and so on, until there are no more rows in the
-   * {@code ResultSet}. If there are no (more) rows in the {@code ResultSet},
-   * {@link Result#notAvailable()} is returned.
+   * column in the second row, and so on. If there are no (more) rows in the
+   * {@code ResultSet}, {@link Result#notAvailable()} is returned.
    *
    * @return the value of the first column of the first row as aa {@code String}
    * @throws KlojangSQLException If the query returned zero rows
@@ -203,9 +200,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
         return Collections.emptyList();
       }
       int sqlType = resultSet.getMetaData().getColumnType(1);
-      ColumnReader<?, T> reader = ColumnReaderFinder
+      ColumnReader<?, T> reader = ColumnReaderFactory
             .getInstance()
-            .findReader(clazz, sqlType);
+            .getReader(clazz, sqlType);
       List<T> list = new ArrayList<>(sizeEstimate);
       do {
         list.add(reader.getValue(resultSet, 1, clazz));
@@ -218,11 +215,11 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   /**
    * Executes the query and returns a {@code ResultSetMappifier} that you can use to
-   * convert the rows in the {@link ResultSet} into {@code Map<String, Object>} pseudo
-   * objects.
+   * convert the rows in the {@link ResultSet} into {@code Map<String, Object>}
+   * pseudo-objects.
    *
    * @return a {@code ResultSetMappifier} that you can use to convert the rows in the
-   * {@link ResultSet} into {@code Map<String, Object>} pseudo objects.
+   *       {@link ResultSet} into {@code Map<String, Object>} pseudo objects.
    */
   public ResultSetMappifier getMappifier() {
     try {
@@ -240,10 +237,10 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * Executes the query and returns a {@code ResultSetBeanifier} that you can use to
    * convert the rows in the {@link ResultSet} into JavaBeans.
    *
-   * @param <T> the type of the JavaBeans
+   * @param <T> the type of the JavaBeans (may be a {@code record} type)
    * @param beanClass the class of the JavaBeans
    * @return a {@code ResultSetBeanifier} that you can use to convert the rows in the
-   * {@link ResultSet} into JavaBeans.
+   *       {@link ResultSet} into JavaBeans.
    */
   public <T> ResultSetBeanifier<T> getBeanifier(Class<T> beanClass) {
     try {
@@ -261,12 +258,13 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * Executes the query and returns a {@code ResultSetBeanifier} that you can use to
    * convert the rows in the {@link ResultSet} into JavaBeans.
    *
-   * @param <T> the type of the JavaBeans
+   * @param <T> the type of the JavaBeans (may be a {@code record} type)
    * @param beanClass the class of the JavaBeans
-   * @param beanSupplier the supplier of the JavaBean instances. This would ordinarily be
-   * a method reference to the constructor of the JavaBean (like {@code Person::new})
+   * @param beanSupplier the supplier of the JavaBean instances. This would
+   *       ordinarily be a method reference to the constructor of the JavaBean (like
+   *       {@code Person::new})
    * @return a {@code ResultSetBeanifier} that you can use to convert the rows in the
-   * {@link ResultSet} into JavaBeans.
+   *       {@link ResultSet} into JavaBeans.
    */
   public <T> ResultSetBeanifier<T> getBeanifier(
         Class<T> beanClass,

@@ -1,7 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.x.rs.MapChannel;
+import org.klojang.jdbc.x.rs.KeyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +11,7 @@ import java.util.*;
 import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.no;
 import static org.klojang.check.CommonExceptions.STATE;
-import static org.klojang.jdbc.x.rs.MapChannel.toMap;
+import static org.klojang.jdbc.x.rs.KeyWriter.toMap;
 
 final class DefaultMappifier implements ResultSetMappifier {
 
@@ -39,13 +39,13 @@ final class DefaultMappifier implements ResultSetMappifier {
   }
 
   private final ResultSet rs;
-  private final MapChannel<?>[] channels;
+  private final KeyWriter<?>[] writers;
 
   private boolean empty;
 
-  DefaultMappifier(ResultSet rs, MapChannel<?>[] channels) {
+  DefaultMappifier(ResultSet rs, KeyWriter<?>[] writers) {
     this.rs = rs;
-    this.channels = channels;
+    this.writers = writers;
   }
 
   @Override
@@ -54,7 +54,7 @@ final class DefaultMappifier implements ResultSetMappifier {
       return Optional.empty();
     }
     try {
-      Optional<Map<String, Object>> row = Optional.of(toMap(rs, channels));
+      Optional<Map<String, Object>> row = Optional.of(toMap(rs, writers));
       empty = !rs.next();
       return row;
     } catch (Throwable t) {
@@ -72,7 +72,7 @@ final class DefaultMappifier implements ResultSetMappifier {
     int i = 0;
     try {
       do {
-        all.add(toMap(rs, channels));
+        all.add(toMap(rs, writers));
       } while (++i < limit && (empty = !rs.next()));
     } catch (Throwable t) {
       throw new KlojangSQLException(t);
@@ -94,7 +94,7 @@ final class DefaultMappifier implements ResultSetMappifier {
     List<Map<String, Object>> all = new ArrayList<>(sizeEstimate);
     try {
       do {
-        all.add(toMap(rs, channels));
+        all.add(toMap(rs, writers));
       } while (rs.next());
     } catch (Throwable t) {
       throw new KlojangSQLException(t);

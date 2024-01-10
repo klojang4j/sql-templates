@@ -1,9 +1,9 @@
 package org.klojang.jdbc.x.rs;
 
+import org.klojang.jdbc.KlojangSQLException;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.NameMapper;
 import org.klojang.util.CollectionMethods;
-import org.klojang.util.ExceptionMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,40 +20,39 @@ import static org.klojang.util.CollectionMethods.implode;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class RecordFactory<T extends Record> {
 
-  private record FactoryConfig(MethodHandle constructor, RecordChannel[] channels) {}
+  private record WriteConfig(MethodHandle constructor, ComponentWriter[] writers) { }
 
   private static final Logger LOG = LoggerFactory.getLogger(RecordFactory.class);
 
   private final MethodHandle constructor;
-  private final RecordChannel[] channels;
+  private final ComponentWriter[] writers;
 
   public RecordFactory(Class<T> recordClass, ResultSet resultset, NameMapper mapper) {
-    FactoryConfig cfg = createChannels(recordClass, resultset, mapper);
+    WriteConfig cfg = createWriters(recordClass, resultset, mapper);
     constructor = cfg.constructor();
-    channels = cfg.channels();
+    writers = cfg.writers();
   }
 
   @SuppressWarnings("unchecked")
   public T createRecord(ResultSet rs) throws Throwable {
-    Object[] args = new Object[channels.length];
-    for (int i = 0; i < channels.length; ++i) {
-      args[i] = channels[i].readValue(rs);
+    Object[] args = new Object[writers.length];
+    for (int i = 0; i < writers.length; ++i) {
+      args[i] = writers[i].readValue(rs);
     }
     return (T) constructor.invokeWithArguments(args);
   }
 
-
-  private static <T extends Record> FactoryConfig createChannels(
+  private static <T extends Record> WriteConfig createWriters(
         Class<T> recordClass,
         ResultSet resultset,
         NameMapper mapper) {
     Map<String, RecordComponent> components = getComponents(recordClass);
-    ColumnReaderFinder finder = ColumnReaderFinder.getInstance();
+    ColumnReaderFactory factory = ColumnReaderFactory.getInstance();
     if (LOG.isTraceEnabled()) {
       log(resultset, recordClass, components);
     }
     List<Class<?>> paramTypes = new ArrayList<>(components.size());
-    List<RecordChannel> channels = new ArrayList<>(components.size());
+    List<ComponentWriter> writers = new ArrayList<>(components.size());
     try {
       ResultSetMetaData rsmd = resultset.getMetaData();
       for (int idx = 0; idx < rsmd.getColumnCount(); ++idx) {
@@ -68,17 +67,17 @@ public final class RecordFactory<T extends Record> {
           continue;
         }
         Class<?> javaType = component.getType();
-        ColumnReader reader = finder.findReader(javaType, sqlType);
-        RecordChannel channel = new RecordChannel(reader, jdbcIdx, javaType);
+        ColumnReader reader = factory.getReader(javaType, sqlType);
+        ComponentWriter writer = new ComponentWriter(reader, jdbcIdx, javaType);
         paramTypes.add(javaType);
-        channels.add(channel);
+        writers.add(writer);
       }
       MethodHandle mh = publicLookup().findConstructor(
             recordClass,
             methodType(void.class, paramTypes.toArray(Class[]::new)));
-      return new FactoryConfig(mh, channels.toArray(RecordChannel[]::new));
+      return new WriteConfig(mh, writers.toArray(ComponentWriter[]::new));
     } catch (Throwable t) {
-      throw ExceptionMethods.uncheck(t);
+      throw new KlojangSQLException(t);
     }
   }
 

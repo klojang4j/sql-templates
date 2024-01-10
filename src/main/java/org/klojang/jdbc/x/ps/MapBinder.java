@@ -31,7 +31,7 @@ public final class MapBinder {
       PreparedStatement ps,
       Collection<NamedParameter> bound)
       throws Throwable {
-    ColumnWriterFinder writerFinder = ColumnWriterFinder.getInstance();
+    ColumnWriterFactory writerFinder = ColumnWriterFactory.getInstance();
     for (NamedParameter param : params) {
       String key = param.name();
       if (!map.containsKey(key)) {

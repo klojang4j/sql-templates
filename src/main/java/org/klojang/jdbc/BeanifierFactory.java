@@ -1,7 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.x.rs.BeanChannel;
+import org.klojang.jdbc.x.rs.PropertyWriter;
 import org.klojang.jdbc.x.rs.RecordFactory;
 import org.klojang.templates.NameMapper;
 import org.klojang.util.ExceptionMethods;
@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-import static org.klojang.jdbc.x.rs.BeanChannel.createChannels;
+import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 import static org.klojang.templates.NameMapper.AS_IS;
 
 /**
@@ -50,7 +50,7 @@ public final class BeanifierFactory<T> {
 
   /**
    * The object held by the AtomicReference will either be a RecordFactory in case the
-   * bean class is a record type or a BeanChannel[] in any other case.
+   * bean class is a record type or a PropertyWriter[] in any other case.
    */
   private final AtomicReference<Object> ref = new AtomicReference<>();
   private final ReentrantLock lock = new ReentrantLock();
@@ -69,8 +69,8 @@ public final class BeanifierFactory<T> {
   public BeanifierFactory(Class<T> beanClass) {
     Check.notNull(beanClass, BEAN_CLASS);
     this.beanClass = beanClass;
-    beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
-    mapper = AS_IS;
+    this.beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
+    this.mapper = AS_IS;
   }
 
   /**
@@ -105,8 +105,8 @@ public final class BeanifierFactory<T> {
     Check.notNull(beanClass, BEAN_CLASS);
     Check.notNull(columnToPropertyMapper, COLUMN_TO_PROPERTY_MAPPER);
     this.beanClass = beanClass;
-    beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
-    mapper = columnToPropertyMapper;
+    this.beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
+    this.mapper = columnToPropertyMapper;
   }
 
   /**
@@ -150,18 +150,18 @@ public final class BeanifierFactory<T> {
   }
 
   private DefaultBeanifier<T> getDefaultBeanifier(ResultSet rs) {
-    BeanChannel[] channels;
-    if ((channels = (BeanChannel[]) ref.getPlain()) == null) {
+    PropertyWriter[] writers;
+    if ((writers = (PropertyWriter[]) ref.getPlain()) == null) {
       lock.lock();
       try {
         if (ref.get() == null) {
-          ref.set(channels = createChannels(rs, beanClass, mapper));
+          ref.set(writers = createWriters(rs, beanClass, mapper));
         }
       } finally {
         lock.unlock();
       }
     }
-    return new DefaultBeanifier<>(rs, channels, beanSupplier);
+    return new DefaultBeanifier<>(rs, writers, beanSupplier);
   }
 
   @SuppressWarnings("unchecked")
