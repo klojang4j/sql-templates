@@ -9,34 +9,33 @@ libraries. These are some of its main features:
    statements alone. <i>Klojang JDBC</i> allows you to do this without exposing yourself
    to the dangers of SQL Injection.
 2. Convert result sets into JavaBeans, records or `Map<String, Object>` pseudo-objects.
-   There is not pretense at all of providing full-fledged ORM functionality. The result
+   There is no pretense at all of providing full-fledged ORM functionality. The result
    set is converted into "flat" beans or maps to be carried across the boundary of the
    data access layer (and into the view layer).
 3. Special attention has been paid to persisting Java objects in potentially very large
    batches.
-4. No fluent APIs that make your code look like SQL, just more bloated.
 
 ## Getting Started
 
-To use <i>Klojang JDBC</i>, add the following dependency to your Maven POM file:
+To use _Klojang JDBC_, add the following dependency to your Maven POM file:
 
 ```xml
 <dependency>
     <groupId>org.klojang</groupId>
     <artifactId>klojang-jdbc</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
 </dependency>
 ```
 
 or Gradle build script:
 
 ```
-implementation group: 'org.klojang', name: 'klojang-jdbc', version: '1.0.8'
+implementation group: 'org.klojang', name: 'klojang-jdbc', version: '1.0.9'
 ```
 
 ## Example
 
-Here is an example that takes you full-circle from CREATE via INSERT to SELECT:
+Here is an example that takes you full-circle from CREATE TABLE via INSERT to SELECT:
 
 ```java
 public record Person(int personId, String firstName, String lastName, LocalDate birthDate) {
@@ -63,9 +62,9 @@ String sql = """
           BIRTH_DATE DATE)
         """;
 
- SQL.basic(sql).session(con).prepareUpdate().execute();
+SQL.basic(sql).session(con).prepareUpdate().execute();
  
- List<Person> persons = List.of(
+List<Person> persons = List.of(
      new Person("John", "Smith", LocalDate.of(1960, 4, 15)),
      new Person("Mary", "Smith", LocalDate.of(1980, 10, 5)),
      new Person("Joan", "de Santos", LocalDate.of(1977, 5, 23)),
@@ -77,22 +76,25 @@ String sql = """
      new Person("Peter", "Peterson", LocalDate.of(1963, 5, 3)),
      new Person("Joe", "Peterson", LocalDate.of(1998, 9, 23)));
  
- SQLBatchInsert sbi = SQL.prepareBatchInsert()
+SQLBatchInsert sbi = SQL.prepareBatchInsert()
      .of(Person.class)
      .into("PERSON")
      .excluding("personId")
      .withNameMapper(new CamelCaseToSnakeUpperCase())
      .prepare(con);
- sbi.insertBatch(persons);
+sbi.insertBatch(persons);
 
- sql = """
-       SELECT * FROM PERSON
-        WHERE LAST_NAME = :lastName
-        ORDER BY ~%sortColumn% ~%sortDirection%
-       """;
+// Here we parametrize the value for LAST_NAME using a named 
+// parameter while we parametrize the ORDER BY clause using 
+// Klojang Templates variables
+sql = """
+      SELECT * FROM PERSON
+       WHERE LAST_NAME = :lastName
+       ORDER BY ~%sortColumn% ~%sortDirection%
+      """;
  
 SQLSession session = SQL.template(sql).session(con);
-session.set("sortColumn", "LAST_NAME").set("sortColumn", "DESC");
+session.set("sortColumn", "FIRST_NAME").set("sortColumn", "ASC");
 try (SQLQuery query = session.prepareQuery()) {
   List<Person> persons = query
         .withNameMapper(new SnakeCaseToCamelCase())

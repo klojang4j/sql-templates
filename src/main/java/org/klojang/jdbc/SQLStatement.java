@@ -125,7 +125,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
         MapBinder binder = new MapBinder(
               sqlInfo.parameters(),
               session.getSQL().getBindInfo());
-        binder.bindMap(map, ps, bound);
+        binder.bind(map, ps, bound);
       } else {
         BeanBinder binder = session.getSQL().getBeanBinder(obj.getClass(), sqlInfo);
         binder.bind(obj, ps);

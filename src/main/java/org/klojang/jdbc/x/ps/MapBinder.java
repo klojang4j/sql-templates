@@ -7,9 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class MapBinder {
 
@@ -26,12 +26,11 @@ public final class MapBinder {
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void bindMap(
-      Map<String, Object> map,
-      PreparedStatement ps,
-      Collection<NamedParameter> bound)
-      throws Throwable {
-    ColumnWriterFactory writerFinder = ColumnWriterFactory.getInstance();
+  public void bind(Map<String, Object> map,
+        PreparedStatement ps,
+        Set<NamedParameter> bound)
+        throws Throwable {
+    ColumnWriterFactory factory = ColumnWriterFactory.getInstance();
     for (NamedParameter param : params) {
       String key = param.name();
       if (!map.containsKey(key)) {
@@ -46,7 +45,7 @@ public final class MapBinder {
         if (value instanceof Enum && bindInfo.saveEnumAsString(Map.class, key)) {
           writer = EnumWriterLookup.ENUM_TO_STRING;
         } else {
-          writer = writerFinder.getDefaultWriter(value.getClass());
+          writer = factory.getDefaultWriter(value.getClass());
         }
         Object output = writer.getParamValue(value);
         if (LOG.isDebugEnabled()) {

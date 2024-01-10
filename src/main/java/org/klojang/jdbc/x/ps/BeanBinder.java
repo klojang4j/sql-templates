@@ -14,16 +14,16 @@ public final class BeanBinder<T> {
 
   private final List<NamedParameter> bound = new ArrayList<>();
 
-  private final PropertyReader<?, ?>[] binders;
+  private final PropertyReader<?, ?>[] readers;
 
   // Creates a BeanBinder capable binding JavaBeans of the specified type to a query
   // containing the specified named parameters.
   public BeanBinder(Class<T> beanClass, List<NamedParameter> params, BindInfo bindInfo) {
-    binders = PropertyReader.createReaders(beanClass, params, bindInfo, bound);
+    readers = PropertyReader.createReaders(beanClass, params, bindInfo, bound);
   }
 
   public void bind(T bean, PreparedStatement ps) throws Throwable {
-    PropertyReader.readAll(ps, bean, binders);
+    PropertyReader.readAll(ps, bean, readers);
   }
 
   // Returns all parameters in the query string that can be bound by this BeanBinder.
