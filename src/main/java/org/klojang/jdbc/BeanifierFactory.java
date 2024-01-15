@@ -27,14 +27,14 @@ import static org.klojang.templates.NameMapper.AS_IS;
  * {@code BeanifierFactory} should never be used to "beanify" result sets from multiple
  * queries.
  *
- * <p><i>(More precisely: all result sets passed to
+ * <p><i>(More precisely: all result sets subsequently passed to
  * {@link #getBeanifier(ResultSet) getBeanifier()} must have the same number of columns
- * and the same column types in the same order. Column names do in fact not matter. The
+ * and the same column types in the same order. Their column names do not matter. The
  * column-to-property mapping is set up and fixed in the first call to
  * {@code getBeanifier()}. Thus, you could, in fact, use a single {@code BeanifierFactory}
- * for multiple SQL queries &#8212; for example if they all select an "ID" column and a
- * "NAME" column from different tables. This might be the case for web applications that
- * need to fill multiple {@code <select>}) boxes.)</i>
+ * for multiple SQL queries &#8212; for example if they all select an {@code INTEGER}
+ * column and a {@code VARCHAR} column from different tables. This might be the case for
+ * web applications that need to fill multiple {@code <select>}) boxes.)</i>
  *
  * @param <T> the type of JavaBeans produced by the beanifier obtained from the
  *       {@code BeanifierFactory} (may be a {@code record} type)
@@ -100,6 +100,7 @@ public final class BeanifierFactory<T> {
    *       obtained from this {@code BeanifierFactory}
    * @param columnToPropertyMapper a {@code NameMapper} mapping column names to
    *       property names
+   * @see org.klojang.templates.name.SnakeCaseToCamelCase
    */
   public BeanifierFactory(Class<T> beanClass, NameMapper columnToPropertyMapper) {
     Check.notNull(beanClass, BEAN_CLASS);

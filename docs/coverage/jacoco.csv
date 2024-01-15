@@ -26,7 +26,7 @@ Klojang JDBC,org.klojang.jdbc,EmptyMappifier,20,0,0,0,8,0,8,0,8,0
 Klojang JDBC,org.klojang.jdbc,BasicSQLSession,0,52,0,0,0,9,0,4,0,4
 Klojang JDBC,org.klojang.jdbc,SQLExpression,9,0,0,0,4,0,2,0,2,0
 Klojang JDBC,org.klojang.jdbc,DefaultBeanifier,100,55,13,3,23,15,11,5,4,4
-Klojang JDBC,org.klojang.jdbc,SQLBatchInsert,52,442,13,29,11,94,13,24,0,16
+Klojang JDBC,org.klojang.jdbc,SQLBatchInsert,42,428,9,25,9,90,9,24,0,16
 Klojang JDBC,org.klojang.jdbc,SQLInsert,36,344,1,13,12,75,1,19,0,13
 Klojang JDBC,org.klojang.jdbc,SQLUpdate,15,14,0,0,7,4,1,2,1,2
 Klojang JDBC,org.klojang.jdbc,SQLInsertBuilder,72,193,3,5,12,33,5,10,3,8
@@ -41,19 +41,20 @@ Klojang JDBC,org.klojang.jdbc,BeanifierFactory,120,130,7,9,26,24,10,8,4,6
 Klojang JDBC,org.klojang.jdbc,BindInfo,2,2,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc,BasicSQL,0,22,0,0,0,4,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,MappifierFactory,60,0,6,0,15,0,6,0,3,0
-Klojang JDBC,org.klojang.jdbc,SQLTemplateSession,85,73,2,2,10,16,4,4,2,4
+Klojang JDBC,org.klojang.jdbc,SQLTemplateSession,64,40,0,0,8,7,2,2,2,2
 Klojang JDBC,org.klojang.jdbc,SQL.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc,SQL.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
+Klojang JDBC,org.klojang.jdbc,DynamicSQLSession,134,35,15,2,25,10,15,3,4,3
 Klojang JDBC,org.klojang.jdbc,SQL.new BindInfo() {...},3,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc,RecordBeanifier,76,70,11,5,19,18,10,6,3,5
-Klojang JDBC,org.klojang.jdbc,SQLSkeletonSession,133,0,4,0,23,0,7,0,5,0
-Klojang JDBC,org.klojang.jdbc,Quoter,30,0,8,0,10,0,6,0,2,0
+Klojang JDBC,org.klojang.jdbc,SQLSkeletonSession,80,0,0,0,16,0,5,0,5,0
+Klojang JDBC,org.klojang.jdbc,Quoter,11,0,0,0,4,0,2,0,2,0
 Klojang JDBC,org.klojang.jdbc,RecordBeanifier.BeanIterator,32,0,2,0,6,0,4,0,3,0
 Klojang JDBC,org.klojang.jdbc,SQLSkeleton,25,0,0,0,7,0,2,0,2,0
-Klojang JDBC,org.klojang.jdbc,SQLSession,44,4,4,0,8,1,8,1,6,1
+Klojang JDBC,org.klojang.jdbc,SQLSession,52,4,4,0,10,1,10,1,8,1
 Klojang JDBC,org.klojang.jdbc,DefaultMappifier,146,0,16,0,37,0,16,0,8,0
 Klojang JDBC,org.klojang.jdbc,SQL,17,32,0,0,3,6,3,6,3,6
-Klojang JDBC,org.klojang.jdbc,KlojangSQLException,50,0,4,0,13,0,8,0,6,0
+Klojang JDBC,org.klojang.jdbc,KlojangSQLException,61,0,3,0,13,0,9,0,7,0
 Klojang JDBC,org.klojang.jdbc,SQLQuery,140,108,7,5,49,30,12,10,7,9
 Klojang JDBC,org.klojang.jdbc,SQLTemplate,6,29,0,0,2,6,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,LongWriterLookup,0,77,0,0,0,11,0,2,0,2
@@ -67,7 +68,7 @@ Klojang JDBC,org.klojang.jdbc.x.ps.writer,FloatWriterLookup,0,101,0,0,0,12,0,2,0
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,LocalDateTimeWriterLookup,5,16,0,0,1,4,1,2,1,2
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,StringWriterLookup,0,121,0,0,0,15,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,IntWriterLookup,0,64,0,0,0,9,0,2,0,2
-Klojang JDBC,org.klojang.jdbc.x,JDBC,38,124,0,6,9,25,4,8,4,5
+Klojang JDBC,org.klojang.jdbc.x,JDBC,56,137,4,7,13,27,8,9,4,6
 Klojang JDBC,org.klojang.jdbc.x,Utils,6,4,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc.x,SQLTypeNames,4,93,0,2,2,15,0,6,0,5
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,BooleanReaderLookup,0,114,0,0,0,11,0,1,0,1

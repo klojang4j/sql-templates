@@ -1,31 +1,19 @@
 package org.klojang.jdbc;
 
+import org.klojang.check.Check;
+import org.klojang.jdbc.x.rs.KeyWriter;
+import org.klojang.templates.NameMapper;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.klojang.check.Check;
-import org.klojang.templates.NameMapper;
-import org.klojang.jdbc.x.rs.KeyWriter;
-
 import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
 
 /**
- * <p>A factory for {@link ResultSetMappifier} instances.
- * {@link ResultSet} objects passed to a single {@code MappifierFactory} instance must all
- * be created from the same SQL query. The very first {@code ResultSet} passed to its
- * {@link #getMappifier(ResultSet) getMappifier()} method is used to configure the
- * conversion from the {@code ResultSet} into a JavaBean. Subsequent calls to
- * {@code getMappifier()} will use the same configuration. Passing heterogeneous result
- * set to one and the same {@code MappifierFactory} instance will produce undefined
- * results.
- *
- * <p>(More precisely: all result sets must have the same number of columns and the same
- * column types in the same order. Column names/labels do in fact not matter. The
- * column-to-key mapping is set up and fixed after the first call to
- * {@code getMappifier()}. Thus, strictly speaking, the SQL query itself is not the
- * defining factor.)
+ * <p>A factory for {@link ResultSetMappifier} instances. This class behaves analogously
+ * to the {@link BeanifierFactory} class. See there for more details.
  *
  * @author Ayco Holleman
  */
@@ -45,9 +33,10 @@ public final class MappifierFactory {
   }
 
   /**
-   * Creates a new {@code MappifierFactory}.
+   * Creates a new {@code MappifierFactory} using the specified column-to-key mapper.
    *
    * @param columnToKeyMapper a {@code NameMapper} mapping column names to map keys
+   * @see org.klojang.templates.name.SnakeCaseToCamelCase
    */
   public MappifierFactory(NameMapper columnToKeyMapper) {
     this.mapper = Check.notNull(columnToKeyMapper).ok();
@@ -57,17 +46,17 @@ public final class MappifierFactory {
     if (!rs.next()) {
       return EmptyMappifier.INSTANCE;
     }
-    KeyWriter<?>[] channels;
-    if ((channels = ref.getPlain()) == null) {
+    KeyWriter<?>[] writers;
+    if ((writers = ref.getPlain()) == null) {
       lock.lock();
       try {
         if (ref.get() == null) {
-          ref.set(channels = createWriters(rs, mapper));
+          ref.set(writers = createWriters(rs, mapper));
         }
       } finally {
         lock.unlock();
       }
     }
-    return new DefaultMappifier(rs, channels);
+    return new DefaultMappifier(rs, writers);
   }
 }

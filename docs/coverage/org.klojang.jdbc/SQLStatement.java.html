@@ -125,7 +125,7 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
 <span class="fc" id="L125">        MapBinder binder = new MapBinder(</span>
 <span class="fc" id="L126">              sqlInfo.parameters(),</span>
 <span class="fc" id="L127">              session.getSQL().getBindInfo());</span>
-<span class="fc" id="L128">        binder.bindMap(map, ps, bound);</span>
+<span class="fc" id="L128">        binder.bind(map, ps, bound);</span>
 <span class="fc" id="L129">      } else {</span>
 <span class="fc" id="L130">        BeanBinder binder = session.getSQL().getBeanBinder(obj.getClass(), sqlInfo);</span>
 <span class="fc" id="L131">        binder.bind(obj, ps);</span>

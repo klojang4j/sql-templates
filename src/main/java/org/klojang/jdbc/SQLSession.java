@@ -1,5 +1,7 @@
 package org.klojang.jdbc;
 
+import java.util.Collection;
+
 /**
  * <p>An {@code SQLSession} is used to initiate and prepare the execution of SQL.
  * It allows you to set SQL <i>template variables</i> within the SQL and then obtain a
@@ -36,7 +38,9 @@ package org.klojang.jdbc;
 public sealed interface SQLSession permits AbstractSQLSession {
 
   /**
-   * Sets the value of a template variable. This method will throw an
+   * Sets the value of the specified template variable. If the value is an array or
+   * collection, it will be "imploded" to a string, using {@code "," } (comma) to separate
+   * the elements in the array or collection. This method will throw an
    * {@link UnsupportedOperationException} for
    * {@linkplain SQL#basic(String) basic SQL sessions} since these are not based on <a
    * href="https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html">Klojang
@@ -51,8 +55,48 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    * @see org.klojang.templates.Template
    * @see org.klojang.templates.RenderSession#set(String, Object)
+   * @see org.klojang.util.ArrayMethods#implode(Object[])
+   * @see org.klojang.util.CollectionMethods#implode(Collection)
    */
   default SQLSession set(String varName, Object value)
+        throws UnsupportedOperationException {
+    throw new UnsupportedOperationException();
+  }
+
+
+  /**
+   * Sets the value of the specified template variable. Use this method if the source of
+   * the value is unknown to prevent SQL injection. The provided value is processed as
+   * follows:
+   * <ol>
+   *   <li>If the value is {@code null}, the literal string "NULL" (without quotes)
+   *   is inserted into the SQL template.
+   *   <li>If the value is a {@link Number} or {@link Boolean}, it is inserted as-is
+   *   (unquoted) into the SQL template.
+   *   <li>If the value is an {@link SQLExpression}, like
+   *   {@code SUBSTRING(FIRST_NAME, 1, 4)}, it is inserted as-is (unquoted) into
+   *   the SQL template.
+   *   <li>Otherwise the value is first escaped and quoted according to the underlying
+   *   database's quoting rules and then inserted into the SQL template.
+   *   <li>However, if the value is a collection or array, each of the elements is treated
+   *   as described in the first four rules, and they are then stringed together using
+   *   a comma (",") to separate them. The result of these two steps is then inserted into
+   *   the SQL template.
+   * </ol>
+   *
+   * @param varName the name of the template variable
+   * @param value the value to set the variable to
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   * @see java.sql.Statement#enquoteLiteral(String)
+   */
+  default SQLSession setAsLiteral(String varName, Object value)
+        throws UnsupportedOperationException {
+    throw new UnsupportedOperationException();
+  }
+
+  default SQLSession setAsIdentifier(String varName, String identifier)
         throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }

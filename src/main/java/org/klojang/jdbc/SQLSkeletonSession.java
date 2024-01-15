@@ -5,57 +5,45 @@ import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.jdbc.x.sql.SQLNormalizer;
 import org.klojang.templates.RenderSession;
-import org.klojang.util.ArrayMethods;
-import org.klojang.util.CollectionMethods;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.Collection;
 
-import static org.klojang.check.Tag.VALUE;
+import static org.klojang.check.CommonChecks.empty;
 
-final class SQLSkeletonSession extends AbstractSQLSession {
-
-  private final RenderSession session;
+final class SQLSkeletonSession extends DynamicSQLSession {
 
   SQLSkeletonSession(Connection con, AbstractSQL sql, RenderSession session) {
-    super(con, sql);
-    this.session = session;
+    super(con, sql, session);
   }
 
   @Override
-  public SQLSession set(String varName, Object value) {
-    Check.notNull(varName, "varName");
-    Check.notNull(value, VALUE);
-    if (value instanceof Collection<?> c) {
-      session.set(varName, CollectionMethods.implode(c));
-    } else if (value.getClass().isArray()) {
-      session.set(varName, ArrayMethods.implodeAny(value));
-    } else {
-      session.set(varName, value);
-    }
-    return this;
-  }
-
   public SQLQuery prepareQuery() {
-    SQLNormalizer normalizer = new SQLNormalizer(session.render());
-    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
+    SQLInfo sqlInfo = getSQLInfo();
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
     return new SQLQuery(ps, this, sqlInfo);
   }
 
-  public SQLInsert prepareInsert(boolean retrieveAutoKeys) {
-    SQLNormalizer normalizer = new SQLNormalizer(session.render());
-    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveAutoKeys);
-    return new SQLInsert(ps, this, sqlInfo, retrieveAutoKeys);
+  @Override
+  public SQLInsert prepareInsert(boolean retrieveKeys) {
+    SQLInfo sqlInfo = getSQLInfo();
+    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
+    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);
   }
 
+  @Override
   public SQLUpdate prepareUpdate() {
-    SQLNormalizer normalizer = new SQLNormalizer(session.render());
-    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
+    SQLInfo sqlInfo = getSQLInfo();
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
     return new SQLUpdate(ps, this, sqlInfo);
+  }
+
+  private SQLInfo getSQLInfo() {
+    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));
+    String sql = session.render();
+    SQLNormalizer normalizer = new SQLNormalizer(sql);
+    SQLInfo sqlInfo = new SQLInfo(sql, normalizer);
+    return sqlInfo;
   }
 
 

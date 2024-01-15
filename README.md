@@ -1,19 +1,8 @@
 # Klojang JDBC
 
-<i>Klojang JDBC</i> is a thin, non-intrusive abstraction layer around standard JDBC that builds
-on <i>[Klojang Templates](https://github.com/klojang4j/klojang-templates)</i> to provide
-functionality not commonly found in JDBC extension
-libraries. These are some of its main features:
-
-1. Enable parametrization of parts of SQL that cannot be parametrized using prepared
-   statements alone. <i>Klojang JDBC</i> allows you to do this without exposing yourself
-   to the dangers of SQL Injection.
-2. Convert result sets into JavaBeans, records or `Map<String, Object>` pseudo-objects.
-   There is no pretense at all of providing full-fledged ORM functionality. The result
-   set is converted into "flat" beans or maps to be carried across the boundary of the
-   data access layer (and into the view layer).
-3. Special attention has been paid to persisting Java objects in potentially very large
-   batches.
+<i>Klojang JDBC</i> is a thin, non-intrusive abstraction layer around standard JDBC that
+builds on <i>[Klojang Templates](https://github.com/klojang4j/klojang-templates)</i> to
+provide functionality not commonly found in JDBC extension libraries.
 
 ## Getting Started
 

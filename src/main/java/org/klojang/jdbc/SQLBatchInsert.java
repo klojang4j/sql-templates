@@ -41,6 +41,7 @@ import static org.klojang.util.StringMethods.append;
 public final class SQLBatchInsert<T> implements AutoCloseable {
 
   private static final String RECORDS_DONT_HAVE_SETTERS = "cannot set id on record types";
+
   private final BatchInsertConfig<T> cfg;
   private final String sqlBase;
 
@@ -168,7 +169,7 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
   }
 
   private void addRows(StringBuilder sql, Statement stmt, List<T> beans)
-  throws Throwable {
+        throws Throwable {
     int i = 0;
     for (T bean : beans) {
       if (i++ > 0) {
@@ -191,15 +192,7 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
       if (transformer != null) {
         value = transformer.transform(bean, value, new Quoter(stmt));
       }
-      if (value == null) {
-        sql.append("NULL");
-      } else if (value instanceof Number
-            || value.getClass() == Boolean.class
-            || value.getClass() == SQLExpression.class) {
-        sql.append(value);
-      } else {
-        sql.append(stmt.enquoteLiteral(value.toString()));
-      }
+      sql.append(JDBC.quote(stmt, value));
     }
     sql.append(')');
   }
@@ -208,7 +201,7 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
    * This is a no-op for {@code SQLBatchInsert}.
    */
   @Override
-  public void close() {}
+  public void close() { }
 
   private void commit() throws SQLException {
     if (cfg.commitPerChunk() && !cfg.connection().getAutoCommit()) {

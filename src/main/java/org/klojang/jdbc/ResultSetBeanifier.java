@@ -7,18 +7,16 @@ import java.util.Optional;
 /**
  * <p>Converts the rows in a JDBC {@link ResultSet} into JavaBeans or records. Instances
  * are obtained via
- * {@link BeanifierFactory#getBeanifier(ResultSet) BeanifierFactory.getBeanifier()}.
- *
- * <p>Contrary to the {@link SQLQuery} class, a
- * {@code ResultSetBeanifier} is agnostic about, and has no opinion on where you got the
- * {@link ResultSet} from. In that sense it is closer to the JDBC metal than the
- * {@code SQLQuery} class. It does not aim to be an ORM-like class. It just converts
- * result sets into (flat) JavaBeans, to be carried across the boundary of the data access
- * module (and into the view layer, for example). The JavaBeans may have nested
- * structures, but only top-level properties will be populated.
+ * {@link BeanifierFactory#getBeanifier(ResultSet) BeanifierFactory.getBeanifier()}. A
+ * {@code ResultSetBeanifier} is agnostic about, and has no opinion on how the
+ * {@link ResultSet} was obtained. It may have been produced using regular JDBC calls. It
+ * does not aim to be an ORM-like class. It just converts result sets into (flat)
+ * JavaBeans, to be carried across the boundary of the data access module (and into the
+ * view layer, for example). The JavaBeans may have nested structures, but only top-level
+ * properties will be populated.
  *
  * <p>{@code ResultSetBeanifier} is an extension of the {@link Iterable} interface,
- * enabling you to conveniently extract the JavaBeans in a {@code forEach} loop:
+ * enabling you to extract the JavaBeans in a {@code forEach} loop:
  *
  * <blockquote><pre>{@code
  * ResultSet rs = ...;
@@ -33,12 +31,12 @@ import java.util.Optional;
  * setters on the JavaBean to populate it. There is no way to populate the bean via its
  * constructors. When converting to a record, a {@code ResultSetBeanifier} will obviously
  * always use one of its constructors to populate it. Make sure the record has a
- * constructor for those record components that map to columns in the SELECT clause. Also,
- * the encounter order of the record components within the constructor must match the
- * encounter order of the corresponding columns in the SELECT clause. However, it is not
+ * constructor for those record components that are supposed to map to columns in the
+ * SELECT clause. The encounter order of the record components within the constructor must
+ * match the encounter order of the columns in the SELECT clause. However, it is not
  * necessary that each record component can be mapped to a column in the SELECT clause,
- * and neither is it necessary that each column in the SELECT clause can be mapped back to
- * a record component.
+ * and it is not necessary that each column in the SELECT clause can be mapped back to a
+ * record component.
  *
  * @param <T> the type of the JavaBeans produced by the {@code ResultSetBeanifier}
  * @author Ayco Holleman

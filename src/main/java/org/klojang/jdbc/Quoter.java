@@ -1,5 +1,7 @@
 package org.klojang.jdbc;
 
+import org.klojang.jdbc.x.JDBC;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -47,7 +49,8 @@ public final class Quoter {
    * <p>Returns a properly escaped and quoted string. This method behaves as follows:
    *
    * <ul>
-   *   <li>if the argument is {@code null}, this method returns the string literal "NULL"
+   *   <li>if the argument is {@code null}, this method returns the literal,
+   *   <i>unquoted</i> string "NULL"
    *   <li>if the argument is an {@link SQL#expression(String) SQL expression}, a
    *   {@link Number} or a {@link Boolean}, this method returns {@code value.toString()}
    *   (in other words, it returns an <i>unquoted</i> string)
@@ -62,13 +65,6 @@ public final class Quoter {
    * @see Statement#enquoteLiteral(String)
    */
   public String escapeAndQuote(Object value) throws SQLException {
-    if (value == null) {
-      return "NULL";
-    } else if (value instanceof Number
-          || value.getClass() == Boolean.class
-          || value.getClass() == SQLException.class) {
-      return value.toString();
-    }
-    return stmt.enquoteLiteral(value.toString());
+    return JDBC.quote(stmt, value);
   }
 }

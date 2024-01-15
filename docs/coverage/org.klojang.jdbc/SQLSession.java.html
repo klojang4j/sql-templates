@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLSession.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLSession.java</span></div><h1>SQLSession.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
+import java.util.Collection;
+
 /**
  * &lt;p&gt;An {@code SQLSession} is used to initiate and prepare the execution of SQL.
  * It allows you to set SQL &lt;i&gt;template variables&lt;/i&gt; within the SQL and then obtain a
@@ -36,7 +38,9 @@
 public sealed interface SQLSession permits AbstractSQLSession {
 
   /**
-   * Sets the value of a template variable. This method will throw an
+   * Sets the value of the specified template variable. If the value is an array or
+   * collection, it will be &quot;imploded&quot; to a string, using {@code &quot;,&quot; } (comma) to separate
+   * the elements in the array or collection. This method will throw an
    * {@link UnsupportedOperationException} for
    * {@linkplain SQL#basic(String) basic SQL sessions} since these are not based on &lt;a
    * href=&quot;https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html&quot;&gt;Klojang
@@ -51,10 +55,50 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    * @see org.klojang.templates.Template
    * @see org.klojang.templates.RenderSession#set(String, Object)
+   * @see org.klojang.util.ArrayMethods#implode(Object[])
+   * @see org.klojang.util.CollectionMethods#implode(Collection)
    */
   default SQLSession set(String varName, Object value)
         throws UnsupportedOperationException {
-<span class="nc" id="L57">    throw new UnsupportedOperationException();</span>
+<span class="nc" id="L63">    throw new UnsupportedOperationException();</span>
+  }
+
+
+  /**
+   * Sets the value of the specified template variable. Use this method if the source of
+   * the value is unknown to prevent SQL injection. The provided value is processed as
+   * follows:
+   * &lt;ol&gt;
+   *   &lt;li&gt;If the value is {@code null}, the literal string &quot;NULL&quot; (without quotes)
+   *   is inserted into the SQL template.
+   *   &lt;li&gt;If the value is a {@link Number} or {@link Boolean}, it is inserted as-is
+   *   (unquoted) into the SQL template.
+   *   &lt;li&gt;If the value is an {@link SQLExpression}, like
+   *   {@code SUBSTRING(FIRST_NAME, 1, 4)}, it is inserted as-is (unquoted) into
+   *   the SQL template.
+   *   &lt;li&gt;Otherwise the value is first escaped and quoted according to the underlying
+   *   database's quoting rules and then inserted into the SQL template.
+   *   &lt;li&gt;However, if the value is a collection or array, each of the elements is treated
+   *   as described in the first four rules, and they are then stringed together using
+   *   a comma (&quot;,&quot;) to separate them. The result of these two steps is then inserted into
+   *   the SQL template.
+   * &lt;/ol&gt;
+   *
+   * @param varName the name of the template variable
+   * @param value the value to set the variable to
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   * @see java.sql.Statement#enquoteLiteral(String)
+   */
+  default SQLSession setAsLiteral(String varName, Object value)
+        throws UnsupportedOperationException {
+<span class="nc" id="L96">    throw new UnsupportedOperationException();</span>
+  }
+
+  default SQLSession setAsIdentifier(String varName, String identifier)
+        throws UnsupportedOperationException {
+<span class="nc" id="L101">    throw new UnsupportedOperationException();</span>
   }
 
 
@@ -70,7 +114,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setOrderBy(Object sortColumn) throws UnsupportedOperationException {
-<span class="nc" id="L73">    return set(&quot;sortColumn&quot;, sortColumn);</span>
+<span class="nc" id="L117">    return set(&quot;sortColumn&quot;, sortColumn);</span>
   }
 
   /**
@@ -87,9 +131,9 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setSortOrder(Object sortOrder) throws UnsupportedOperationException {
-<span class="nc bnc" id="L90" title="All 2 branches missed.">    return (sortOrder instanceof Boolean)</span>
-<span class="nc" id="L91">          ? setDescending((Boolean) sortOrder)</span>
-<span class="nc" id="L92">          : set(&quot;sortOrder&quot;, sortOrder);</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">    return (sortOrder instanceof Boolean)</span>
+<span class="nc" id="L135">          ? setDescending((Boolean) sortOrder)</span>
+<span class="nc" id="L136">          : set(&quot;sortOrder&quot;, sortOrder);</span>
   }
 
   /**
@@ -103,7 +147,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setDescending(boolean isDescending)
         throws UnsupportedOperationException {
-<span class="nc bnc" id="L106" title="All 2 branches missed.">    return set(&quot;sortOrder&quot;, isDescending ? &quot;DESC&quot; : &quot;ASC&quot;);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">    return set(&quot;sortOrder&quot;, isDescending ? &quot;DESC&quot; : &quot;ASC&quot;);</span>
   }
 
   /**
@@ -117,7 +161,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setOrderBy(Object sortColumn, Object sortOrder)
         throws UnsupportedOperationException {
-<span class="nc" id="L120">    return setOrderBy(sortColumn).setSortOrder(sortOrder);</span>
+<span class="nc" id="L164">    return setOrderBy(sortColumn).setSortOrder(sortOrder);</span>
   }
 
   /**
@@ -131,7 +175,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setOrderBy(Object sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
-<span class="nc" id="L134">    return setOrderBy(sortColumn).setDescending(isDescending);</span>
+<span class="nc" id="L178">    return setOrderBy(sortColumn).setDescending(isDescending);</span>
   }
 
   /**
@@ -150,7 +194,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @return a {@code SQLInsert} instance
    */
   default SQLInsert prepareInsert() {
-<span class="fc" id="L153">    return prepareInsert(true);</span>
+<span class="fc" id="L197">    return prepareInsert(true);</span>
   }
 
   /**

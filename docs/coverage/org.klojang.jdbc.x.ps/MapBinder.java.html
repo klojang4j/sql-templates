@@ -7,9 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class MapBinder {
 
@@ -26,39 +26,38 @@ public final class MapBinder {
 <span class="fc" id="L26">  }</span>
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
-  public void bindMap(
-      Map&lt;String, Object&gt; map,
-      PreparedStatement ps,
-      Collection&lt;NamedParameter&gt; bound)
-      throws Throwable {
-<span class="fc" id="L34">    ColumnWriterFactory writerFinder = ColumnWriterFactory.getInstance();</span>
-<span class="fc bfc" id="L35" title="All 2 branches covered.">    for (NamedParameter param : params) {</span>
-<span class="fc" id="L36">      String key = param.name();</span>
-<span class="pc bpc" id="L37" title="1 of 2 branches missed.">      if (!map.containsKey(key)) {</span>
-<span class="nc" id="L38">        continue;</span>
+  public void bind(Map&lt;String, Object&gt; map,
+        PreparedStatement ps,
+        Set&lt;NamedParameter&gt; bound)
+        throws Throwable {
+<span class="fc" id="L33">    ColumnWriterFactory factory = ColumnWriterFactory.getInstance();</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">    for (NamedParameter param : params) {</span>
+<span class="fc" id="L35">      String key = param.name();</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">      if (!map.containsKey(key)) {</span>
+<span class="nc" id="L37">        continue;</span>
       }
-<span class="fc" id="L40">      bound.add(param);</span>
-<span class="fc" id="L41">      Object value = map.getOrDefault(key, ABSENT);</span>
-<span class="pc bpc" id="L42" title="1 of 2 branches missed.">      if (value == null) {</span>
-<span class="nc" id="L43">        param.positions().forEachThrowing(i -&gt; ps.setString(i, null));</span>
-<span class="pc bpc" id="L44" title="1 of 2 branches missed.">      } else if (value != ABSENT) {</span>
+<span class="fc" id="L39">      bound.add(param);</span>
+<span class="fc" id="L40">      Object value = map.getOrDefault(key, ABSENT);</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">      if (value == null) {</span>
+<span class="nc" id="L42">        param.positions().forEachThrowing(i -&gt; ps.setString(i, null));</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">      } else if (value != ABSENT) {</span>
         ColumnWriter writer;
-<span class="pc bpc" id="L46" title="3 of 4 branches missed.">        if (value instanceof Enum &amp;&amp; bindInfo.saveEnumAsString(Map.class, key)) {</span>
-<span class="nc" id="L47">          writer = EnumWriterLookup.ENUM_TO_STRING;</span>
+<span class="pc bpc" id="L45" title="3 of 4 branches missed.">        if (value instanceof Enum &amp;&amp; bindInfo.saveEnumAsString(Map.class, key)) {</span>
+<span class="nc" id="L46">          writer = EnumWriterLookup.ENUM_TO_STRING;</span>
         } else {
-<span class="fc" id="L49">          writer = writerFinder.getDefaultWriter(value.getClass());</span>
+<span class="fc" id="L48">          writer = factory.getDefaultWriter(value.getClass());</span>
         }
-<span class="fc" id="L51">        Object output = writer.getParamValue(value);</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (LOG.isDebugEnabled()) {</span>
-<span class="pc bpc" id="L53" title="1 of 2 branches missed.">          if (value == output) {</span>
-<span class="fc" id="L54">            LOG.trace(&quot;-&gt; Parameter \&quot;{}\&quot;: {}&quot;, key, output);</span>
+<span class="fc" id="L50">        Object output = writer.getParamValue(value);</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (LOG.isDebugEnabled()) {</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">          if (value == output) {</span>
+<span class="fc" id="L53">            LOG.trace(&quot;-&gt; Parameter \&quot;{}\&quot;: {}&quot;, key, output);</span>
           } else {
-<span class="nc" id="L56">            LOG.trace(&quot;-&gt; Parameter \&quot;{}\&quot;: {} (map value: {})&quot;, key, output, value);</span>
+<span class="nc" id="L55">            LOG.trace(&quot;-&gt; Parameter \&quot;{}\&quot;: {} (map value: {})&quot;, key, output, value);</span>
           }
         }
-<span class="fc" id="L59">        param.positions().forEachThrowing(i -&gt; writer.bind(ps, i, output));</span>
+<span class="fc" id="L58">        param.positions().forEachThrowing(i -&gt; writer.bind(ps, i, output));</span>
       }
-<span class="fc" id="L61">    }</span>
-<span class="fc" id="L62">  }</span>
+<span class="fc" id="L60">    }</span>
+<span class="fc" id="L61">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

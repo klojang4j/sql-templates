@@ -4,6 +4,7 @@ import org.klojang.check.Check;
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
 import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.SQLExpression;
 import org.klojang.jdbc.x.sql.SQLInfo;
 
 import java.sql.*;
@@ -20,7 +21,7 @@ public final class JDBC {
   private static final String NO_KEYS_GENERATED = "no keys were generated";
   private static final String MULTIPLE_AUTO_KEYS = "multiple auto-increment keys not supported";
 
-  private JDBC() {throw new UnsupportedOperationException();}
+  private JDBC() { throw new UnsupportedOperationException(); }
 
   public static String[] getColumnNames(ResultSet rs) {
     try {
@@ -40,7 +41,7 @@ public final class JDBC {
     try {
       return con.prepareStatement(sqlInfo.jdbcSQL());
     } catch (SQLException e) {
-      throw new KlojangSQLException(e);
+      throw KlojangSQLException.wrap(e, sqlInfo);
     }
   }
 
@@ -51,7 +52,7 @@ public final class JDBC {
     try {
       return con.prepareStatement(sqlInfo.jdbcSQL(), x);
     } catch (SQLException e) {
-      throw new KlojangSQLException(e);
+      throw KlojangSQLException.wrap(e, sqlInfo);
     }
   }
 
@@ -70,6 +71,16 @@ public final class JDBC {
       }
     }
     return keys;
+  }
+
+  public static String quote(Statement stmt, Object value) throws SQLException {
+    return switch (value) {
+      case null -> "NULL";
+      case Number n -> n.toString();
+      case Boolean b -> b.toString();
+      case SQLExpression s -> s.toString();
+      default -> stmt.enquoteLiteral(value.toString());
+    };
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
