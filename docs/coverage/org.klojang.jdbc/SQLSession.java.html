@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLSession.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLSession.java</span></div><h1>SQLSession.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
+import org.klojang.invoke.BeanReader;
+
 import java.util.Collection;
+import java.util.List;
 
 /**
- * &lt;p&gt;An {@code SQLSession} is used to initiate and prepare the execution of SQL.
- * It allows you to set SQL &lt;i&gt;template variables&lt;/i&gt; within the SQL and then obtain a
+ * &lt;p&gt;
+ * An {@code SQLSession} is used to initiate and prepare the execution of SQL. It allows
+ * you to set SQL &lt;i&gt;template variables&lt;/i&gt; within the SQL and then obtain a
  * {@link SQLStatement} object that can be used to set (a.k.a. &quot;bind&quot;) the &lt;i&gt;named
  * parameters&lt;/i&gt; within the SQL. The difference between template variables and named
  * parameters is explained in the comments for the {@link SQL} interface. The
@@ -12,14 +16,16 @@ import java.util.Collection;
  * does not support template variables. This leaves you no choice but to retrieve a
  * {@code SQLStatement} from it straight away.
  *
- * &lt;p&gt;Probably the most common use case for using template variables is to parametrize
- * the ORDER BY column and sort order (&quot;ASC&quot; or &quot;DESC&quot;). Therefore the {@code SQLSession}
+ * &lt;p&gt;
+ * Probably the most common use case for using template variables is to parametrize the
+ * ORDER BY column and sort order (&quot;ASC&quot; or &quot;DESC&quot;). Therefore the {@code SQLSession}
  * contains a few specialized {@code set} methods specifically for this purpose. These
  * methods assume that the SQL template contains a template variable named &quot;sortColumn&quot;
  * for the ORDER BY column(s), and a template variable name &quot;sortOrder&quot; for the sort
  * order.
  *
- * &lt;p&gt;The difference between the {@code SQLSession} you get from
+ * &lt;p&gt;
+ * The difference between the {@code SQLSession} you get from
  * {@link SQL#template(String) SQL.template()} and the one you get from
  * {@link SQL#skeleton(String) SQL.skeleton()} is that with the latter, named parameters
  * are extracted from the SQL at the very last moment, just before you retrieve a
@@ -27,29 +33,28 @@ import java.util.Collection;
  * and you set one or more of them to text values that again contain named parameters,
  * these, too, will be available for binding in the {@code SQLStatement}.
  *
- * &lt;p&gt;&lt;i&gt;An {@code SQLSession} is not thread-safe and should generally not be reused once
- * you have obtained a {@code SQLStatement} object from it.&lt;/i&gt;
+ * &lt;p&gt;
+ * &lt;i&gt;An {@code SQLSession} is not thread-safe and should generally not be
+ * reused once you have obtained a {@code SQLStatement} object from it.&lt;/i&gt;
  */
 
 /*
  * In fact all implementations currently _are_ thread-safe, but they are not intended to
  * be, and we don't want to commit to it.
  */
-public sealed interface SQLSession permits AbstractSQLSession {
+public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSession {
 
   /**
-   * Sets the value of the specified template variable. If the value is an array or
-   * collection, it will be &quot;imploded&quot; to a string, using {@code &quot;,&quot; } (comma) to separate
-   * the elements in the array or collection. This method will throw an
-   * {@link UnsupportedOperationException} for
+   * Sets the value of the specified template variable. The value will not be escaped or
+   * quoted. If the value is an array or collection, it will be &quot;imploded&quot; to a string,
+   * using {@code &quot;,&quot; } (comma) to separate the elements in the array or collection. This
+   * method will throw an {@link UnsupportedOperationException} for
    * {@linkplain SQL#basic(String) basic SQL sessions} since these are not based on &lt;a
    * href=&quot;https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html&quot;&gt;Klojang
    * Templates&lt;/a&gt;.
    *
    * @param varName the name of the template variable
-   * @param value the value to set the variable to. If the value is an array or
-   *       collection, it will be &quot;imploded&quot; to a string, using {@code &quot;,&quot; } (comma) to
-   *       separate the elements in the array or collection.
+   * @param value the value to set the variable to.
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#basic(String) SQL.basic()} method
@@ -60,47 +65,73 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession set(String varName, Object value)
         throws UnsupportedOperationException {
-<span class="nc" id="L63">    throw new UnsupportedOperationException();</span>
+<span class="nc" id="L68">    throw new UnsupportedOperationException();</span>
   }
 
-
   /**
-   * Sets the value of the specified template variable. Use this method if the source of
-   * the value is unknown to prevent SQL injection. The provided value is processed as
-   * follows:
-   * &lt;ol&gt;
-   *   &lt;li&gt;If the value is {@code null}, the literal string &quot;NULL&quot; (without quotes)
-   *   is inserted into the SQL template.
-   *   &lt;li&gt;If the value is a {@link Number} or {@link Boolean}, it is inserted as-is
-   *   (unquoted) into the SQL template.
-   *   &lt;li&gt;If the value is an {@link SQLExpression}, like
-   *   {@code SUBSTRING(FIRST_NAME, 1, 4)}, it is inserted as-is (unquoted) into
-   *   the SQL template.
-   *   &lt;li&gt;Otherwise the value is first escaped and quoted according to the underlying
-   *   database's quoting rules and then inserted into the SQL template.
-   *   &lt;li&gt;However, if the value is a collection or array, each of the elements is treated
-   *   as described in the first four rules, and they are then stringed together using
-   *   a comma (&quot;,&quot;) to separate them. The result of these two steps is then inserted into
-   *   the SQL template.
-   * &lt;/ol&gt;
+   * Sets the specified template variable to the escaped and quoted version of the
+   * specified value. The value is escaped and quoted using the
+   * {@link #quoteValue(Object)} method. Use this method if the source of the value is
+   * unknown to prevent SQL injection.
    *
    * @param varName the name of the template variable
    * @param value the value to set the variable to
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#basic(String) SQL.basic()} method
-   * @see java.sql.Statement#enquoteLiteral(String)
+   * @see #quoteValue(Object)
    */
-  default SQLSession setAsLiteral(String varName, Object value)
+  default SQLSession quote(String varName, Object value)
         throws UnsupportedOperationException {
-<span class="nc" id="L96">    throw new UnsupportedOperationException();</span>
+<span class="nc" id="L86">    throw new UnsupportedOperationException();</span>
   }
 
-  default SQLSession setAsIdentifier(String varName, String identifier)
+  /**
+   * &lt;p&gt;A specialised SQL template method, aimed at facilitating batch inserts. The SQL
+   * template must contain a nested template named &quot;values&quot;. This template will be
+   * repeated for each of the beans or records in the provided list. This is best
+   * illustrated using an example:
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * record Person(Integer id, String firstName, String lastName, int age) {}
+   * // ...
+   * List&lt;Person&gt; persons = List.of(
+   *    new Person(null, &quot;John&quot;, &quot;Smith&quot;, 34),
+   *    new Person(null, &quot;Francis&quot;, &quot;O'Donell&quot;, 27),
+   *    new Person(null, &quot;Mary&quot;, &quot;Bear&quot;, 52));
+   * // ...
+   * SQL sql = SQL.template(&quot;&quot;&quot;
+   *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+   *    ~%%begin:values%
+   *    (~%firstName%,~%lastName%,~%age%)
+   *    ~%%end:values%
+   *    &quot;&quot;&quot;);
+   * try(SQLSession session = sql.session()) {
+   *  session.setValues(Person.class, persons).execute();
+   * }
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * &lt;p&gt;The above code snippet will execute the following SQL:
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+   * ('John','Smith',34),
+   * ('Francis','O''Donell',27),
+   * ('Mary','Bear',52)
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * @param &lt;T&gt; the type of the beans or records to persist
+   * @param reader a {@code BeanReader} for the beans or records to persist
+   * @param beans the beans or records to persist
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   * @see SQLInsert#insertBatchAndGetIDs(List)
+   * @see SQLInsert#insertBatchAndSetIDs(String, List)
+   */
+  default &lt;T&gt; SQLSession setValues(BeanReader&lt;T&gt; reader, List&lt;T&gt; beans)
         throws UnsupportedOperationException {
-<span class="nc" id="L101">    throw new UnsupportedOperationException();</span>
+<span class="nc" id="L133">    throw new UnsupportedOperationException();</span>
   }
-
 
   /**
    * Sets a template variable named &quot;sortColumn&quot; to the specified value. This presumes and
@@ -114,7 +145,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setOrderBy(Object sortColumn) throws UnsupportedOperationException {
-<span class="nc" id="L117">    return set(&quot;sortColumn&quot;, sortColumn);</span>
+<span class="nc" id="L148">    return set(&quot;sortColumn&quot;, sortColumn);</span>
   }
 
   /**
@@ -131,9 +162,9 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       obtained via the {@link SQL#basic(String) SQL.basic()} method
    */
   default SQLSession setSortOrder(Object sortOrder) throws UnsupportedOperationException {
-<span class="nc bnc" id="L134" title="All 2 branches missed.">    return (sortOrder instanceof Boolean)</span>
-<span class="nc" id="L135">          ? setDescending((Boolean) sortOrder)</span>
-<span class="nc" id="L136">          : set(&quot;sortOrder&quot;, sortOrder);</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">    return (sortOrder instanceof Boolean)</span>
+<span class="nc" id="L166">          ? setDescending((Boolean) sortOrder)</span>
+<span class="nc" id="L167">          : set(&quot;sortOrder&quot;, sortOrder);</span>
   }
 
   /**
@@ -147,7 +178,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setDescending(boolean isDescending)
         throws UnsupportedOperationException {
-<span class="nc bnc" id="L150" title="All 2 branches missed.">    return set(&quot;sortOrder&quot;, isDescending ? &quot;DESC&quot; : &quot;ASC&quot;);</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">    return set(&quot;sortOrder&quot;, isDescending ? &quot;DESC&quot; : &quot;ASC&quot;);</span>
   }
 
   /**
@@ -161,11 +192,11 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setOrderBy(Object sortColumn, Object sortOrder)
         throws UnsupportedOperationException {
-<span class="nc" id="L164">    return setOrderBy(sortColumn).setSortOrder(sortOrder);</span>
+<span class="nc" id="L195">    return setOrderBy(sortColumn).setSortOrder(sortOrder);</span>
   }
 
   /**
-   * Sets the ort column and sort order of an ORDER BY clause.
+   * Sets the sort column and sort order of an ORDER BY clause.
    *
    * @param sortColumn the column to sort on
    * @param isDescending whether to sort in descending order
@@ -175,8 +206,56 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setOrderBy(Object sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
-<span class="nc" id="L178">    return setOrderBy(sortColumn).setDescending(isDescending);</span>
+<span class="nc" id="L209">    return setOrderBy(sortColumn).setDescending(isDescending);</span>
   }
+
+  /**
+   * Escapes and quotes the specified value. More precisely:
+   * &lt;ul&gt;
+   * &lt;li&gt;If the value is {@code null}, the literal string &quot;NULL&quot;
+   * (&lt;i&gt;without&lt;/i&gt; quotes) is returned.
+   * &lt;li&gt;If the value is a {@link Number}, a {@link Boolean} or a
+   * {@link SQLExpression}, the value is returned as-is. No quoting will take
+   * place.
+   * &lt;li&gt;Otherwise the value is escaped and quoted according to the quoting
+   * rules of the target database.
+   * &lt;/ul&gt;
+   * Use this method if the value comes from outside your program to prevent
+   * SQL injection.
+   *
+   * @param value the value to be escaped and quoted
+   * @return the escaped and quoted value
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   */
+  default String quoteValue(Object value) throws UnsupportedOperationException {
+<span class="nc" id="L232">    throw new UnsupportedOperationException();</span>
+  }
+
+  /**
+   * If necessary, quotes the specified identifier (e&amp;#46;g&amp;#46; a column name or table
+   * name) according to the quoting rules of the target database.
+   *
+   * @param identifier the identifier to quote
+   * @return the quoted identifier
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   * @see java.sql.Statement#enquoteIdentifier(String, boolean)
+   */
+  default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
+<span class="nc" id="L246">    throw new UnsupportedOperationException();</span>
+  }
+
+  /**
+   * Executes the SQL. You can call this method either if the SQL is completely static, or
+   * if you have set all template variables and the SQL does not contain any named
+   * parameters. If the SQL &lt;i&gt;does&lt;/i&gt; contain named parameters, you will first have to
+   * bind them. Call {@link #prepareInsert()}, or {@link #prepareUpdate()} to obtain a
+   * {@link SQLStatement} that enables you to bind the named parameters. Although you
+   * &lt;i&gt;could&lt;/i&gt; call this method for SQL SELECT statements, it does not make much sense
+   * because this method does not return any feedback from the database.
+   */
+  void execute();
 
   /**
    * Returns a {@code SQLQuery} instance that allows you to provide values for named
@@ -194,7 +273,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @return a {@code SQLInsert} instance
    */
   default SQLInsert prepareInsert() {
-<span class="fc" id="L197">    return prepareInsert(true);</span>
+<span class="fc" id="L276">    return prepareInsert(true);</span>
   }
 
   /**

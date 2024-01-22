@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
@@ -9,9 +10,10 @@ import org.klojang.util.CollectionMethods;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
+import java.util.*;
 import java.util.function.Supplier;
 
+import static org.klojang.check.CommonChecks.empty;
 import static org.klojang.check.CommonExceptions.illegalState;
 
 abstract sealed class DynamicSQLSession extends AbstractSQLSession
@@ -40,29 +42,38 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   @Override
-  public final SQLSession setAsLiteral(String varName, Object value) {
+  public final SQLSession quote(String varName, Object value) {
     Check.notNull(varName, "varName");
-    String val = switch (value) {
-      case null -> "NULL";
-      case Collection<?> x -> CollectionMethods.implode(x, this::quote, ",");
-      case Number[] x -> ArrayMethods.implode(x, this::stringify, ",");
-      case Boolean[] x -> ArrayMethods.implode(x, this::stringify, ",");
-      case Object[] x -> ArrayMethods.implode(x, this::quote, ",");
-      case char[] x -> ArrayMethods.implodeAny(x, this::quote, ",");
-      default -> value.getClass().isArray()
-            ? ArrayMethods.implodeAny(value, ",")
-            : quote(value);
-    };
-    session.set(varName, val);
+    session.set(varName, quoteValue(value));
     return this;
   }
 
-  static Supplier<IllegalStateException> sessionNotFinished(RenderSession session) {
-    String unset = CollectionMethods.implode(session.getAllUnsetVariables());
-    return illegalState("one or more variables have not been set yet: " + unset);
+//  @SuppressWarnings("unchecked")
+//  public final <T> SQLSession setValues(T[] beans) {
+//    Class<T> clazz = (Class<T>) beans.getClass().getComponentType();
+//    BeanReader<T> reader = new BeanReader<>(clazz);
+//    return setValues(reader, Arrays.asList(beans));
+//  }
+
+  public final <T> SQLSession setValues(Class<T> beanClass, List<T> beans) {
+    Check.notNull(beanClass, "beanClass");
+    Check.that(beans, "beans").isNot(empty());
+    String[] vars = session.getTemplate().getVariables().toArray(String[]::new);
+    BeanReader<T> reader = new BeanReader<>(beanClass);
+    List<Map<String, String>> quoted = new ArrayList<>(beans.size());
+    for (T bean : beans) {
+      Map<String, String> m = HashMap.newHashMap(vars.length);
+      for (String var : vars) {
+        m.put(var, quoteValue(reader.read(bean, var)));
+      }
+      quoted.add(m);
+    }
+    session.populate("values", quoted, ",");
+    return this;
   }
 
-  private String quote(Object obj) {
+  @Override
+  public final String quoteValue(Object obj) {
     try {
       return JDBC.quote(statement(), obj);
     } catch (SQLException e) {
@@ -70,8 +81,29 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     }
   }
 
-  private String stringify(Object obj) {
-    return obj == null ? "NULL" : obj.toString();
+  @Override
+  public final String quoteIdentifier(String obj) {
+    try {
+      return statement().enquoteIdentifier(obj, false);
+    } catch (SQLException e) {
+      throw KlojangSQLException.wrap(e, sql);
+    }
+  }
+
+  @Override
+  public final void execute() {
+    try {
+      Statement statement = con.createStatement();
+      statement.execute(session.render());
+    } catch (SQLException e) {
+      throw KlojangSQLException.wrap(e, sql);
+    }
+  }
+
+
+  static Supplier<IllegalStateException> sessionNotFinished(RenderSession session) {
+    String unset = CollectionMethods.implode(session.getAllUnsetVariables());
+    return illegalState("one or more variables have not been set yet: " + unset);
   }
 
   private Statement statement() {
@@ -85,5 +117,14 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     return stmt;
   }
 
+  public void close() {
+    if (stmt != null) {
+      try {
+        stmt.close();
+      } catch (SQLException e) {
+        throw KlojangSQLException.wrap(e, sql);
+      }
+    }
+  }
 
 }

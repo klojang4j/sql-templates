@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DynamicSQLSession.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">DynamicSQLSession.java</span></div><h1>DynamicSQLSession.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
@@ -9,9 +10,10 @@ import org.klojang.util.CollectionMethods;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
+import java.util.*;
 import java.util.function.Supplier;
 
+import static org.klojang.check.CommonChecks.empty;
 import static org.klojang.check.CommonExceptions.illegalState;
 
 abstract sealed class DynamicSQLSession extends AbstractSQLSession
@@ -22,69 +24,108 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   private Statement stmt;
 
   DynamicSQLSession(Connection con, AbstractSQL sql, RenderSession session) {
-<span class="fc" id="L25">    super(con, sql);</span>
-<span class="fc" id="L26">    this.session = session;</span>
-<span class="fc" id="L27">  }</span>
+<span class="fc" id="L27">    super(con, sql);</span>
+<span class="fc" id="L28">    this.session = session;</span>
+<span class="fc" id="L29">  }</span>
 
   @Override
   public final SQLSession set(String varName, Object value) {
-<span class="fc" id="L31">    Check.notNull(varName, &quot;varName&quot;);</span>
-<span class="pc bpc" id="L32" title="1 of 2 branches missed.">    if (value instanceof Collection&lt;?&gt; c) {</span>
-<span class="nc" id="L33">      session.set(varName, CollectionMethods.implode(c));</span>
-<span class="pc bpc" id="L34" title="1 of 2 branches missed.">    } else if (value.getClass().isArray()) {</span>
-<span class="nc" id="L35">      session.set(varName, ArrayMethods.implodeAny(value));</span>
+<span class="fc" id="L33">    Check.notNull(varName, &quot;varName&quot;);</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">    if (value instanceof Collection&lt;?&gt; c) {</span>
+<span class="nc" id="L35">      session.set(varName, CollectionMethods.implode(c));</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">    } else if (value.getClass().isArray()) {</span>
+<span class="nc" id="L37">      session.set(varName, ArrayMethods.implodeAny(value));</span>
     } else {
-<span class="fc" id="L37">      session.set(varName, value);</span>
+<span class="fc" id="L39">      session.set(varName, value);</span>
     }
-<span class="fc" id="L39">    return this;</span>
+<span class="fc" id="L41">    return this;</span>
   }
 
   @Override
-  public final SQLSession setAsLiteral(String varName, Object value) {
-<span class="nc" id="L44">    Check.notNull(varName, &quot;varName&quot;);</span>
-<span class="nc bnc" id="L45" title="All 7 branches missed.">    String val = switch (value) {</span>
-<span class="nc" id="L46">      case null -&gt; &quot;NULL&quot;;</span>
-<span class="nc" id="L47">      case Collection&lt;?&gt; x -&gt; CollectionMethods.implode(x, this::quote, &quot;,&quot;);</span>
-<span class="nc" id="L48">      case Number[] x -&gt; ArrayMethods.implode(x, this::stringify, &quot;,&quot;);</span>
-<span class="nc" id="L49">      case Boolean[] x -&gt; ArrayMethods.implode(x, this::stringify, &quot;,&quot;);</span>
-<span class="nc" id="L50">      case Object[] x -&gt; ArrayMethods.implode(x, this::quote, &quot;,&quot;);</span>
-<span class="nc" id="L51">      case char[] x -&gt; ArrayMethods.implodeAny(x, this::quote, &quot;,&quot;);</span>
-<span class="nc bnc" id="L52" title="All 2 branches missed.">      default -&gt; value.getClass().isArray()</span>
-<span class="nc" id="L53">            ? ArrayMethods.implodeAny(value, &quot;,&quot;)</span>
-<span class="nc" id="L54">            : quote(value);</span>
-    };
-<span class="nc" id="L56">    session.set(varName, val);</span>
-<span class="nc" id="L57">    return this;</span>
+  public final SQLSession quote(String varName, Object value) {
+<span class="nc" id="L46">    Check.notNull(varName, &quot;varName&quot;);</span>
+<span class="nc" id="L47">    session.set(varName, quoteValue(value));</span>
+<span class="nc" id="L48">    return this;</span>
   }
 
-  static Supplier&lt;IllegalStateException&gt; sessionNotFinished(RenderSession session) {
-<span class="fc" id="L61">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
-<span class="fc" id="L62">    return illegalState(&quot;one or more variables have not been set yet: &quot; + unset);</span>
+//  @SuppressWarnings(&quot;unchecked&quot;)
+//  public final &lt;T&gt; SQLSession setValues(T[] beans) {
+//    Class&lt;T&gt; clazz = (Class&lt;T&gt;) beans.getClass().getComponentType();
+//    BeanReader&lt;T&gt; reader = new BeanReader&lt;&gt;(clazz);
+//    return setValues(reader, Arrays.asList(beans));
+//  }
+
+  public final &lt;T&gt; SQLSession setValues(Class&lt;T&gt; beanClass, List&lt;T&gt; beans) {
+<span class="nc" id="L59">    Check.notNull(beanClass, &quot;beanClass&quot;);</span>
+<span class="nc" id="L60">    Check.that(beans, &quot;beans&quot;).isNot(empty());</span>
+<span class="nc" id="L61">    String[] vars = session.getTemplate().getVariables().toArray(String[]::new);</span>
+<span class="nc" id="L62">    BeanReader&lt;T&gt; reader = new BeanReader&lt;&gt;(beanClass);</span>
+<span class="nc" id="L63">    List&lt;Map&lt;String, String&gt;&gt; quoted = new ArrayList&lt;&gt;(beans.size());</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">    for (T bean : beans) {</span>
+<span class="nc" id="L65">      Map&lt;String, String&gt; m = HashMap.newHashMap(vars.length);</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">      for (String var : vars) {</span>
+<span class="nc" id="L67">        m.put(var, quoteValue(reader.read(bean, var)));</span>
+      }
+<span class="nc" id="L69">      quoted.add(m);</span>
+<span class="nc" id="L70">    }</span>
+<span class="nc" id="L71">    session.populate(&quot;values&quot;, quoted, &quot;,&quot;);</span>
+<span class="nc" id="L72">    return this;</span>
   }
 
-  private String quote(Object obj) {
+  @Override
+  public final String quoteValue(Object obj) {
     try {
-<span class="nc" id="L67">      return JDBC.quote(statement(), obj);</span>
-<span class="nc" id="L68">    } catch (SQLException e) {</span>
-<span class="nc" id="L69">      throw KlojangSQLException.wrap(e, sql);</span>
+<span class="nc" id="L78">      return JDBC.quote(statement(), obj);</span>
+<span class="nc" id="L79">    } catch (SQLException e) {</span>
+<span class="nc" id="L80">      throw KlojangSQLException.wrap(e, sql);</span>
     }
   }
 
-  private String stringify(Object obj) {
-<span class="nc bnc" id="L74" title="All 2 branches missed.">    return obj == null ? &quot;NULL&quot; : obj.toString();</span>
+  @Override
+  public final String quoteIdentifier(String obj) {
+    try {
+<span class="nc" id="L87">      return statement().enquoteIdentifier(obj, false);</span>
+<span class="nc" id="L88">    } catch (SQLException e) {</span>
+<span class="nc" id="L89">      throw KlojangSQLException.wrap(e, sql);</span>
+    }
+  }
+
+  @Override
+  public final void execute() {
+    try {
+<span class="nc" id="L96">      Statement statement = con.createStatement();</span>
+<span class="nc" id="L97">      statement.execute(session.render());</span>
+<span class="nc" id="L98">    } catch (SQLException e) {</span>
+<span class="nc" id="L99">      throw KlojangSQLException.wrap(e, sql);</span>
+<span class="nc" id="L100">    }</span>
+<span class="nc" id="L101">  }</span>
+
+
+  static Supplier&lt;IllegalStateException&gt; sessionNotFinished(RenderSession session) {
+<span class="fc" id="L105">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
+<span class="fc" id="L106">    return illegalState(&quot;one or more variables have not been set yet: &quot; + unset);</span>
   }
 
   private Statement statement() {
-<span class="nc bnc" id="L78" title="All 2 branches missed.">    if (stmt == null) {</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">    if (stmt == null) {</span>
       try {
-<span class="nc" id="L80">        stmt = con.createStatement();</span>
-<span class="nc" id="L81">      } catch (SQLException e) {</span>
-<span class="nc" id="L82">        throw KlojangSQLException.wrap(e, sql);</span>
-<span class="nc" id="L83">      }</span>
+<span class="nc" id="L112">        stmt = con.createStatement();</span>
+<span class="nc" id="L113">      } catch (SQLException e) {</span>
+<span class="nc" id="L114">        throw KlojangSQLException.wrap(e, sql);</span>
+<span class="nc" id="L115">      }</span>
     }
-<span class="nc" id="L85">    return stmt;</span>
+<span class="nc" id="L117">    return stmt;</span>
   }
 
+  public void close() {
+<span class="nc bnc" id="L121" title="All 2 branches missed.">    if (stmt != null) {</span>
+      try {
+<span class="nc" id="L123">        stmt.close();</span>
+<span class="nc" id="L124">      } catch (SQLException e) {</span>
+<span class="nc" id="L125">        throw KlojangSQLException.wrap(e, sql);</span>
+<span class="nc" id="L126">      }</span>
+    }
+<span class="nc" id="L128">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

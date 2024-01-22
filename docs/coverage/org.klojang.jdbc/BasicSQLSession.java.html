@@ -5,30 +5,49 @@ import org.klojang.jdbc.x.sql.SQLInfo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 final class BasicSQLSession extends AbstractSQLSession {
 
   private final SQLInfo sqlInfo;
 
   BasicSQLSession(Connection con, AbstractSQL sql, SQLInfo sqlInfo) {
-<span class="fc" id="L14">    super(con, sql);</span>
-<span class="fc" id="L15">    this.sqlInfo = sqlInfo;</span>
-<span class="fc" id="L16">  }</span>
+<span class="fc" id="L16">    super(con, sql);</span>
+<span class="fc" id="L17">    this.sqlInfo = sqlInfo;</span>
+<span class="fc" id="L18">  }</span>
 
+  @Override
   public SQLQuery prepareQuery() {
-<span class="fc" id="L19">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="fc" id="L20">    return new SQLQuery(ps, this, sqlInfo);</span>
+<span class="fc" id="L22">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="fc" id="L23">    return new SQLQuery(ps, this, sqlInfo);</span>
   }
 
+  @Override
   public SQLInsert prepareInsert(boolean retrieveAutoKeys) {
-<span class="fc" id="L24">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveAutoKeys);</span>
-<span class="fc" id="L25">    return new SQLInsert(ps, this, sqlInfo, retrieveAutoKeys);</span>
+<span class="fc" id="L28">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveAutoKeys);</span>
+<span class="fc" id="L29">    return new SQLInsert(ps, this, sqlInfo, retrieveAutoKeys);</span>
   }
 
+  @Override
   public SQLUpdate prepareUpdate() {
-<span class="fc" id="L29">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="fc" id="L30">    return new SQLUpdate(ps, this, sqlInfo);</span>
+<span class="fc" id="L34">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="fc" id="L35">    return new SQLUpdate(ps, this, sqlInfo);</span>
   }
+
+
+  @Override
+  public void execute() {
+    try {
+<span class="nc" id="L42">      Statement statement = con.createStatement();</span>
+<span class="nc" id="L43">      statement.execute(sqlInfo.normalizedSQL());</span>
+<span class="nc" id="L44">    } catch (SQLException e) {</span>
+<span class="nc" id="L45">      throw KlojangSQLException.wrap(e, sql);</span>
+<span class="nc" id="L46">    }</span>
+<span class="nc" id="L47">  }</span>
+
+  @Override
+<span class="nc" id="L50">  public void close() { }</span>
 
 
 }
