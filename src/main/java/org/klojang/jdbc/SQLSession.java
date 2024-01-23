@@ -12,7 +12,7 @@ import java.util.List;
  * {@link SQLStatement} object that can be used to set (a.k.a. "bind") the <i>named
  * parameters</i> within the SQL. The difference between template variables and named
  * parameters is explained in the comments for the {@link SQL} interface. The
- * {@code SQLSession} implementation you get from {@link SQL#basic(String) SQL.basic()})
+ * {@code SQLSession} implementation you get from {@link SQL#simple(String) SQL.simple()})
  * does not support template variables. This leaves you no choice but to retrieve a
  * {@code SQLStatement} from it straight away.
  *
@@ -49,7 +49,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * quoted. If the value is an array or collection, it will be "imploded" to a string,
    * using {@code "," } (comma) to separate the elements in the array or collection. This
    * method will throw an {@link UnsupportedOperationException} for
-   * {@linkplain SQL#basic(String) basic SQL sessions} since these are not based on <a
+   * {@linkplain SQL#simple(String) simple SQL sessions} since these are not based on <a
    * href="https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html">Klojang
    * Templates</a>.
    *
@@ -57,7 +57,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @param value the value to set the variable to.
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    * @see org.klojang.templates.Template
    * @see org.klojang.templates.RenderSession#set(String, Object)
    * @see org.klojang.util.ArrayMethods#implode(Object[])
@@ -78,7 +78,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @param value the value to set the variable to
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    * @see #quoteValue(Object)
    */
   default SQLSession quote(String varName, Object value)
@@ -106,8 +106,10 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *    (~%firstName%,~%lastName%,~%age%)
    *    ~%%end:values%
    *    """);
-   * try(SQLSession session = sql.session()) {
-   *  session.setValues(Person.class, persons).execute();
+   * try(Connection conn = ...) {
+   *   try(SQLSession session = sql.session(conn)) {
+   *     session.setValues(Person.class, persons).execute();
+   *   }
    * }
    * }</pre></blockquote>
    *
@@ -124,7 +126,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @param beans the beans or records to persist
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    * @see SQLInsert#insertBatchAndGetIDs(List)
    * @see SQLInsert#insertBatchAndSetIDs(String, List)
    */
@@ -142,7 +144,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @param sortColumn the column(s) to sort on
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setOrderBy(Object sortColumn) throws UnsupportedOperationException {
     return set("sortColumn", sortColumn);
@@ -159,7 +161,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @param sortOrder the sort order
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setSortOrder(Object sortOrder) throws UnsupportedOperationException {
     return (sortOrder instanceof Boolean)
@@ -174,7 +176,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @param isDescending whether to sort in descending order
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setDescending(boolean isDescending)
         throws UnsupportedOperationException {
@@ -188,7 +190,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @param sortOrder the sort order
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setOrderBy(Object sortColumn, Object sortOrder)
         throws UnsupportedOperationException {
@@ -202,7 +204,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @param isDescending whether to sort in descending order
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setOrderBy(Object sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
@@ -226,7 +228,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @param value the value to be escaped and quoted
    * @return the escaped and quoted value
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
@@ -239,7 +241,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @param identifier the identifier to quote
    * @return the quoted identifier
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#basic(String) SQL.basic()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    * @see java.sql.Statement#enquoteIdentifier(String, boolean)
    */
   default String quoteIdentifier(String identifier) throws UnsupportedOperationException {

@@ -52,7 +52,7 @@ public class ColumnReaderFinderTest {
           """;
     SQL.basic(sql).session(con).prepareUpdate().execute();
     Stuff stuff = new Stuff(uuid1, uuid2, url, sb);
-    SQL.prepareInsert()
+    SQL.configureInsert()
           .of(Stuff.class)
           .into("STUFF")
           .returnKeys(false)

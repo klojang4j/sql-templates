@@ -21,7 +21,7 @@ import java.sql.Connection;
  * <p>Named parameters are placeholders for, and will ultimately be replaced by regular
  * JDBC parameters (that is: question marks). Thus, named parameters can and should be
  * used wherever you would ordinarily use regular JDBC parameters. An instance of this
- * implementation can be obtained via the {@link #basic(String) SQL.basic()} method. You
+ * implementation can be obtained via the {@link #simple(String) SQL.simple()} method. You
  * should also preferably use this implementation for completely static SQL.
  *
  * <h2>SQL Templates</h2>
@@ -41,10 +41,19 @@ import java.sql.Connection;
  * <p>(Thus: named parameters look like this: <b>{@code :fooBar}</b>. <i>Klojang
  * Templates</i> variables look like this: <b>{@code ~%fooBar%}</b>.)
  *
- * <p>An instance of this implementation can be obtained via the
- * {@link #template(String) SQL.template()} method. <i>Klojang JDBC</i> is agnostic about,
- * and has no opinion on what gets parametrized this way. You could also parametrize the
- * table(s) in the FROM clause for example.
+ * <p><i>Klojang Templates</i> variables can be set in the {@link SQLSession} that you
+ * obtain from the {@code SQL} instance. Named parameters can be set (a.k.a. "bound") in
+ * the {@link SQLStatement} that you again obtain from the {@code SQLSession}. Since
+ * "simple" SQL is not allowed to contain <i>Klojang Templates</i> variables, the
+ * {@code SQL} interface contains a few convenience methods that yield an
+ * {@link SQLStatement} instance straight away, even though under the hood they still
+ * create a {@link SQLSession} object.
+ *
+ *
+ * <p>SQL templates can be created using the {@link #template(String) SQL.template()}
+ * method. <i>Klojang JDBC</i> is agnostic about, and has no opinion on what gets
+ * parametrized this way. You could also parametrize the table(s) in the FROM clause for
+ * example.
  *
  * <h2>SQL Skeletons</h2>
  * <p>The implementation obtained via the {@link #skeleton(String) SQL.skeleton()}
@@ -63,26 +72,152 @@ import java.sql.Connection;
 public sealed interface SQL permits AbstractSQL {
   /**
    * Returns an {@code SQL} implementation that allows for named parameters, but not for
-   * <i>Klojang Templates</i> variables.
+   * <i>Klojang Templates</i> variables. Also use this implementation for completely
+   * static SQL.
    *
    * @param sql the SQL query string
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
-  static SQL basic(String sql) {
-    return basic(sql, new BindInfo() { });
+  static SQL simple(String sql) {
+    return simple(sql, new BindInfo() { });
   }
 
   /**
    * Returns an {@code SQL} implementation that allows for named parameters, but not for
-   * <i>Klojang Templates</i> variables.
+   * <i>Klojang Templates</i> variables. Also use this implementation for completely
+   * static SQL.
    *
    * @param sql the SQL query string
    * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
-  static SQL basic(String sql, BindInfo bindInfo) {
+  static SQL simple(String sql, BindInfo bindInfo) {
     return new BasicSQL(sql, bindInfo);
+  }
+
+  /**
+   * Convenience method for SQL SELECT statements that do not contain <i>Klojang
+   * Templates</i> variables. Equivalent to:
+   *
+   * <blockquote><pre>{@code
+   * SQL.simple(sql, new BindInfo() {}).session(con).prepareQuery();
+   * }</pre></blockquote>
+   *
+   * @param con the JDBC connection to use
+   * @param sql the SQL SELECT string
+   * @return an {@code SQLQuery} instance that allows you to bind the named parameters in
+   *       the SQL (if present) and then execute it
+   * @see SQLSession#prepareQuery()
+   */
+  static SQLQuery simpleQuery(Connection con, String sql) {
+    return simpleQuery(con, sql, noBindInfo());
+  }
+
+  /**
+   * Convenience method for SQL SELECT statements that do not contain <i>Klojang
+   * Templates</i> variables. Equivalent to:
+   *
+   * <blockquote><pre>{@code
+   * SQL.simple(sql, bindInfo).session(con).prepareQuery();
+   * }</pre></blockquote>
+   *
+   * @param con the JDBC connection to use
+   * @param sql the SQL SELECT string
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   * @return an {@code SQLQuery} instance that allows you to bind the named parameters in
+   *       the SQL (if present) and then execute it
+   * @see SQLSession#prepareQuery()
+   */
+  static SQLQuery simpleQuery(Connection con, String sql, BindInfo bindInfo) {
+    return simple(sql, bindInfo).session(con).prepareQuery();
+  }
+
+  /**
+   * Convenience method for SQL INSERT statements that do not contain <i>Klojang
+   * Templates</i> variables. Equivalent to:
+   *
+   * <blockquote><pre>{@code
+   * SQL.simple(sql, new BindInfo() {}).session(con).prepareInsert();
+   * }</pre></blockquote>
+   *
+   * @param con the JDBC connection to use
+   * @param sql the SQL INSERT string
+   * @return an {@code SQLInsert} instance that allows you to bind the named parameters in
+   *       the SQL (if present) and then execute it
+   * @see SQLSession#prepareInsert()
+   */
+  static SQLInsert simpleInsert(Connection con, String sql) {
+    return simple(sql, noBindInfo()).session(con).prepareInsert();
+  }
+
+  /**
+   * Convenience method for SQL INSERT statements that do not contain <i>Klojang
+   * Templates</i> variables. Equivalent to:
+   *
+   * <blockquote><pre>{@code
+   * SQL.simple(sql, bindInfo).session(con).prepareInsert();
+   * }</pre></blockquote>
+   *
+   * @param con the JDBC connection to use
+   * @param sql the SQL INSERT string
+   * @param retrieveAutoKeys whether to retrieve the keys that were generated by the
+   *       database
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   * @return an {@code SQLInsert} instance that allows you to bind the named parameters in
+   *       the SQL (if present) and then execute it
+   * @see SQLSession#prepareInsert(boolean)
+   */
+  static SQLInsert simpleInsert(Connection con,
+        String sql,
+        boolean retrieveAutoKeys,
+        BindInfo bindInfo) {
+    return simple(sql, bindInfo).session(con).prepareInsert(retrieveAutoKeys);
+  }
+
+  /**
+   * Convenience method for SQL UPDATE statements that do not contain <i>Klojang
+   * Templates</i> variables. Equivalent to:
+   *
+   * <blockquote><pre>{@code
+   * SQL.simple(sql, new BindInfo() {}).session(con).prepareUpdate();
+   * }</pre></blockquote>
+   *
+   * @param con the JDBC connection to use
+   * @param sql the SQL UPDATE string
+   * @return an {@code SQLUpdate} instance that allows you to bind the named parameters in
+   *       the SQL (if present) and then execute it
+   * @see SQLSession#prepareUpdate()
+   */
+  static SQLUpdate simpleUpdate(Connection con, String sql) {
+    return simpleUpdate(con, sql, noBindInfo());
+  }
+
+  /**
+   * Convenience method for SQL UPDATE statements that do not contain <i>Klojang
+   * Templates</i> variables. Equivalent to:
+   *
+   * <blockquote><pre>{@code
+   * SQL.simple(sql, bindInfo).session(con).prepareUpdate();
+   * }</pre></blockquote>
+   *
+   * @param con the JDBC connection to use
+   * @param sql the SQL UPDATE string
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   * @return an {@code SQLUpdate} instance that allows you to bind the named parameters in
+   *       the SQL (if present) and then execute it
+   * @see SQLSession#prepareUpdate()
+   */
+  static SQLUpdate simpleUpdate(Connection con, String sql, BindInfo bindInfo) {
+    return simple(sql, bindInfo).session(con).prepareUpdate();
+  }
+
+
+  private static BindInfo noBindInfo() {
+    return new BindInfo() { };
   }
 
   /**
@@ -122,6 +257,7 @@ public sealed interface SQL permits AbstractSQL {
     return skeleton(sql, new BindInfo() { });
   }
 
+
   /**
    * Returns an {@code SQL} implementation that allows for named parameters and
    * <i>Klojang Templates</i> variables. The template variables may be set to strings
@@ -145,7 +281,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an {@code SQLInsertBuilder} that enables you to easily configure an SQL
    *       INSERT statement
    */
-  static SQLInsertBuilder prepareInsert() {
+  static SQLInsertBuilder configureInsert() {
     return new SQLInsertBuilder();
   }
 
@@ -156,7 +292,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an {@code SQLBatchInsertBuilder} that enables you to easily configure large
    *       batch inserts.
    */
-  static SQLBatchInsertBuilder prepareBatchInsert() {
+  static SQLBatchInsertBuilder configureBatchInsert() {
     return new SQLBatchInsertBuilder();
   }
 
@@ -183,6 +319,7 @@ public sealed interface SQL permits AbstractSQL {
   /**
    * Returns a {@code SQLSession} that allows you to execute the SQL query.
    *
+   * @param con the JDBC connection to use
    * @return a {@code SQLSession} that allows you to execute the SQL query
    */
   SQLSession session(Connection con);

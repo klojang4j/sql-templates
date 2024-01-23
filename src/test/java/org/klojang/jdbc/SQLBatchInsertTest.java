@@ -75,7 +75,7 @@ public class SQLBatchInsertTest {
   @Test
   public void insertBatch00() {
     try (SQLBatchInsert<Person> insert = SQL
-          .prepareBatchInsert()
+          .configureBatchInsert()
           .of(Person.class)
           .into("TEST")
           .excluding("id")
@@ -95,7 +95,7 @@ public class SQLBatchInsertTest {
   public void insertAllAndGetIDs00() {
     long[] ids;
     try (SQLBatchInsert<Person> insert = SQL
-          .prepareBatchInsert()
+          .configureBatchInsert()
           .of(Person.class)
           .into("TEST")
           .excluding("id")
@@ -119,7 +119,7 @@ public class SQLBatchInsertTest {
           new Person("Mark"),
           new Person("Edward"));
     try (SQLBatchInsert<Person> insert = SQL
-          .prepareBatchInsert()
+          .configureBatchInsert()
           .of(Person.class)
           .into("TEST")
           .excluding("id")
