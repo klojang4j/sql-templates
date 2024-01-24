@@ -84,7 +84,7 @@ public class SQLBatchInsertTest {
             new Person("Mark"),
             new Person("Edward")));
     }
-    try (SQLQuery query = SQL.basic("SELECT COUNT(*) FROM TEST")
+    try (SQLQuery query = SQL.simple("SELECT COUNT(*) FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
       assertEquals(OptionalInt.of(3), query.getInt());
@@ -105,7 +105,7 @@ public class SQLBatchInsertTest {
             new Person("Edward")));
     }
     assertEquals(3, ids.length);
-    try (SQLQuery query = SQL.basic("SELECT ID FROM TEST")
+    try (SQLQuery query = SQL.simple("SELECT ID FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
       long[] actual = Morph.convert(query.firstColumn(), long[].class);
@@ -127,7 +127,7 @@ public class SQLBatchInsertTest {
       insert.insertBatchAndSetIDs("id", persons);
     }
     int[] ids = persons.stream().mapToInt(Person::getId).toArray();
-    try (SQLQuery query = SQL.basic("SELECT ID FROM TEST")
+    try (SQLQuery query = SQL.simple("SELECT ID FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
       int[] actual = Morph.convert(query.firstColumn(), int[].class);

@@ -44,7 +44,7 @@ public class RecordBeanifierTest {
             LAST_NAME VARCHAR(255),
             BIRTH_DATE DATE)
           """;
-    SQL.basic(sql).session(con).prepareUpdate().execute();
+    SQL.simple(sql).session(con).prepareUpdate().execute();
     List<Person> persons = List.of(
           new Person(0, "John", "Smith", LocalDate.of(1960, 4, 15)),
           new Person(0, "Mary", "Smith", LocalDate.of(1980, 10, 5)),

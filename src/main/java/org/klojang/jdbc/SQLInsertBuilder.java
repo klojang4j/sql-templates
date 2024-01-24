@@ -105,7 +105,7 @@ public final class SQLInsertBuilder {
    * @param b whether auto-generated keys should be retrieved from the database
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder returnKeys(boolean b) {
+  public SQLInsertBuilder retrieveKeys(boolean b) {
     this.returnKeys = b;
     return this;
   }
@@ -165,7 +165,7 @@ public final class SQLInsertBuilder {
     String table = ifNull(tableName, beanClass.getSimpleName());
     StringBuilder sb = new StringBuilder(100);
     append(sb, "INSERT INTO ", table, " (", cols, ") VALUES(", params, ")");
-    SQLSession sql = SQL.basic(sb.toString(), bindInfo).session(con);
+    SQLSession sql = SQL.simple(sb.toString(), bindInfo).session(con);
     return sql.prepareInsert(returnKeys);
   }
 

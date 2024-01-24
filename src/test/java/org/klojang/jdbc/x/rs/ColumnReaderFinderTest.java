@@ -50,12 +50,12 @@ public class ColumnReaderFinderTest {
             url VARCHAR(255),
             sb VARCHAR(255))
           """;
-    SQL.basic(sql).session(con).prepareUpdate().execute();
+    SQL.simple(sql).session(con).prepareUpdate().execute();
     Stuff stuff = new Stuff(uuid1, uuid2, url, sb);
     SQL.configureInsert()
           .of(Stuff.class)
           .into("STUFF")
-          .returnKeys(false)
+          .retrieveKeys(false)
           .prepare(con)
           .bind(stuff)
           .execute();

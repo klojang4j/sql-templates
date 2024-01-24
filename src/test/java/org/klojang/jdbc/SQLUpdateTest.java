@@ -91,7 +91,7 @@ public class SQLUpdateTest {
   public void test01() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = Collections.singletonMap("name", "John");
-    SQLSession sql = SQL.basic(s).session(MY_CON.get());
+    SQLSession sql = SQL.simple(s).session(MY_CON.get());
     long id = Long.MIN_VALUE;
     try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(data);
@@ -104,7 +104,7 @@ public class SQLUpdateTest {
   public void test02() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
-    SQLSession sql = SQL.basic(s).session(MY_CON.get());
+    SQLSession sql = SQL.simple(s).session(MY_CON.get());
     long id = Long.MIN_VALUE;
     try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(person);
@@ -117,7 +117,7 @@ public class SQLUpdateTest {
 //  public void test03() {
 //    String s = "INSERT INTO TEST(NAME) VALUES(:name)";
 //    Map<String, Object> data = new HashMap<>(Collections.singletonMap("name", "John"));
-//    SQLSession sql = SQL.basic(s).session();
+//    SQLSession sql = SQL.simple(s).session();
 //    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
 //      insert.bind(data, "id");
 //      insert.execute();
@@ -130,7 +130,7 @@ public class SQLUpdateTest {
 //    String s = "INSERT INTO TEST(NAME) VALUES(:name)";
 //    Person person = new Person("John");
 //    person.setId(Integer.MIN_VALUE);
-//    SQLSession sql = SQL.basic(s).session();
+//    SQLSession sql = SQL.simple(s).session();
 //    try (SQLInsert insert = sql.prepareInsert(MY_CON.get())) {
 //      insert.bind(person, "id");
 //      insert.execute();

@@ -90,7 +90,7 @@ public class SQLInsertTest {
   public void executeAndGetID01() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = Collections.singletonMap("name", "John");
-    SQLSession sql = SQL.basic(s).session(MY_CON.get());
+    SQLSession sql = SQL.simple(s).session(MY_CON.get());
     long id = Long.MIN_VALUE;
     try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(data);
@@ -103,7 +103,7 @@ public class SQLInsertTest {
   public void executeAndGetID02() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
-    SQLSession sql = SQL.basic(s).session(MY_CON.get());
+    SQLSession sql = SQL.simple(s).session(MY_CON.get());
     long id = Long.MIN_VALUE;
     try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(person);
@@ -116,7 +116,7 @@ public class SQLInsertTest {
   public void executeAndSetID00() {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Map<String, Object> data = new HashMap<>(Collections.singletonMap("name", "John"));
-    SQLSession sql = SQL.basic(s).session(MY_CON.get());
+    SQLSession sql = SQL.simple(s).session(MY_CON.get());
     try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(data, "id");
       insert.executeAndSetID();
@@ -129,7 +129,7 @@ public class SQLInsertTest {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
     person.setId(Integer.MIN_VALUE);
-    SQLSession sql = SQL.basic(s).session(MY_CON.get());
+    SQLSession sql = SQL.simple(s).session(MY_CON.get());
     try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(person, "id");
       insert.executeAndSetID();
@@ -165,7 +165,7 @@ public class SQLInsertTest {
             new Person("Mark"),
             new Person("Edward")));
     }
-    try (SQLQuery query = SQL.basic("SELECT COUNT(*) FROM TEST")
+    try (SQLQuery query = SQL.simple("SELECT COUNT(*) FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
       assertEquals(OptionalInt.of(3), query.getInt());
@@ -187,7 +187,7 @@ public class SQLInsertTest {
                   new Person("Edward")));
     }
     assertEquals(3, ids.length);
-    try (SQLQuery query = SQL.basic("SELECT ID FROM TEST")
+    try (SQLQuery query = SQL.simple("SELECT ID FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
       long[] actual = Morph.convert(query.firstColumn(), long[].class);
@@ -209,7 +209,7 @@ public class SQLInsertTest {
       insert.insertBatchAndSetIDs("id", beans);
     }
     int[] ids = beans.stream().mapToInt(Person::getId).toArray();
-    try (SQLQuery query = SQL.basic("SELECT ID FROM TEST")
+    try (SQLQuery query = SQL.simple("SELECT ID FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
       int[] actual = Morph.convert(query.firstColumn(), int[].class);

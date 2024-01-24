@@ -43,9 +43,10 @@ Klojang JDBC,org.klojang.jdbc,BasicSQL,0,22,0,0,0,4,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,MappifierFactory,60,0,6,0,15,0,6,0,3,0
 Klojang JDBC,org.klojang.jdbc,SQLTemplateSession,64,40,0,0,8,7,2,2,2,2
 Klojang JDBC,org.klojang.jdbc,SQL.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
-Klojang JDBC,org.klojang.jdbc,SQL.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
-Klojang JDBC,org.klojang.jdbc,DynamicSQLSession,193,35,10,2,42,10,14,3,8,3
 Klojang JDBC,org.klojang.jdbc,SQL.new BindInfo() {...},3,0,0,0,1,0,1,0,1,0
+Klojang JDBC,org.klojang.jdbc,SQL.new BindInfo() {...},3,0,0,0,1,0,1,0,1,0
+Klojang JDBC,org.klojang.jdbc,DynamicSQLSession,193,35,10,2,42,10,14,3,8,3
+Klojang JDBC,org.klojang.jdbc,SQL.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc,RecordBeanifier,76,70,11,5,19,18,10,6,3,5
 Klojang JDBC,org.klojang.jdbc,SQLSkeletonSession,80,0,0,0,16,0,5,0,5,0
 Klojang JDBC,org.klojang.jdbc,Quoter,11,0,0,0,4,0,2,0,2,0
@@ -53,7 +54,7 @@ Klojang JDBC,org.klojang.jdbc,RecordBeanifier.BeanIterator,32,0,2,0,6,0,4,0,3,0
 Klojang JDBC,org.klojang.jdbc,SQLSkeleton,25,0,0,0,7,0,2,0,2,0
 Klojang JDBC,org.klojang.jdbc,SQLSession,60,4,4,0,12,1,12,1,10,1
 Klojang JDBC,org.klojang.jdbc,DefaultMappifier,146,0,16,0,37,0,16,0,8,0
-Klojang JDBC,org.klojang.jdbc,SQL,17,32,0,0,3,6,3,6,3,6
+Klojang JDBC,org.klojang.jdbc,SQL,60,32,0,0,10,6,10,6,10,6
 Klojang JDBC,org.klojang.jdbc,KlojangSQLException,61,0,3,0,13,0,9,0,7,0
 Klojang JDBC,org.klojang.jdbc,SQLQuery,140,108,7,5,49,30,12,10,7,9
 Klojang JDBC,org.klojang.jdbc,SQLTemplate,6,29,0,0,2,6,0,2,0,2

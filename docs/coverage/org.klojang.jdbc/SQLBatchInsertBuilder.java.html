@@ -21,7 +21,7 @@ import static org.klojang.util.ObjectMethods.isEmpty;
 
 /**
  * A builder class for {@link SQLBatchInsert} instances. {@code SQLBatchInsertBuilder}
- * instances are obtained via {@link SQL#prepareBatchInsert()}.
+ * instances are obtained via {@link SQL#configureBatchInsert()}.
  */
 public final class SQLBatchInsertBuilder {
 
