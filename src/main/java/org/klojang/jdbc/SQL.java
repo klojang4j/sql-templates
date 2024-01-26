@@ -93,7 +93,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL simple(String sql, BindInfo bindInfo) {
-    return new BasicSQL(sql, bindInfo);
+    return new SimpleSQL(sql, bindInfo);
   }
 
   /**

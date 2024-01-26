@@ -1,7 +1,6 @@
 package org.klojang.jdbc;
 
-import org.klojang.jdbc.x.sql.SQLInfo;
-import org.klojang.util.exception.UncheckedException;
+import org.klojang.jdbc.x.Utils;
 
 import java.sql.SQLException;
 
@@ -13,28 +12,8 @@ import java.sql.SQLException;
  */
 public final class KlojangSQLException extends RuntimeException {
 
-  public static KlojangSQLException wrap(Throwable exc, SQLInfo sqlInfo) {
-    return wrap(exc, sqlInfo.jdbcSQL());
-  }
-
-  public static KlojangSQLException wrap(Throwable exc, SQL sql) {
-    return wrap(exc, ((AbstractSQL) sql).getUnparsedSQL());
-  }
-
-  public static KlojangSQLException wrap(Throwable exc, String sql) {
-    return switch (exc) {
-      case KlojangSQLException e0 -> e0;
-      case UncheckedException e1 -> wrap(e1.unwrap(), sql);
-      default -> new KlojangSQLException(message(exc, sql), exc);
-    };
-  }
-
-  static KlojangSQLException wrap(Throwable exc) {
-    return switch (exc) {
-      case KlojangSQLException e0 -> e0;
-      case UncheckedException e1 -> wrap(e1.unwrap());
-      default -> new KlojangSQLException(exc);
-    };
+  static KlojangSQLException wrap(Throwable exc, SQL sql) {
+    return Utils.wrap(exc, ((AbstractSQL) sql).getUnparsedSQL());
   }
 
   public KlojangSQLException(String message) {
@@ -45,12 +24,8 @@ public final class KlojangSQLException extends RuntimeException {
     super(cause);
   }
 
-  private KlojangSQLException(String message, Throwable cause) {
+  public KlojangSQLException(String message, Throwable cause) {
     super(message, cause);
-  }
-
-  private static String message(Throwable cause, String sql) {
-    return cause.toString() + " **** while executing: " + sql;
   }
 
 }

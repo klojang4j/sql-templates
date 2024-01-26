@@ -3,6 +3,7 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +143,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
       ps.executeUpdate();
       return retrieveAutoKeys ? JDBC.getGeneratedKeys(ps, 1)[0] : -1;
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw Utils.wrap(t, sqlInfo);
     } finally {
       reset();
     }
@@ -180,7 +181,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
       }
       return dbKey;
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw Utils.wrap(t, sqlInfo);
     } finally {
       reset();
     }
@@ -209,7 +210,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
         reset();
       }
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw Utils.wrap(t, sqlInfo);
     }
   }
 
@@ -243,7 +244,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
         reset();
       }
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw Utils.wrap(t, sqlInfo);
     }
     return keys;
   }
@@ -271,7 +272,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
         reset();
       }
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw Utils.wrap(t, sqlInfo);
     }
   }
 
@@ -281,7 +282,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
     try {
       ps.clearParameters();
     } catch (SQLException e) {
-      throw KlojangSQLException.wrap(e, sqlInfo);
+      throw Utils.wrap(e, sqlInfo);
     }
   }
 

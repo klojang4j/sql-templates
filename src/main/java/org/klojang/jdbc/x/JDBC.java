@@ -41,7 +41,7 @@ public final class JDBC {
     try {
       return con.prepareStatement(sqlInfo.jdbcSQL());
     } catch (SQLException e) {
-      throw KlojangSQLException.wrap(e, sqlInfo);
+      throw Utils.wrap(e, sqlInfo);
     }
   }
 
@@ -52,7 +52,7 @@ public final class JDBC {
     try {
       return con.prepareStatement(sqlInfo.jdbcSQL(), x);
     } catch (SQLException e) {
-      throw KlojangSQLException.wrap(e, sqlInfo);
+      throw Utils.wrap(e, sqlInfo);
     }
   }
 

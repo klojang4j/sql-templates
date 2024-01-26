@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.ps.MapBinder;
 import org.klojang.jdbc.x.sql.NamedParameter;
@@ -144,7 +145,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     try {
       ps.close();
     } catch (SQLException e) {
-      throw KlojangSQLException.wrap(e, sqlInfo);
+      throw Utils.wrap(e, sqlInfo);
     }
   }
 

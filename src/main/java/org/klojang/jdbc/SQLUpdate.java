@@ -1,5 +1,6 @@
 package org.klojang.jdbc;
 
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
     try {
       ps.clearParameters();
     } catch (SQLException e) {
-      throw KlojangSQLException.wrap(e, sqlInfo);
+      throw Utils.wrap(e, sqlInfo);
     }
   }
 
