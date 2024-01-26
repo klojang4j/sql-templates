@@ -21,14 +21,16 @@ import java.util.function.Supplier;
 /**
  * <p>Facilitates the execution of SQL SELECT statements. {@code SQLQuery} instances are
  * obtained via {@link SQLSession#prepareQuery() SQLSession.prepareQuery()}. You should
- * always obtain them using a try-with-resources block. Here is a simple example of how
- * you can use the {@code SQLQuery} class:
+ * always obtain them using a try-with-resources block. Here is a simple example of how to
+ * use the {@code SQLQuery} class:
  *
  * <blockquote><pre>{@code
- * SQL sql = SQL.basic("SELECT * FROM PERSON WHERE FIRST_NAME = :firstName");
- * try(SQLQuery query = sql.session().prepareQuery(jdbcConnection)) {
- *  query.bind("firstName", "John");
- *  List<Person> persons = query.getBeanifier(Person.class).beanifyAll();
+ * SQL sql = SQL.simple("SELECT * FROM PERSON WHERE FIRST_NAME = :firstName");
+ * try(Connection con = ...) {
+ *   try(SQLQuery query = sql.session(con).prepareQuery(jdbcConnection)) {
+ *     query.bind("firstName", "John");
+ *     List<Person> persons = query.getBeanifier(Person.class).beanifyAll();
+ *   }
  * }
  * }</pre></blockquote>
  *
@@ -76,10 +78,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Executes the query and returns the raw JDBC {@link ResultSet}. If the query has not
-   * been executed yet, it will be executed now. Otherwise the already-present
-   * {@code ResultSet} will be returned. The query will <i>not</i> be re-executed until
-   * you call {@link SQLStatement#reset()}.
+   * Executes the query and returns the raw JDBC {@link ResultSet}. If the query had
+   * already been executed, it will not be re-executed. Call {@link SQLStatement#reset()}
+   * to force the query to be re-executed.
    *
    * @return the {@code ResultSet} produced by the JDBC driver
    */
@@ -93,10 +94,10 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Executes the query and returns the value of the first column in the first row. The
-   * second time you call this method, you get the value of the first column in the second
-   * row, and so on. If there are no (more) rows in the {@code ResultSet}. If there are no
-   * (more) rows in the {@code ResultSet}, {@link Result#notAvailable()} is returned.
+   * Returns the value of the first column in the first row. The second time you call this
+   * method, you get the value of the first column in the second row, and so on. If there
+   * are no (more) rows in the {@code ResultSet}. If there are no (more) rows in the
+   * {@code ResultSet}, {@link Result#notAvailable()} is returned.
    *
    * @param <T> the type of the value to be returned
    * @param clazz the class of the value to be returned
@@ -168,16 +169,15 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Executes the query and returns a {@code List} of all values in the first column of
-   * the result set. Equivalent to {@link #firstColumn(Class) firstColumn(String.class)}.
+   * Returns all values in the first column of the SELECT clause. Equivalent to
+   * {@link #firstColumn(Class) firstColumn(String.class)}.
    *
    * @return the values of the first column in the result set
    */
   public List<String> firstColumn() { return firstColumn(String.class); }
 
   /**
-   * Executes the query and returns a {@code List} of all values in the first column of
-   * the result set. Equivalent to
+   * Returns all values in the first column of the SELECT clause. Equivalent to
    * {@link #firstColumn(Class, int) firstColumn(clazz, 10)}.
    *
    * @param <T> the desired type of the values
@@ -187,12 +187,13 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public <T> List<T> firstColumn(Class<T> clazz) { return firstColumn(clazz, 10); }
 
   /**
-   * Executes the query and returns a {@code List} of the all values in the first column.
-   * In other words, this method will exhaust the {@link ResultSet}.
+   * Returns all values in the first column of the SELECT clause. In other words, this
+   * method will retrieve all rows satisfying the WHERE and LIMIT clauses (if any) and
+   * collect the values of the first column into a {@code List}.
    *
    * @param <T> the desired type of the values
    * @param clazz the desired class of the values
-   * @param sizeEstimate the expected number of rows in the result set
+   * @param sizeEstimate the expected number of rows
    * @return the values of the first column in the result set
    */
   public <T> List<T> firstColumn(Class<T> clazz, int sizeEstimate) {
@@ -212,26 +213,6 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       return list;
     } catch (Throwable t) {
       throw new KlojangSQLException(t);
-    }
-  }
-
-  public <T> List<T> column(Class<T> clazz, int sizeEstimate) {
-    try {
-      executeQuery();
-      if (!resultSet.next()) {
-        return Collections.emptyList();
-      }
-      int sqlType = resultSet.getMetaData().getColumnType(1);
-      ColumnReader<?, T> reader = ColumnReaderFactory
-            .getInstance()
-            .getReader(clazz, sqlType);
-      List<T> list = new ArrayList<>(sizeEstimate);
-      do {
-        list.add(reader.getValue(resultSet, 1, clazz));
-      } while (resultSet.next());
-      return list;
-    } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t);
     }
   }
 

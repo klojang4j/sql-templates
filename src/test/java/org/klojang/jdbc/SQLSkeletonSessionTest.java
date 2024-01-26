@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.klojang.invoke.BeanReader;
+import org.klojang.invoke.BeanValueTransformer;
 import org.klojang.util.IOMethods;
 
 import java.io.IOException;
@@ -112,35 +113,36 @@ public class SQLSkeletonSessionTest {
     }
   }
 
-//  @Test
-//  public void sqlFunction00() throws Exception {
-//    List<Person> persons = List.of(
-//          new Person(null, "John", "Smith", 34),
-//          new Person(null, "Francis", "O'Donell", 27),
-//          new Person(null, "Mary", "Bear", 52));
-//    // ...
-//    SQL sql = SQL.skeleton("""
-//          INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
-//          ~%%begin:record%
-//          (~%firstName%,~%lastName%,~%age%)
-//          ~%%end:record%
-//          """);
-//    try (Connection conn = MY_CON.get()) {
-//      try (SQLSession session = sql.session(conn)) {
-//        BeanValueTransformer<Person> transformer = (bean, prop, val) -> {
-//          if (prop.equals("firstName")) {
-//            return session.sqlFunction("SUBSTRING", val, 1, 3);
-//          }
-//          return val;
-//        };
-//        BeanReader<Person> reader = new BeanReader<>(Person.class, transformer);
-//        session.setValues(reader, persons).execute();
-//        List<String> firstNames = SQL.simpleQuery(MY_CON.get(),
-//              "SELECT FIRST_NAME FROM PERSON").firstColumn(String.class);
-//        assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);
-//      }
-//    }
-//  }
+  @Test
+  public void sqlFunction00() throws Exception {
+    List<Person> persons = List.of(
+          new Person(null, "John", "Smith", 34),
+          new Person(null, "Francis", "O'Donell", 27),
+          new Person(null, "Mary", "Bear", 52));
+    // ...
+    SQL sql = SQL.skeleton("""
+          INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+          ~%%begin:record%
+          (~%firstName%,~%lastName%,~%age%)
+          ~%%end:record%
+          """);
+    try (Connection con = MY_CON.get()) {
+      try (SQLSession session = sql.session(con)) {
+        BeanValueTransformer<Person> transformer = (bean, prop, val) -> {
+          if (prop.equals("firstName")) {
+            return session.sqlFunction("SUBSTRING", val, 1, 3);
+          }
+          return val;
+        };
+        BeanReader<Person> reader = new BeanReader<>(Person.class, transformer);
+        session.setValues(reader, persons).execute();
+        String query = "SELECT FIRST_NAME FROM PERSON";
+        List<String> firstNames = SQL.simpleQuery(MY_CON.get(), query)
+              .firstColumn(String.class);
+        assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);
+      }
+    }
+  }
 
 
 }

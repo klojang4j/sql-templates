@@ -18,6 +18,7 @@ import java.sql.Connection;
  *    AND LAST_NAME = :lastName
  *  LIMIT :from, :batchSize
  * }</pre></blockquote>
+ *
  * <p>Named parameters are placeholders for, and will ultimately be replaced by regular
  * JDBC parameters (that is: question marks). Thus, named parameters can and should be
  * used wherever you would ordinarily use regular JDBC parameters. An instance of this
@@ -49,7 +50,6 @@ import java.sql.Connection;
  * {@link SQLStatement} instance straight away, even though under the hood they still
  * create a {@link SQLSession} object.
  *
- *
  * <p>SQL templates can be created using the {@link #template(String) SQL.template()}
  * method. <i>Klojang JDBC</i> is agnostic about, and has no opinion on what gets
  * parametrized this way. You could also parametrize the table(s) in the FROM clause for
@@ -60,11 +60,11 @@ import java.sql.Connection;
  * methods allows for very dynamically generated SQL. As with SQL templates, the SQL is
  * provided in the form of a Klojang template (that is: it may contain <i>Klojang
  * Templates</i> variables). However, SQL skeletons explicitly allow you to set template
- * variables to values that are themselves chunks of SQL again. If the SQL chunks contain
- * named parameters, <i>Klojang JDBC</i> will register them, and you can provide values
- * for them just like you can for the named parameters in the SQL skeleton. This is not
- * possible with the implementation returned by {@code SQL.template()}. This makes SQL
- * skeletons less efficient, but more dynamic than SQL templates.
+ * variables to SQL fragments that again contain named parameters. <i>Klojang JDBC</i>
+ * will register them, and you can provide values for them just like you can for the named
+ * parameters in the SQL skeleton. This is not possible with the implementation returned
+ * by {@code SQL.template()}. This makes SQL skeletons less efficient, but more dynamic
+ * than SQL templates.
  *
  * @see org.klojang.templates.Template
  * @see org.klojang.templates.RenderSession

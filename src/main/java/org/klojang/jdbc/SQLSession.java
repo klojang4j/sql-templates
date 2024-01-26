@@ -6,41 +6,25 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * <p>
- * An {@code SQLSession} is used to initiate and prepare the execution of SQL. It allows
- * you to set SQL <i>template variables</i> within the SQL and then obtain a
- * {@link SQLStatement} object that can be used to set (a.k.a. "bind") the <i>named
- * parameters</i> within the SQL. The difference between template variables and named
- * parameters is explained in the comments for the {@link SQL} interface. The
- * {@code SQLSession} implementation you get from {@link SQL#simple(String) SQL.simple()})
- * does not support template variables. This leaves you no choice but to retrieve a
- * {@code SQLStatement} from it straight away.
+ * <p>An {@code SQLSession} allows you to provide values for the <a
+ * href="https://klojang4j.github.io/klojang-templates/api/org.klojang.templates/module-summary.html">template
+ * variables</a> within the SQL. Once you have set all template variables, you can obtain
+ * a {@link SQLStatement} object from the {@code SQLSession} and use it to set (a.k.a.
+ * "bind") the <i>named parameters</i> within the SQL. The difference between template
+ * variables and named parameters is explained in the comments for the {@link SQL}
+ * interface. Since the {@code SQLSession} implementation obtained via
+ * {@link SQL#simple(String) SQL.simple()}) does not allow for template variables, you
+ * have no choice but to retrieve a {@code SQLStatement} from it straight away. If the SQL
+ * does not contain any named parameters, you may call {@link #execute()} on the
+ * {@code SQLSession} straight away, without going through the creation of an
+ * {@code SQLStatement}.
  *
- * <p>
- * Probably the most common use case for using template variables is to parametrize the
- * ORDER BY column and sort order ("ASC" or "DESC"). Therefore the {@code SQLSession}
- * contains a few specialized {@code set} methods specifically for this purpose. These
- * methods assume that the SQL template contains a template variable named "sortColumn"
- * for the ORDER BY column(s), and a template variable name "sortOrder" for the sort
- * order.
- *
- * <p>
- * The difference between the {@code SQLSession} you get from
- * {@link SQL#template(String) SQL.template()} and the one you get from
- * {@link SQL#skeleton(String) SQL.skeleton()} is that with the latter, named parameters
- * are extracted from the SQL at the very last moment, just before you retrieve a
- * {@link SQLStatement} from the session. Thus, if the SQL contained template variables,
- * and you set one or more of them to text values that again contain named parameters,
- * these, too, will be available for binding in the {@code SQLStatement}.
- *
- * <p>
- * <i>An {@code SQLSession} is not thread-safe and should generally not be
- * reused once you have obtained a {@code SQLStatement} object from it.</i>
- */
-
-/*
- * In fact all implementations currently _are_ thread-safe, but they are not intended to
- * be, and we don't want to commit to it.
+ * <h2>AutoCloseable</h2>
+ * The {@code SQLSession} interface extends {@link AutoCloseable}, so in principle you
+ * should set up a try-with-resources block for {@code SQLSession} instances. However, the
+ * {@code SQLSession} implementation obtained via {@link SQL#simple(String) SQL.simple()}
+ * does manage any resources that need to be freed up, so in that case a
+ * try-with-resources block is optional.
  */
 public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSession {
 
@@ -261,35 +245,92 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   }
 
   /**
-   * Escapes and quotes the specified value. More precisely:
+   * <p>Escapes and quotes the specified value. More precisely:
    * <ul>
-   * <li>If the value is {@code null}, the literal string "NULL"
-   * (<i>without</i> quotes) is returned.
-   * <li>If the value is a {@link Number}, a {@link Boolean} or a
-   * {@link SQLExpression}, the value is returned as-is. No quoting will take
-   * place.
-   * <li>Otherwise the value is escaped and quoted according to the quoting
-   * rules of the target database.
+   *     <li>If the value is {@code null}, the literal string "NULL"
+   *         (<i>without</i> quotes) is returned.
+   *     <li>If the value is a {@link Number}, a {@link Boolean} or a
+   *         {@link SQLExpression}, the value is returned as-is. That is,
+   *         {@code toString()} will be called on the value, but the resulting string
+   *         will <i>not</i> be quoted.
+   *     <li>Otherwise the value is escaped and quoted according to the quoting rules of
+   *         the target database.
    * </ul>
-   * Use this method if the value comes from outside your program to prevent
+   * <p>Use this method if the value is passed in from outside your program to prevent
    * SQL injection.
    *
    * @param value the value to be escaped and quoted
    * @return the escaped and quoted value
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   * @see java.sql.Statement#enquoteLiteral(String)
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }
 
+  /**
+   * Enables you to embed SQL function calls (a subset of SQL expressions) in your SQL
+   * without risking SQL injection.
+   *
+   * <blockquote><pre>{@code
+   * record Person(Integer id, String firstName, String lastName, int age) {}
+   *
+   * // ...
+   *
+   * List<Person> persons = List.of(
+   *    new Person(null, "John", "Smith", 34),
+   *    new Person(null, "Francis", "O'Donell", 27),
+   *    new Person(null, "Mary", "Bear", 52));
+   *
+   * // ...
+   *
+   * SQL sql = SQL.skeleton("""
+   *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+   *    ~%%begin:record%
+   *    (~%firstName%,~%lastName%,~%age%)
+   *    ~%%end:record%
+   *    """);
+   *
+   * try (Connection con = ...) {
+   *   try (SQLSession session = sql.session(con)) {
+   *     BeanValueTransformer<Person> transformer = (bean, prop, val) -> {
+   *         if (prop.equals("firstName")) {
+   *           return session.sqlFunction("SUBSTRING", val, 1, 3);
+   *         }
+   *         return val;
+   *     };
+   *     BeanReader<Person> reader = new BeanReader<>(Person.class, transformer);
+   *     session.setValues(reader, persons).execute();
+   *     String query = "SELECT FIRST_NAME FROM PERSON";
+   *     List<String> firstNames = SQL.simpleQuery(con, query).firstColumn();
+   *     assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);
+   *   }
+   * }
+   * }</pre></blockquote>
+   *
+   * <p>The above code snippet will execute the following SQL:
+   * <blockquote><pre>{@code
+   * INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+   * (SUBSTRING('John', 1, 3), 'Smith', 34),
+   * (SUBSTRING('Francis', 1, 3), 'O''Donell', 27),
+   * (SUBSTRING('Mary', 1, 3), 'Bear', 52)
+   * }</pre></blockquote>
+   *
+   *
+   * @param name the name of the function
+   * @param args the function arguments. Each of the provided arguments will be
+   *       escaped and quoted using {@link #quoteValue(Object)}.
+   * @return
+   */
   default SQLExpression sqlFunction(String name, Object... args) {
     throw new UnsupportedOperationException();
   }
 
   /**
    * If necessary, quotes the specified identifier (e&#46;g&#46; a column name or table
-   * name) according to the quoting rules of the target database.
+   * name) according to the quoting rules of the target database. Use this method if the
+   * identifier is passed in from outside your program to prevent SQL injection.
    *
    * @param identifier the identifier to quote
    * @return the quoted identifier
