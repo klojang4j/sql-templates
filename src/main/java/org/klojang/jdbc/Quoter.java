@@ -25,7 +25,7 @@ import java.sql.Statement;
  * {@code Quoter}:
  *
  * <blockquote><pre>{@code
- * SQLBatchInsertBuilder builder = SQL.prepareBatchInsert()
+ * BatchInsertBuilder builder = SQL.prepareBatchInsert()
  *    .withTransformer("lastName", (bean, value, quoter) -> {
  *      String quoted = quoter.escapeAndQuote(value);
  *      String expression = String.format("LTRIM(%s)", quoted);

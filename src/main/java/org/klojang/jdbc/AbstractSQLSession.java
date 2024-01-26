@@ -3,7 +3,7 @@ package org.klojang.jdbc;
 import java.sql.Connection;
 
 abstract sealed class AbstractSQLSession implements SQLSession
-      permits BasicSQLSession, DynamicSQLSession {
+      permits SimpleSQLSession, DynamicSQLSession {
 
   final Connection con;
   final AbstractSQL sql;

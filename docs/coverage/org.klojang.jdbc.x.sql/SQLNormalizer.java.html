@@ -17,16 +17,16 @@ import static org.klojang.check.CommonChecks.ne;
 import static org.klojang.check.CommonProperties.strlen;
 import static org.klojang.util.CollectionMethods.collectionToList;
 
-/*
+/**
  * Extracts named parameters from a SQL query string and replaces them with positional
  * parameters (question marks).
  */
 public final class SQLNormalizer {
 
   private static final String ERR_ADJACENT_PARAMS =
-      &quot;adjacent parameters at positions ${0} and ${1} cannot yield valid SQL&quot;;
+        &quot;adjacent parameters at positions ${0} and ${1} cannot yield valid SQL&quot;;
   private static final String ERR_EMPTY_NAME =
-      &quot;zero-length parameter name at position ${0}&quot;;
+        &quot;zero-length parameter name at position ${0}&quot;;
 
   private static final char QUOTE = '\'';
   private static final char COLON = ':';
@@ -110,15 +110,15 @@ public final class SQLNormalizer {
   }
 
   private static void addParam(
-      StringBuilder name,
-      int position,
-      Map&lt;String, IntList&gt; positions,
-      MutableInt counter) {
+        StringBuilder name,
+        int position,
+        Map&lt;String, IntList&gt; positions,
+        MutableInt counter) {
 <span class="fc" id="L117">    Check.on(KlojangSQLException::new, name)</span>
-<span class="fc" id="L118">        .has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);</span>
+<span class="fc" id="L118">          .has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);</span>
 <span class="fc" id="L119">    positions</span>
-<span class="fc" id="L120">        .computeIfAbsent(name.toString(), k -&gt; new IntArrayList())</span>
-<span class="fc" id="L121">        .add(counter.ppi());</span>
+<span class="fc" id="L120">          .computeIfAbsent(name.toString(), k -&gt; new IntArrayList())</span>
+<span class="fc" id="L121">          .add(counter.ppi());</span>
 <span class="fc" id="L122">  }</span>
 
   private NamedParameter toNamedParam(Entry&lt;String, IntList&gt; e) {

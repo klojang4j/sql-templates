@@ -1,7 +1,6 @@
 package org.klojang.jdbc.x;
 
 import org.klojang.check.Check;
-import org.klojang.util.ExceptionMethods;
 
 import java.io.PrintStream;
 import java.lang.reflect.Field;
@@ -36,8 +35,8 @@ public class SQLTypeNames {
       for (Field f : fields) {
         map.put(f.getInt(null), f.getName());
       }
-    } catch (Exception e) {
-      throw ExceptionMethods.uncheck(e);
+    } catch (Throwable t) {
+      throw Utils.wrap(t);
     }
   }
 }

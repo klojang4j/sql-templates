@@ -19,12 +19,9 @@ import org.klojang.util.collection.IntList;
  *
  * <p>the {@code firstName} parameter occurs at positions 0 and 3, the {@code firstName}
  * parameter occurs at positions 1 and 4, and the {@code fullName} parameter occurs at
- * position 2. In other words: <i>these are not string indices!</i>
+ * position 2.
  *
  * @param name the name of the parameters
- * @param positions the positions at which the parameter can be found. For example, in
- * {@code SELECT * FROM person WHERE first_name = :firstName or last_name = :lastName}
+ * @param positions the positions at which the parameter can be found.
  */
-public record NamedParameter(String name, IntList positions) {
-
-}
+public record NamedParameter(String name, IntList positions) { }

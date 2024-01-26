@@ -30,7 +30,7 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
       applyBindings(ps);
       return ps.executeUpdate();
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 

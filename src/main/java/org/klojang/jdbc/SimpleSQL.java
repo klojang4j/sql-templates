@@ -16,7 +16,7 @@ final class SimpleSQL extends AbstractSQL {
 
   @Override
   public SQLSession session(Connection con) {
-    return new BasicSQLSession(con, this, sqlInfo);
+    return new SimpleSQLSession(con, this, sqlInfo);
   }
 
 }

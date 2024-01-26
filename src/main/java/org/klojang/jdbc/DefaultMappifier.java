@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.KeyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ final class DefaultMappifier implements ResultSetMappifier {
       empty = !rs.next();
       return row;
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 
@@ -75,7 +76,7 @@ final class DefaultMappifier implements ResultSetMappifier {
         all.add(toMap(rs, writers));
       } while (++i < limit && (empty = !rs.next()));
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
     return all;
   }
@@ -97,7 +98,7 @@ final class DefaultMappifier implements ResultSetMappifier {
         all.add(toMap(rs, writers));
       } while (rs.next());
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
     empty = true;
     return all;

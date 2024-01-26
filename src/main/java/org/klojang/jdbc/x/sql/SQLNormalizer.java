@@ -17,16 +17,16 @@ import static org.klojang.check.CommonChecks.ne;
 import static org.klojang.check.CommonProperties.strlen;
 import static org.klojang.util.CollectionMethods.collectionToList;
 
-/*
+/**
  * Extracts named parameters from a SQL query string and replaces them with positional
  * parameters (question marks).
  */
 public final class SQLNormalizer {
 
   private static final String ERR_ADJACENT_PARAMS =
-      "adjacent parameters at positions ${0} and ${1} cannot yield valid SQL";
+        "adjacent parameters at positions ${0} and ${1} cannot yield valid SQL";
   private static final String ERR_EMPTY_NAME =
-      "zero-length parameter name at position ${0}";
+        "zero-length parameter name at position ${0}";
 
   private static final char QUOTE = '\'';
   private static final char COLON = ':';
@@ -110,15 +110,15 @@ public final class SQLNormalizer {
   }
 
   private static void addParam(
-      StringBuilder name,
-      int position,
-      Map<String, IntList> positions,
-      MutableInt counter) {
+        StringBuilder name,
+        int position,
+        Map<String, IntList> positions,
+        MutableInt counter) {
     Check.on(KlojangSQLException::new, name)
-        .has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);
+          .has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);
     positions
-        .computeIfAbsent(name.toString(), k -> new IntArrayList())
-        .add(counter.ppi());
+          .computeIfAbsent(name.toString(), k -> new IntArrayList())
+          .add(counter.ppi());
   }
 
   private NamedParameter toNamedParam(Entry<String, IntList> e) {

@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.PropertyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
       empty = !rs.next();
       return bean;
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 
@@ -77,7 +78,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
         beans.add(PropertyWriter.writeAll(rs, beanSupplier, writers));
       } while (++i < limit && (empty = !rs.next()));
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
     return beans;
   }
@@ -99,7 +100,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
         beans.add(PropertyWriter.writeAll(rs, beanSupplier, writers));
       } while (rs.next());
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
     empty = true;
     return beans;

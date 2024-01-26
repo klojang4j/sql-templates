@@ -2,6 +2,7 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.check.aux.Result;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderFactory;
 import org.klojang.jdbc.x.sql.SQLInfo;
@@ -89,7 +90,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       executeQuery();
       return resultSet;
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 
@@ -116,7 +117,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       }
       return Result.notAvailable();
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 
@@ -137,7 +138,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       }
       return OptionalInt.empty();
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 
@@ -164,7 +165,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       executeQuery();
       return resultSet.next();
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 
@@ -212,7 +213,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       } while (resultSet.next());
       return list;
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 
@@ -232,7 +233,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
             .getMappifierFactory(mapper)
             .getMappifier(resultSet);
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 
@@ -253,7 +254,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
             .getBeanifierFactory(beanClass, mapper)
             .getBeanifier(resultSet);
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 
@@ -279,7 +280,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
             .getBeanifierFactory(beanClass, beanSupplier, mapper)
             .getBeanifier(resultSet);
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw Utils.wrap(t);
     }
   }
 
@@ -292,7 +293,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       }
       ps.clearParameters();
     } catch (SQLException e) {
-      throw new KlojangSQLException(e);
+      throw Utils.wrap(e);
     }
   }
 

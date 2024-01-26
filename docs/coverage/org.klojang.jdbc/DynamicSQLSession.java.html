@@ -62,11 +62,11 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   public final SQLExpression sqlFunction(String name, Object... args) {
-<span class="nc" id="L65">    Check.notNull(name, &quot;SQL function name&quot;);</span>
-<span class="nc" id="L66">    Check.notNull(args, VARARGS);</span>
-<span class="nc" id="L67">    String str = ArrayMethods.implode(args, arg -&gt; quoteValue(arg), &quot;,&quot;);</span>
-<span class="nc" id="L68">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
-<span class="nc" id="L69">    return new SQLExpression(expr);</span>
+<span class="fc" id="L65">    Check.notNull(name, &quot;SQL function name&quot;);</span>
+<span class="fc" id="L66">    Check.notNull(args, VARARGS);</span>
+<span class="fc" id="L67">    String str = ArrayMethods.implode(args, arg -&gt; quoteValue(arg), &quot;,&quot;);</span>
+<span class="fc" id="L68">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
+<span class="fc" id="L69">    return new SQLExpression(expr);</span>
   }
 
   @Override

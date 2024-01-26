@@ -3,6 +3,7 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.invoke.Getter;
 import org.klojang.jdbc.x.JDBC;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.BatchInsertConfig;
 
 import java.sql.PreparedStatement;
@@ -101,7 +102,7 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
       try {
         insertChunk(beans.subList(i, j));
       } catch (Throwable t) {
-        throw new KlojangSQLException(t);
+        throw Utils.wrap(t);
       }
     }
   }
@@ -114,7 +115,7 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
         long[] keys = insertChunkAndGetIDs(beans.subList(i, j));
         System.arraycopy(keys, 0, allKeys, i, j);
       } catch (Throwable t) {
-        throw new KlojangSQLException(t);
+        throw Utils.wrap(t);
       }
     }
     return allKeys;
@@ -126,7 +127,7 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
       try {
         insertChunkAndSetIDs(beans.subList(i, j), idProperty);
       } catch (Throwable t) {
-        throw new KlojangSQLException(t);
+        throw Utils.wrap(t);
       }
     }
   }

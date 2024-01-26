@@ -10,13 +10,13 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-final class BasicSQLSession extends AbstractSQLSession {
+final class SimpleSQLSession extends AbstractSQLSession {
 
-  private static final Logger LOG = LoggerFactory.getLogger(BasicSQLSession.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SimpleSQLSession.class);
 
   private final SQLInfo sqlInfo;
 
-  BasicSQLSession(Connection con, AbstractSQL sql, SQLInfo sqlInfo) {
+  SimpleSQLSession(Connection con, AbstractSQL sql, SQLInfo sqlInfo) {
     super(con, sql);
     this.sqlInfo = sqlInfo;
   }
