@@ -3,10 +3,10 @@ package org.klojang.jdbc;
 /**
  * Transformers enable you to modify values before they are saved to the database.
  * Transformers can be configured for bean properties while preparing a batch INSERT using
- * an {@link SQLBatchInsertBuilder}.
+ * an {@link BatchInsertBuilder}.
  *
  * @param <T> the type of the bean being saved to the database
- * @see SQLBatchInsertBuilder#withTransformer(String, Transformer)
+ * @see BatchInsertBuilder#withTransformer(String, Transformer)
  * @see SQL#expression(String)
  * @see Quoter
  */

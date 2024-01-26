@@ -65,7 +65,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLSession set(String varName, Object value)
         throws UnsupportedOperationException {
-    throw new UnsupportedOperationException();
+    throw notSupported("set");
   }
 
   /**
@@ -83,32 +83,80 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLSession quote(String varName, Object value)
         throws UnsupportedOperationException {
-    throw new UnsupportedOperationException();
+    throw notSupported("quote");
   }
 
   /**
-   * <p>A specialised SQL template method, aimed at facilitating batch inserts. The SQL
-   * template must contain a nested template named "values". This template will be
-   * repeated for each of the beans or records in the provided list. This is best
-   * illustrated using an example:
+   * <p>A specialised templating method, aimed at facilitating batch inserts. This method
+   * is <i>only</i> supported by {@code SQL} instances obtained via
+   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
+   * template named "record". This template will be repeated for each of the beans or
+   * records in the provided array. See {@link #setValues(BeanReader, List)} for a usage
+   * example.
+   *
+   * @param <T> the type of the beans or records to persist
+   * @param beans the beans or records to persist (at least one required)
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} or
+   *       {@link SQL#template(String) SQL.template()} method
+   */
+  @SuppressWarnings("unchecked")
+  default <T> SQLSession setValues(T... beans) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException(sqlSkeletonsOnly());
+  }
+
+  /**
+   * <p>A specialised templating method, aimed at facilitating batch inserts. This method
+   * is <i>only</i> supported by {@code SQL} instances obtained via
+   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
+   * template named "record". This template will be repeated for each of the beans or
+   * records in the provided array. See {@link #setValues(BeanReader, List)} for a usage
+   * example. This method creates a {@link BeanReader} for the class of the <i>first</i>
+   * bean or record in the provided list and then, in essence, calls
+   * {@code setValues(reader, beans)}.
+   *
+   * @param <T> the type of the beans or records to persist
+   * @param beans the beans or records to persist (at least one required).
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} or
+   *       {@link SQL#template(String) SQL.template()} method
+   */
+  default <T> SQLSession setValues(List<T> beans) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException(sqlSkeletonsOnly());
+  }
+
+  /**
+   * <p>A specialised templating method, aimed at facilitating batch inserts. This method
+   * is <i>only</i> supported by {@code SQL} instances obtained via
+   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
+   * template named "record". This template will be repeated for each of the beans or
+   * records in the provided list.
    *
    * <blockquote><pre>{@code
    * record Person(Integer id, String firstName, String lastName, int age) {}
+   *
    * // ...
+   *
    * List<Person> persons = List.of(
    *    new Person(null, "John", "Smith", 34),
    *    new Person(null, "Francis", "O'Donell", 27),
    *    new Person(null, "Mary", "Bear", 52));
+   *
    * // ...
-   * SQL sql = SQL.template("""
+   *
+   * SQL sql = SQL.skeleton("""
    *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
-   *    ~%%begin:values%
+   *    ~%%begin:record%
    *    (~%firstName%,~%lastName%,~%age%)
-   *    ~%%end:values%
+   *    ~%%end:record%
    *    """);
-   * try(Connection conn = ...) {
-   *   try(SQLSession session = sql.session(conn)) {
-   *     session.setValues(Person.class, persons).execute();
+   *
+   * BeanReader<Person> reader = new BeanReader<>(Person.class);
+   * try(Connection con = ...) {
+   *   try(SQLSession session = sql.session(con)) {
+   *     session.setValues(reader, persons).execute();
    *   }
    * }
    * }</pre></blockquote>
@@ -123,16 +171,17 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *
    * @param <T> the type of the beans or records to persist
    * @param reader a {@code BeanReader} for the beans or records to persist
-   * @param beans the beans or records to persist
+   * @param beans the beans or records to persist (at least one required)
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} or
+   *       {@link SQL#template(String) SQL.template()} method
    * @see SQLInsert#insertBatchAndGetIDs(List)
    * @see SQLInsert#insertBatchAndSetIDs(String, List)
    */
   default <T> SQLSession setValues(BeanReader<T> reader, List<T> beans)
         throws UnsupportedOperationException {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(sqlSkeletonsOnly());
   }
 
   /**
@@ -234,6 +283,10 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
     throw new UnsupportedOperationException();
   }
 
+  default SQLExpression sqlFunction(String name, Object... args) {
+    throw new UnsupportedOperationException();
+  }
+
   /**
    * If necessary, quotes the specified identifier (e&#46;g&#46; a column name or table
    * name) according to the quoting rules of the target database.
@@ -245,7 +298,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @see java.sql.Statement#enquoteIdentifier(String, boolean)
    */
   default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
-    throw new UnsupportedOperationException();
+    throw notSupported("quoteIdentifier");
   }
 
   /**
@@ -295,5 +348,14 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @return a {@code SQLUpdate} instance
    */
   SQLUpdate prepareUpdate();
+
+  private static UnsupportedOperationException notSupported(String method) {
+    String fmt = "method %s() only supported for SQL templates and SQL skeletons";
+    return new UnsupportedOperationException(String.format(fmt, method));
+  }
+
+  private static String sqlSkeletonsOnly() {
+    return "setValues() only supported for SQL skeletons";
+  }
 
 }

@@ -1,23 +1,27 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
 import org.klojang.util.CollectionMethods;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.Collection;
 import java.util.function.Supplier;
 
-import static org.klojang.check.CommonChecks.empty;
 import static org.klojang.check.CommonExceptions.illegalState;
+import static org.klojang.check.Tag.VARARGS;
+import static org.klojang.util.StringMethods.append;
 
 abstract sealed class DynamicSQLSession extends AbstractSQLSession
       permits SQLTemplateSession, SQLSkeletonSession {
+
+  private static final Logger LOG = LoggerFactory.getLogger(DynamicSQLSession.class);
 
   final RenderSession session;
 
@@ -48,30 +52,6 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     return this;
   }
 
-//  @SuppressWarnings("unchecked")
-//  public final <T> SQLSession setValues(T[] beans) {
-//    Class<T> clazz = (Class<T>) beans.getClass().getComponentType();
-//    BeanReader<T> reader = new BeanReader<>(clazz);
-//    return setValues(reader, Arrays.asList(beans));
-//  }
-
-  public final <T> SQLSession setValues(Class<T> beanClass, List<T> beans) {
-    Check.notNull(beanClass, "beanClass");
-    Check.that(beans, "beans").isNot(empty());
-    String[] vars = session.getTemplate().getVariables().toArray(String[]::new);
-    BeanReader<T> reader = new BeanReader<>(beanClass);
-    List<Map<String, String>> quoted = new ArrayList<>(beans.size());
-    for (T bean : beans) {
-      Map<String, String> m = HashMap.newHashMap(vars.length);
-      for (String var : vars) {
-        m.put(var, quoteValue(reader.read(bean, var)));
-      }
-      quoted.add(m);
-    }
-    session.populate("values", quoted, ",");
-    return this;
-  }
-
   @Override
   public final String quoteValue(Object obj) {
     try {
@@ -79,6 +59,14 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     } catch (SQLException e) {
       throw KlojangSQLException.wrap(e, sql);
     }
+  }
+
+  public final SQLExpression sqlFunction(String name, Object... args) {
+    Check.notNull(name, "SQL function name");
+    Check.notNull(args, VARARGS);
+    String str = ArrayMethods.implode(args, arg -> quoteValue(arg), ",");
+    String expr = append(new StringBuilder(), name, '(', str, ')').toString();
+    return new SQLExpression(expr);
   }
 
   @Override
@@ -94,7 +82,9 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   public final void execute() {
     try {
       Statement statement = con.createStatement();
-      statement.execute(session.render());
+      String str = session.render();
+      LOG.trace("Executing SQL: {}", str);
+      statement.execute(str);
     } catch (SQLException e) {
       throw KlojangSQLException.wrap(e, sql);
     }

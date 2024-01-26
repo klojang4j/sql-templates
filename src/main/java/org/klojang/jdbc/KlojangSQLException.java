@@ -29,6 +29,14 @@ public final class KlojangSQLException extends RuntimeException {
     };
   }
 
+  static KlojangSQLException wrap(Throwable exc) {
+    return switch (exc) {
+      case KlojangSQLException e0 -> e0;
+      case UncheckedException e1 -> wrap(e1.unwrap());
+      default -> new KlojangSQLException(exc);
+    };
+  }
+
   public KlojangSQLException(String message) {
     super(message);
   }

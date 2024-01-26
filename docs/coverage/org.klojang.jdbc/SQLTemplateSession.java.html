@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 import static org.klojang.check.CommonChecks.empty;
-import static org.klojang.check.CommonExceptions.illegalState;
 
 final class SQLTemplateSession extends DynamicSQLSession {
 
@@ -20,29 +19,29 @@ final class SQLTemplateSession extends DynamicSQLSession {
         AbstractSQL sql,
         SQLNormalizer normalizer,
         RenderSession session) {
-<span class="fc" id="L23">    super(con, sql, session);</span>
-<span class="fc" id="L24">    this.normalizer = normalizer;</span>
-<span class="fc" id="L25">  }</span>
+<span class="fc" id="L22">    super(con, sql, session);</span>
+<span class="fc" id="L23">    this.normalizer = normalizer;</span>
+<span class="fc" id="L24">  }</span>
 
   public SQLQuery prepareQuery() {
-<span class="fc" id="L28">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
-<span class="fc" id="L29">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
-<span class="fc" id="L30">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="fc" id="L31">    return new SQLQuery(ps, this, sqlInfo);</span>
+<span class="fc" id="L27">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
+<span class="fc" id="L28">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
+<span class="fc" id="L29">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="fc" id="L30">    return new SQLQuery(ps, this, sqlInfo);</span>
   }
 
   public SQLInsert prepareInsert(boolean retrieveKeys) {
-<span class="nc" id="L35">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
-<span class="nc" id="L36">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
-<span class="nc" id="L37">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
-<span class="nc" id="L38">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L34">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
+<span class="nc" id="L35">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
+<span class="nc" id="L36">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L37">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
   }
 
   public SQLUpdate prepareUpdate() {
-<span class="nc" id="L42">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
-<span class="nc" id="L43">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
-<span class="nc" id="L44">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="nc" id="L45">    return new SQLUpdate(ps, this, sqlInfo);</span>
+<span class="nc" id="L41">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
+<span class="nc" id="L42">    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);</span>
+<span class="nc" id="L43">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="nc" id="L44">    return new SQLUpdate(ps, this, sqlInfo);</span>
   }
 
 }

@@ -29,20 +29,28 @@ public final class KlojangSQLException extends RuntimeException {
     };
   }
 
+  static KlojangSQLException wrap(Throwable exc) {
+<span class="nc bnc" id="L33" title="All 3 branches missed.">    return switch (exc) {</span>
+<span class="nc" id="L34">      case KlojangSQLException e0 -&gt; e0;</span>
+<span class="nc" id="L35">      case UncheckedException e1 -&gt; wrap(e1.unwrap());</span>
+<span class="nc" id="L36">      default -&gt; new KlojangSQLException(exc);</span>
+    };
+  }
+
   public KlojangSQLException(String message) {
-<span class="nc" id="L33">    super(message);</span>
-<span class="nc" id="L34">  }</span>
+<span class="fc" id="L41">    super(message);</span>
+<span class="fc" id="L42">  }</span>
 
   public KlojangSQLException(Throwable cause) {
-<span class="nc" id="L37">    super(cause);</span>
-<span class="nc" id="L38">  }</span>
+<span class="nc" id="L45">    super(cause);</span>
+<span class="nc" id="L46">  }</span>
 
   private KlojangSQLException(String message, Throwable cause) {
-<span class="nc" id="L41">    super(message, cause);</span>
-<span class="nc" id="L42">  }</span>
+<span class="nc" id="L49">    super(message, cause);</span>
+<span class="nc" id="L50">  }</span>
 
   private static String message(Throwable cause, String sql) {
-<span class="nc" id="L45">    return cause.toString() + &quot; **** while executing: &quot; + sql;</span>
+<span class="nc" id="L53">    return cause.toString() + &quot; **** while executing: &quot; + sql;</span>
   }
 
 }

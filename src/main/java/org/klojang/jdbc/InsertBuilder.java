@@ -23,7 +23,7 @@ import static org.klojang.util.StringMethods.append;
 /**
  * A {@code Builder} class for {@link SQLInsert} instances.
  */
-public final class SQLInsertBuilder {
+public final class InsertBuilder {
 
   static final String PROPERTIES_ALREADY_SET = "properties to include/exclude can only be set once";
   static final String EMPTY_PROPERTY_NAME = "empty property name not allowed";
@@ -38,7 +38,7 @@ public final class SQLInsertBuilder {
   private BindInfo bindInfo = new BindInfo() { };
   private boolean returnKeys = true;
 
-  SQLInsertBuilder() { }
+  InsertBuilder() { }
 
   /**
    * Sets the type of the beans to be persisted.
@@ -46,7 +46,7 @@ public final class SQLInsertBuilder {
    * @param beanClass the type of the beans to be persisted
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder of(Class<?> beanClass) {
+  public InsertBuilder of(Class<?> beanClass) {
     this.beanClass = Check.notNull(beanClass).ok();
     return this;
   }
@@ -58,7 +58,7 @@ public final class SQLInsertBuilder {
    * @param tableName the table name to insert the data into
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder into(String tableName) {
+  public InsertBuilder into(String tableName) {
     this.tableName = Check.that(tableName).isNot(empty()).ok();
     return this;
   }
@@ -73,7 +73,7 @@ public final class SQLInsertBuilder {
    *       the INSERT statement
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder excluding(String... properties) {
+  public InsertBuilder excluding(String... properties) {
     Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));
     this.properties = Check.notNull(properties, PROPERTIES).ok();
     this.exclude = true;
@@ -89,7 +89,7 @@ public final class SQLInsertBuilder {
    *       INSERT statement
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder including(String... properties) {
+  public InsertBuilder including(String... properties) {
     Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));
     this.properties = Check.notNull(properties, PROPERTIES).ok();
     this.exclude = false;
@@ -105,7 +105,7 @@ public final class SQLInsertBuilder {
    * @param b whether auto-generated keys should be retrieved from the database
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder retrieveKeys(boolean b) {
+  public InsertBuilder retrieveKeys(boolean b) {
     this.returnKeys = b;
     return this;
   }
@@ -118,7 +118,7 @@ public final class SQLInsertBuilder {
    * @param propertyToColumnMapper the property-to-column mapper
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder withMapper(NameMapper propertyToColumnMapper) {
+  public InsertBuilder withMapper(NameMapper propertyToColumnMapper) {
     this.mapper = Check.notNull(propertyToColumnMapper).ok();
     return this;
   }
@@ -130,7 +130,7 @@ public final class SQLInsertBuilder {
    *       process
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder withBindInfo(BindInfo bindInfo) {
+  public InsertBuilder withBindInfo(BindInfo bindInfo) {
     this.bindInfo = Check.notNull(bindInfo).ok();
     return this;
   }

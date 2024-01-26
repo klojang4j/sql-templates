@@ -275,32 +275,32 @@ public sealed interface SQL permits AbstractSQL {
   }
 
   /**
-   * Returns an {@link SQLInsertBuilder} that enables you to easily configure an SQL
-   * INSERT statement.
+   * Returns an {@link InsertBuilder} that enables you to easily configure an SQL INSERT
+   * statement.
    *
    * @return an {@code SQLInsertBuilder} that enables you to easily configure an SQL
    *       INSERT statement
    */
-  static SQLInsertBuilder configureInsert() {
-    return new SQLInsertBuilder();
+  static InsertBuilder configureInsert() {
+    return new InsertBuilder();
   }
 
   /**
-   * Returns an {@link SQLBatchInsertBuilder} that enables you to easily configure large
+   * Returns an {@link BatchInsertBuilder} that enables you to easily configure large
    * batch inserts.
    *
    * @return an {@code SQLBatchInsertBuilder} that enables you to easily configure large
    *       batch inserts.
    */
-  static SQLBatchInsertBuilder configureBatchInsert() {
-    return new SQLBatchInsertBuilder();
+  static BatchInsertBuilder configureBatchInsert() {
+    return new BatchInsertBuilder();
   }
 
   /**
    * Returns a special object that signals to <i>Klojang JDBC</i> that the specified
    * string is to be treated as an SQL expression and hence must not be quoted or escaped.
    * You can use this when
-   * {@link SQLBatchInsertBuilder#withTransformer specifying transformers} for beans to be
+   * {@link BatchInsertBuilder#withTransformer specifying transformers} for beans to be
    * saved in a {@link SQLBatchInsert batch insert}. Note that this makes you responsible
    * for ensuring that the specified string does not and cannot suffer from SQL injection.
    * Use a {@link Quoter} to ensure that all strings in the expression are properly quoted

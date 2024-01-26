@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLBatchInsertBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLBatchInsertBuilder.java</span></div><h1>SQLBatchInsertBuilder.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BatchInsertBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">BatchInsertBuilder.java</span></div><h1>BatchInsertBuilder.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.invoke.Getter;
@@ -20,10 +20,10 @@ import static org.klojang.check.Tag.PROPERTY;
 import static org.klojang.util.ObjectMethods.isEmpty;
 
 /**
- * A builder class for {@link SQLBatchInsert} instances. {@code SQLBatchInsertBuilder}
+ * A builder class for {@link SQLBatchInsert} instances. {@code BatchInsertBuilder}
  * instances are obtained via {@link SQL#configureBatchInsert()}.
  */
-public final class SQLBatchInsertBuilder {
+public final class BatchInsertBuilder {
 
 <span class="fc" id="L28">  private final Map&lt;String, Transformer&lt;?&gt;&gt; transformers = new HashMap&lt;&gt;();</span>
 
@@ -36,7 +36,7 @@ public final class SQLBatchInsertBuilder {
   private String[] properties;
   private boolean exclude;
 
-<span class="fc" id="L39">  SQLBatchInsertBuilder() { }</span>
+<span class="fc" id="L39">  BatchInsertBuilder() { }</span>
 
   /**
    * Sets the type of the beans to be saved.
@@ -44,7 +44,7 @@ public final class SQLBatchInsertBuilder {
    * @param beanClass the type of the beans to be saved
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder of(Class&lt;?&gt; beanClass) {
+  public BatchInsertBuilder of(Class&lt;?&gt; beanClass) {
 <span class="fc" id="L48">    this.beanClass = Check.notNull(beanClass).ok();</span>
 <span class="fc" id="L49">    return this;</span>
   }
@@ -56,7 +56,7 @@ public final class SQLBatchInsertBuilder {
    * @param tableName the table name to insert the data into
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder into(String tableName) {
+  public BatchInsertBuilder into(String tableName) {
 <span class="fc" id="L60">    this.tableName = Check.that(tableName).isNot(empty()).ok();</span>
 <span class="fc" id="L61">    return this;</span>
   }
@@ -73,7 +73,7 @@ public final class SQLBatchInsertBuilder {
    * INSERT statement
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder excluding(String... properties) {
+  public BatchInsertBuilder excluding(String... properties) {
 <span class="fc" id="L77">    Check.that(properties).is(deepNotEmpty());</span>
 <span class="fc" id="L78">    this.properties = properties;</span>
 <span class="fc" id="L79">    this.exclude = true;</span>
@@ -90,7 +90,7 @@ public final class SQLBatchInsertBuilder {
    * statement
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder including(String... properties) {
+  public BatchInsertBuilder including(String... properties) {
 <span class="nc" id="L94">    Check.that(properties).is(deepNotEmpty());</span>
 <span class="nc" id="L95">    this.properties = properties;</span>
 <span class="nc" id="L96">    this.exclude = false;</span>
@@ -105,7 +105,7 @@ public final class SQLBatchInsertBuilder {
    * @param propertyToColumnMapper the property-to-column mapper
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder withNameMapper(NameMapper propertyToColumnMapper) {
+  public BatchInsertBuilder withNameMapper(NameMapper propertyToColumnMapper) {
 <span class="fc" id="L109">    Check.notNull(propertyToColumnMapper);</span>
 <span class="fc" id="L110">    this.nameMapper = propertyToColumnMapper;</span>
 <span class="fc" id="L111">    return this;</span>
@@ -119,7 +119,7 @@ public final class SQLBatchInsertBuilder {
    * @param chunkSize the number of beans that will be saved at a time
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder withChunkSize(int chunkSize) {
+  public BatchInsertBuilder withChunkSize(int chunkSize) {
 <span class="nc" id="L123">    Check.that(chunkSize).is(gt(), 0);</span>
 <span class="nc" id="L124">    this.chunkSize = chunkSize;</span>
 <span class="nc" id="L125">    return this;</span>
@@ -134,7 +134,7 @@ public final class SQLBatchInsertBuilder {
    * the database
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder withCommitPerChunk(boolean commitPerChunk) {
+  public BatchInsertBuilder withCommitPerChunk(boolean commitPerChunk) {
 <span class="nc" id="L138">    this.commitPerChunk = commitPerChunk;</span>
 <span class="nc" id="L139">    return this;</span>
   }
@@ -152,7 +152,7 @@ public final class SQLBatchInsertBuilder {
    * @return this {@code SQLBatchInsertBuilder}
    * @see java.sql.Statement#enquoteLiteral(String)
    */
-  public SQLBatchInsertBuilder withTransformer(
+  public BatchInsertBuilder withTransformer(
         String property,
         Transformer&lt;?&gt; transformer) {
 <span class="nc" id="L158">    Check.notNull(property, PROPERTY);</span>

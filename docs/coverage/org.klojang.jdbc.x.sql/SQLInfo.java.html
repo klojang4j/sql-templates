@@ -5,43 +5,24 @@ import org.klojang.util.collection.IntList;
 import java.util.List;
 import java.util.Map;
 
-public final class SQLInfo {
+<span class="fc" id="L8">public record SQLInfo(String normalizedSQL,</span>
+      String jdbcSQL,
+      List&lt;NamedParameter&gt; parameters,
+      Map&lt;String, IntList&gt; parameterPositions) {
 
-    private final String normalizedSQL;
-    private final String jdbcSQL;
-    private final List&lt;NamedParameter&gt; parameters;
-    private final Map&lt;String, IntList&gt; parameterPositions;
+  public SQLInfo(SQLNormalizer normalizer) {
+<span class="fc" id="L14">    this(normalizer.getNormalizedSQL(),</span>
+<span class="fc" id="L15">          normalizer.getNormalizedSQL(),</span>
+<span class="fc" id="L16">          normalizer.getParameters(),</span>
+<span class="fc" id="L17">          normalizer.getParameterPositions());</span>
+<span class="fc" id="L18">  }</span>
 
-<span class="fc" id="L15">    public SQLInfo(SQLNormalizer normalizer) {</span>
-<span class="fc" id="L16">        this.normalizedSQL = normalizer.getNormalizedSQL();</span>
-<span class="fc" id="L17">        this.jdbcSQL = normalizer.getNormalizedSQL();</span>
-<span class="fc" id="L18">        this.parameters = normalizer.getParameters();</span>
-<span class="fc" id="L19">        this.parameterPositions = normalizer.getParameterPositions();</span>
-<span class="fc" id="L20">    }</span>
-
-<span class="fc" id="L22">    public SQLInfo(String jdbcSQL, SQLNormalizer normalizer) {</span>
-<span class="fc" id="L23">        this.normalizedSQL = normalizer.getNormalizedSQL();</span>
-<span class="fc" id="L24">        this.jdbcSQL = jdbcSQL;</span>
-<span class="fc" id="L25">        this.parameters = normalizer.getParameters();</span>
-<span class="fc" id="L26">        this.parameterPositions = normalizer.getParameterPositions();</span>
-<span class="fc" id="L27">    }</span>
-
-
-    public String normalizedSQL() {
-<span class="nc" id="L31">        return normalizedSQL;</span>
-    }
-
-    public String jdbcSQL() {
-<span class="fc" id="L35">        return jdbcSQL;</span>
-    }
-
-    public List&lt;NamedParameter&gt; parameters() {
-<span class="fc" id="L39">        return parameters;</span>
-    }
-
-    public Map&lt;String, IntList&gt; parameterPositions() {
-<span class="fc" id="L43">        return parameterPositions;</span>
-    }
+  public SQLInfo(String jdbcSQL, SQLNormalizer normalizer) {
+<span class="fc" id="L21">    this(normalizer.getNormalizedSQL(),</span>
+          jdbcSQL,
+<span class="fc" id="L23">          normalizer.getParameters(),</span>
+<span class="fc" id="L24">          normalizer.getParameterPositions());</span>
+<span class="fc" id="L25">  }</span>
 
 
 }

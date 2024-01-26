@@ -2,6 +2,8 @@ package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.sql.SQLInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +11,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 final class BasicSQLSession extends AbstractSQLSession {
+
+  private static final Logger LOG = LoggerFactory.getLogger(BasicSQLSession.class);
 
   private final SQLInfo sqlInfo;
 
@@ -40,7 +44,9 @@ final class BasicSQLSession extends AbstractSQLSession {
   public void execute() {
     try {
       Statement statement = con.createStatement();
-      statement.execute(sqlInfo.normalizedSQL());
+      String str = sqlInfo.normalizedSQL();
+      LOG.trace("Executing SQL: {}", str);
+      statement.execute(str);
     } catch (SQLException e) {
       throw KlojangSQLException.wrap(e, sql);
     }

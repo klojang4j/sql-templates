@@ -35,7 +35,7 @@ import java.sql.Statement;
  *
  * @see SQLExpression
  * @see Statement#enquoteLiteral(String)
- * @see SQLBatchInsertBuilder#withTransformer(String, Transformer)
+ * @see BatchInsertBuilder#withTransformer(String, Transformer)
  */
 public final class Quoter {
 

@@ -10,17 +10,17 @@ final class SQLSkeleton extends AbstractSQL {
   private final Template template;
 
   SQLSkeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L13">    super(sql, bindInfo);</span>
+<span class="fc" id="L13">    super(sql, bindInfo);</span>
     try {
-<span class="nc" id="L15">      template = Template.fromString(sql);</span>
+<span class="fc" id="L15">      template = Template.fromString(sql);</span>
 <span class="nc" id="L16">    } catch (ParseException e) {</span>
 <span class="nc" id="L17">      throw new KlojangSQLException(e);</span>
-<span class="nc" id="L18">    }</span>
-<span class="nc" id="L19">  }</span>
+<span class="fc" id="L18">    }</span>
+<span class="fc" id="L19">  }</span>
 
   @Override
   public SQLSession session(Connection con) {
-<span class="nc" id="L23">    return new SQLSkeletonSession(con, this, template.newRenderSession());</span>
+<span class="fc" id="L23">    return new SQLSkeletonSession(con, this, template.newRenderSession());</span>
   }
 
 }

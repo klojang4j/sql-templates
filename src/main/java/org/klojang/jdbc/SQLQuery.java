@@ -76,8 +76,10 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Executes the query and returns the {@link ResultSet}. If the query had already been
-   * executed, the initial {@link ResultSet} is returned. It will not be re-executed.
+   * Executes the query and returns the raw JDBC {@link ResultSet}. If the query has not
+   * been executed yet, it will be executed now. Otherwise the already-present
+   * {@code ResultSet} will be returned. The query will <i>not</i> be re-executed until
+   * you call {@link SQLStatement#reset()}.
    *
    * @return the {@code ResultSet} produced by the JDBC driver
    */
@@ -86,7 +88,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       executeQuery();
       return resultSet;
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw new KlojangSQLException(t);
     }
   }
 
@@ -113,7 +115,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       }
       return Result.notAvailable();
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw new KlojangSQLException(t);
     }
   }
 
@@ -134,7 +136,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       }
       return OptionalInt.empty();
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw new KlojangSQLException(t);
     }
   }
 
@@ -161,7 +163,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       executeQuery();
       return resultSet.next();
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw new KlojangSQLException(t);
     }
   }
 
@@ -209,7 +211,27 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       } while (resultSet.next());
       return list;
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw new KlojangSQLException(t);
+    }
+  }
+
+  public <T> List<T> column(Class<T> clazz, int sizeEstimate) {
+    try {
+      executeQuery();
+      if (!resultSet.next()) {
+        return Collections.emptyList();
+      }
+      int sqlType = resultSet.getMetaData().getColumnType(1);
+      ColumnReader<?, T> reader = ColumnReaderFactory
+            .getInstance()
+            .getReader(clazz, sqlType);
+      List<T> list = new ArrayList<>(sizeEstimate);
+      do {
+        list.add(reader.getValue(resultSet, 1, clazz));
+      } while (resultSet.next());
+      return list;
+    } catch (Throwable t) {
+      throw KlojangSQLException.wrap(t);
     }
   }
 
@@ -229,7 +251,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
             .getMappifierFactory(mapper)
             .getMappifier(resultSet);
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw new KlojangSQLException(t);
     }
   }
 
@@ -250,7 +272,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
             .getBeanifierFactory(beanClass, mapper)
             .getBeanifier(resultSet);
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw new KlojangSQLException(t);
     }
   }
 
@@ -276,7 +298,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
             .getBeanifierFactory(beanClass, beanSupplier, mapper)
             .getBeanifier(resultSet);
     } catch (Throwable t) {
-      throw KlojangSQLException.wrap(t, sqlInfo);
+      throw new KlojangSQLException(t);
     }
   }
 
@@ -295,7 +317,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   private void executeQuery() throws Throwable {
     if (resultSet == null) {
-      LOG.trace("Executing query");
+      LOG.trace("Executing SQL: {}", sqlInfo.jdbcSQL());
       applyBindings(ps);
       resultSet = ps.executeQuery();
     }

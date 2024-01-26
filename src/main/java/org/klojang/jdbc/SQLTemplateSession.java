@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 import static org.klojang.check.CommonChecks.empty;
-import static org.klojang.check.CommonExceptions.illegalState;
 
 final class SQLTemplateSession extends DynamicSQLSession {
 

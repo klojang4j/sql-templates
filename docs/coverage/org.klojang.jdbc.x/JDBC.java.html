@@ -74,9 +74,9 @@ public final class JDBC {
   }
 
   public static String quote(Statement stmt, Object value) throws SQLException {
-<span class="pc bpc" id="L77" title="4 of 5 branches missed.">    return switch (value) {</span>
+<span class="pc bpc" id="L77" title="3 of 5 branches missed.">    return switch (value) {</span>
 <span class="nc" id="L78">      case null -&gt; &quot;NULL&quot;;</span>
-<span class="nc" id="L79">      case Number n -&gt; n.toString();</span>
+<span class="fc" id="L79">      case Number n -&gt; n.toString();</span>
 <span class="nc" id="L80">      case Boolean b -&gt; b.toString();</span>
 <span class="nc" id="L81">      case SQLExpression s -&gt; s.toString();</span>
 <span class="fc" id="L82">      default -&gt; stmt.enquoteLiteral(value.toString());</span>

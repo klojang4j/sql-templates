@@ -111,7 +111,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql) {
-<span class="nc" id="L114">    return simpleQuery(con, sql, noBindInfo());</span>
+<span class="fc" id="L114">    return simpleQuery(con, sql, noBindInfo());</span>
   }
 
   /**
@@ -131,7 +131,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L134">    return simple(sql, bindInfo).session(con).prepareQuery();</span>
+<span class="fc" id="L134">    return simple(sql, bindInfo).session(con).prepareQuery();</span>
   }
 
   /**
@@ -217,7 +217,7 @@ public sealed interface SQL permits AbstractSQL {
 
 
   private static BindInfo noBindInfo() {
-<span class="nc" id="L220">    return new BindInfo() { };</span>
+<span class="fc" id="L220">    return new BindInfo() { };</span>
   }
 
   /**
@@ -254,7 +254,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql) {
-<span class="nc" id="L257">    return skeleton(sql, new BindInfo() { });</span>
+<span class="fc" id="L257">    return skeleton(sql, new BindInfo() { });</span>
   }
 
 
@@ -271,36 +271,36 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="nc" id="L274">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="fc" id="L274">    return new SQLSkeleton(sql, bindInfo);</span>
   }
 
   /**
-   * Returns an {@link SQLInsertBuilder} that enables you to easily configure an SQL
-   * INSERT statement.
+   * Returns an {@link InsertBuilder} that enables you to easily configure an SQL INSERT
+   * statement.
    *
    * @return an {@code SQLInsertBuilder} that enables you to easily configure an SQL
    *       INSERT statement
    */
-  static SQLInsertBuilder configureInsert() {
-<span class="fc" id="L285">    return new SQLInsertBuilder();</span>
+  static InsertBuilder configureInsert() {
+<span class="fc" id="L285">    return new InsertBuilder();</span>
   }
 
   /**
-   * Returns an {@link SQLBatchInsertBuilder} that enables you to easily configure large
+   * Returns an {@link BatchInsertBuilder} that enables you to easily configure large
    * batch inserts.
    *
    * @return an {@code SQLBatchInsertBuilder} that enables you to easily configure large
    *       batch inserts.
    */
-  static SQLBatchInsertBuilder configureBatchInsert() {
-<span class="fc" id="L296">    return new SQLBatchInsertBuilder();</span>
+  static BatchInsertBuilder configureBatchInsert() {
+<span class="fc" id="L296">    return new BatchInsertBuilder();</span>
   }
 
   /**
    * Returns a special object that signals to &lt;i&gt;Klojang JDBC&lt;/i&gt; that the specified
    * string is to be treated as an SQL expression and hence must not be quoted or escaped.
    * You can use this when
-   * {@link SQLBatchInsertBuilder#withTransformer specifying transformers} for beans to be
+   * {@link BatchInsertBuilder#withTransformer specifying transformers} for beans to be
    * saved in a {@link SQLBatchInsert batch insert}. Note that this makes you responsible
    * for ensuring that the specified string does not and cannot suffer from SQL injection.
    * Use a {@link Quoter} to ensure that all strings in the expression are properly quoted

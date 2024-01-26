@@ -20,10 +20,10 @@ import static org.klojang.check.Tag.PROPERTY;
 import static org.klojang.util.ObjectMethods.isEmpty;
 
 /**
- * A builder class for {@link SQLBatchInsert} instances. {@code SQLBatchInsertBuilder}
+ * A builder class for {@link SQLBatchInsert} instances. {@code BatchInsertBuilder}
  * instances are obtained via {@link SQL#configureBatchInsert()}.
  */
-public final class SQLBatchInsertBuilder {
+public final class BatchInsertBuilder {
 
   private final Map<String, Transformer<?>> transformers = new HashMap<>();
 
@@ -36,7 +36,7 @@ public final class SQLBatchInsertBuilder {
   private String[] properties;
   private boolean exclude;
 
-  SQLBatchInsertBuilder() { }
+  BatchInsertBuilder() { }
 
   /**
    * Sets the type of the beans to be saved.
@@ -44,7 +44,7 @@ public final class SQLBatchInsertBuilder {
    * @param beanClass the type of the beans to be saved
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder of(Class<?> beanClass) {
+  public BatchInsertBuilder of(Class<?> beanClass) {
     this.beanClass = Check.notNull(beanClass).ok();
     return this;
   }
@@ -56,7 +56,7 @@ public final class SQLBatchInsertBuilder {
    * @param tableName the table name to insert the data into
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder into(String tableName) {
+  public BatchInsertBuilder into(String tableName) {
     this.tableName = Check.that(tableName).isNot(empty()).ok();
     return this;
   }
@@ -73,7 +73,7 @@ public final class SQLBatchInsertBuilder {
    * INSERT statement
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder excluding(String... properties) {
+  public BatchInsertBuilder excluding(String... properties) {
     Check.that(properties).is(deepNotEmpty());
     this.properties = properties;
     this.exclude = true;
@@ -90,7 +90,7 @@ public final class SQLBatchInsertBuilder {
    * statement
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder including(String... properties) {
+  public BatchInsertBuilder including(String... properties) {
     Check.that(properties).is(deepNotEmpty());
     this.properties = properties;
     this.exclude = false;
@@ -105,7 +105,7 @@ public final class SQLBatchInsertBuilder {
    * @param propertyToColumnMapper the property-to-column mapper
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder withNameMapper(NameMapper propertyToColumnMapper) {
+  public BatchInsertBuilder withNameMapper(NameMapper propertyToColumnMapper) {
     Check.notNull(propertyToColumnMapper);
     this.nameMapper = propertyToColumnMapper;
     return this;
@@ -119,7 +119,7 @@ public final class SQLBatchInsertBuilder {
    * @param chunkSize the number of beans that will be saved at a time
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder withChunkSize(int chunkSize) {
+  public BatchInsertBuilder withChunkSize(int chunkSize) {
     Check.that(chunkSize).is(gt(), 0);
     this.chunkSize = chunkSize;
     return this;
@@ -134,7 +134,7 @@ public final class SQLBatchInsertBuilder {
    * the database
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public SQLBatchInsertBuilder withCommitPerChunk(boolean commitPerChunk) {
+  public BatchInsertBuilder withCommitPerChunk(boolean commitPerChunk) {
     this.commitPerChunk = commitPerChunk;
     return this;
   }
@@ -152,7 +152,7 @@ public final class SQLBatchInsertBuilder {
    * @return this {@code SQLBatchInsertBuilder}
    * @see java.sql.Statement#enquoteLiteral(String)
    */
-  public SQLBatchInsertBuilder withTransformer(
+  public BatchInsertBuilder withTransformer(
         String property,
         Transformer<?> transformer) {
     Check.notNull(property, PROPERTY);

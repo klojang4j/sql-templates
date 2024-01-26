@@ -33,7 +33,7 @@ import static org.klojang.util.StringMethods.append;
  * try-with-resource block with {@code SQLBatchInsert}.
  *
  * @param <T> the type of the JavaBeans to save to the database.
- * @see SQLInsertBuilder
+ * @see InsertBuilder
  * @see SQLInsert
  * @see SQL#expression(String)
  * @see Quoter

@@ -1,5 +1,6 @@
 package org.klojang.jdbc;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ public class SQLInsertTest {
     }
   }
 
-  public SQLInsertTest() {}
+  public SQLInsertTest() { }
 
   @BeforeEach
   public void before() throws IOException, SQLException {
@@ -61,11 +62,23 @@ public class SQLInsertTest {
   }
 
   @AfterEach
-  public void after() throws SQLException, IOException {
+  public void after() throws SQLException {
     if (MY_CON.get() != null) {
       MY_CON.get().close();
     }
     IOMethods.rm(DB_DIR);
+  }
+
+  @AfterAll
+  public static void afterAll() {
+    if (MY_CON.get() != null) {
+      try {
+        MY_CON.get().close();
+        IOMethods.rm(DB_DIR);
+      } catch (SQLException e) {
+        // ...
+      }
+    }
   }
 
   /**

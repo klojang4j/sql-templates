@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLInsertBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLInsertBuilder.java</span></div><h1>SQLInsertBuilder.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InsertBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">InsertBuilder.java</span></div><h1>InsertBuilder.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.check.ObjectCheck;
@@ -23,7 +23,7 @@ import static org.klojang.util.StringMethods.append;
 /**
  * A {@code Builder} class for {@link SQLInsert} instances.
  */
-public final class SQLInsertBuilder {
+public final class InsertBuilder {
 
   static final String PROPERTIES_ALREADY_SET = &quot;properties to include/exclude can only be set once&quot;;
   static final String EMPTY_PROPERTY_NAME = &quot;empty property name not allowed&quot;;
@@ -38,7 +38,7 @@ public final class SQLInsertBuilder {
 <span class="fc" id="L38">  private BindInfo bindInfo = new BindInfo() { };</span>
 <span class="fc" id="L39">  private boolean returnKeys = true;</span>
 
-<span class="fc" id="L41">  SQLInsertBuilder() { }</span>
+<span class="fc" id="L41">  InsertBuilder() { }</span>
 
   /**
    * Sets the type of the beans to be persisted.
@@ -46,7 +46,7 @@ public final class SQLInsertBuilder {
    * @param beanClass the type of the beans to be persisted
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder of(Class&lt;?&gt; beanClass) {
+  public InsertBuilder of(Class&lt;?&gt; beanClass) {
 <span class="fc" id="L50">    this.beanClass = Check.notNull(beanClass).ok();</span>
 <span class="fc" id="L51">    return this;</span>
   }
@@ -58,7 +58,7 @@ public final class SQLInsertBuilder {
    * @param tableName the table name to insert the data into
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder into(String tableName) {
+  public InsertBuilder into(String tableName) {
 <span class="fc" id="L62">    this.tableName = Check.that(tableName).isNot(empty()).ok();</span>
 <span class="fc" id="L63">    return this;</span>
   }
@@ -73,7 +73,7 @@ public final class SQLInsertBuilder {
    *       the INSERT statement
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder excluding(String... properties) {
+  public InsertBuilder excluding(String... properties) {
 <span class="fc" id="L77">    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));</span>
 <span class="fc" id="L78">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
 <span class="fc" id="L79">    this.exclude = true;</span>
@@ -89,7 +89,7 @@ public final class SQLInsertBuilder {
    *       INSERT statement
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder including(String... properties) {
+  public InsertBuilder including(String... properties) {
 <span class="nc" id="L93">    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));</span>
 <span class="nc" id="L94">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
 <span class="nc" id="L95">    this.exclude = false;</span>
@@ -105,7 +105,7 @@ public final class SQLInsertBuilder {
    * @param b whether auto-generated keys should be retrieved from the database
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder retrieveKeys(boolean b) {
+  public InsertBuilder retrieveKeys(boolean b) {
 <span class="fc" id="L109">    this.returnKeys = b;</span>
 <span class="fc" id="L110">    return this;</span>
   }
@@ -118,7 +118,7 @@ public final class SQLInsertBuilder {
    * @param propertyToColumnMapper the property-to-column mapper
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder withMapper(NameMapper propertyToColumnMapper) {
+  public InsertBuilder withMapper(NameMapper propertyToColumnMapper) {
 <span class="nc" id="L122">    this.mapper = Check.notNull(propertyToColumnMapper).ok();</span>
 <span class="nc" id="L123">    return this;</span>
   }
@@ -130,7 +130,7 @@ public final class SQLInsertBuilder {
    *       process
    * @return this {@code SQLInsertBuilder}
    */
-  public SQLInsertBuilder withBindInfo(BindInfo bindInfo) {
+  public InsertBuilder withBindInfo(BindInfo bindInfo) {
 <span class="nc" id="L134">    this.bindInfo = Check.notNull(bindInfo).ok();</span>
 <span class="nc" id="L135">    return this;</span>
   }

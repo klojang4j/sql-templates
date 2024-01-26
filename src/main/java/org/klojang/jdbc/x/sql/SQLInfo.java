@@ -5,43 +5,24 @@ import org.klojang.util.collection.IntList;
 import java.util.List;
 import java.util.Map;
 
-public final class SQLInfo {
+public record SQLInfo(String normalizedSQL,
+      String jdbcSQL,
+      List<NamedParameter> parameters,
+      Map<String, IntList> parameterPositions) {
 
-    private final String normalizedSQL;
-    private final String jdbcSQL;
-    private final List<NamedParameter> parameters;
-    private final Map<String, IntList> parameterPositions;
+  public SQLInfo(SQLNormalizer normalizer) {
+    this(normalizer.getNormalizedSQL(),
+          normalizer.getNormalizedSQL(),
+          normalizer.getParameters(),
+          normalizer.getParameterPositions());
+  }
 
-    public SQLInfo(SQLNormalizer normalizer) {
-        this.normalizedSQL = normalizer.getNormalizedSQL();
-        this.jdbcSQL = normalizer.getNormalizedSQL();
-        this.parameters = normalizer.getParameters();
-        this.parameterPositions = normalizer.getParameterPositions();
-    }
-
-    public SQLInfo(String jdbcSQL, SQLNormalizer normalizer) {
-        this.normalizedSQL = normalizer.getNormalizedSQL();
-        this.jdbcSQL = jdbcSQL;
-        this.parameters = normalizer.getParameters();
-        this.parameterPositions = normalizer.getParameterPositions();
-    }
-
-
-    public String normalizedSQL() {
-        return normalizedSQL;
-    }
-
-    public String jdbcSQL() {
-        return jdbcSQL;
-    }
-
-    public List<NamedParameter> parameters() {
-        return parameters;
-    }
-
-    public Map<String, IntList> parameterPositions() {
-        return parameterPositions;
-    }
+  public SQLInfo(String jdbcSQL, SQLNormalizer normalizer) {
+    this(normalizer.getNormalizedSQL(),
+          jdbcSQL,
+          normalizer.getParameters(),
+          normalizer.getParameterPositions());
+  }
 
 
 }
