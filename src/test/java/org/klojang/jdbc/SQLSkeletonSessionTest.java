@@ -4,8 +4,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.klojang.invoke.BeanReader;
-import org.klojang.invoke.BeanValueTransformer;
 import org.klojang.util.IOMethods;
 
 import java.io.IOException;
@@ -19,7 +17,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.klojang.invoke.IncludeExclude.EXCLUDE;
 
 public class SQLSkeletonSessionTest {
 
@@ -79,10 +76,9 @@ public class SQLSkeletonSessionTest {
           (~%firstName%,~%lastName%,~%age%)
           ~%%end:record%
           """);
-    BeanReader<Person> reader = new BeanReader<>(Person.class, EXCLUDE, "id");
     try (Connection conn = MY_CON.get()) {
       try (SQLSession session = sql.session(conn)) {
-        session.setValues(reader, persons).execute();
+        session.setValues(persons).execute();
       }
       int i = SQL.simpleQuery(MY_CON.get(), "SELECT COUNT(*) FROM PERSON")
             .getInt()
@@ -104,43 +100,40 @@ public class SQLSkeletonSessionTest {
           (~%firstName%,~%lastName%,~%age%)
           ~%%end:foo_bar%
           """);
-    BeanReader<Person> reader = new BeanReader<>(Person.class);
     try (Connection conn = MY_CON.get()) {
       try (SQLSession session = sql.session(conn)) {
-        assertThrows(KlojangSQLException.class,
-              () -> session.setValues(reader, persons).execute());
+        // missing nested template "records"
+        assertThrows(KlojangSQLException.class, () -> session.setValues(persons));
       }
     }
   }
 
+
   @Test
-  public void sqlFunction00() throws Exception {
+  public void setValues02() throws Exception {
     List<Person> persons = List.of(
           new Person(null, "John", "Smith", 34),
           new Person(null, "Francis", "O'Donell", 27),
           new Person(null, "Mary", "Bear", 52));
-    // ...
     SQL sql = SQL.skeleton("""
           INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
           ~%%begin:record%
           (~%firstName%,~%lastName%,~%age%)
           ~%%end:record%
           """);
-    try (Connection con = MY_CON.get()) {
-      try (SQLSession session = sql.session(con)) {
-        BeanValueTransformer<Person> transformer = (bean, prop, val) -> {
-          if (prop.equals("firstName")) {
-            return session.sqlFunction("SUBSTRING", val, 1, 3);
-          }
-          return val;
-        };
-        BeanReader<Person> reader = new BeanReader<>(Person.class, transformer);
-        session.setValues(reader, persons).execute();
-        String query = "SELECT FIRST_NAME FROM PERSON";
-        List<String> firstNames = SQL.simpleQuery(MY_CON.get(), query)
-              .firstColumn(String.class);
-        assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);
+    BeanValueProcessor<Person> processor = (bean, prop, val, quoter) -> {
+      if (prop.equals("firstName")) {
+        return quoter.sqlFunction("SUBSTRING", val, 1, 3);
       }
+      return val;
+    };
+    try (Connection conn = MY_CON.get()) {
+      try (SQLSession session = sql.session(conn)) {
+        session.setValues(persons, processor).execute();
+      }
+      String query = "SELECT FIRST_NAME FROM PERSON";
+      List<String> firstNames = SQL.simpleQuery(MY_CON.get(), query).firstColumn();
+      assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);
     }
   }
 

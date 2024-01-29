@@ -20,75 +20,82 @@ final class SQLSkeletonSession extends DynamicSQLSession {
 <span class="fc" id="L20">    super(con, sql, session);</span>
 <span class="fc" id="L21">  }</span>
 
+  @Override
   @SafeVarargs
   @SuppressWarnings({&quot;unchecked&quot;})
   public final &lt;T&gt; SQLSession setValues(T... beans) {
-<span class="nc" id="L26">    Check.notNull(beans, VARARGS).isNot(empty());</span>
-<span class="nc" id="L27">    Class&lt;T&gt; beanType = (Class&lt;T&gt;) beans.getClass().getComponentType();</span>
-<span class="nc" id="L28">    return setValues0(new BeanReader&lt;&gt;(beanType), Arrays.asList(beans));</span>
+<span class="nc" id="L27">    Check.notNull(beans, VARARGS).isNot(empty());</span>
+<span class="nc" id="L28">    Class&lt;T&gt; clazz = (Class&lt;T&gt;) beans.getClass().getComponentType();</span>
+<span class="nc" id="L29">    BeanReader&lt;T&gt; reader = new BeanReader&lt;&gt;(clazz);</span>
+<span class="nc" id="L30">    return setValues(Arrays.asList(beans), reader, BeanValueProcessor.identity());</span>
   }
 
-  @SuppressWarnings(&quot;unchecked&quot;)
   @Override
   public &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans) {
-<span class="nc" id="L34">    Check.that(beans, &quot;beans&quot;).isNot(empty());</span>
-<span class="nc" id="L35">    Class&lt;T&gt; beanType = (Class&lt;T&gt;) beans.get(0).getClass();</span>
-<span class="nc" id="L36">    return setValues0(new BeanReader&lt;&gt;(beanType), beans);</span>
+<span class="fc" id="L35">    return setValues(beans, BeanValueProcessor.identity());</span>
   }
 
   @Override
-  public &lt;T&gt; SQLSession setValues(BeanReader&lt;T&gt; reader, List&lt;T&gt; beans) {
-<span class="fc" id="L41">    Check.notNull(reader, &quot;reader&quot;);</span>
-<span class="fc" id="L42">    Check.that(beans, &quot;beans&quot;).isNot(empty());</span>
-<span class="fc" id="L43">    return setValues0(reader, beans);</span>
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans, BeanValueProcessor&lt;T&gt; processor) {
+<span class="fc" id="L41">    Check.that(beans, &quot;beans&quot;).isNot(empty());</span>
+<span class="fc" id="L42">    Check.notNull(processor, &quot;processor&quot;);</span>
+<span class="fc" id="L43">    Class&lt;T&gt; clazz = (Class&lt;T&gt;) beans.getFirst().getClass();</span>
+<span class="fc" id="L44">    BeanReader&lt;T&gt; reader = new BeanReader&lt;&gt;(clazz);</span>
+<span class="fc" id="L45">    return setValues(beans, reader, processor);</span>
   }
 
-  private &lt;T&gt; SQLSession setValues0(BeanReader&lt;T&gt; reader, List&lt;T&gt; beans) {
-<span class="fc bfc" id="L47" title="All 2 branches covered.">    if (!session.getTemplate().hasNestedTemplate(&quot;record&quot;)) {</span>
-<span class="fc" id="L48">      throw new KlojangSQLException(&quot;missing nested template \&quot;record\&quot;&quot;);</span>
+  private &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans,
+        BeanReader&lt;T&gt; reader,
+        BeanValueProcessor&lt;T&gt; processor) {
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    if (!session.getTemplate().hasNestedTemplate(&quot;record&quot;)) {</span>
+<span class="fc" id="L52">      throw new KlojangSQLException(&quot;missing nested template \&quot;record\&quot;&quot;);</span>
     }
-<span class="fc" id="L50">    String[] vars = session.getTemplate()</span>
-<span class="fc" id="L51">          .getNestedTemplate(&quot;record&quot;)</span>
-<span class="fc" id="L52">          .getVariables()</span>
-<span class="fc" id="L53">          .toArray(String[]::new);</span>
-<span class="fc" id="L54">    List&lt;Map&lt;String, String&gt;&gt; quoted = new ArrayList&lt;&gt;(beans.size());</span>
-<span class="fc bfc" id="L55" title="All 2 branches covered.">    for (T bean : beans) {</span>
-<span class="fc" id="L56">      Check.notNull(bean, &quot;bean&quot;);</span>
-<span class="fc" id="L57">      Map&lt;String, String&gt; map = HashMap.newHashMap(vars.length);</span>
-<span class="fc bfc" id="L58" title="All 2 branches covered.">      for (String var : vars) {</span>
-<span class="fc" id="L59">        map.put(var, quoteValue(reader.read(bean, var)));</span>
+<span class="fc" id="L54">    String[] vars = session.getTemplate()</span>
+<span class="fc" id="L55">          .getNestedTemplate(&quot;record&quot;)</span>
+<span class="fc" id="L56">          .getVariables()</span>
+<span class="fc" id="L57">          .toArray(String[]::new);</span>
+<span class="fc" id="L58">    List&lt;Map&lt;String, String&gt;&gt; quoted = new ArrayList&lt;&gt;(beans.size());</span>
+<span class="fc" id="L59">    Quoter quoter = new Quoter(statement());</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">    for (T bean : beans) {</span>
+<span class="fc" id="L61">      Check.notNull(bean, &quot;bean&quot;);</span>
+<span class="fc" id="L62">      Map&lt;String, String&gt; map = HashMap.newHashMap(vars.length);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">      for (String var : vars) {</span>
+<span class="fc" id="L64">        Object in = reader.read(bean, var);</span>
+<span class="fc" id="L65">        String out = quoteValue(processor.process(bean, var, in, quoter));</span>
+<span class="fc" id="L66">        map.put(var, out);</span>
       }
-<span class="fc" id="L61">      quoted.add(map);</span>
-<span class="fc" id="L62">    }</span>
-<span class="fc" id="L63">    session.populate(&quot;record&quot;, quoted, &quot;,&quot;);</span>
-<span class="fc" id="L64">    return this;</span>
+<span class="fc" id="L68">      quoted.add(map);</span>
+<span class="fc" id="L69">    }</span>
+<span class="fc" id="L70">    session.populate(&quot;record&quot;, quoted, &quot;,&quot;);</span>
+<span class="fc" id="L71">    return this;</span>
   }
 
   @Override
   public SQLQuery prepareQuery() {
-<span class="nc" id="L69">    SQLInfo sqlInfo = getSQLInfo();</span>
-<span class="nc" id="L70">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="nc" id="L71">    return new SQLQuery(ps, this, sqlInfo);</span>
+<span class="nc" id="L76">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="nc" id="L77">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="nc" id="L78">    return new SQLQuery(ps, this, sqlInfo);</span>
   }
 
   @Override
   public SQLInsert prepareInsert(boolean retrieveKeys) {
-<span class="nc" id="L76">    SQLInfo sqlInfo = getSQLInfo();</span>
-<span class="nc" id="L77">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
-<span class="nc" id="L78">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L83">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="nc" id="L84">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L85">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
   }
 
   @Override
   public SQLUpdate prepareUpdate() {
-<span class="nc" id="L83">    SQLInfo sqlInfo = getSQLInfo();</span>
-<span class="nc" id="L84">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="nc" id="L85">    return new SQLUpdate(ps, this, sqlInfo);</span>
+<span class="nc" id="L90">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="nc" id="L91">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="nc" id="L92">    return new SQLUpdate(ps, this, sqlInfo);</span>
   }
 
   private SQLInfo getSQLInfo() {
-<span class="nc" id="L89">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
-<span class="nc" id="L90">    String sql = session.render();</span>
-<span class="nc" id="L91">    return new SQLInfo(sql, new SQLNormalizer(sql));</span>
+<span class="nc" id="L96">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
+<span class="nc" id="L97">    String sql = session.render();</span>
+<span class="nc" id="L98">    return new SQLInfo(sql, new SQLNormalizer(sql));</span>
   }
 
 

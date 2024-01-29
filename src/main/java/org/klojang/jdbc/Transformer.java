@@ -6,7 +6,7 @@ package org.klojang.jdbc;
  * an {@link BatchInsertBuilder}.
  *
  * @param <T> the type of the bean being saved to the database
- * @see BatchInsertBuilder#withTransformer(String, Transformer)
+ * @see BatchInsertBuilder#withValueProcessor(BeanValueProcessor) 
  * @see SQL#expression(String)
  * @see Quoter
  */

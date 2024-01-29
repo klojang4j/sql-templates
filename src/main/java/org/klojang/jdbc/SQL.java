@@ -298,13 +298,8 @@ public sealed interface SQL permits AbstractSQL {
 
   /**
    * Returns a special object that signals to <i>Klojang JDBC</i> that the specified
-   * string is to be treated as an SQL expression and hence must not be quoted or escaped.
-   * You can use this when
-   * {@link BatchInsertBuilder#withTransformer specifying transformers} for beans to be
-   * saved in a {@link SQLBatchInsert batch insert}. Note that this makes you responsible
-   * for ensuring that the specified string does not and cannot suffer from SQL injection.
-   * Use a {@link Quoter} to ensure that all strings in the expression are properly quoted
-   * and escaped.
+   * string is to be treated as an SQL expression and hence must not be quoted or
+   * escaped.
    *
    * @param expression the string to be wrapped into the signal object
    * @return a special object that signals to <i>Klojang JDBC</i> that the specified

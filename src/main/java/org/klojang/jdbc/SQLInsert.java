@@ -1,7 +1,6 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.SQLInfo;
@@ -223,7 +222,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
    * {@link #reset()}.
    *
    * <p>For large batches consider using
-   * {@link SQLSession#setValues(BeanReader, List) SQLSession.setValues()} or the
+   * {@link SQLSession#setValues(List) SQLSession.setValues()} or the
    * {@link SQLBatchInsert} class as they are likely to perform better.
    *
    * @param beans the beans or records to save

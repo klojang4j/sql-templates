@@ -42,22 +42,31 @@ public final class MappifierFactory {
 <span class="nc" id="L42">    this.mapper = Check.notNull(columnToKeyMapper).ok();</span>
 <span class="nc" id="L43">  }</span>
 
+  /**
+   * Returns a {@code ResultSetMappifier} that will convert the rows in the specified
+   * {@code ResultSet} into {@code Map&lt;String, Object&gt;} pseudo-objects.
+   *
+   * @param rs the {@code ResultSet}
+   * @return a {@code ResultSetMappifier} that will convert the rows in the specified
+   *       {@code ResultSet} into {@code Map&lt;String, Object&gt;} pseudo-objects.
+   * @throws SQLException if a database error occurs
+   */
   public ResultSetMappifier getMappifier(ResultSet rs) throws SQLException {
-<span class="nc bnc" id="L46" title="All 2 branches missed.">    if (!rs.next()) {</span>
-<span class="nc" id="L47">      return EmptyMappifier.INSTANCE;</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">    if (!rs.next()) {</span>
+<span class="nc" id="L56">      return EmptyMappifier.INSTANCE;</span>
     }
     KeyWriter&lt;?&gt;[] writers;
-<span class="nc bnc" id="L50" title="All 2 branches missed.">    if ((writers = ref.getPlain()) == null) {</span>
-<span class="nc" id="L51">      lock.lock();</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">    if ((writers = ref.getPlain()) == null) {</span>
+<span class="nc" id="L60">      lock.lock();</span>
       try {
-<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (ref.get() == null) {</span>
-<span class="nc" id="L54">          ref.set(writers = createWriters(rs, mapper));</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (ref.get() == null) {</span>
+<span class="nc" id="L63">          ref.set(writers = createWriters(rs, mapper));</span>
         }
       } finally {
-<span class="nc" id="L57">        lock.unlock();</span>
+<span class="nc" id="L66">        lock.unlock();</span>
       }
     }
-<span class="nc" id="L60">    return new DefaultMappifier(rs, writers);</span>
+<span class="nc" id="L69">    return new DefaultMappifier(rs, writers);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

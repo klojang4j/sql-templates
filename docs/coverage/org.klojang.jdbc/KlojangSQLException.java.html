@@ -16,17 +16,34 @@ public final class KlojangSQLException extends RuntimeException {
 <span class="nc" id="L16">    return Utils.wrap(exc, ((AbstractSQL) sql).getUnparsedSQL());</span>
   }
 
+  /**
+   * Instantiates a {@code KlojangSQLException} with the specified message.
+   *
+   * @param message the message
+   */
   public KlojangSQLException(String message) {
-<span class="fc" id="L20">    super(message);</span>
-<span class="fc" id="L21">  }</span>
+<span class="fc" id="L25">    super(message);</span>
+<span class="fc" id="L26">  }</span>
 
+  /**
+   * Instantiates a {@code KlojangSQLException} with the specified underlying cause.
+   *
+   * @param cause the cause of the exception
+   */
   public KlojangSQLException(Throwable cause) {
-<span class="nc" id="L24">    super(cause);</span>
-<span class="nc" id="L25">  }</span>
+<span class="nc" id="L34">    super(cause);</span>
+<span class="nc" id="L35">  }</span>
 
+  /**
+   * Instantiates a {@code KlojangSQLException} with the specified message and underlying
+   * cause.
+   *
+   * @param message the message
+   * @param cause the cause of the exception
+   */
   public KlojangSQLException(String message, Throwable cause) {
-<span class="nc" id="L28">    super(message, cause);</span>
-<span class="nc" id="L29">  }</span>
+<span class="nc" id="L45">    super(message, cause);</span>
+<span class="nc" id="L46">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

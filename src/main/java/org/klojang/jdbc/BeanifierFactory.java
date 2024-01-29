@@ -136,11 +136,11 @@ public final class BeanifierFactory<T> {
 
   /**
    * Returns a {@code ResultSetBeanifier} that will convert the rows in the specified
-   * {@code ResultSet} into JavaBeans of type {@code <T>}.
+   * {@code ResultSet} into JavaBeans or records of type {@code <T>}.
    *
    * @param rs the {@code ResultSet}
    * @return A {@code ResultSetBeanifier} that will convert the rows in the specified
-   *       {@code ResultSet} into JavaBeans of type {@code <T>}
+   *       {@code ResultSet} into JavaBeans or records of type {@code <T>}
    * @throws SQLException if a database error occurs
    */
   @SuppressWarnings("unchecked")

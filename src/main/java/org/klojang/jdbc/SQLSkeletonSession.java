@@ -20,30 +20,34 @@ final class SQLSkeletonSession extends DynamicSQLSession {
     super(con, sql, session);
   }
 
+  @Override
   @SafeVarargs
   @SuppressWarnings({"unchecked"})
   public final <T> SQLSession setValues(T... beans) {
     Check.notNull(beans, VARARGS).isNot(empty());
-    Class<T> beanType = (Class<T>) beans.getClass().getComponentType();
-    return setValues0(new BeanReader<>(beanType), Arrays.asList(beans));
+    Class<T> clazz = (Class<T>) beans.getClass().getComponentType();
+    BeanReader<T> reader = new BeanReader<>(clazz);
+    return setValues(Arrays.asList(beans), reader, BeanValueProcessor.identity());
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> SQLSession setValues(List<T> beans) {
-    Check.that(beans, "beans").isNot(empty());
-    Class<T> beanType = (Class<T>) beans.get(0).getClass();
-    return setValues0(new BeanReader<>(beanType), beans);
+    return setValues(beans, BeanValueProcessor.identity());
   }
 
   @Override
-  public <T> SQLSession setValues(BeanReader<T> reader, List<T> beans) {
-    Check.notNull(reader, "reader");
+  @SuppressWarnings("unchecked")
+  public <T> SQLSession setValues(List<T> beans, BeanValueProcessor<T> processor) {
     Check.that(beans, "beans").isNot(empty());
-    return setValues0(reader, beans);
+    Check.notNull(processor, "processor");
+    Class<T> clazz = (Class<T>) beans.getFirst().getClass();
+    BeanReader<T> reader = new BeanReader<>(clazz);
+    return setValues(beans, reader, processor);
   }
 
-  private <T> SQLSession setValues0(BeanReader<T> reader, List<T> beans) {
+  private <T> SQLSession setValues(List<T> beans,
+        BeanReader<T> reader,
+        BeanValueProcessor<T> processor) {
     if (!session.getTemplate().hasNestedTemplate("record")) {
       throw new KlojangSQLException("missing nested template \"record\"");
     }
@@ -52,11 +56,14 @@ final class SQLSkeletonSession extends DynamicSQLSession {
           .getVariables()
           .toArray(String[]::new);
     List<Map<String, String>> quoted = new ArrayList<>(beans.size());
+    Quoter quoter = new Quoter(statement());
     for (T bean : beans) {
       Check.notNull(bean, "bean");
       Map<String, String> map = HashMap.newHashMap(vars.length);
       for (String var : vars) {
-        map.put(var, quoteValue(reader.read(bean, var)));
+        Object in = reader.read(bean, var);
+        String out = quoteValue(processor.process(bean, var, in, quoter));
+        map.put(var, out);
       }
       quoted.add(map);
     }

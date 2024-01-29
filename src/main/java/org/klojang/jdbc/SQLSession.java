@@ -71,12 +71,9 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   }
 
   /**
-   * <p>A specialised templating method, aimed at facilitating batch inserts. This method
-   * is <i>only</i> supported by {@code SQL} instances obtained via
-   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
-   * template named "record". This template will be repeated for each of the beans or
-   * records in the provided array. See {@link #setValues(BeanReader, List)} for a usage
-   * example.
+   * <p>Sets the contents of the VALUES clause within an INSERT statement.Equivalent to
+   * {@link #setValues(List, BeanValueProcessor) setValues(Arrays.asList(beans),
+   * BeanValueProcessor.identity())}.
    *
    * @param <T> the type of the beans or records to persist
    * @param beans the beans or records to persist (at least one required)
@@ -91,14 +88,9 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   }
 
   /**
-   * <p>A specialised templating method, aimed at facilitating batch inserts. This method
-   * is <i>only</i> supported by {@code SQL} instances obtained via
-   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
-   * template named "record". This template will be repeated for each of the beans or
-   * records in the provided array. See {@link #setValues(BeanReader, List)} for a usage
-   * example. This method creates a {@link BeanReader} for the class of the <i>first</i>
-   * bean or record in the provided list and then, in essence, calls
-   * {@code setValues(reader, beans)}.
+   * <p>Sets the contents of the VALUES clause within an INSERT statement. Equivalent to
+   * {@link #setValues(List, BeanValueProcessor) setValues(beans,
+   * BeanValueProcessor.identity())}.
    *
    * @param <T> the type of the beans or records to persist
    * @param beans the beans or records to persist (at least one required).
@@ -116,7 +108,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * is <i>only</i> supported by {@code SQL} instances obtained via
    * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
    * template named "record". This template will be repeated for each of the beans or
-   * records in the provided list.
+   * records in the provided list. This is best illustrated using an example:
    *
    * <blockquote><pre>{@code
    * record Person(Integer id, String firstName, String lastName, int age) {}
@@ -128,8 +120,6 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *    new Person(null, "Francis", "O'Donell", 27),
    *    new Person(null, "Mary", "Bear", 52));
    *
-   * // ...
-   *
    * SQL sql = SQL.skeleton("""
    *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
    *    ~%%begin:record%
@@ -137,25 +127,41 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *    ~%%end:record%
    *    """);
    *
-   * BeanReader<Person> reader = new BeanReader<>(Person.class);
+   * BeanValueProcessor processor = (bean, prop, val, quoter) -> {
+   *     if(prop.equals("firstName") {
+   *       return quoter.sqlFunction("SUBSTRING", val, 1, 3);
+   *     }
+   *     return val;
+   * };
+   *
    * try(Connection con = ...) {
    *   try(SQLSession session = sql.session(con)) {
-   *     session.setValues(reader, persons).execute();
+   *     session.setValues(persons, processor).execute();
    *   }
+   *   String query = "SELECT FIRST_NAME FROM PERSON";
+   *   List<String> firstNames = SQL.simpleQuery(con, query).firstColumn();
+   *   assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);
    * }
    * }</pre></blockquote>
+   *
    *
    * <p>The above code snippet will execute the following SQL:
    * <blockquote><pre>{@code
    * INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
-   * ('John','Smith',34),
-   * ('Francis','O''Donell',27),
-   * ('Mary','Bear',52)
+   * (SUBSTRING('John', 1, 3), 'Smith', 34),
+   * (SUBSTRING('Francis', 1, 3), 'O''Donell', 27),
+   * (SUBSTRING('Mary', 1, 3), 'Bear', 52)
    * }</pre></blockquote>
    *
+   * <p>Beware of mixing multiple types of elements within the {@code List} of beans.
+   * Under the hood this method creates a {@link BeanReader} for the class of the first
+   * element in the {@code List}. Any subsequent element must have the same class as, or
+   * be a subclass of that class.
+   *
    * @param <T> the type of the beans or records to persist
-   * @param reader a {@code BeanReader} for the beans or records to persist
    * @param beans the beans or records to persist (at least one required)
+   * @param processor a {@code BeanValueProcessor} that allows you to selectively
+   *       convert values within the provided beans or records
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} or
@@ -163,7 +169,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @see SQLInsert#insertBatchAndGetIDs(List)
    * @see SQLInsert#insertBatchAndSetIDs(String, List)
    */
-  default <T> SQLSession setValues(BeanReader<T> reader, List<T> beans)
+  default <T> SQLSession setValues(List<T> beans, BeanValueProcessor<T> processor)
         throws UnsupportedOperationException {
     throw new UnsupportedOperationException(sqlSkeletonsOnly());
   }
@@ -249,7 +255,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * <ul>
    *     <li>If the value is {@code null}, the literal string "NULL"
    *         (<i>without</i> quotes) is returned.
-   *     <li>If the value is a {@link Number}, a {@link Boolean} or a
+   *     <li>If the value is a {@link Number}, a {@link Boolean}, or a
    *         {@link SQLExpression}, the value is returned as-is. That is,
    *         {@code toString()} will be called on the value, but the resulting string
    *         will <i>not</i> be quoted.
@@ -266,65 +272,23 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @see java.sql.Statement#enquoteLiteral(String)
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
-    throw new UnsupportedOperationException();
+    throw notSupported("quoteValue");
   }
 
   /**
-   * Enables you to embed SQL function calls (a subset of SQL expressions) in your SQL
-   * without risking SQL injection.
-   *
-   * <blockquote><pre>{@code
-   * record Person(Integer id, String firstName, String lastName, int age) {}
-   *
-   * // ...
-   *
-   * List<Person> persons = List.of(
-   *    new Person(null, "John", "Smith", 34),
-   *    new Person(null, "Francis", "O'Donell", 27),
-   *    new Person(null, "Mary", "Bear", 52));
-   *
-   * // ...
-   *
-   * SQL sql = SQL.skeleton("""
-   *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
-   *    ~%%begin:record%
-   *    (~%firstName%,~%lastName%,~%age%)
-   *    ~%%end:record%
-   *    """);
-   *
-   * try (Connection con = ...) {
-   *   try (SQLSession session = sql.session(con)) {
-   *     BeanValueTransformer<Person> transformer = (bean, prop, val) -> {
-   *         if (prop.equals("firstName")) {
-   *           return session.sqlFunction("SUBSTRING", val, 1, 3);
-   *         }
-   *         return val;
-   *     };
-   *     BeanReader<Person> reader = new BeanReader<>(Person.class, transformer);
-   *     session.setValues(reader, persons).execute();
-   *     String query = "SELECT FIRST_NAME FROM PERSON";
-   *     List<String> firstNames = SQL.simpleQuery(con, query).firstColumn();
-   *     assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);
-   *   }
-   * }
-   * }</pre></blockquote>
-   *
-   * <p>The above code snippet will execute the following SQL:
-   * <blockquote><pre>{@code
-   * INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
-   * (SUBSTRING('John', 1, 3), 'Smith', 34),
-   * (SUBSTRING('Francis', 1, 3), 'O''Donell', 27),
-   * (SUBSTRING('Mary', 1, 3), 'Bear', 52)
-   * }</pre></blockquote>
-   *
+   * Generates a SQL function call in which each of the function arguments is escaped and
+   * quoted using the {@link #quoteValue(Object) quoteValue()} method.
    *
    * @param name the name of the function
    * @param args the function arguments. Each of the provided arguments will be
    *       escaped and quoted using {@link #quoteValue(Object)}.
-   * @return
+   * @return an {@code SQLExpression} representing a SQL function call
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
-  default SQLExpression sqlFunction(String name, Object... args) {
-    throw new UnsupportedOperationException();
+  default SQLExpression sqlFunction(String name, Object... args)
+        throws UnsupportedOperationException {
+    throw notSupported("sqlFunction");
   }
 
   /**

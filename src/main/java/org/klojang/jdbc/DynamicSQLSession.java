@@ -96,7 +96,7 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     return illegalState("one or more variables have not been set yet: " + unset);
   }
 
-  private Statement statement() {
+  Statement statement() {
     if (stmt == null) {
       try {
         stmt = con.createStatement();

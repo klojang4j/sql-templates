@@ -1,7 +1,6 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.invoke.Getter;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.BatchInsertConfig;
@@ -9,7 +8,6 @@ import org.klojang.jdbc.x.sql.BatchInsertConfig;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.List;
 
 import static java.sql.Statement.NO_GENERATED_KEYS;
@@ -40,6 +38,7 @@ import static org.klojang.util.StringMethods.append;
  * @see SQL#expression(String)
  * @see Quoter
  */
+@SuppressWarnings({"resource", "SqlSourceToSinkFlow"})
 public final class SQLBatchInsert<T> implements AutoCloseable {
 
   private static final String RECORDS_DONT_HAVE_SETTERS = "cannot set id on record types";
@@ -90,7 +89,8 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
    */
   public void insertBatchAndSetIDs(String idProperty, List<T> beans) {
     Check.notNull(beans);
-    Check.on(STATE, cfg.beanClass()).isNot(Class::isRecord, RECORDS_DONT_HAVE_SETTERS);
+    Class<T> clazz = cfg.reader().getBeanClass();
+    Check.on(STATE, clazz).isNot(Class::isRecord, RECORDS_DONT_HAVE_SETTERS);
     if (!beans.isEmpty()) {
       int chunkSize = cfg.chunkSize() == -1 ? beans.size() : cfg.chunkSize();
       insertBatchAndSetIDs(beans, idProperty, chunkSize);
@@ -170,8 +170,7 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
     commit();
   }
 
-  private void addRows(StringBuilder sql, Statement stmt, List<T> beans)
-        throws Throwable {
+  private void addRows(StringBuilder sql, Statement stmt, List<T> beans) {
     int i = 0;
     for (T bean : beans) {
       if (i++ > 0) {
@@ -181,20 +180,18 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
     }
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private void addRow(StringBuilder sql, Statement stmt, T bean) throws Throwable {
+  private void addRow(StringBuilder sql, Statement stmt, T bean) {
+    BatchInsertConfig<T> cfg = this.cfg;
+    Quoter quoter = new Quoter(stmt);
+    String[] props = cfg.reader().getReadableProperties().toArray(String[]::new);
+    List<Object> values = cfg.reader().readAllProperties(bean);
     sql.append('(');
-    for (int i = 0; i < cfg.getters().length; ++i) {
+    for (int i = 0; i < props.length; ++i) {
       if (i > 0) {
         sql.append(',');
       }
-      Getter getter = cfg.getters()[i];
-      Transformer transformer = cfg.transformers()[i];
-      Object value = getter.read(bean);
-      if (transformer != null) {
-        value = transformer.transform(bean, value, new Quoter(stmt));
-      }
-      sql.append(JDBC.quote(stmt, value));
+      Object val = cfg.processor().process(bean, props[i], values.get(i), quoter);
+      sql.append(quoter.quoteValue(val));
     }
     sql.append(')');
   }
@@ -212,8 +209,7 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
   }
 
   private static String getSqlBase(BatchInsertConfig<?> cfg) {
-    String cols = Arrays.stream(cfg.getters())
-          .map(Getter::getProperty)
+    String cols = cfg.reader().getReadableProperties().stream()
           .map(cfg.mapper()::map)
           .collect(joining(","));
     StringBuilder sb = new StringBuilder(cols.length() + 40);
@@ -222,7 +218,7 @@ public final class SQLBatchInsert<T> implements AutoCloseable {
   }
 
   private int guessSize(List<T> beans) {
-    return 50 + (cfg.getters().length * beans.size() * 12);
+    return 50 + (cfg.reader().getReadableProperties().size() * beans.size() * 12);
   }
 
 }
