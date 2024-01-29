@@ -19,7 +19,7 @@ import java.sql.Statement;
  *
  * <p><b>Only use a {@code Quoter} to escape and quote strings <i>within</i> the SQL
  * expression</b>. In any other case escaping and quoting is taken care of by <i>Klojang
- * JDBC</i>, if not simply by JDBC itself.
+ * JDBC</i>.
  *
  * <p>Here is a clear (but not very useful) example of where and how you can use a
  * {@code Quoter}:

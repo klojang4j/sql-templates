@@ -21,11 +21,12 @@ import static org.klojang.util.StringMethods.append;
 
 /**
  * <p>{@code SQLBatchInsert} specializes in saving potentially very large batches of
- * JavaBeans to be saved to the database. Contrary to {@link SQLInsert}
+ * JavaBeans or records to the database. Contrary to {@link SQLInsert}
  * {@code SQLBatchInsert} is not a subclass of {@link SQLStatement}. It is not underpinned
- * by prepared statements (i.e. the {@link PreparedStatement} class). It still protects
- * against SQL injection, though, as all values except numbers and booleans are quoted and
- * escaped using the target database's quoting and escaping rules.
+ * by {@link PreparedStatement prepared statements}. It still protects against SQL
+ * injection, though, as all values except numbers, booleans and
+ * {@link SQLExpression SQL expressions} are quoted and escaped using the target
+ * database's quoting rules.
  *
  * <p>{@code SQLBatchInsert} implements {@link AutoCloseable} in order to stay aligned
  * with {@link SQLStatement} and its subclasses, and more specifically so you can easily

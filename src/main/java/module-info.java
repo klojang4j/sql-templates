@@ -22,7 +22,7 @@
  * <p>Here is an example that goes full-circle from INSERT to SELECT:
  *
  * <blockquote><pre>{@code
- * Connection con = DriverManager.getConnection("jdbc:h2:/tmp/h2/test");
+ * Connection con = ... // get/create JDBC Connection
  *
  * String sql = """
  *      CREATE TABLE PERSON(
@@ -31,7 +31,7 @@
  *          LAST_NAME VARCHAR(255),
  *          BIRTH_DATE DATE)
  *      """;
- * SQL.basic(sql).session(con).prepareUpdate().execute();
+ * SQL.simple(sql).session(con).execute();
  *
  * List<Person> persons = List.of(
  *    new Person("John", "Smith", LocalDate.of(1960, 4, 15)),
@@ -60,17 +60,17 @@
  *     ORDER BY ~%column% ~%direction%
  *    """;
  *
- * SQLSession session = SQL.template(sql).session(con);
- * session.set("column", "LAST_NAME").set("direction", "DESC");
- *
- * try (SQLQuery query = session.prepareQuery()) {
- *  List<Person> persons = query
- *    .withNameMapper(new SnakeCaseToCamelCase())
- *    .bind("lastName", "Smith")
- *    .getBeanifier(Person.class)
- *    .beanifyAll();
- *  for (Person person : persons) {
- *    System.out.println(person);
+ * try(SQLSession session = SQL.template(sql).session(con)) {
+ *   session.set("column", "LAST_NAME").set("direction", "DESC");
+ *   try (SQLQuery query = session.prepareQuery()) {
+ *    List<Person> persons = query
+ *        .withNameMapper(new SnakeCaseToCamelCase())
+ *        .bind("lastName", "Smith")
+ *        .getBeanifier(Person.class)
+ *        .beanifyAll();
+ *    for (Person person : persons) {
+ *      System.out.println(person);
+ *    }
  *  }
  * }
  *
