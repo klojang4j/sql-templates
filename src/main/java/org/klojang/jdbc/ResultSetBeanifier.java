@@ -38,7 +38,8 @@ import java.util.Optional;
  * and it is not necessary that each column in the SELECT clause can be mapped back to a
  * record component.
  *
- * @param <T> the type of the JavaBeans produced by the {@code ResultSetBeanifier}
+ * @param <T> the type of the JavaBeans or records produced by the
+ *       {@code ResultSetBeanifier}
  * @author Ayco Holleman
  * @see BeanifierFactory
  * @see ResultSetMappifier
@@ -50,7 +51,8 @@ public sealed interface ResultSetBeanifier<T> extends Iterable<T>
    * Converts the current row within the {@code ResultSet} into a JavaBean. If the
    * {@code ResultSet} is empty, or if there are no more rows in the {@code ResultSet}, an
    * empty {@code Optional} is returned. You can keep calling {@code beanify()} to
-   * successively extract all rows in the result set.
+   * successively extract all rows in the result set until you receive an empty
+   * {@code Optional}, or until {@link #isEmpty()} returns {@code true}.
    *
    * @return an {@code Optional} containing the JavaBean or an empty {@code Optional} if
    *       the {@code ResultSet} contained no (more) rows
@@ -59,7 +61,8 @@ public sealed interface ResultSetBeanifier<T> extends Iterable<T>
 
   /**
    * Converts at most {@code limit} rows from the {@code ResultSet} into JavaBeans. If the
-   * {@code ResultSet} is empty, an empty {@code List} is returned.
+   * {@code ResultSet} is empty, or if there are no more rows in the {@code ResultSet}, an
+   * empty {@code List} is returned.
    *
    * @param limit the maximum number of rows to extract and convert
    * @return a {@code List} of JavaBeans or an empty {@code List} if the {@code ResultSet}

@@ -104,8 +104,8 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   }
 
   /**
-   * &lt;p&gt;A specialised templating method, aimed at facilitating batch inserts. This method
-   * is &lt;i&gt;only&lt;/i&gt; supported by {@code SQL} instances obtained via
+   * &lt;p&gt;Sets the contents of the VALUES clause within an INSERT statement. This method
+   * is only supported by {@code SQL} instances obtained via
    * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
    * template named &quot;record&quot;. This template will be repeated for each of the beans or
    * records in the provided list. This is best illustrated using an example:

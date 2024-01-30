@@ -11,7 +11,7 @@ import java.util.*;
 
 import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.no;
-import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.jdbc.x.rs.KeyWriter.toMap;
 
 final class DefaultMappifier implements ResultSetMappifier {
@@ -21,21 +21,21 @@ final class DefaultMappifier implements ResultSetMappifier {
 
   private static class MapIterator implements Iterator&lt;Map&lt;String, Object&gt;&gt; {
 
-    private final DefaultMappifier dm;
+    private final DefaultMappifier m;
 
-<span class="nc" id="L26">    MapIterator(DefaultMappifier dm) {</span>
-<span class="nc" id="L27">      this.dm = dm;</span>
+<span class="nc" id="L26">    MapIterator(DefaultMappifier m) {</span>
+<span class="nc" id="L27">      this.m = m;</span>
 <span class="nc" id="L28">    }</span>
 
     @Override
     public boolean hasNext() {
-<span class="nc bnc" id="L32" title="All 2 branches missed.">      return !dm.empty;</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">      return !m.isEmpty();</span>
     }
 
     @Override
     public Map&lt;String, Object&gt; next() {
-<span class="nc" id="L37">      Check.on(STATE, dm.empty).is(no(), &quot;no more rows in result set&quot;);</span>
-<span class="nc" id="L38">      return dm.mappify().get();</span>
+<span class="nc" id="L37">      Check.that(m.isEmpty()).is(no(), illegalState(&quot;no more rows in result set&quot;));</span>
+<span class="nc" id="L38">      return m.mappify().get();</span>
     }
   }
 

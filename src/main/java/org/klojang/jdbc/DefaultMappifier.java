@@ -11,7 +11,7 @@ import java.util.*;
 
 import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.no;
-import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.jdbc.x.rs.KeyWriter.toMap;
 
 final class DefaultMappifier implements ResultSetMappifier {
@@ -21,21 +21,21 @@ final class DefaultMappifier implements ResultSetMappifier {
 
   private static class MapIterator implements Iterator<Map<String, Object>> {
 
-    private final DefaultMappifier dm;
+    private final DefaultMappifier m;
 
-    MapIterator(DefaultMappifier dm) {
-      this.dm = dm;
+    MapIterator(DefaultMappifier m) {
+      this.m = m;
     }
 
     @Override
     public boolean hasNext() {
-      return !dm.empty;
+      return !m.isEmpty();
     }
 
     @Override
     public Map<String, Object> next() {
-      Check.on(STATE, dm.empty).is(no(), "no more rows in result set");
-      return dm.mappify().get();
+      Check.that(m.isEmpty()).is(no(), illegalState("no more rows in result set"));
+      return m.mappify().get();
     }
   }
 

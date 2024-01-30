@@ -3,11 +3,11 @@ package org.klojang.jdbc;
 import java.util.List;
 
 /**
- * Converts the value of a particular property within a particular bean instance. If a
+ * Used to selectively modify values within a list of JavaBeans or records. If a
  * {@link SQLExpression SQL expression} must be generated from the input value, the
  * provided {@link Quoter} can be used to escape and quote string literals <i>within</i>
- * the expression. <i>Do not use the {@code Quoter} to simply return a quoted version of
- * the input value.</i> The return value of the
+ * the expression. <b>Do not use the {@code Quoter} to just return a quoted version of the
+ * input value.</b> The return value of the
  * {@link #process(Object, String, Object, Quoter) process()} method will always be
  * processed <i>again</i> by {@link Quoter#quoteValue(Object) Quoter.quoteValue()}. An
  * example of how to use a {@code BeanValueProcessor} is provided in the comments for
