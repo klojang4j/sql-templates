@@ -6,11 +6,12 @@ import java.util.List;
  * Used to selectively modify values within a list of JavaBeans or records. If a
  * {@link SQLExpression SQL expression} must be generated from the input value, the
  * provided {@link Quoter} can be used to escape and quote string literals <i>within</i>
- * the expression. <b>Do not use the {@code Quoter} to just return a quoted version of the
- * input value.</b> The return value of the
- * {@link #process(Object, String, Object, Quoter) process()} method will always be
- * processed <i>again</i> by {@link Quoter#quoteValue(Object) Quoter.quoteValue()}. An
- * example of how to use a {@code BeanValueProcessor} is provided in the comments for
+ * the expression. <b>Do not use this interface just to return a quoted version of the
+ * input value.</b> <i>Klojang JDBC</i> already takes care of that. That is: the return
+ * value of {@link #process(Object, String, Object, Quoter) BeanValueProcessor.process()}
+ * will always be processed again by
+ * {@link Quoter#quoteValue(Object) Quoter.quoteValue()}. An example of how to use a
+ * {@code BeanValueProcessor} is provided in the comments for
  * {@link SQLSession#setValues(List, BeanValueProcessor)}.
  *
  * @param <T> the type of the bean containing the value to be processed
@@ -40,7 +41,8 @@ public interface BeanValueProcessor<T> {
    * @param propertyName the name of the property or record component
    * @param propertyValue the value of the property or record component
    * @param quoter a {@code Quoter} to be used if you intend to return an
-   *       {@link SQLExpression} containing strings of unknown origin
+   *       {@link SQLExpression} containing string literals coming in from outside your
+   *       program, to prevent SQL injection
    * @return the converted value
    */
   Object process(T bean, String propertyName, Object propertyValue, Quoter quoter);
