@@ -17,6 +17,9 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 public class SQLQueryTest {
   private static final String DB_DIR = System.getProperty("user.home") + "/klojang-db-query-test";
   private static final ThreadLocal<Connection> MY_CON = new ThreadLocal<>();
@@ -27,7 +30,7 @@ public class SQLQueryTest {
     String lastName;
     LocalDate birthDate;
 
-    public Person() {}
+    public Person() { }
 
     public Person(int personId, String firstName, String lastName, LocalDate birthDate) {
       this.personId = personId;
@@ -135,6 +138,53 @@ public class SQLQueryTest {
             .beanifyAll();
       for (Person person : persons) {
         System.out.println(person);
+      }
+    }
+  }
+
+  @Test
+  public void lookup00() throws Exception {
+    String sql = """
+          SELECT FALSE FROM PERSON
+           LIMIT :limit
+          """;
+    try (SQLSession session = SQL.simple(sql).session(MY_CON.get())) {
+      try (SQLQuery query = session.prepareQuery()) {
+        boolean b = query.bind("limit", 1).lookup(boolean.class).get();
+        assertFalse(b);
+      }
+    }
+  }
+
+  @Test
+  public void firstColumn00() throws Exception {
+    String sql = """
+          SELECT ~%literal%, ~%limit% FROM PERSON
+           LIMIT ~%limit%
+          """;
+    try (SQLSession session = SQL.skeleton(sql).session(MY_CON.get())) {
+      session.setValue("literal", "O'Donell").setValue("limit", 2);
+      try (SQLQuery query = session.prepareQuery()) {
+        List<String> l = query.firstColumn();
+        assertEquals(List.of("O'Donell", "O'Donell"), l);
+      }
+    }
+  }
+
+  @Test
+  public void firstColumn01() throws Exception {
+    String sql = """
+          SELECT ~%column% FROM PERSON
+           ORDER BY ~%sortColumn%
+           LIMIT ~%limit%
+          """;
+    try (SQLSession session = SQL.skeleton(sql).session(MY_CON.get())) {
+      session.setIdentifier("column", "LAST_NAME")
+            .setOrderBy("LAST_NAME")
+            .set("limit", 2);
+      try (SQLQuery query = session.prepareQuery()) {
+        List<String> l = query.firstColumn();
+        assertEquals(List.of("Bear", "Bester"), l);
       }
     }
   }

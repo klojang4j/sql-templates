@@ -73,9 +73,9 @@ final class SQLSkeletonSession extends DynamicSQLSession {
 
   @Override
   public SQLQuery prepareQuery() {
-<span class="nc" id="L76">    SQLInfo sqlInfo = getSQLInfo();</span>
-<span class="nc" id="L77">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="nc" id="L78">    return new SQLQuery(ps, this, sqlInfo);</span>
+<span class="fc" id="L76">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="fc" id="L77">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="fc" id="L78">    return new SQLQuery(ps, this, sqlInfo);</span>
   }
 
   @Override
@@ -93,9 +93,9 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   }
 
   private SQLInfo getSQLInfo() {
-<span class="nc" id="L96">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
-<span class="nc" id="L97">    String sql = session.render();</span>
-<span class="nc" id="L98">    return new SQLInfo(sql, new SQLNormalizer(sql));</span>
+<span class="fc" id="L96">    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));</span>
+<span class="fc" id="L97">    String sql = session.render();</span>
+<span class="fc" id="L98">    return new SQLInfo(sql, new SQLNormalizer(sql));</span>
   }
 
 

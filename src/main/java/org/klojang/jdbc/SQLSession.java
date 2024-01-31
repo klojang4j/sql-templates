@@ -29,10 +29,13 @@ import java.util.List;
 public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSession {
 
   /**
-   * Sets the value of the specified template variable. The value will not be escaped or
-   * quoted. If the value is an array or collection, it will be "imploded" to a string,
-   * using {@code "," } (comma) to separate the elements in the array or collection. This
-   * method will throw an {@link UnsupportedOperationException} for
+   * Sets the specified template variable to the specified value. Only use this method if
+   * you know and trust the source of the provided value. The value will not be escaped or
+   * quoted. Preferably use {@link #setValue(String, Object) setLiteral()} or
+   * {@link #setIdentifier(String, String) setIdentifier()} to prevent SQL injection. If
+   * the value is an array or collection, it will be "imploded" to a string, using
+   * {@code "," } (comma) to separate the elements in the array or collection. This method
+   * will throw an {@link UnsupportedOperationException} for
    * {@linkplain SQL#simple(String) simple SQL sessions} since these are not based on <a
    * href="https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html">Klojang
    * Templates</a>.
@@ -54,9 +57,13 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
 
   /**
    * Sets the specified template variable to the escaped and quoted version of the
-   * specified value. The value is escaped and quoted using the
-   * {@link #quoteValue(Object)} method. Use this method if the source of the value is
-   * unknown to prevent SQL injection.
+   * specified value. Use this method if you do not know or trust the source of the value
+   * to prevent SQL injection. If the value is a {@code String}, it is escaped and quoted
+   * using the {@link #quoteValue(Object)} method. If the value is an array or collection,
+   * it will be "imploded" to a string, using {@code "," } (comma) to separate the
+   * elements in the array or collection, and using
+   * {@link #quoteValue(Object) quoteValue()} to escape and quote each element
+   * separately.
    *
    * @param varName the name of the template variable
    * @param value the value to set the variable to
@@ -65,9 +72,25 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    * @see #quoteValue(Object)
    */
-  default SQLSession quote(String varName, Object value)
+  default SQLSession setValue(String varName, Object value)
         throws UnsupportedOperationException {
-    throw notSupported("quote");
+    throw notSupported("setValue");
+  }
+
+  /**
+   * Sets the specified template variable to the escaped and quoted version of the
+   * specified identifier (e&#46;g&#46; a column name or table name).
+   *
+   * @param varName the name of the template variable
+   * @param identifier the identifier to substitute the variable with
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   * @see #quoteIdentifier(String)
+   */
+  default SQLSession setIdentifier(String varName, String identifier)
+        throws UnsupportedOperationException {
+    throw notSupported("setIdentifier");
   }
 
   /**
@@ -154,9 +177,25 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * }</pre></blockquote>
    *
    * <p>Beware of mixing multiple types of elements within the {@code List} of beans.
-   * Under the hood this method creates a {@link BeanReader} for the class of the first
-   * element in the {@code List}. Any subsequent element must have the same class as, or
-   * be a subclass of that class.
+   * Under the hood this method creates a {@link BeanReader} for the type of the first
+   * element in the {@code List}. The type of subsequent elements may be a subtype of that
+   * type, but not a supertype (unless you only read properties that belong to the
+   * supertype).
+   *
+   * <p>Also note that the above example is just for illustration purposes. It would
+   * have been much easier to use the following SQL template:
+   *
+   * <blockquote><pre>{@code
+   * SQL sql = SQL.skeleton("""
+   *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+   *    ~%%begin:record%
+   *    (SUBSTRING(~%firstName%, 1, 3),~%lastName%,~%age%)
+   *    ~%%end:record%
+   *    """);
+   * }</pre></blockquote>
+   *
+   * <p>And then simply call {@code session.setValues(persons)} (without creating and
+   * using a {@code BeanValueProcessor}).
    *
    * @param <T> the type of the beans or records to persist
    * @param beans the beans or records to persist (at least one required)
@@ -175,79 +214,51 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   }
 
   /**
-   * Sets a template variable named "sortColumn" to the specified value. This presumes and
-   * requires that the SQL template indeed contains a variable with that name. This is a
-   * convenience method facilitating the most common use case for template variables: to
-   * parametrize the column(s) in the ORDER BY clause.
-   *
-   * @param sortColumn the column(s) to sort on
-   * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
-   */
-  default SQLSession setOrderBy(Object sortColumn) throws UnsupportedOperationException {
-    return set("sortColumn", sortColumn);
-  }
-
-  /**
-   * Sets a template variable named "sortOrder" to the specified value. This presumes and
-   * requires that the SQL template indeed contains a variable with that name. The
-   * provided value supposedly is either "ASC" or "DESC". The value may also be a boolean,
-   * in which case {@code true} is translated into "DESC" and {@code false} into "ASC".
-   * This is a convenience method facilitating the most common use case for template
-   * variables: to parametrize the sort order for the column(s) in the ORDER BY clause.
-   *
-   * @param sortOrder the sort order
-   * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
-   */
-  default SQLSession setSortOrder(Object sortOrder) throws UnsupportedOperationException {
-    return (sortOrder instanceof Boolean)
-          ? setDescending((Boolean) sortOrder)
-          : set("sortOrder", sortOrder);
-  }
-
-  /**
-   * Sets a template variable named "sortOrder" to "DESC" if the argument equals
-   * {@code true}, else to "ASC".
-   *
-   * @param isDescending whether to sort in descending order
-   * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
-   */
-  default SQLSession setDescending(boolean isDescending)
-        throws UnsupportedOperationException {
-    return set("sortOrder", isDescending ? "DESC" : "ASC");
-  }
-
-  /**
-   * Sets the sort column and sort order of an ORDER BY clause.
+   * Sets the sort column and sort order of the ORDER BY clause within a SQL template.
+   * This presumes and requires that the template contains a variable named "sortColumn".
+   * This is a convenience method facilitating a common use case for template variables:
+   * being able to parametrize the ORDER BY clause. It is equivalent to calling
+   * {@code setIdentifier("sortColumn", sortColumn)}.
    *
    * @param sortColumn the column to sort on
-   * @param sortOrder the sort order
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
-  default SQLSession setOrderBy(Object sortColumn, Object sortOrder)
-        throws UnsupportedOperationException {
-    return setOrderBy(sortColumn).setSortOrder(sortOrder);
+  default SQLSession setOrderBy(String sortColumn) throws UnsupportedOperationException {
+    return setIdentifier("sortColumn", sortColumn);
   }
 
   /**
-   * Sets the sort column and sort order of an ORDER BY clause.
+   * Sets the sort column and sort order of the ORDER BY clause within a SQL template.
+   * This presumes and requires that the template contains a variable named "sortColumn"
+   * and a variable named "sortColumn". This is a convenience method facilitating a common
+   * use case for template variables: being able to parametrize the ORDER BY clause.
+   *
+   * <blockquote><pre>{@code
+   * SQL sql = SQL.template("""
+   *     SELECT LAST_NAME
+   *       FROM EMPLOYEE
+   *      ORDER BY ~%sortColum% ~%sortOrder%
+   *      """);
+   * try(Connection con = ...) {
+   *   List<String> lastNames = sql.session(con)
+   *       .setOrderBy("SALARY", true)
+   *       .prepareQuery()
+   *       .firstColumn();
+   * }
+   * }</pre></blockquote>
    *
    * @param sortColumn the column to sort on
-   * @param isDescending whether to sort in descending order
+   * @param isDescending whether to sort in descending order. If true, the
+   *       "sortOrder" variable in the SQL template will be set to "DESC", else to "ASC".
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
-  default SQLSession setOrderBy(Object sortColumn, boolean isDescending)
+  default SQLSession setOrderBy(String sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
-    return setOrderBy(sortColumn).setDescending(isDescending);
+    return set("sortOrder", isDescending ? "DESC" : "ASC").setOrderBy(sortColumn);
   }
 
   /**
@@ -262,7 +273,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *     <li>Otherwise the value is escaped and quoted according to the quoting rules of
    *         the target database.
    * </ul>
-   * <p>Use this method if the value is passed in from outside your program to prevent
+   * <p>Use this method if you do not know or trust the source of the value to prevent
    * SQL injection.
    *
    * @param value the value to be escaped and quoted

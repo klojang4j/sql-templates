@@ -106,14 +106,14 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; Result&lt;T&gt; lookup(Class&lt;T&gt; clazz) {
     try {
-<span class="nc" id="L109">      executeQuery();</span>
-<span class="nc bnc" id="L110" title="All 2 branches missed.">      if (resultSet.next()) {</span>
-<span class="nc" id="L111">        int sqlType = resultSet.getMetaData().getColumnType(1);</span>
+<span class="fc" id="L109">      executeQuery();</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
+<span class="fc" id="L111">        int sqlType = resultSet.getMetaData().getColumnType(1);</span>
         T val = ColumnReaderFactory
-<span class="nc" id="L113">              .getInstance()</span>
-<span class="nc" id="L114">              .getReader(clazz, sqlType)</span>
-<span class="nc" id="L115">              .getValue(resultSet, 1, clazz);</span>
-<span class="nc" id="L116">        return Result.of(val);</span>
+<span class="fc" id="L113">              .getInstance()</span>
+<span class="fc" id="L114">              .getReader(clazz, sqlType)</span>
+<span class="fc" id="L115">              .getValue(resultSet, 1, clazz);</span>
+<span class="fc" id="L116">        return Result.of(val);</span>
       }
 <span class="nc" id="L118">      return Result.notAvailable();</span>
 <span class="nc" id="L119">    } catch (Throwable t) {</span>

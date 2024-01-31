@@ -46,9 +46,36 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   @Override
-  public final SQLSession quote(String varName, Object value) {
+  public final SQLSession setValue(String varName, Object value) {
     Check.notNull(varName, "varName");
-    session.set(varName, quoteValue(value));
+    switch (value) {
+      case Collection<?> x -> {
+        String val = CollectionMethods.implode(x, this::quoteValue, ",");
+        session.set(varName, val);
+      }
+      case Object[] x -> {
+        String val = ArrayMethods.implode(x, this::quoteValue, ",");
+        session.set(varName, val);
+      }
+      case int[] x -> {
+        session.set(varName, ArrayMethods.implodeInts(x, ","));
+      }
+      default -> {
+        if (value != null && value.getClass().isArray()) {
+          session.set(varName, ArrayMethods.implodeAny(value, this::quoteValue, ","));
+        } else {
+          session.set(varName, quoteValue(value));
+        }
+      }
+    }
+    return this;
+  }
+
+  @Override
+  public final SQLSession setIdentifier(String varName, String identifier) {
+    Check.notNull(varName, "varName");
+    Check.notNull(identifier, "identifier");
+    session.set(varName, quoteIdentifier(identifier));
     return this;
   }
 
@@ -61,10 +88,11 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     }
   }
 
+  @Override
   public final SQLExpression sqlFunction(String name, Object... args) {
     Check.notNull(name, "SQL function name");
     Check.notNull(args, VARARGS);
-    String str = ArrayMethods.implode(args, arg -> quoteValue(arg), ",");
+    String str = ArrayMethods.implode(args, this::quoteValue, ",");
     String expr = append(new StringBuilder(), name, '(', str, ')').toString();
     return new SQLExpression(expr);
   }

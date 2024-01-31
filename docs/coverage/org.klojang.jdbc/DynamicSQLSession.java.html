@@ -46,76 +46,104 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   @Override
-  public final SQLSession quote(String varName, Object value) {
-<span class="nc" id="L50">    Check.notNull(varName, &quot;varName&quot;);</span>
-<span class="nc" id="L51">    session.set(varName, quoteValue(value));</span>
-<span class="nc" id="L52">    return this;</span>
+  public final SQLSession setValue(String varName, Object value) {
+<span class="fc" id="L50">    Check.notNull(varName, &quot;varName&quot;);</span>
+<span class="pc bpc" id="L51" title="3 of 4 branches missed.">    switch (value) {</span>
+<span class="nc" id="L52">      case Collection&lt;?&gt; x -&gt; {</span>
+<span class="nc" id="L53">        String val = CollectionMethods.implode(x, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L54">        session.set(varName, val);</span>
+<span class="nc" id="L55">      }</span>
+<span class="nc" id="L56">      case Object[] x -&gt; {</span>
+<span class="nc" id="L57">        String val = ArrayMethods.implode(x, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L58">        session.set(varName, val);</span>
+<span class="nc" id="L59">      }</span>
+<span class="nc" id="L60">      case int[] x -&gt; {</span>
+<span class="nc" id="L61">        session.set(varName, ArrayMethods.implodeInts(x, &quot;,&quot;));</span>
+<span class="nc" id="L62">      }</span>
+      default -&gt; {
+<span class="pc bpc" id="L64" title="2 of 4 branches missed.">        if (value != null &amp;&amp; value.getClass().isArray()) {</span>
+<span class="nc" id="L65">          session.set(varName, ArrayMethods.implodeAny(value, this::quoteValue, &quot;,&quot;));</span>
+        } else {
+<span class="fc" id="L67">          session.set(varName, quoteValue(value));</span>
+        }
+      }
+    }
+<span class="fc" id="L71">    return this;</span>
+  }
+
+  @Override
+  public final SQLSession setIdentifier(String varName, String identifier) {
+<span class="fc" id="L76">    Check.notNull(varName, &quot;varName&quot;);</span>
+<span class="fc" id="L77">    Check.notNull(identifier, &quot;identifier&quot;);</span>
+<span class="fc" id="L78">    session.set(varName, quoteIdentifier(identifier));</span>
+<span class="fc" id="L79">    return this;</span>
   }
 
   @Override
   public final String quoteValue(Object obj) {
     try {
-<span class="fc" id="L58">      return JDBC.quote(statement(), obj);</span>
-<span class="nc" id="L59">    } catch (SQLException e) {</span>
-<span class="nc" id="L60">      throw KlojangSQLException.wrap(e, sql);</span>
+<span class="fc" id="L85">      return JDBC.quote(statement(), obj);</span>
+<span class="nc" id="L86">    } catch (SQLException e) {</span>
+<span class="nc" id="L87">      throw KlojangSQLException.wrap(e, sql);</span>
     }
   }
 
+  @Override
   public final SQLExpression sqlFunction(String name, Object... args) {
-<span class="nc" id="L65">    Check.notNull(name, &quot;SQL function name&quot;);</span>
-<span class="nc" id="L66">    Check.notNull(args, VARARGS);</span>
-<span class="nc" id="L67">    String str = ArrayMethods.implode(args, arg -&gt; quoteValue(arg), &quot;,&quot;);</span>
-<span class="nc" id="L68">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
-<span class="nc" id="L69">    return new SQLExpression(expr);</span>
+<span class="nc" id="L93">    Check.notNull(name, &quot;SQL function name&quot;);</span>
+<span class="nc" id="L94">    Check.notNull(args, VARARGS);</span>
+<span class="nc" id="L95">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L96">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
+<span class="nc" id="L97">    return new SQLExpression(expr);</span>
   }
 
   @Override
   public final String quoteIdentifier(String obj) {
     try {
-<span class="nc" id="L75">      return statement().enquoteIdentifier(obj, false);</span>
-<span class="nc" id="L76">    } catch (SQLException e) {</span>
-<span class="nc" id="L77">      throw KlojangSQLException.wrap(e, sql);</span>
+<span class="fc" id="L103">      return statement().enquoteIdentifier(obj, false);</span>
+<span class="nc" id="L104">    } catch (SQLException e) {</span>
+<span class="nc" id="L105">      throw KlojangSQLException.wrap(e, sql);</span>
     }
   }
 
   @Override
   public final void execute() {
     try {
-<span class="fc" id="L84">      Statement statement = con.createStatement();</span>
-<span class="fc" id="L85">      String str = session.render();</span>
-<span class="fc" id="L86">      LOG.trace(&quot;Executing SQL: {}&quot;, str);</span>
-<span class="fc" id="L87">      statement.execute(str);</span>
-<span class="nc" id="L88">    } catch (SQLException e) {</span>
-<span class="nc" id="L89">      throw KlojangSQLException.wrap(e, sql);</span>
-<span class="fc" id="L90">    }</span>
-<span class="fc" id="L91">  }</span>
+<span class="fc" id="L112">      Statement statement = con.createStatement();</span>
+<span class="fc" id="L113">      String str = session.render();</span>
+<span class="fc" id="L114">      LOG.trace(&quot;Executing SQL: {}&quot;, str);</span>
+<span class="fc" id="L115">      statement.execute(str);</span>
+<span class="nc" id="L116">    } catch (SQLException e) {</span>
+<span class="nc" id="L117">      throw KlojangSQLException.wrap(e, sql);</span>
+<span class="fc" id="L118">    }</span>
+<span class="fc" id="L119">  }</span>
 
 
   static Supplier&lt;IllegalStateException&gt; sessionNotFinished(RenderSession session) {
-<span class="fc" id="L95">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
-<span class="fc" id="L96">    return illegalState(&quot;one or more variables have not been set yet: &quot; + unset);</span>
+<span class="fc" id="L123">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
+<span class="fc" id="L124">    return illegalState(&quot;one or more variables have not been set yet: &quot; + unset);</span>
   }
 
   Statement statement() {
-<span class="fc bfc" id="L100" title="All 2 branches covered.">    if (stmt == null) {</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">    if (stmt == null) {</span>
       try {
-<span class="fc" id="L102">        stmt = con.createStatement();</span>
-<span class="nc" id="L103">      } catch (SQLException e) {</span>
-<span class="nc" id="L104">        throw KlojangSQLException.wrap(e, sql);</span>
-<span class="fc" id="L105">      }</span>
+<span class="fc" id="L130">        stmt = con.createStatement();</span>
+<span class="nc" id="L131">      } catch (SQLException e) {</span>
+<span class="nc" id="L132">        throw KlojangSQLException.wrap(e, sql);</span>
+<span class="fc" id="L133">      }</span>
     }
-<span class="fc" id="L107">    return stmt;</span>
+<span class="fc" id="L135">    return stmt;</span>
   }
 
   public void close() {
-<span class="fc bfc" id="L111" title="All 2 branches covered.">    if (stmt != null) {</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">    if (stmt != null) {</span>
       try {
-<span class="fc" id="L113">        stmt.close();</span>
-<span class="nc" id="L114">      } catch (SQLException e) {</span>
-<span class="nc" id="L115">        throw KlojangSQLException.wrap(e, sql);</span>
-<span class="fc" id="L116">      }</span>
+<span class="fc" id="L141">        stmt.close();</span>
+<span class="nc" id="L142">      } catch (SQLException e) {</span>
+<span class="nc" id="L143">        throw KlojangSQLException.wrap(e, sql);</span>
+<span class="fc" id="L144">      }</span>
     }
-<span class="fc" id="L118">  }</span>
+<span class="fc" id="L146">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
