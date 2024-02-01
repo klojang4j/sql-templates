@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MappifierFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">MappifierFactory.java</span></div><h1>MappifierFactory.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.check.Check;
+import org.klojang.jdbc.x.rs.KeyWriter;
+import org.klojang.templates.NameMapper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
+
+/**
+ * &lt;p&gt;A factory for {@link ResultSetMappifier} instances. This class behaves analogously
+ * to the {@link BeanifierFactory} class. See there for more details.
+ *
+ * @author Ayco Holleman
+ */
+public final class MappifierFactory {
+
+<span class="nc" id="L22">  private final AtomicReference&lt;KeyWriter&lt;?&gt;[]&gt; ref = new AtomicReference&lt;&gt;();</span>
+<span class="nc" id="L23">  private final ReentrantLock lock = new ReentrantLock();</span>
+
+  private final NameMapper mapper;
+
+  /**
+   * Creates a new {@code MappifierFactory}. Column names will be mapped as-is to map
+   * keys.
+   */
+  public MappifierFactory() {
+<span class="nc" id="L32">    this(NameMapper.AS_IS);</span>
+<span class="nc" id="L33">  }</span>
+
+  /**
+   * Creates a new {@code MappifierFactory} using the specified column-to-key mapper.
+   *
+   * @param columnToKeyMapper a {@code NameMapper} mapping column names to map keys
+   * @see org.klojang.templates.name.SnakeCaseToCamelCase
+   */
+<span class="nc" id="L41">  public MappifierFactory(NameMapper columnToKeyMapper) {</span>
+<span class="nc" id="L42">    this.mapper = Check.notNull(columnToKeyMapper).ok();</span>
+<span class="nc" id="L43">  }</span>
+
+  /**
+   * Returns a {@code ResultSetMappifier} that will convert the rows in the specified
+   * {@code ResultSet} into {@code Map&lt;String, Object&gt;} pseudo-objects.
+   *
+   * @param rs the {@code ResultSet}
+   * @return a {@code ResultSetMappifier} that will convert the rows in the specified
+   *       {@code ResultSet} into {@code Map&lt;String, Object&gt;} pseudo-objects.
+   * @throws SQLException if a database error occurs
+   */
+  public ResultSetMappifier getMappifier(ResultSet rs) throws SQLException {
+<span class="nc bnc" id="L55" title="All 2 branches missed.">    if (!rs.next()) {</span>
+<span class="nc" id="L56">      return EmptyMappifier.INSTANCE;</span>
+    }
+    KeyWriter&lt;?&gt;[] writers;
+<span class="nc bnc" id="L59" title="All 2 branches missed.">    if ((writers = ref.getPlain()) == null) {</span>
+<span class="nc" id="L60">      lock.lock();</span>
+      try {
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (ref.get() == null) {</span>
+<span class="nc" id="L63">          ref.set(writers = createWriters(rs, mapper));</span>
+        }
+      } finally {
+<span class="nc" id="L66">        lock.unlock();</span>
+      }
+    }
+<span class="nc" id="L69">    return new DefaultMappifier(rs, writers);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

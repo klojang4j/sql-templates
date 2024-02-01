@@ -4,7 +4,7 @@ import org.klojang.check.Check;
 import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.sql.SQLInfo;
-import org.klojang.jdbc.x.sql.SQLNormalizer;
+import org.klojang.jdbc.x.sql.ParamExtractor;
 import org.klojang.templates.RenderSession;
 
 import java.sql.Connection;
@@ -97,7 +97,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   private SQLInfo getSQLInfo() {
     Check.that(session.hasUnsetVariables()).is(no(), sessionNotFinished(session));
     String sql = session.render();
-    return new SQLInfo(sql, new SQLNormalizer(sql));
+    return new SQLInfo(sql, new ParamExtractor(sql));
   }
 
 

@@ -10,18 +10,18 @@ public record SQLInfo(String normalizedSQL,
       List<NamedParameter> parameters,
       Map<String, IntList> parameterPositions) {
 
-  public SQLInfo(SQLNormalizer normalizer) {
-    this(normalizer.getNormalizedSQL(),
-          normalizer.getNormalizedSQL(),
-          normalizer.getParameters(),
-          normalizer.getParameterPositions());
+  public SQLInfo(ParamExtractor paramExtractor) {
+    this(paramExtractor.getNormalizedSQL(),
+          paramExtractor.getNormalizedSQL(),
+          paramExtractor.getParameters(),
+          paramExtractor.getParameterPositions());
   }
 
-  public SQLInfo(String jdbcSQL, SQLNormalizer normalizer) {
-    this(normalizer.getNormalizedSQL(),
+  public SQLInfo(String jdbcSQL, ParamExtractor paramExtractor) {
+    this(paramExtractor.getNormalizedSQL(),
           jdbcSQL,
-          normalizer.getParameters(),
-          normalizer.getParameterPositions());
+          paramExtractor.getParameters(),
+          paramExtractor.getParameterPositions());
   }
 
 

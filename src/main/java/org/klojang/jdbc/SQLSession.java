@@ -30,7 +30,7 @@ import java.util.List;
  * unless an exception occurs, the following programming pattern will not cause a resource
  * leak: {@code SQL.template(mySQLTemplate).session(con).prepareQuery()}. Even though
  * closed after obtaining a {@code SQLStatement} from it, you can still re-use the session
- * as the required resource will be created again if and when necessary. With SQL
+ * as the required resources will be created again if and when necessary. With SQL
  * skeletons there is no gain to be had from re-using session. With SQL templates,
  * however, you do save the cost of re-parsing the SQL for named parameters.
  */

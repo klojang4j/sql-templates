@@ -139,9 +139,10 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     if (stmt != null) {
       try {
         stmt.close();
-        stmt = null;
       } catch (SQLException e) {
         throw KlojangSQLException.wrap(e, sql);
+      } finally {
+        stmt = null;
       }
     }
   }

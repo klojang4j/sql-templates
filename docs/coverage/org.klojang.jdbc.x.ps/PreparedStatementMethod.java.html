@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PreparedStatementMethod.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.ps</a> &gt; <span class="el_source">PreparedStatementMethod.java</span></div><h1>PreparedStatementMethod.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.ps;
+
+import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.util.ExceptionMethods;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.lang.invoke.MethodHandles.lookup;
+import static java.lang.invoke.MethodHandles.publicLookup;
+import static java.lang.invoke.MethodType.methodType;
+
+/**
+ * Represents one of the setXXX() methods of PreparedStatement.
+ *
+ * @param &lt;PARAM_TYPE&gt; the type of the value passed to
+ *       PreparedStatement.setXXX(parameterIndex, value)
+ */
+public final class PreparedStatementMethod&lt;PARAM_TYPE&gt; {
+
+<span class="fc" id="L30">  private static final Logger LOG = LoggerFactory.getLogger(PreparedStatementMethod.class);</span>
+
+<span class="fc" id="L32">  public static final PreparedStatementMethod&lt;String&gt; SET_STRING</span>
+<span class="fc" id="L33">        = setter(&quot;setString&quot;, String.class);</span>
+<span class="fc" id="L34">  public static final PreparedStatementMethod&lt;Integer&gt; SET_INT</span>
+<span class="fc" id="L35">        = setter(&quot;setInt&quot;, int.class);</span>
+<span class="fc" id="L36">  public static final PreparedStatementMethod&lt;Double&gt; SET_DOUBLE</span>
+<span class="fc" id="L37">        = setter(&quot;setDouble&quot;, double.class);</span>
+<span class="fc" id="L38">  public static final PreparedStatementMethod&lt;Long&gt; SET_LONG</span>
+<span class="fc" id="L39">        = setter(&quot;setLong&quot;, long.class);</span>
+<span class="fc" id="L40">  public static final PreparedStatementMethod&lt;Float&gt; SET_FLOAT</span>
+<span class="fc" id="L41">        = setter(&quot;setFloat&quot;, float.class);</span>
+<span class="fc" id="L42">  public static final PreparedStatementMethod&lt;Short&gt; SET_SHORT</span>
+<span class="fc" id="L43">        = setter(&quot;setShort&quot;, short.class);</span>
+<span class="fc" id="L44">  public static final PreparedStatementMethod&lt;Byte&gt; SET_BYTE</span>
+<span class="fc" id="L45">        = setter(&quot;setByte&quot;, byte.class);</span>
+<span class="fc" id="L46">  public static final PreparedStatementMethod&lt;Boolean&gt; SET_BOOLEAN</span>
+<span class="fc" id="L47">        = setter(&quot;setBoolean&quot;, boolean.class);</span>
+<span class="fc" id="L48">  public static final PreparedStatementMethod&lt;BigDecimal&gt; SET_BIG_DECIMAL</span>
+<span class="fc" id="L49">        = setter(&quot;setBigDecimal&quot;, BigDecimal.class);</span>
+<span class="fc" id="L50">  public static final PreparedStatementMethod&lt;Date&gt; SET_DATE</span>
+<span class="fc" id="L51">        = setter(&quot;setDate&quot;, Date.class);</span>
+<span class="fc" id="L52">  public static final PreparedStatementMethod&lt;Time&gt; SET_TIME</span>
+<span class="fc" id="L53">        = setter(&quot;setTime&quot;, Time.class);</span>
+<span class="fc" id="L54">  public static final PreparedStatementMethod&lt;Timestamp&gt; SET_TIMESTAMP</span>
+<span class="fc" id="L55">        = setter(&quot;setTimestamp&quot;, Timestamp.class);</span>
+
+<span class="fc" id="L57">  private static final Map&lt;Integer, PreparedStatementMethod&lt;Object&gt;&gt; setObjectMethods = new HashMap&lt;&gt;();</span>
+
+  private final String name;
+  private final MethodHandle method;
+  private final Class&lt;PARAM_TYPE&gt; paramType;
+  private final Integer sqlType;
+
+  private PreparedStatementMethod(String name,
+        MethodHandle method,
+        Class&lt;PARAM_TYPE&gt; paramType) {
+<span class="fc" id="L67">    this(name, method, paramType, null);</span>
+<span class="fc" id="L68">  }</span>
+
+  private PreparedStatementMethod(
+        String name,
+        MethodHandle method,
+        Class&lt;PARAM_TYPE&gt; paramType,
+<span class="fc" id="L74">        Integer sqlType) {</span>
+<span class="fc" id="L75">    this.name = name;</span>
+<span class="fc" id="L76">    this.method = method;</span>
+<span class="fc" id="L77">    this.paramType = paramType;</span>
+<span class="fc" id="L78">    this.sqlType = sqlType;</span>
+<span class="fc" id="L79">  }</span>
+
+  Class&lt;PARAM_TYPE&gt; getParamType() {
+<span class="fc" id="L82">    return paramType;</span>
+  }
+
+  public static PreparedStatementMethod&lt;Object&gt; setObject(int targetSqlType) {
+<span class="fc" id="L86">    PreparedStatementMethod&lt;Object&gt; psm = setObjectMethods.get(targetSqlType);</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">    if (psm == null) {</span>
+<span class="fc" id="L88">      MethodType mt = methodType(void.class, int.class, Object.class, int.class);</span>
+      MethodHandle mh;
+      try {
+<span class="fc" id="L91">        mh = publicLookup().findVirtual(PreparedStatement.class, &quot;setObject&quot;, mt);</span>
+<span class="nc" id="L92">      } catch (Exception e) {</span>
+<span class="nc" id="L93">        throw new KlojangSQLException(e);</span>
+<span class="fc" id="L94">      }</span>
+<span class="fc" id="L95">      psm = new PreparedStatementMethod&lt;&gt;(&quot;setObject&quot;, mh, Object.class, targetSqlType);</span>
+<span class="fc" id="L96">      setObjectMethods.put(targetSqlType, psm);</span>
+    }
+<span class="fc" id="L98">    return psm;</span>
+  }
+
+  void bindValue(PreparedStatement ps, int paramIndex, PARAM_TYPE paramValue)
+        throws Throwable {
+<span class="fc" id="L103">    LOG.trace(&quot;-----&gt; Parameter {}: {}&quot;, paramIndex, paramValue);</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">    if (paramValue == null) {</span>
+<span class="nc" id="L105">      SET_STRING.method.invoke(ps, paramIndex, (String) null);</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">    } else if (sqlType == null) {</span>
+<span class="fc" id="L107">      method.invoke(ps, paramIndex, paramValue);</span>
+    } else {
+<span class="nc" id="L109">      method.invoke(ps, paramIndex, paramValue, sqlType);</span>
+    }
+<span class="fc" id="L111">  }</span>
+
+  private static &lt;X&gt; PreparedStatementMethod&lt;X&gt; setter(String methodName,
+        Class&lt;X&gt; paramType) {
+<span class="fc" id="L115">    MethodType mt = methodType(void.class, int.class, paramType);</span>
+    MethodHandle mh;
+    try {
+<span class="fc" id="L118">      mh = lookup().findVirtual(PreparedStatement.class, methodName, mt);</span>
+<span class="nc" id="L119">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
+<span class="nc" id="L120">      throw ExceptionMethods.uncheck(e);</span>
+<span class="fc" id="L121">    }</span>
+<span class="fc" id="L122">    return new PreparedStatementMethod&lt;&gt;(methodName, mh, paramType);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

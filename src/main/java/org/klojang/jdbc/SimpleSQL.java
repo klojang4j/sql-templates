@@ -1,7 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.sql.SQLInfo;
-import org.klojang.jdbc.x.sql.SQLNormalizer;
+import org.klojang.jdbc.x.sql.ParamExtractor;
 
 import java.sql.Connection;
 
@@ -11,7 +11,7 @@ final class SimpleSQL extends AbstractSQL {
 
   SimpleSQL(String sql, BindInfo bindInfo) {
     super(sql, bindInfo);
-    sqlInfo = new SQLInfo(new SQLNormalizer(sql));
+    sqlInfo = new SQLInfo(new ParamExtractor(sql));
   }
 
   @Override
