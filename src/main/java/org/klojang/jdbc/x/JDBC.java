@@ -33,7 +33,7 @@ public final class JDBC {
       }
       return colNames;
     } catch (SQLException e) {
-      throw new KlojangSQLException(e);
+      throw Utils.wrap(e);
     }
   }
 

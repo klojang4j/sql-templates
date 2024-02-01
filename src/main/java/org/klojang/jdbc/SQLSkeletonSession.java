@@ -11,7 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
 
-import static org.klojang.check.CommonChecks.empty;
+import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.Tag.VARARGS;
 
 final class SQLSkeletonSession extends DynamicSQLSession {
@@ -38,7 +38,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   @Override
   @SuppressWarnings("unchecked")
   public <T> SQLSession setValues(List<T> beans, BeanValueProcessor<T> processor) {
-    Check.that(beans, "beans").isNot(empty());
+    Check.that(beans, "beans").is(deepNotNull()).isNot(empty());
     Check.notNull(processor, "processor");
     Class<T> clazz = (Class<T>) beans.getFirst().getClass();
     BeanReader<T> reader = new BeanReader<>(clazz);
@@ -58,7 +58,6 @@ final class SQLSkeletonSession extends DynamicSQLSession {
     List<Map<String, String>> quoted = new ArrayList<>(beans.size());
     Quoter quoter = new Quoter(statement());
     for (T bean : beans) {
-      Check.notNull(bean, "bean");
       Map<String, String> map = HashMap.newHashMap(vars.length);
       for (String var : vars) {
         Object in = reader.read(bean, var);
@@ -73,6 +72,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
 
   @Override
   public SQLQuery prepareQuery() {
+    close();
     SQLInfo sqlInfo = getSQLInfo();
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
     return new SQLQuery(ps, this, sqlInfo);
@@ -80,6 +80,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
 
   @Override
   public SQLInsert prepareInsert(boolean retrieveKeys) {
+    close();
     SQLInfo sqlInfo = getSQLInfo();
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
     return new SQLInsert(ps, this, sqlInfo, retrieveKeys);
@@ -87,13 +88,14 @@ final class SQLSkeletonSession extends DynamicSQLSession {
 
   @Override
   public SQLUpdate prepareUpdate() {
+    close();
     SQLInfo sqlInfo = getSQLInfo();
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
     return new SQLUpdate(ps, this, sqlInfo);
   }
 
   private SQLInfo getSQLInfo() {
-    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));
+    Check.that(session.hasUnsetVariables()).is(no(), sessionNotFinished(session));
     String sql = session.render();
     return new SQLInfo(sql, new SQLNormalizer(sql));
   }

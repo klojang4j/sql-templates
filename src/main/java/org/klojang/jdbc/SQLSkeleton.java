@@ -1,5 +1,6 @@
 package org.klojang.jdbc;
 
+import org.klojang.jdbc.x.Utils;
 import org.klojang.templates.ParseException;
 import org.klojang.templates.Template;
 
@@ -14,7 +15,7 @@ final class SQLSkeleton extends AbstractSQL {
     try {
       template = Template.fromString(sql);
     } catch (ParseException e) {
-      throw new KlojangSQLException(e);
+      throw Utils.wrap(e);
     }
   }
 

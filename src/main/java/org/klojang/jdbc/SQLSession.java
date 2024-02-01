@@ -23,8 +23,16 @@ import java.util.List;
  * The {@code SQLSession} interface extends {@link AutoCloseable}, so in principle you
  * should set up a try-with-resources block for {@code SQLSession} instances. However, the
  * {@code SQLSession} implementation obtained via {@link SQL#simple(String) SQL.simple()}
- * does manage any resources that need to be freed up, so in that case a
- * try-with-resources block is optional.
+ * does not manage any resources that need to be freed up, so a try-with-resources block
+ * is optional here. Sessions obtained via {@link SQL#template(String) SQL.template()} and
+ * {@link SQL#skeleton(String) SQL.skeleton()} will close the moment you obtain a
+ * {@link SQLStatement} from it &#8212; for example via {@link #prepareQuery()}. So,
+ * unless an exception occurs, the following programming pattern will not cause a resource
+ * leak: {@code SQL.template(mySQLTemplate).session(con).prepareQuery()}. Even though
+ * closed after obtaining a {@code SQLStatement} from it, you can still re-use the session
+ * as the required resource will be created again if and when necessary. With SQL
+ * skeletons there is no gain to be had from re-using session. With SQL templates,
+ * however, you do save the cost of re-parsing the SQL for named parameters.
  */
 public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSession {
 

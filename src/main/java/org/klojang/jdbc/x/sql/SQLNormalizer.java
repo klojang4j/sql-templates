@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.sql;
 
-import org.klojang.check.Check;
 import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.util.CollectionMethods;
 import org.klojang.util.MutableInt;
 import org.klojang.util.collection.IntArrayList;
@@ -37,10 +37,10 @@ public final class SQLNormalizer {
   private final List<NamedParameter> params;
 
   public SQLNormalizer(String sql) {
-    final StringBuilder normalized = new StringBuilder(sql.length());
-    final Map<String, IntList> positions = new LinkedHashMap<>();
-    final MutableInt counter = new MutableInt(); // parameter counter
-    final StringBuilder name = new StringBuilder(); // parameter name
+    final var normalized = new StringBuilder(sql.length());
+    final var positions = new LinkedHashMap<String, IntList>();
+    final var counter = new MutableInt(); // parameter counter
+    final var name = new StringBuilder(); // parameter name
     int position = -1; // parameter start position
     boolean insideString = false;
     boolean escaped = false;
@@ -86,7 +86,7 @@ public final class SQLNormalizer {
     }
     this.normalized = normalized.toString();
     this.positions = CollectionMethods.freeze(positions, IntList::copyOf);
-    this.params = collectionToList(positions.entrySet(), this::toNamedParam);
+    this.params = collectionToList(positions.entrySet(), this::entryToParam);
   }
 
   /*
@@ -114,14 +114,13 @@ public final class SQLNormalizer {
         int position,
         Map<String, IntList> positions,
         MutableInt counter) {
-    Check.on(KlojangSQLException::new, name)
-          .has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);
+    Utils.check(name).has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);
     positions
           .computeIfAbsent(name.toString(), k -> new IntArrayList())
           .add(counter.ppi());
   }
 
-  private NamedParameter toNamedParam(Entry<String, IntList> e) {
+  private NamedParameter entryToParam(Entry<String, IntList> e) {
     return new NamedParameter(e.getKey(), IntList.copyOf(e.getValue()));
   }
 

@@ -7,9 +7,8 @@ import org.klojang.jdbc.x.sql.SQLNormalizer;
 import org.klojang.templates.RenderSession;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 
-import static org.klojang.check.CommonChecks.empty;
+import static org.klojang.check.CommonChecks.no;
 
 final class SQLTemplateSession extends DynamicSQLSession {
 
@@ -24,24 +23,30 @@ final class SQLTemplateSession extends DynamicSQLSession {
   }
 
   public SQLQuery prepareQuery() {
-    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));
-    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
+    close();
+    var sqlInfo = getSQLInfo(session, normalizer);
+    var ps = JDBC.getPreparedStatement(con, sqlInfo);
     return new SQLQuery(ps, this, sqlInfo);
   }
 
   public SQLInsert prepareInsert(boolean retrieveKeys) {
-    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));
-    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
+    close();
+    var sqlInfo = getSQLInfo(session, normalizer);
+    var ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
     return new SQLInsert(ps, this, sqlInfo, retrieveKeys);
   }
 
   public SQLUpdate prepareUpdate() {
-    Check.that(session.getAllUnsetVariables()).is(empty(), sessionNotFinished(session));
-    SQLInfo sqlInfo = new SQLInfo(session.render(), normalizer);
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
+    close();
+    var sqlInfo = getSQLInfo(session, normalizer);
+    var ps = JDBC.getPreparedStatement(con, sqlInfo);
     return new SQLUpdate(ps, this, sqlInfo);
   }
+
+  private static SQLInfo getSQLInfo(RenderSession session, SQLNormalizer normalizer) {
+    Check.that(session.hasUnsetVariables()).is(no(), sessionNotFinished(session));
+    return new SQLInfo(session.render(), normalizer);
+  }
+
 
 }
