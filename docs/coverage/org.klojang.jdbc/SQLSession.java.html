@@ -25,21 +25,22 @@ import java.util.List;
  * {@code SQLSession} implementation obtained via {@link SQL#simple(String) SQL.simple()}
  * does not manage any resources that need to be freed up, so a try-with-resources block
  * is optional here. Sessions obtained via {@link SQL#template(String) SQL.template()} and
- * {@link SQL#skeleton(String) SQL.skeleton()} will close the moment you obtain a
+ * {@link SQL#skeleton(String) SQL.skeleton()} will tacitly close the moment you obtain a
  * {@link SQLStatement} from it &amp;#8212; for example via {@link #prepareQuery()}. So,
  * unless an exception occurs, the following programming pattern will not cause a resource
- * leak: {@code SQL.template(mySQLTemplate).session(con).prepareQuery()}. Even though
+ * leak: {@code SQL.template(&quot;SELECT ...&quot;).session(con).prepareQuery()}. Even though
  * closed after obtaining a {@code SQLStatement} from it, you can still re-use the session
- * as the required resources will be created again if and when necessary. With SQL
- * skeletons there is no gain to be had from re-using session. With SQL templates,
- * however, you do save the cost of re-parsing the SQL for named parameters.
+ * because the required resources will be created again if and when necessary. With SQL
+ * skeletons there is no gain to be had from re-using sessions. With SQL templates,
+ * however, you do save the (small) cost of extracting named parameters from the SQL
+ * string.
  */
 public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSession {
 
   /**
    * Sets the specified template variable to the specified value. Only use this method if
    * you know and trust the source of the provided value. The value will not be escaped or
-   * quoted. Preferably use {@link #setValue(String, Object) setLiteral()} or
+   * quoted. Preferably use {@link #setValue(String, Object) setValue()} or
    * {@link #setIdentifier(String, String) setIdentifier()} to prevent SQL injection. If
    * the value is an array or collection, it will be &quot;imploded&quot; to a string, using
    * {@code &quot;,&quot; } (comma) to separate the elements in the array or collection. This method
@@ -60,18 +61,17 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLSession set(String varName, Object value)
         throws UnsupportedOperationException {
-<span class="nc" id="L63">    throw notSupported(&quot;set&quot;);</span>
+<span class="nc" id="L64">    throw notSupported(&quot;set&quot;);</span>
   }
 
   /**
    * Sets the specified template variable to the escaped and quoted version of the
    * specified value. Use this method if you do not know or trust the source of the value
-   * to prevent SQL injection. If the value is a {@code String}, it is escaped and quoted
-   * using the {@link #quoteValue(Object)} method. If the value is an array or collection,
-   * it will be &quot;imploded&quot; to a string, using {@code &quot;,&quot; } (comma) to separate the
-   * elements in the array or collection, and using
-   * {@link #quoteValue(Object) quoteValue()} to escape and quote each element
-   * separately.
+   * to prevent SQL injection. If the value is an array or collection, it will be
+   * &quot;imploded&quot; to a string, using {@code &quot;,&quot; } (comma) to separate the elements in the
+   * array or collection, and using {@link #quoteValue(Object) quoteValue()} to escape and
+   * quote each element separately. Otherwise this method is equivalent to
+   * {@code set(varName, quoteValue(value))}.
    *
    * @param varName the name of the template variable
    * @param value the value to set the variable to
@@ -222,11 +222,11 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   }
 
   /**
-   * Sets the sort column and sort order of the ORDER BY clause within a SQL template.
-   * This presumes and requires that the template contains a variable named &quot;sortColumn&quot;.
-   * This is a convenience method facilitating a common use case for template variables:
-   * being able to parametrize the ORDER BY clause. It is equivalent to calling
-   * {@code setIdentifier(&quot;sortColumn&quot;, sortColumn)}.
+   * Sets the sort column of the ORDER BY clause within a SQL template. This presumes and
+   * requires that the template contains a variable named &quot;orderBy&quot;. This is a convenience
+   * method facilitating a common use case for template variables: parametrizing the sort
+   * column within the ORDER BY clause. It is equivalent to calling
+   * {@code setIdentifier(&quot;orderBy&quot;, sortColumn)}.
    *
    * @param sortColumn the column to sort on
    * @return this {@code SQLSession} instance
@@ -234,26 +234,20 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setOrderBy(String sortColumn) throws UnsupportedOperationException {
-<span class="fc" id="L237">    return setIdentifier(&quot;sortColumn&quot;, sortColumn);</span>
+<span class="fc" id="L237">    return setIdentifier(&quot;orderBy&quot;, sortColumn);</span>
   }
 
   /**
    * Sets the sort column and sort order of the ORDER BY clause within a SQL template.
-   * This presumes and requires that the template contains a variable named &quot;sortColumn&quot;
-   * and a variable named &quot;sortColumn&quot;. This is a convenience method facilitating a common
-   * use case for template variables: being able to parametrize the ORDER BY clause.
+   * This presumes and requires that the template contains a variable named &quot;orderBy&quot;.
+   * This is a convenience method facilitating a common use case for template variables:
+   * parametrizing the sort column and sort order within the ORDER BY clause.
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
-   * SQL sql = SQL.template(&quot;&quot;&quot;
-   *     SELECT LAST_NAME
-   *       FROM EMPLOYEE
-   *      ORDER BY ~%sortColum% ~%sortOrder%
-   *      &quot;&quot;&quot;);
+   * SQL sql = SQL.template(&quot;SELECT LAST_NAME FROM EMPLOYEE ORDER BY ~%orderBy%&quot;);
    * try(Connection con = ...) {
-   *   List&lt;String&gt; lastNames = sql.session(con)
-   *       .setOrderBy(&quot;SALARY&quot;, true)
-   *       .prepareQuery()
-   *       .firstColumn();
+   *   // Sort in descending order of salary
+   *   List&lt;String&gt; lastNames = sql.session(con).setOrderBy(&quot;SALARY&quot;, true).prepareQuery().firstColumn();
    * }
    * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
@@ -266,7 +260,8 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLSession setOrderBy(String sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
-<span class="nc bnc" id="L269" title="All 2 branches missed.">    return set(&quot;sortOrder&quot;, isDescending ? &quot;DESC&quot; : &quot;ASC&quot;).setOrderBy(sortColumn);</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">    String orderBy = quoteIdentifier(sortColumn) + (isDescending ? &quot; DESC&quot; : &quot; ASC&quot;);</span>
+<span class="nc" id="L264">    return set(&quot;orderBy&quot;, orderBy);</span>
   }
 
   /**
@@ -291,7 +286,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @see java.sql.Statement#enquoteLiteral(String)
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
-<span class="nc" id="L294">    throw notSupported(&quot;quoteValue&quot;);</span>
+<span class="nc" id="L289">    throw notSupported(&quot;quoteValue&quot;);</span>
   }
 
   /**
@@ -307,7 +302,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLExpression sqlFunction(String name, Object... args)
         throws UnsupportedOperationException {
-<span class="nc" id="L310">    throw notSupported(&quot;sqlFunction&quot;);</span>
+<span class="nc" id="L305">    throw notSupported(&quot;sqlFunction&quot;);</span>
   }
 
   /**
@@ -322,7 +317,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @see java.sql.Statement#enquoteIdentifier(String, boolean)
    */
   default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
-<span class="nc" id="L325">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
+<span class="nc" id="L320">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
   }
 
   /**
@@ -352,18 +347,18 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @return a {@code SQLInsert} instance
    */
   default SQLInsert prepareInsert() {
-<span class="fc" id="L355">    return prepareInsert(true);</span>
+<span class="fc" id="L350">    return prepareInsert(true);</span>
   }
 
   /**
    * Returns a {@code SQLInsert} instance that allows you to provide values for named
    * parameters (&quot;binding&quot;) and then execute the INSERT statement.
    *
-   * @param retrieveAutoKeys whether to retrieve the keys that were generated by the
+   * @param retrieveKeys whether to retrieve the keys that were generated by the
    *       database
    * @return a {@code SQLInsert} instance
    */
-  SQLInsert prepareInsert(boolean retrieveAutoKeys);
+  SQLInsert prepareInsert(boolean retrieveKeys);
 
   /**
    * Returns a {@code SQLUpdate} instance that allows you to provide values for named
@@ -374,12 +369,12 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   SQLUpdate prepareUpdate();
 
   private static UnsupportedOperationException notSupported(String method) {
-<span class="nc" id="L377">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
-<span class="nc" id="L378">    return new UnsupportedOperationException(String.format(fmt, method));</span>
+<span class="nc" id="L372">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
+<span class="nc" id="L373">    return new UnsupportedOperationException(String.format(fmt, method));</span>
   }
 
   private static String sqlSkeletonsOnly() {
-<span class="nc" id="L382">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
+<span class="nc" id="L377">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
   }
 
 }

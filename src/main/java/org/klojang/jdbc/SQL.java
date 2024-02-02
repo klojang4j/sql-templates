@@ -3,10 +3,11 @@ package org.klojang.jdbc;
 import java.sql.Connection;
 
 /**
- * <p>Encapsulates a user-provided SQL statement. The statement can be parametrized in
- * three qualitatively different ways. For each variant a different implementation of the
- * {@code SQL} interface is provided. The implementations are hidden from view. Instances
- * of them are obtained via static factory methods on the {@code SQL} interface itself.
+ * <p>Encapsulates a user-provided SQL statement. <i>Klojang JDBC</i> provides three
+ * implementations of the {@code SQL} interface. These implementations are hidden from
+ * view. Instances of them are obtained via static factory methods on the {@code SQL}
+ * interface itself. The implementations cater to different levels of parametrization of
+ * the SQL.
  *
  * <h2>Named Parameters</h2>
  * <p>The simplest implementation supports the use of named parameters within SQL query
@@ -27,10 +28,12 @@ import java.sql.Connection;
  *
  * <h2>SQL Templates</h2>
  * <p>A classic example of something that you often want to, but cannot parametrize with
- * JDBC are the column(s) in the ORDER BY clause. <i>Klojang JDBC</i> lets you do this
- * using <b><a
+ * JDBC are the column(s) in the ORDER BY clause. <i>Klojang JDBC</i> lets you do this by
+ * providing SQL in the form of a
+ * <b><a
  * href="https://klojang4j.github.io/klojang-templates/api/org.klojang.templates/module-summary.html">Klojang
- * Templates</a></b> variables. For example:
+ * template</a></b>. That is: SQL that contains <i>Klojang Templates</i> variables. For
+ * example:
  * <blockquote><pre>{@code
  * SELECT *
  *   FROM PERSON
@@ -42,13 +45,13 @@ import java.sql.Connection;
  * <p>(Thus: named parameters look like this: <b>{@code :fooBar}</b>. <i>Klojang
  * Templates</i> variables look like this: <b>{@code ~%fooBar%}</b>.)
  *
- * <p><i>Klojang Templates</i> variables can be set in the {@link SQLSession} that you
- * obtain from the {@code SQL} instance. Named parameters can be set (a.k.a. "bound") in
- * the {@link SQLStatement} that you again obtain from the {@code SQLSession}. Since
- * "simple" SQL is not allowed to contain <i>Klojang Templates</i> variables, the
- * {@code SQL} interface contains a few convenience methods that yield an
- * {@link SQLStatement} instance straight away, even though under the hood they still
- * create a {@link SQLSession} object.
+ * <p>The workflow is as follows: <i>Klojang Templates</i> variables are set in the
+ * {@link SQLSession} obtained from the {@code SQL} object; named parameters are set
+ * (a.k.a. "bound") in the {@link SQLStatement} obtained from the {@code SQLSession}.
+ * Since "simple" SQL is not allowed to contain <i>Klojang Templates</i> variables, the
+ * {@code SQL} interface contains a few convenience methods that yield a
+ * {@link SQLStatement} object straight away, even though under the hood they still create
+ * a {@link SQLSession} object.
  *
  * <p>SQL templates can be created using the {@link #template(String) SQL.template()}
  * method. <i>Klojang JDBC</i> is agnostic about, and has no opinion on what gets
@@ -57,14 +60,17 @@ import java.sql.Connection;
  *
  * <h2>SQL Skeletons</h2>
  * <p>The implementation obtained via the {@link #skeleton(String) SQL.skeleton()}
- * methods allows for very dynamically generated SQL. As with SQL templates, the SQL is
+ * method allows for very dynamically generated SQL. As with SQL templates, the SQL is
  * provided in the form of a Klojang template (that is: it may contain <i>Klojang
  * Templates</i> variables). However, SQL skeletons explicitly allow you to set template
  * variables to SQL fragments that again contain named parameters. <i>Klojang JDBC</i>
- * will register them, and you can provide values for them just like you can for the named
- * parameters in the SQL skeleton. This is not possible with the implementation returned
- * by {@code SQL.template()}. This makes SQL skeletons less efficient, but more dynamic
- * than SQL templates.
+ * will register them, and you can bind them in the forthcoming {@code SQLStatement}, just
+ * like the named parameters in the SQL skeleton. This is not possible with the
+ * implementation returned by {@code SQL.template()}, since it will immediately extract
+ * all parameters from the original SQL string (and leave it at that). With SQL skeletons
+ * this is deferred to the very last moment, just before you retrieve a
+ * {@link SQLStatement} from the {@code SQLSession}. This makes SQL skeletons somewhat
+ * less efficient, but more dynamic than SQL templates.
  *
  * @see org.klojang.templates.Template
  * @see org.klojang.templates.RenderSession
@@ -79,7 +85,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL simple(String sql) {
-    return simple(sql, new BindInfo() { });
+    return simple(sql, noBindInfo());
   }
 
   /**
@@ -216,10 +222,6 @@ public sealed interface SQL permits AbstractSQL {
   }
 
 
-  private static BindInfo noBindInfo() {
-    return new BindInfo() { };
-  }
-
   /**
    * Returns an {@code SQL} implementation that allows for named parameters and
    * <i>Klojang Templates</i> variables.
@@ -228,7 +230,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql) {
-    return template(sql, new BindInfo() { });
+    return template(sql, noBindInfo());
   }
 
   /**
@@ -254,7 +256,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql) {
-    return skeleton(sql, new BindInfo() { });
+    return skeleton(sql, noBindInfo());
   }
 
 
@@ -297,13 +299,13 @@ public sealed interface SQL permits AbstractSQL {
   }
 
   /**
-   * Returns a special object that signals to <i>Klojang JDBC</i> that the specified
-   * string is to be treated as an SQL expression and hence must not be quoted or
-   * escaped.
+   * Returns a special string wrapper object whose type signals to <i>Klojang JDBC</i>
+   * that the specified string is to be treated as a native SQL expression and hence must
+   * not be quoted or escaped.
    *
-   * @param expression the string to be wrapped into the signal object
-   * @return a special object that signals to <i>Klojang JDBC</i> that the specified
-   *       string is to be treated as an SQL expression
+   * @param expression the SQL expression
+   * @return a special string wrapper object whose type signals to <i>Klojang JDBC</i>
+   *       that the specified string is to be treated as a native SQL expression
    * @see java.sql.Statement#enquoteLiteral(String)
    * @see Quoter
    */
@@ -318,5 +320,10 @@ public sealed interface SQL permits AbstractSQL {
    * @return a {@code SQLSession} that allows you to execute the SQL query
    */
   SQLSession session(Connection con);
+
+  private static BindInfo noBindInfo() {
+    return new BindInfo() { };
+  }
+
 
 }

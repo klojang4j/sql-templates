@@ -175,7 +175,7 @@ public class SQLQueryTest {
   public void firstColumn01() throws Exception {
     String sql = """
           SELECT ~%column% FROM PERSON
-           ORDER BY ~%sortColumn%
+           ORDER BY ~%orderBy%
            LIMIT ~%limit%
           """;
     try (SQLSession session = SQL.skeleton(sql).session(MY_CON.get())) {

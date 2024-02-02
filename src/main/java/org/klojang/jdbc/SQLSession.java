@@ -25,21 +25,22 @@ import java.util.List;
  * {@code SQLSession} implementation obtained via {@link SQL#simple(String) SQL.simple()}
  * does not manage any resources that need to be freed up, so a try-with-resources block
  * is optional here. Sessions obtained via {@link SQL#template(String) SQL.template()} and
- * {@link SQL#skeleton(String) SQL.skeleton()} will close the moment you obtain a
+ * {@link SQL#skeleton(String) SQL.skeleton()} will tacitly close the moment you obtain a
  * {@link SQLStatement} from it &#8212; for example via {@link #prepareQuery()}. So,
  * unless an exception occurs, the following programming pattern will not cause a resource
- * leak: {@code SQL.template(mySQLTemplate).session(con).prepareQuery()}. Even though
+ * leak: {@code SQL.template("SELECT ...").session(con).prepareQuery()}. Even though
  * closed after obtaining a {@code SQLStatement} from it, you can still re-use the session
- * as the required resources will be created again if and when necessary. With SQL
- * skeletons there is no gain to be had from re-using session. With SQL templates,
- * however, you do save the cost of re-parsing the SQL for named parameters.
+ * because the required resources will be created again if and when necessary. With SQL
+ * skeletons there is no gain to be had from re-using sessions. With SQL templates,
+ * however, you do save the (small) cost of extracting named parameters from the SQL
+ * string.
  */
 public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSession {
 
   /**
    * Sets the specified template variable to the specified value. Only use this method if
    * you know and trust the source of the provided value. The value will not be escaped or
-   * quoted. Preferably use {@link #setValue(String, Object) setLiteral()} or
+   * quoted. Preferably use {@link #setValue(String, Object) setValue()} or
    * {@link #setIdentifier(String, String) setIdentifier()} to prevent SQL injection. If
    * the value is an array or collection, it will be "imploded" to a string, using
    * {@code "," } (comma) to separate the elements in the array or collection. This method
@@ -66,12 +67,11 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   /**
    * Sets the specified template variable to the escaped and quoted version of the
    * specified value. Use this method if you do not know or trust the source of the value
-   * to prevent SQL injection. If the value is a {@code String}, it is escaped and quoted
-   * using the {@link #quoteValue(Object)} method. If the value is an array or collection,
-   * it will be "imploded" to a string, using {@code "," } (comma) to separate the
-   * elements in the array or collection, and using
-   * {@link #quoteValue(Object) quoteValue()} to escape and quote each element
-   * separately.
+   * to prevent SQL injection. If the value is an array or collection, it will be
+   * "imploded" to a string, using {@code "," } (comma) to separate the elements in the
+   * array or collection, and using {@link #quoteValue(Object) quoteValue()} to escape and
+   * quote each element separately. Otherwise this method is equivalent to
+   * {@code set(varName, quoteValue(value))}.
    *
    * @param varName the name of the template variable
    * @param value the value to set the variable to
@@ -222,11 +222,11 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   }
 
   /**
-   * Sets the sort column and sort order of the ORDER BY clause within a SQL template.
-   * This presumes and requires that the template contains a variable named "sortColumn".
-   * This is a convenience method facilitating a common use case for template variables:
-   * being able to parametrize the ORDER BY clause. It is equivalent to calling
-   * {@code setIdentifier("sortColumn", sortColumn)}.
+   * Sets the sort column of the ORDER BY clause within a SQL template. This presumes and
+   * requires that the template contains a variable named "orderBy". This is a convenience
+   * method facilitating a common use case for template variables: parametrizing the sort
+   * column within the ORDER BY clause. It is equivalent to calling
+   * {@code setIdentifier("orderBy", sortColumn)}.
    *
    * @param sortColumn the column to sort on
    * @return this {@code SQLSession} instance
@@ -234,26 +234,20 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setOrderBy(String sortColumn) throws UnsupportedOperationException {
-    return setIdentifier("sortColumn", sortColumn);
+    return setIdentifier("orderBy", sortColumn);
   }
 
   /**
    * Sets the sort column and sort order of the ORDER BY clause within a SQL template.
-   * This presumes and requires that the template contains a variable named "sortColumn"
-   * and a variable named "sortColumn". This is a convenience method facilitating a common
-   * use case for template variables: being able to parametrize the ORDER BY clause.
+   * This presumes and requires that the template contains a variable named "orderBy".
+   * This is a convenience method facilitating a common use case for template variables:
+   * parametrizing the sort column and sort order within the ORDER BY clause.
    *
    * <blockquote><pre>{@code
-   * SQL sql = SQL.template("""
-   *     SELECT LAST_NAME
-   *       FROM EMPLOYEE
-   *      ORDER BY ~%sortColum% ~%sortOrder%
-   *      """);
+   * SQL sql = SQL.template("SELECT LAST_NAME FROM EMPLOYEE ORDER BY ~%orderBy%");
    * try(Connection con = ...) {
-   *   List<String> lastNames = sql.session(con)
-   *       .setOrderBy("SALARY", true)
-   *       .prepareQuery()
-   *       .firstColumn();
+   *   // Sort in descending order of salary
+   *   List<String> lastNames = sql.session(con).setOrderBy("SALARY", true).prepareQuery().firstColumn();
    * }
    * }</pre></blockquote>
    *
@@ -266,7 +260,8 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLSession setOrderBy(String sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
-    return set("sortOrder", isDescending ? "DESC" : "ASC").setOrderBy(sortColumn);
+    String orderBy = quoteIdentifier(sortColumn) + (isDescending ? " DESC" : " ASC");
+    return set("orderBy", orderBy);
   }
 
   /**
@@ -359,11 +354,11 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * Returns a {@code SQLInsert} instance that allows you to provide values for named
    * parameters ("binding") and then execute the INSERT statement.
    *
-   * @param retrieveAutoKeys whether to retrieve the keys that were generated by the
+   * @param retrieveKeys whether to retrieve the keys that were generated by the
    *       database
    * @return a {@code SQLInsert} instance
    */
-  SQLInsert prepareInsert(boolean retrieveAutoKeys);
+  SQLInsert prepareInsert(boolean retrieveKeys);
 
   /**
    * Returns a {@code SQLUpdate} instance that allows you to provide values for named
