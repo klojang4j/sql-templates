@@ -108,8 +108,7 @@ public sealed interface SQL permits AbstractSQL {
 
   /**
    * Returns an {@code SQL} implementation that allows for named parameters, but not for
-   * <i>Klojang Templates</i> variables. Also use this implementation for completely
-   * static SQL.
+   * <i>Klojang Templates</i> variables.
    *
    * @param sql the SQL statement
    * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
