@@ -36,6 +36,13 @@ public final class ParamExtractor {
   private final Map<String, IntList> positions;
   private final List<NamedParameter> params;
 
+  // For static SQL - containing no named parameters
+  public ParamExtractor(String sql, int foo) {
+    this.normalized = sql;
+    this.positions = Map.of();
+    this.params = List.of();
+  }
+
   public ParamExtractor(String sql) {
     final var normalized = new StringBuilder(sql.length());
     final var positions = new LinkedHashMap<String, IntList>();

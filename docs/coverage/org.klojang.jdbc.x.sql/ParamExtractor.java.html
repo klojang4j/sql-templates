@@ -36,58 +36,65 @@ public final class ParamExtractor {
   private final Map&lt;String, IntList&gt; positions;
   private final List&lt;NamedParameter&gt; params;
 
-<span class="fc" id="L39">  public ParamExtractor(String sql) {</span>
-<span class="fc" id="L40">    final var normalized = new StringBuilder(sql.length());</span>
-<span class="fc" id="L41">    final var positions = new LinkedHashMap&lt;String, IntList&gt;();</span>
-<span class="fc" id="L42">    final var counter = new MutableInt(); // parameter counter</span>
-<span class="fc" id="L43">    final var name = new StringBuilder(); // parameter name</span>
-<span class="fc" id="L44">    int position = -1; // parameter start position</span>
-<span class="fc" id="L45">    boolean insideString = false;</span>
-<span class="fc" id="L46">    boolean escaped = false;</span>
-<span class="fc bfc" id="L47" title="All 2 branches covered.">    for (int i = 0; i &lt; sql.length(); ++i) {</span>
-<span class="fc" id="L48">      char c = sql.charAt(i);</span>
-<span class="fc bfc" id="L49" title="All 2 branches covered.">      if (insideString) {</span>
-<span class="fc" id="L50">        normalized.append(c);</span>
-<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (c == QUOTE) {</span>
-<span class="fc bfc" id="L52" title="All 2 branches covered.">          if (!escaped) {</span>
-<span class="fc" id="L53">            insideString = false;</span>
+  // For static SQL - containing no named parameters
+<span class="nc" id="L40">  public ParamExtractor(String sql, int foo) {</span>
+<span class="nc" id="L41">    this.normalized = sql;</span>
+<span class="nc" id="L42">    this.positions = Map.of();</span>
+<span class="nc" id="L43">    this.params = List.of();</span>
+<span class="nc" id="L44">  }</span>
+
+<span class="fc" id="L46">  public ParamExtractor(String sql) {</span>
+<span class="fc" id="L47">    final var normalized = new StringBuilder(sql.length());</span>
+<span class="fc" id="L48">    final var positions = new LinkedHashMap&lt;String, IntList&gt;();</span>
+<span class="fc" id="L49">    final var counter = new MutableInt(); // parameter counter</span>
+<span class="fc" id="L50">    final var name = new StringBuilder(); // parameter name</span>
+<span class="fc" id="L51">    int position = -1; // parameter start position</span>
+<span class="fc" id="L52">    boolean insideString = false;</span>
+<span class="fc" id="L53">    boolean escaped = false;</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">    for (int i = 0; i &lt; sql.length(); ++i) {</span>
+<span class="fc" id="L55">      char c = sql.charAt(i);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">      if (insideString) {</span>
+<span class="fc" id="L57">        normalized.append(c);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (c == QUOTE) {</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">          if (!escaped) {</span>
+<span class="fc" id="L60">            insideString = false;</span>
           }
-<span class="fc bfc" id="L55" title="All 2 branches covered.">        } else if (c == BACKSLASH) {</span>
-<span class="fc" id="L56">          escaped = true;</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        } else if (c == BACKSLASH) {</span>
+<span class="fc" id="L63">          escaped = true;</span>
         } else {
-<span class="fc" id="L58">          escaped = false;</span>
+<span class="fc" id="L65">          escaped = false;</span>
         }
-<span class="fc bfc" id="L60" title="All 2 branches covered.">      } else if (position != -1) { // we are assembling a parameter name</span>
-<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (isParamChar(c)) {</span>
-<span class="fc" id="L62">          name.append(c);</span>
-<span class="fc bfc" id="L63" title="All 2 branches covered.">          if (i == sql.length() - 1) {</span>
-<span class="fc" id="L64">            addParam(name, position, positions, counter);</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">      } else if (position != -1) { // we are assembling a parameter name</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (isParamChar(c)) {</span>
+<span class="fc" id="L69">          name.append(c);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">          if (i == sql.length() - 1) {</span>
+<span class="fc" id="L71">            addParam(name, position, positions, counter);</span>
           }
         } else {
-<span class="fc" id="L67">          addParam(name, position, positions, counter);</span>
-<span class="fc" id="L68">          normalized.append(c);</span>
-<span class="fc" id="L69">          position = -1;</span>
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">          if (c == QUOTE) {</span>
-<span class="nc" id="L71">            insideString = true;</span>
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">          } else if (c == COLON) {</span>
-<span class="nc" id="L73">            fail(KlojangSQLException::new, ERR_ADJACENT_PARAMS, position, i);</span>
+<span class="fc" id="L74">          addParam(name, position, positions, counter);</span>
+<span class="fc" id="L75">          normalized.append(c);</span>
+<span class="fc" id="L76">          position = -1;</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">          if (c == QUOTE) {</span>
+<span class="nc" id="L78">            insideString = true;</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">          } else if (c == COLON) {</span>
+<span class="nc" id="L80">            fail(KlojangSQLException::new, ERR_ADJACENT_PARAMS, position, i);</span>
           }
         }
-<span class="fc bfc" id="L76" title="All 2 branches covered.">      } else if (c == COLON) {</span>
-<span class="fc" id="L77">        normalized.append('?');</span>
-<span class="fc" id="L78">        position = i;</span>
-<span class="fc" id="L79">        name.setLength(0);</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">      } else if (c == COLON) {</span>
+<span class="fc" id="L84">        normalized.append('?');</span>
+<span class="fc" id="L85">        position = i;</span>
+<span class="fc" id="L86">        name.setLength(0);</span>
       } else {
-<span class="fc" id="L81">        normalized.append(c);</span>
-<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (c == QUOTE) {</span>
-<span class="fc" id="L83">          insideString = true;</span>
+<span class="fc" id="L88">        normalized.append(c);</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (c == QUOTE) {</span>
+<span class="fc" id="L90">          insideString = true;</span>
         }
       }
     }
-<span class="fc" id="L87">    this.normalized = normalized.toString();</span>
-<span class="fc" id="L88">    this.positions = CollectionMethods.freeze(positions, IntList::copyOf);</span>
-<span class="fc" id="L89">    this.params = collectionToList(positions.entrySet(), this::entryToParam);</span>
-<span class="fc" id="L90">  }</span>
+<span class="fc" id="L94">    this.normalized = normalized.toString();</span>
+<span class="fc" id="L95">    this.positions = CollectionMethods.freeze(positions, IntList::copyOf);</span>
+<span class="fc" id="L96">    this.params = collectionToList(positions.entrySet(), this::entryToParam);</span>
+<span class="fc" id="L97">  }</span>
 
   /**
    * Returns SQL in which all named parameters have been replaced with question marks
@@ -95,19 +102,19 @@ public final class ParamExtractor {
    * variables potentially still present.
    */
   public String getNormalizedSQL() {
-<span class="fc" id="L98">    return normalized;</span>
+<span class="fc" id="L105">    return normalized;</span>
   }
 
   public List&lt;NamedParameter&gt; getParameters() {
-<span class="fc" id="L102">    return params;</span>
+<span class="fc" id="L109">    return params;</span>
   }
 
   public Map&lt;String, IntList&gt; getParameterPositions() {
-<span class="fc" id="L106">    return positions;</span>
+<span class="fc" id="L113">    return positions;</span>
   }
 
   private static boolean isParamChar(char c) {
-<span class="pc bpc" id="L110" title="1 of 4 branches missed.">    return Character.isLetterOrDigit(c) || c == '_';</span>
+<span class="pc bpc" id="L117" title="1 of 4 branches missed.">    return Character.isLetterOrDigit(c) || c == '_';</span>
   }
 
   private static void addParam(
@@ -115,14 +122,14 @@ public final class ParamExtractor {
         int position,
         Map&lt;String, IntList&gt; positions,
         MutableInt counter) {
-<span class="fc" id="L118">    Utils.check(name).has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);</span>
-<span class="fc" id="L119">    positions</span>
-<span class="fc" id="L120">          .computeIfAbsent(name.toString(), k -&gt; new IntArrayList())</span>
-<span class="fc" id="L121">          .add(counter.ppi());</span>
-<span class="fc" id="L122">  }</span>
+<span class="fc" id="L125">    Utils.check(name).has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);</span>
+<span class="fc" id="L126">    positions</span>
+<span class="fc" id="L127">          .computeIfAbsent(name.toString(), k -&gt; new IntArrayList())</span>
+<span class="fc" id="L128">          .add(counter.ppi());</span>
+<span class="fc" id="L129">  }</span>
 
   private NamedParameter entryToParam(Entry&lt;String, IntList&gt; e) {
-<span class="fc" id="L125">    return new NamedParameter(e.getKey(), IntList.copyOf(e.getValue()));</span>
+<span class="fc" id="L132">    return new NamedParameter(e.getKey(), IntList.copyOf(e.getValue()));</span>
   }
 
 }

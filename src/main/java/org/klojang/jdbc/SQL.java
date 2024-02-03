@@ -76,13 +76,31 @@ import java.sql.Connection;
  * @see org.klojang.templates.RenderSession
  */
 public sealed interface SQL permits AbstractSQL {
+
+  /**
+   * Returns an {@code SQL} implementation that supports neither named parameters nor
+   * <i>Klojang Templates</i> variables. In other words, it only supports completely
+   * static SQL. This method really just returns the same {@code SQL} implementation as
+   * the one returned by {@link #simple(String) SQL.simple()}, but does so under the
+   * <i>assumption</i> that the SQL does not contain any named parameters, thus saving on
+   * the cost of parsing the SQL in order to extract the named parameters.
+   *
+   * @param sql the SQL statement
+   * @return an {@code SQL} implementation that supports neither named parameters nor
+   *       <i>Klojang Templates</i> variables
+   */
+  static SQL staticSQL(String sql) {
+    return new SimpleSQL(sql, true, noBindInfo());
+  }
+
   /**
    * Returns an {@code SQL} implementation that allows for named parameters, but not for
    * <i>Klojang Templates</i> variables. Also use this implementation for completely
    * static SQL.
    *
-   * @param sql the SQL query string
-   * @return an instance of an {@code SQL} implementation that behaves as described above
+   * @param sql the SQL statement
+   * @return an {@code SQL} implementation that allows for named parameters, but not for
+   *       <i>Klojang Templates</i> variables
    */
   static SQL simple(String sql) {
     return simple(sql, noBindInfo());
@@ -93,13 +111,13 @@ public sealed interface SQL permits AbstractSQL {
    * <i>Klojang Templates</i> variables. Also use this implementation for completely
    * static SQL.
    *
-   * @param sql the SQL query string
+   * @param sql the SQL statement
    * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL simple(String sql, BindInfo bindInfo) {
-    return new SimpleSQL(sql, bindInfo);
+    return new SimpleSQL(sql, false, bindInfo);
   }
 
   /**
@@ -226,7 +244,7 @@ public sealed interface SQL permits AbstractSQL {
    * Returns an {@code SQL} implementation that allows for named parameters and
    * <i>Klojang Templates</i> variables.
    *
-   * @param sql the SQL query string
+   * @param sql the SQL statement
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL template(String sql) {
@@ -237,7 +255,7 @@ public sealed interface SQL permits AbstractSQL {
    * Returns an {@code SQL} implementation that allows for named parameters and
    * <i>Klojang Templates</i> variables.
    *
-   * @param sql the SQL query string
+   * @param sql the SQL statement
    * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an instance of an {@code SQL} implementation that behaves as described above
@@ -252,7 +270,7 @@ public sealed interface SQL permits AbstractSQL {
    * that themselves again contain named parameters. These named parameters will be
    * detected and extracted by <i>Klojang JDBC</i>.
    *
-   * @param sql the SQL query string
+   * @param sql the SQL statement
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL skeleton(String sql) {
@@ -267,7 +285,7 @@ public sealed interface SQL permits AbstractSQL {
    * extracted by <i>Klojang JDBC</i>, and you can bind them in the {@link SQLStatement}
    * derived from the {@code SQL} implementation.
    *
-   * @param sql the SQL query string
+   * @param sql the SQL statement
    * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an instance of an {@code SQL} implementation that behaves as described above

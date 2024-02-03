@@ -1,7 +1,7 @@
 package org.klojang.jdbc;
 
-import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.jdbc.x.sql.ParamExtractor;
+import org.klojang.jdbc.x.sql.SQLInfo;
 
 import java.sql.Connection;
 
@@ -9,9 +9,13 @@ final class SimpleSQL extends AbstractSQL {
 
   private final SQLInfo sqlInfo;
 
-  SimpleSQL(String sql, BindInfo bindInfo) {
+  SimpleSQL(String sql, boolean isStatic, BindInfo bindInfo) {
     super(sql, bindInfo);
-    sqlInfo = new SQLInfo(new ParamExtractor(sql));
+    if (isStatic) {
+      sqlInfo = new SQLInfo(new ParamExtractor(sql, 0));
+    } else {
+      sqlInfo = new SQLInfo(new ParamExtractor(sql));
+    }
   }
 
   @Override

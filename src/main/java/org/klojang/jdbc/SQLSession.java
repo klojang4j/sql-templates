@@ -6,16 +6,15 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * <p>An {@code SQLSession} allows you to provide values for the <a
- * href="https://klojang4j.github.io/klojang-templates/api/org.klojang.templates/module-summary.html">template
- * variables</a> within the SQL. Once you have set all template variables, you can obtain
- * a {@link SQLStatement} object from the {@code SQLSession} and use it to set (a.k.a.
- * "bind") the <i>named parameters</i> within the SQL. The difference between template
- * variables and named parameters is explained in the comments for the {@link SQL}
- * interface. Since the {@code SQLSession} implementation obtained via
+ * <p>An {@code SQLSession} allows you to provide values for the <i>template
+ * variables</i> within an SQL template. Once you have set all template variables, you can
+ * obtain a {@link SQLStatement} object from the {@code SQLSession} and use it to set
+ * (a.k.a. "bind") the <i>named parameters</i> within the SQL. The difference between
+ * template variables and named parameters is explained in the comments for the
+ * {@link SQL SQL interface}. Since the {@code SQLSession} implementation obtained via
  * {@link SQL#simple(String) SQL.simple()}) does not allow for template variables, you
  * have no choice but to retrieve a {@code SQLStatement} from it straight away. If the SQL
- * does not contain any named parameters, you may call {@link #execute()} on the
+ * does not contain any named parameters, you may also call {@link #execute()} on the
  * {@code SQLSession} straight away, without going through the creation of an
  * {@code SQLStatement}.
  *
@@ -24,12 +23,13 @@ import java.util.List;
  * should set up a try-with-resources block for {@code SQLSession} instances. However, the
  * {@code SQLSession} implementation obtained via {@link SQL#simple(String) SQL.simple()}
  * does not manage any resources that need to be freed up, so a try-with-resources block
- * is optional here. Sessions obtained via {@link SQL#template(String) SQL.template()} and
+ * is optional in that case. Sessions obtained via
+ * {@link SQL#template(String) SQL.template()} and
  * {@link SQL#skeleton(String) SQL.skeleton()} will tacitly close the moment you obtain a
  * {@link SQLStatement} from it &#8212; for example via {@link #prepareQuery()}. So,
- * unless an exception occurs, the following programming pattern will not cause a resource
- * leak: {@code SQL.template("SELECT ...").session(con).prepareQuery()}. Even though
- * closed after obtaining a {@code SQLStatement} from it, you can still re-use the session
+ * unless an exception occurs, the following code pattern will not cause a resource leak:
+ * {@code SQL.template("SELECT ...").session(con).prepareQuery()}. Even though closed
+ * after obtaining a {@code SQLStatement} from it, you can still re-use the session
  * because the required resources will be created again if and when necessary. With SQL
  * skeletons there is no gain to be had from re-using sessions. With SQL templates,
  * however, you do save the (small) cost of extracting named parameters from the SQL
