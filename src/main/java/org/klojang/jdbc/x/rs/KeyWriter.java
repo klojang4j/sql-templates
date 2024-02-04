@@ -1,6 +1,6 @@
 package org.klojang.jdbc.x.rs;
 
-import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.DatabaseException;
 import org.klojang.templates.NameMapper;
 
 import java.sql.ResultSet;
@@ -43,7 +43,7 @@ public class KeyWriter<COLUMN_TYPE> {
       }
       return writers;
     } catch (SQLException e) {
-      throw new KlojangSQLException(e);
+      throw new DatabaseException(e);
     }
   }
 

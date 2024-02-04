@@ -103,7 +103,7 @@ public class SQLSkeletonSessionTest {
     try (Connection conn = MY_CON.get()) {
       try (SQLSession session = sql.session(conn)) {
         // missing nested template "records"
-        assertThrows(KlojangSQLException.class, () -> session.setValues(persons));
+        assertThrows(DatabaseException.class, () -> session.setValues(persons));
       }
     }
   }

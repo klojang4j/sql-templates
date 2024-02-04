@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.rs;
 
 import org.klojang.collections.TypeMap;
-import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.reader.*;
 import org.slf4j.Logger;
@@ -149,7 +149,7 @@ public class ColumnReaderFactory {
       try {
         return mh.invoke(x);
       } catch (Throwable t) {
-        throw new KlojangSQLException(t);
+        throw new DatabaseException(t);
       }
     };
   }

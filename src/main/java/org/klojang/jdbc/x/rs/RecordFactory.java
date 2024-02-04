@@ -1,6 +1,6 @@
 package org.klojang.jdbc.x.rs;
 
-import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.NameMapper;
 import org.klojang.util.CollectionMethods;
@@ -77,7 +77,7 @@ public final class RecordFactory<T extends Record> {
             methodType(void.class, paramTypes.toArray(Class[]::new)));
       return new WriteConfig(mh, writers.toArray(ComponentWriter[]::new));
     } catch (Throwable t) {
-      throw new KlojangSQLException(t);
+      throw new DatabaseException(t);
     }
   }
 

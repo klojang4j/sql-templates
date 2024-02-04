@@ -49,7 +49,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
         BeanReader&lt;T&gt; reader,
         BeanValueProcessor&lt;T&gt; processor) {
 <span class="fc bfc" id="L51" title="All 2 branches covered.">    if (!session.getTemplate().hasNestedTemplate(&quot;record&quot;)) {</span>
-<span class="fc" id="L52">      throw new KlojangSQLException(&quot;missing nested template \&quot;record\&quot;&quot;);</span>
+<span class="fc" id="L52">      throw new DatabaseException(&quot;missing nested template \&quot;record\&quot;&quot;);</span>
     }
 <span class="fc" id="L54">    String[] vars = session.getTemplate()</span>
 <span class="fc" id="L55">          .getNestedTemplate(&quot;record&quot;)</span>

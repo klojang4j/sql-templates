@@ -5,14 +5,14 @@ import org.klojang.jdbc.x.Utils;
 import java.sql.SQLException;
 
 /**
- * A {@link RuntimeException} that may either wrap an {@link SQLException} or indicate
+ * A {@link RuntimeException} that may either wrap a {@link SQLException} or indicate
  * another error condition while processing or executing SQL.
  *
  * @author Ayco Holleman
  */
-public final class KlojangSQLException extends RuntimeException {
+public final class DatabaseException extends RuntimeException {
 
-  static KlojangSQLException wrap(Throwable exc, SQL sql) {
+  static DatabaseException wrap(Throwable exc, SQL sql) {
     return Utils.wrap(exc, ((AbstractSQL) sql).getUnparsedSQL());
   }
 
@@ -21,7 +21,7 @@ public final class KlojangSQLException extends RuntimeException {
    *
    * @param message the message
    */
-  public KlojangSQLException(String message) {
+  public DatabaseException(String message) {
     super(message);
   }
 
@@ -30,7 +30,7 @@ public final class KlojangSQLException extends RuntimeException {
    *
    * @param cause the cause of the exception
    */
-  public KlojangSQLException(Throwable cause) {
+  public DatabaseException(Throwable cause) {
     super(cause);
   }
 
@@ -41,7 +41,7 @@ public final class KlojangSQLException extends RuntimeException {
    * @param message the message
    * @param cause the cause of the exception
    */
-  public KlojangSQLException(String message, Throwable cause) {
+  public DatabaseException(String message, Throwable cause) {
     super(message, cause);
   }
 

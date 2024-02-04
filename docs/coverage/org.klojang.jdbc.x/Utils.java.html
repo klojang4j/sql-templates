@@ -2,7 +2,7 @@
 
 import org.klojang.check.Check;
 import org.klojang.check.ObjectCheck;
-import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.util.exception.UncheckedException;
 
@@ -10,27 +10,27 @@ public final class Utils {
 
 <span class="nc" id="L11">  private Utils() { throw new UnsupportedOperationException(); }</span>
 
-  public static &lt;T&gt; ObjectCheck&lt;T, KlojangSQLException&gt; check(T arg) {
-<span class="fc" id="L14">    return Check.on(KlojangSQLException::new, arg);</span>
+  public static &lt;T&gt; ObjectCheck&lt;T, DatabaseException&gt; check(T arg) {
+<span class="fc" id="L14">    return Check.on(DatabaseException::new, arg);</span>
   }
 
-  public static KlojangSQLException wrap(Throwable exc, SQLInfo sqlInfo) {
+  public static DatabaseException wrap(Throwable exc, SQLInfo sqlInfo) {
 <span class="nc" id="L18">    return wrap(exc, sqlInfo.jdbcSQL());</span>
   }
 
-  public static KlojangSQLException wrap(Throwable exc, String sql) {
+  public static DatabaseException wrap(Throwable exc, String sql) {
 <span class="nc bnc" id="L22" title="All 3 branches missed.">    return switch (exc) {</span>
-<span class="nc" id="L23">      case KlojangSQLException e0 -&gt; e0;</span>
+<span class="nc" id="L23">      case DatabaseException e0 -&gt; e0;</span>
 <span class="nc" id="L24">      case UncheckedException e1 -&gt; wrap(e1.unwrap(), sql);</span>
-<span class="nc" id="L25">      default -&gt; new KlojangSQLException(message(exc, sql), exc);</span>
+<span class="nc" id="L25">      default -&gt; new DatabaseException(message(exc, sql), exc);</span>
     };
   }
 
-  public static KlojangSQLException wrap(Throwable exc) {
+  public static DatabaseException wrap(Throwable exc) {
 <span class="nc bnc" id="L30" title="All 3 branches missed.">    return switch (exc) {</span>
-<span class="nc" id="L31">      case KlojangSQLException e0 -&gt; e0;</span>
+<span class="nc" id="L31">      case DatabaseException e0 -&gt; e0;</span>
 <span class="nc" id="L32">      case UncheckedException e1 -&gt; wrap(e1.unwrap());</span>
-<span class="nc" id="L33">      default -&gt; new KlojangSQLException(exc);</span>
+<span class="nc" id="L33">      default -&gt; new DatabaseException(exc);</span>
     };
   }
 

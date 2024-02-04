@@ -1,6 +1,6 @@
 package org.klojang.jdbc.x.sql;
 
-import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.util.CollectionMethods;
 import org.klojang.util.MutableInt;
@@ -18,8 +18,8 @@ import static org.klojang.check.CommonProperties.strlen;
 import static org.klojang.util.CollectionMethods.collectionToList;
 
 /**
- * Extracts named parameters from a SQL query string and replaces them with positional
- * parameters (question marks).
+ * Extracts named parameters from a SQL query and replaces them with positional parameters
+ * (question marks).
  */
 public final class ParamExtractor {
 
@@ -77,7 +77,7 @@ public final class ParamExtractor {
           if (c == QUOTE) {
             insideString = true;
           } else if (c == COLON) {
-            fail(KlojangSQLException::new, ERR_ADJACENT_PARAMS, position, i);
+            fail(DatabaseException::new, ERR_ADJACENT_PARAMS, position, i);
           }
         }
       } else if (c == COLON) {

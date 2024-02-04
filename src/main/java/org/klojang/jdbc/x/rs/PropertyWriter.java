@@ -2,7 +2,7 @@ package org.klojang.jdbc.x.rs;
 
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
-import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.templates.NameMapper;
 import org.slf4j.Logger;
@@ -66,7 +66,7 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
       }
       return writers.toArray(PropertyWriter[]::new);
     } catch (SQLException e) {
-      throw new KlojangSQLException(e);
+      throw new DatabaseException(e);
     }
   }
 

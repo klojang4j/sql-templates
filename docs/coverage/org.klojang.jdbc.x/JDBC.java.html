@@ -3,7 +3,7 @@
 import org.klojang.check.Check;
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
-import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.SQLExpression;
 import org.klojang.jdbc.x.sql.SQLInfo;
 
@@ -47,8 +47,8 @@ public final class JDBC {
 
   public static PreparedStatement getPreparedStatement(Connection con,
         SQLInfo sqlInfo,
-        boolean retrieveAutoKeys) {
-<span class="fc bfc" id="L51" title="All 2 branches covered.">    int x = retrieveAutoKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
+        boolean retrieveKeys) {
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
     try {
 <span class="fc" id="L53">      return con.prepareStatement(sqlInfo.jdbcSQL(), x);</span>
 <span class="nc" id="L54">    } catch (SQLException e) {</span>
@@ -61,9 +61,9 @@ public final class JDBC {
 <span class="fc" id="L61">    long[] keys = new long[rowCount];</span>
 <span class="fc" id="L62">    try (ResultSet rs = stmt.getGeneratedKeys()) {</span>
 <span class="fc" id="L63">      Check.that(rs.next()).is(yes(),</span>
-<span class="nc" id="L64">            () -&gt; new KlojangSQLException(NO_KEYS_GENERATED));</span>
+<span class="nc" id="L64">            () -&gt; new DatabaseException(NO_KEYS_GENERATED));</span>
 <span class="fc" id="L65">      Check.that(rs.getMetaData().getColumnCount()).is(eq(), 1,</span>
-<span class="nc" id="L66">            () -&gt; new KlojangSQLException(MULTIPLE_AUTO_KEYS));</span>
+<span class="nc" id="L66">            () -&gt; new DatabaseException(MULTIPLE_AUTO_KEYS));</span>
 <span class="fc" id="L67">      keys[0] = rs.getLong(1);</span>
 <span class="fc bfc" id="L68" title="All 2 branches covered.">      for (int i = 1; i &lt; rowCount; ++i) {</span>
 <span class="fc" id="L69">        rs.next();</span>

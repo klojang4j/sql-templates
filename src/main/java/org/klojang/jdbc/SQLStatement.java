@@ -149,10 +149,10 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     }
   }
 
-  private Supplier<KlojangSQLException> incompleteBindings() {
+  private Supplier<DatabaseException> incompleteBindings() {
     Set<String> all = new HashSet<>(sqlInfo.parameterPositions().keySet());
     all.removeAll(collectionToSet(bound, NamedParameter::name));
     String fmt = "some query parameters have not been bound yet: %s";
-    return () -> new KlojangSQLException(String.format(fmt, all));
+    return () -> new DatabaseException(String.format(fmt, all));
   }
 }

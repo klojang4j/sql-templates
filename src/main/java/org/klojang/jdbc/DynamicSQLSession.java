@@ -84,7 +84,7 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     try {
       return JDBC.quote(statement(), obj);
     } catch (SQLException e) {
-      throw KlojangSQLException.wrap(e, sql);
+      throw DatabaseException.wrap(e, sql);
     }
   }
 
@@ -102,7 +102,7 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     try {
       return statement().enquoteIdentifier(obj, false);
     } catch (SQLException e) {
-      throw KlojangSQLException.wrap(e, sql);
+      throw DatabaseException.wrap(e, sql);
     }
   }
 
@@ -114,7 +114,7 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
       LOG.trace("Executing SQL: {}", str);
       statement.execute(str);
     } catch (SQLException e) {
-      throw KlojangSQLException.wrap(e, sql);
+      throw DatabaseException.wrap(e, sql);
     }
   }
 
@@ -129,7 +129,7 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
       try {
         stmt = con.createStatement();
       } catch (SQLException e) {
-        throw KlojangSQLException.wrap(e, sql);
+        throw DatabaseException.wrap(e, sql);
       }
     }
     return stmt;
@@ -140,7 +140,7 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
       try {
         stmt.close();
       } catch (SQLException e) {
-        throw KlojangSQLException.wrap(e, sql);
+        throw DatabaseException.wrap(e, sql);
       } finally {
         stmt = null;
       }

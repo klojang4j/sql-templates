@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.rs.reader;
 
 import org.klojang.convert.NumberMethods;
-import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.x.rs.Adapter;
 import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderLookup;
@@ -54,7 +54,7 @@ public final class EnumReaderLookup extends ColumnReaderLookup<Enum<?>> {
     if (i < 0 || i >= enumClass.getEnumConstants().length) {
       String fmt = "invalid ordinal number for enum type %s: %d";
       String msg = String.format(fmt, enumClass.getSimpleName(), i);
-      throw new KlojangSQLException(msg);
+      throw new DatabaseException(msg);
     }
     return enumClass.getEnumConstants()[i];
   }
@@ -70,7 +70,7 @@ public final class EnumReaderLookup extends ColumnReaderLookup<Enum<?>> {
     }
     String fmt = "unable to parse \"%s\" into %s";
     String msg = String.format(fmt, s, enumClass.getSimpleName());
-    throw new KlojangSQLException(msg);
+    throw new DatabaseException(msg);
   }
 
 }

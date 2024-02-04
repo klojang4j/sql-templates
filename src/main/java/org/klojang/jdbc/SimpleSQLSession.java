@@ -28,9 +28,9 @@ final class SimpleSQLSession extends AbstractSQLSession {
   }
 
   @Override
-  public SQLInsert prepareInsert(boolean retrieveAutoKeys) {
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveAutoKeys);
-    return new SQLInsert(ps, this, sqlInfo, retrieveAutoKeys);
+  public SQLInsert prepareInsert(boolean retrieveKeys) {
+    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
+    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);
   }
 
   @Override
@@ -48,7 +48,7 @@ final class SimpleSQLSession extends AbstractSQLSession {
       LOG.trace("Executing SQL: {}", str);
       statement.execute(str);
     } catch (SQLException e) {
-      throw KlojangSQLException.wrap(e, sql);
+      throw DatabaseException.wrap(e, sql);
     }
   }
 

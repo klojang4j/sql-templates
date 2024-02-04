@@ -149,11 +149,11 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
 <span class="fc" id="L149">    }</span>
 <span class="fc" id="L150">  }</span>
 
-  private Supplier&lt;KlojangSQLException&gt; incompleteBindings() {
+  private Supplier&lt;DatabaseException&gt; incompleteBindings() {
 <span class="fc" id="L153">    Set&lt;String&gt; all = new HashSet&lt;&gt;(sqlInfo.parameterPositions().keySet());</span>
 <span class="fc" id="L154">    all.removeAll(collectionToSet(bound, NamedParameter::name));</span>
 <span class="fc" id="L155">    String fmt = &quot;some query parameters have not been bound yet: %s&quot;;</span>
-<span class="pc" id="L156">    return () -&gt; new KlojangSQLException(String.format(fmt, all));</span>
+<span class="pc" id="L156">    return () -&gt; new DatabaseException(String.format(fmt, all));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

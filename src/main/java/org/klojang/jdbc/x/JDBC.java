@@ -3,7 +3,7 @@ package org.klojang.jdbc.x;
 import org.klojang.check.Check;
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
-import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.SQLExpression;
 import org.klojang.jdbc.x.sql.SQLInfo;
 
@@ -47,8 +47,8 @@ public final class JDBC {
 
   public static PreparedStatement getPreparedStatement(Connection con,
         SQLInfo sqlInfo,
-        boolean retrieveAutoKeys) {
-    int x = retrieveAutoKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
+        boolean retrieveKeys) {
+    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
     try {
       return con.prepareStatement(sqlInfo.jdbcSQL(), x);
     } catch (SQLException e) {
@@ -61,9 +61,9 @@ public final class JDBC {
     long[] keys = new long[rowCount];
     try (ResultSet rs = stmt.getGeneratedKeys()) {
       Check.that(rs.next()).is(yes(),
-            () -> new KlojangSQLException(NO_KEYS_GENERATED));
+            () -> new DatabaseException(NO_KEYS_GENERATED));
       Check.that(rs.getMetaData().getColumnCount()).is(eq(), 1,
-            () -> new KlojangSQLException(MULTIPLE_AUTO_KEYS));
+            () -> new DatabaseException(MULTIPLE_AUTO_KEYS));
       keys[0] = rs.getLong(1);
       for (int i = 1; i < rowCount; ++i) {
         rs.next();

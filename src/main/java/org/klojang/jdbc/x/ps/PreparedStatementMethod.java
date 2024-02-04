@@ -1,6 +1,6 @@
 package org.klojang.jdbc.x.ps;
 
-import org.klojang.jdbc.KlojangSQLException;
+import org.klojang.jdbc.DatabaseException;
 import org.klojang.util.ExceptionMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +90,7 @@ public final class PreparedStatementMethod<PARAM_TYPE> {
       try {
         mh = publicLookup().findVirtual(PreparedStatement.class, "setObject", mt);
       } catch (Exception e) {
-        throw new KlojangSQLException(e);
+        throw new DatabaseException(e);
       }
       psm = new PreparedStatementMethod<>("setObject", mh, Object.class, targetSqlType);
       setObjectMethods.put(targetSqlType, psm);
