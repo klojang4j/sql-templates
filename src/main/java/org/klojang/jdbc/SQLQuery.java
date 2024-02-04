@@ -68,7 +68,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Sets the column-to-property mapper to be used when populating JavaBeans or maps from
    * a {@link ResultSet}. Beware of the direction of the mappings: <i>from</i> column
-   * names <i>to</i> bean properties (or map keys).
+   * names <i>to</i> bean properties (or record components, or map keys).
    *
    * @param columnToPropertyMapper the column-to-property mapper to be used
    * @return this {@code SQLQuery} instance
@@ -98,11 +98,13 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * Returns the value of the first column in the first row. The second time you call this
    * method, you get the value of the first column in the second row, and so on. If there
    * are no (more) rows in the {@code ResultSet}. If there are no (more) rows in the
-   * {@code ResultSet}, {@link Result#notAvailable()} is returned.
+   * {@code ResultSet}, {@link Result#notAvailable() Result.notAvailable()} is returned.
    *
    * @param <T> the type of the value to be returned
    * @param clazz the class of the value to be returned
-   * @return the value of the first column in the first row
+   * @return the value of the first column in the first row or
+   *       {@link Result#notAvailable() Result.notAvailable()} if there are no (more) rows
+   *       in the {@code ResultSet}
    */
   public <T> Result<T> lookup(Class<T> clazz) {
     try {
@@ -123,20 +125,20 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   /**
    * Executes the query and returns the value of the first column in the first row as an
-   * {@code int}. The second time you call this method, you get the value of the first
-   * column in the second row, and so on. If there are no (more) rows in the
-   * {@code ResultSet}, {@link OptionalInt#empty()} is returned.
+   * {@code Integer}. Equivalent to {@code lookup(Integer.class}). The second time you
+   * call this method, you get the value of the first column in the second row, and so on.
+   * If there are no (more) rows in the {@code ResultSet}, {@link OptionalInt#empty()} is
+   * returned.
    *
    * @return the value of the first column in the first row as an integer
-   * @throws KlojangSQLException if the query returned zero rows
    */
-  public OptionalInt getInt() throws KlojangSQLException {
+  public Result<Integer> getInt() {
     try {
       executeQuery();
       if (resultSet.next()) {
-        return OptionalInt.of(resultSet.getInt(1));
+        return Result.of(resultSet.getInt(1));
       }
-      return OptionalInt.empty();
+      return Result.notAvailable();
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -144,21 +146,29 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   /**
    * Executes the query and returns the value of the first column of the first row as a
-   * {@code String}. The second time you call this method, you get the value of the first
-   * column in the second row, and so on. If there are no (more) rows in the
-   * {@code ResultSet}, {@link Result#notAvailable()} is returned.
+   * {@code String}. Equivalent to {@code lookup(String.class}). The second time you call
+   * this method, you get the value of the first column in the second row, and so on. If
+   * there are no (more) rows in the {@code ResultSet}, {@link Result#notAvailable()} is
+   * returned.
    *
-   * @return the value of the first column of the first row as aa {@code String}
-   * @throws KlojangSQLException If the query returned zero rows
+   * @return the value of the first column of the first row as a {@code String}
    */
-  public Result<String> getString() throws KlojangSQLException {
-    return lookup(String.class);
+  public Result<String> getString() {
+    try {
+      executeQuery();
+      if (resultSet.next()) {
+        return Result.of(resultSet.getString(1));
+      }
+      return Result.notAvailable();
+    } catch (Throwable t) {
+      throw Utils.wrap(t);
+    }
   }
 
   /**
-   * Returns whether the query yielded at least one row.
+   * Returns {@code true} if the query yielded at least one row; {@code false} otherwise
    *
-   * @return whether the query yielded at least one row
+   * @return {@code true} if the query yielded at least one row; {@code false} otherwise
    */
   public boolean exists() {
     try {

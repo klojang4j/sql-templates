@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.klojang.check.aux.Result;
 import org.klojang.convert.Morph;
 import org.klojang.util.IOMethods;
 
@@ -181,7 +182,7 @@ public class SQLInsertTest {
     try (SQLQuery query = SQL.simple("SELECT COUNT(*) FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
-      assertEquals(OptionalInt.of(3), query.getInt());
+      assertEquals(Result.of(3), query.getInt());
     }
   }
 

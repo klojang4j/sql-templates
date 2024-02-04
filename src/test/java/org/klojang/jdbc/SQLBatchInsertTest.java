@@ -3,6 +3,7 @@ package org.klojang.jdbc;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.klojang.check.aux.Result;
 import org.klojang.convert.Morph;
 import org.klojang.util.IOMethods;
 
@@ -14,7 +15,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,7 +87,7 @@ public class SQLBatchInsertTest {
     try (SQLQuery query = SQL.simple("SELECT COUNT(*) FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
-      assertEquals(OptionalInt.of(3), query.getInt());
+      assertEquals(Result.of(3), query.getInt());
     }
   }
 

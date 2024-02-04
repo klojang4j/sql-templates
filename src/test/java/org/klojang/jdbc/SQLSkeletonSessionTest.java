@@ -82,7 +82,7 @@ public class SQLSkeletonSessionTest {
       }
       int i = SQL.simpleQuery(MY_CON.get(), "SELECT COUNT(*) FROM PERSON")
             .getInt()
-            .getAsInt();
+            .get();
       assertEquals(3, i);
     }
   }

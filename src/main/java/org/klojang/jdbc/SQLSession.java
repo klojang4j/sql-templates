@@ -102,7 +102,9 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   }
 
   /**
-   * <p>Sets the contents of the VALUES clause within an INSERT statement.Equivalent to
+   * <p>Sets the contents of the VALUES clause within an INSERT statement. This method is
+   * only supported by {@code SQL} instances obtained via
+   * {@link SQL#skeleton(String) SQL.skeleton()}. Equivalent to
    * {@link #setValues(List, BeanValueProcessor) setValues(Arrays.asList(beans),
    * BeanValueProcessor.identity())}.
    *
@@ -119,7 +121,9 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   }
 
   /**
-   * <p>Sets the contents of the VALUES clause within an INSERT statement. Equivalent to
+   * <p>Sets the contents of the VALUES clause within an INSERT statement. This method is
+   * only supported by {@code SQL} instances obtained via
+   * {@link SQL#skeleton(String) SQL.skeleton()}. Equivalent to
    * {@link #setValues(List, BeanValueProcessor) setValues(beans,
    * BeanValueProcessor.identity())}.
    *
@@ -135,8 +139,8 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   }
 
   /**
-   * <p>Sets the contents of the VALUES clause within an INSERT statement. This method
-   * is only supported by {@code SQL} instances obtained via
+   * <p>Sets the contents of the VALUES clause within an INSERT statement. This method is
+   * only supported by {@code SQL} instances obtained via
    * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
    * template named "record". This template will be repeated for each of the beans or
    * records in the provided list. This is best illustrated using an example:
@@ -202,8 +206,8 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *    """);
    * }</pre></blockquote>
    *
-   * <p>And then simply call {@code session.setValues(persons)} (without creating and
-   * using a {@code BeanValueProcessor}).
+   * <p>And then simply call {@code session.setValues(persons)} (obviating the need to
+   * create and use a {@code BeanValueProcessor}).
    *
    * @param <T> the type of the beans or records to persist
    * @param beans the beans or records to persist (at least one required)
@@ -223,9 +227,9 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
 
   /**
    * Sets the sort column of the ORDER BY clause within a SQL template. This presumes and
-   * requires that the template contains a variable named "orderBy". This is a convenience
-   * method facilitating a common use case for template variables: parametrizing the sort
-   * column within the ORDER BY clause. It is equivalent to calling
+   * requires that the template contains a template variable named "orderBy". This is a
+   * convenience method facilitating a common use case for template variables:
+   * parametrizing the sort column within the ORDER BY clause. It is equivalent to calling
    * {@code setIdentifier("orderBy", sortColumn)}.
    *
    * @param sortColumn the column to sort on
@@ -239,9 +243,9 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
 
   /**
    * Sets the sort column and sort order of the ORDER BY clause within a SQL template.
-   * This presumes and requires that the template contains a variable named "orderBy".
-   * This is a convenience method facilitating a common use case for template variables:
-   * parametrizing the sort column and sort order within the ORDER BY clause.
+   * This presumes and requires that the template contains a template variable named
+   * "orderBy". This is a convenience method facilitating a common use case for template
+   * variables: parametrizing the sort column and sort order within the ORDER BY clause.
    *
    * <blockquote><pre>{@code
    * SQL sql = SQL.template("SELECT LAST_NAME FROM EMPLOYEE ORDER BY ~%orderBy%");
