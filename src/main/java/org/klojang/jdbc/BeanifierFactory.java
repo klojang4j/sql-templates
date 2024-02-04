@@ -21,11 +21,11 @@ import static org.klojang.templates.NameMapper.AS_IS;
  * {@code BeanifierFactory} per SQL query. Possibly more, if multiple bean types are
  * extracted from the same {@link ResultSet}. The very first {@code ResultSet} passed to
  * the {@link #getBeanifier(ResultSet) getBeanifier()} method is used to configure the
- * conversion from the {@code ResultSet} to the desired bean type. Subsequent calls to
- * {@code getBeanifier()} will use that same configuration. Therefore, although multiple
- * {@code BeanifierFactory} instances may be instantiated for a single SQL query, a single
- * {@code BeanifierFactory} should never be used to "beanify" result sets from multiple
- * queries.
+ * conversion from the {@code ResultSet} to the desired bean or {@code record} type.
+ * Subsequent calls to {@code getBeanifier()} will use that same configuration. Therefore,
+ * although multiple {@code BeanifierFactory} instances may be instantiated for a single
+ * SQL query, a single {@code BeanifierFactory} should never be used to "beanify" result
+ * sets from multiple queries.
  *
  * <p><i>(More precisely: all result sets subsequently passed to
  * {@link #getBeanifier(ResultSet) getBeanifier()} must have the same number of columns
@@ -36,8 +36,7 @@ import static org.klojang.templates.NameMapper.AS_IS;
  * column and a {@code VARCHAR} column from different tables. This might be the case for
  * web applications that need to fill multiple {@code <select>}) boxes.)</i>
  *
- * @param <T> the type of JavaBeans produced by the beanifier obtained from the
- *       {@code BeanifierFactory} (may be a {@code record} type)
+ * @param <T> the type of JavaBeans or records produced by the beanifier
  * @author Ayco Holleman
  */
 @SuppressWarnings("rawtypes")

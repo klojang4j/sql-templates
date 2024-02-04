@@ -18,19 +18,18 @@ import static org.klojang.util.ArrayMethods.EMPTY_STRING_ARRAY;
 /**
  * A builder class for {@link SQLBatchInsert} instances. {@code BatchInsertBuilder}
  * instances are obtained via {@link SQL#configureBatchInsert()}.
- *
- * @param <T> the type of the beans or records to be saved to the database
  */
-public final class BatchInsertBuilder<T> {
+@SuppressWarnings({"rawtypes", "unchecked"})
+public final class BatchInsertBuilder {
 
-  private BeanValueProcessor<T> processor = BeanValueProcessor.identity();
+  private BeanValueProcessor processor = BeanValueProcessor.identity();
   private IncludeExclude includeExclude = INCLUDE;
   private String[] properties = EMPTY_STRING_ARRAY;
   private NameMapper nameMapper = NameMapper.AS_IS;
   private int chunkSize = -1;
   boolean commitPerChunk = true;
 
-  private Class<T> beanClass;
+  private Class beanClass;
   private String tableName;
 
   BatchInsertBuilder() { }
@@ -41,7 +40,7 @@ public final class BatchInsertBuilder<T> {
    * @param beanClass the type of the beans or records to be saved
    * @return this {@code BatchInsertBuilder}
    */
-  public BatchInsertBuilder<T> of(Class<T> beanClass) {
+  public BatchInsertBuilder of(Class<?> beanClass) {
     this.beanClass = Check.notNull(beanClass).ok();
     return this;
   }
@@ -53,7 +52,7 @@ public final class BatchInsertBuilder<T> {
    * @param tableName the table name to insert the data into
    * @return this {@code BatchInsertBuilder}
    */
-  public BatchInsertBuilder<T> into(String tableName) {
+  public BatchInsertBuilder into(String tableName) {
     this.tableName = Check.notNull(tableName).ok();
     return this;
   }
@@ -68,7 +67,7 @@ public final class BatchInsertBuilder<T> {
    *       the INSERT statement
    * @return this {@code BatchInsertBuilder}
    */
-  public BatchInsertBuilder<T> excluding(String... properties) {
+  public BatchInsertBuilder excluding(String... properties) {
     this.properties = Check.notNull(properties).ok();
     this.includeExclude = EXCLUDE;
     return this;
@@ -83,7 +82,7 @@ public final class BatchInsertBuilder<T> {
    *       INSERT statement
    * @return this {@code BatchInsertBuilder}
    */
-  public BatchInsertBuilder<T> including(String... properties) {
+  public BatchInsertBuilder including(String... properties) {
     this.properties = Check.notNull(properties).ok();
     this.includeExclude = INCLUDE;
     return this;
@@ -97,7 +96,7 @@ public final class BatchInsertBuilder<T> {
    * @param chunkSize the number of beans that will be saved at a time
    * @return this {@code BatchInsertBuilder}
    */
-  public BatchInsertBuilder<T> withChunkSize(int chunkSize) {
+  public BatchInsertBuilder withChunkSize(int chunkSize) {
     this.chunkSize = Check.that(chunkSize).is(gt(), 0).ok();
     return this;
   }
@@ -111,7 +110,7 @@ public final class BatchInsertBuilder<T> {
    *       to the database
    * @return this {@code BatchInsertBuilder}
    */
-  public BatchInsertBuilder<T> withCommitPerChunk(boolean commitPerChunk) {
+  public BatchInsertBuilder withCommitPerChunk(boolean commitPerChunk) {
     this.commitPerChunk = commitPerChunk;
     return this;
   }
@@ -124,7 +123,7 @@ public final class BatchInsertBuilder<T> {
    * @param processor the {@code BeanValueProcessor} to use
    * @return this {@code BatchInsertBuilder}
    */
-  public BatchInsertBuilder<T> withValueProcessor(BeanValueProcessor<T> processor) {
+  public BatchInsertBuilder withValueProcessor(BeanValueProcessor<?> processor) {
     this.processor = Check.notNull(processor, "processor").ok();
     return this;
   }
@@ -137,7 +136,7 @@ public final class BatchInsertBuilder<T> {
    * @param propertyToColumnMapper the property-to-column mapper
    * @return this {@code SQLBatchInsertBuilder}
    */
-  public BatchInsertBuilder<T> withNameMapper(NameMapper propertyToColumnMapper) {
+  public BatchInsertBuilder withNameMapper(NameMapper propertyToColumnMapper) {
     Check.notNull(propertyToColumnMapper);
     this.nameMapper = propertyToColumnMapper;
     return this;
@@ -149,13 +148,15 @@ public final class BatchInsertBuilder<T> {
    * the other methods
    *
    * @param con the JDBC {@code Connection} to use for the INSERT statement
+   * @param <T> the type of the beans or records to be persisted by the
+   *       {@code SQLBatchInsert} instance
    * @return a {@code SQLBatchInsert} instance
    */
-  public SQLBatchInsert<T> prepare(Connection con) {
+  public <T> SQLBatchInsert<T> prepare(Connection con) {
     Check.notNull(con);
     Check.on(STATE, beanClass, "beanClass").is(notNull());
-    BeanReader<T> reader = new BeanReader<>(beanClass, includeExclude, properties);
-    BatchInsertConfig<T> cfg = new BatchInsertConfig<>(con,
+    BeanReader reader = new BeanReader<>(beanClass, includeExclude, properties);
+    BatchInsertConfig cfg = new BatchInsertConfig<>(con,
           reader,
           processor,
           nameMapper,

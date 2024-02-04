@@ -24,15 +24,15 @@ public interface BindInfo {
    * you don't need to know the name of the property or the type of the bean containing
    * the property.
    *
-   * @param beanOrRecordType the class containing the property whose SQL type to
+   * @param beanType the class containing the property whose SQL datatype to
    *       determine (may be a {@code record} type)
    * @param propertyName the name of the property or record component whose SQL
    *       datatype to determine
    * @param propertyType the type of the property whose SQL datatype to determine
-   * @return one of the class constants of the {@link java.sql.Types} class or
-   *       {@code null}
+   * @return one of the class constants of the {@link java.sql.Types java.sql.Types} class
+   *       or {@code null}
    */
-  default Integer getSqlType(Class<?> beanOrRecordType,
+  default Integer getSqlType(Class<?> beanType,
         String propertyName,
         Class<?> propertyType) {
     return null;
@@ -47,7 +47,7 @@ public interface BindInfo {
    * you don't need in order to determine the storage type. To save <i>all</i> enums in
    * your application as strings, simply return {@code true} straight away.
    *
-   * @param beanType the class containing the enum property
+   * @param beanType the class containing the enum property (may be a {@code record} type)
    * @param enumProperty the enum property for which to specify the storage type.
    * @return whether to bind enums as strings ({@code true}) or as ints ({@code false})
    */

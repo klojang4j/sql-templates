@@ -27,7 +27,7 @@ import java.util.Optional;
  * }</pre></blockquote>
  *
  * <h2>JavaBeans vs. Records</h2>
- * When converting a row to a JavaBean, a {@code ResultSetBeanifier} will always use the
+ * When converting a row into a JavaBean, a {@code ResultSetBeanifier} will always use the
  * setters on the JavaBean to populate it. There is no way to populate the bean via its
  * constructors. When converting to a record, a {@code ResultSetBeanifier} will obviously
  * always use one of its constructors to populate it. Make sure the record has a

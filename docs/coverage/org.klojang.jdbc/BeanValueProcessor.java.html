@@ -7,9 +7,9 @@ import java.util.List;
  * return a {@link SQLExpression} object from the
  * {@link #process(Object, String, Object, Quoter) process()} method, you can use the
  * provided {@link Quoter} to escape and quote string literals &lt;b&gt;within&lt;/b&gt; the
- * expression. Do not use this interface just to return a quoted version of the
- * &lt;b&gt;entire&lt;/b&gt; input value. &lt;i&gt;Klojang JDBC&lt;/i&gt; already takes care of that. That is:
- * the return value of
+ * expression. Do not use this interface just to return a quoted version of the input
+ * value (the {@code propertyValue} argument to the {@code process() method}). &lt;i&gt;Klojang
+ * JDBC&lt;/i&gt; already takes care of that. That is: the return value of
  * {@link #process(Object, String, Object, Quoter) BeanValueProcessor.process()} will
  * always be processed again by {@link Quoter#quoteValue(Object) Quoter.quoteValue()}. An
  * example of how to use a {@code BeanValueProcessor} is provided in the comments for
@@ -43,8 +43,7 @@ public interface BeanValueProcessor&lt;T&gt; {
    * @param propertyValue the value of the specified property within the specified
    *       bean
    * @param quoter a {@code Quoter} to be used if you intend to return an
-   *       {@link SQLExpression} containing string literals coming in from outside your
-   *       program, to prevent SQL injection
+   *       {@link SQLExpression} containing string literals
    * @return the converted value
    */
   Object process(T bean, String propertyName, Object propertyValue, Quoter quoter);
