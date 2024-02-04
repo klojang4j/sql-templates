@@ -6,6 +6,7 @@ import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.ps.MapBinder;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.templates.RenderSession;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -18,9 +19,9 @@ import static org.klojang.check.Tag.*;
 import static org.klojang.util.CollectionMethods.collectionToSet;
 
 /**
- * Abstract base class for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate}. An
- * {@code SQLStatement} allows you to bind the named parameters within the underlying SQL
- * (if present) and then execute it.
+ * Abstract base class for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate}. A
+ * {@code SQLStatement} allows you to bind the named parameters within the SQL and then
+ * execute the SQL.
  *
  * @param <T> the {@code SQLStatement} subtype returned by various methods in the
  *       fluent API.
@@ -79,7 +80,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
 
   /**
    * Binds the components of the specified record to the parameters within the SQL
-   * statement. Components that do not correspond to named parameters are ignored.
+   * statement. Record components that do not correspond to named parameters are ignored.
    *
    * @param record the record
    * @return this {@code SQLStatement} instance
@@ -123,8 +124,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     fresh = false;
     for (Object obj : bindings) {
       if (obj instanceof Map map) {
-        MapBinder binder = new MapBinder(
-              sqlInfo.parameters(),
+        MapBinder binder = new MapBinder(sqlInfo.parameters(),
               session.getSQL().getBindInfo());
         binder.bind(map, ps, bound);
       } else {

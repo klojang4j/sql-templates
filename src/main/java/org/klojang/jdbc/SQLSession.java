@@ -6,12 +6,12 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * <p>An {@code SQLSession} allows you to provide values for the <i>template
- * variables</i> within an SQL template. Once you have set all template variables, you can
- * obtain a {@link SQLStatement} object from the {@code SQLSession} and use it to set
- * (a.k.a. "bind") the <i>named parameters</i> within the SQL. The difference between
- * template variables and named parameters is explained in the comments for the
- * {@link SQL SQL interface}. Since the {@code SQLSession} implementation obtained via
+ * <p>An {@code SQLSession} allows you to provide values for <i>template variables</i>
+ * within an SQL template. Once you have set all template variables, you can obtain a
+ * {@link SQLStatement} from the {@code SQLSession} and use it to set (a.k.a. "bind") the
+ * <i>named parameters</i> within the SQL. The difference between template variables and
+ * named parameters is explained in the comments for the {@linkplain SQL SQL interface}.
+ * Since the {@code SQLSession} implementation obtained via
  * {@link SQL#simple(String) SQL.simple()}) does not allow for template variables, you
  * have no choice but to retrieve a {@code SQLStatement} from it straight away. If the SQL
  * does not contain any named parameters, you may also call {@link #execute()} on the
@@ -26,14 +26,13 @@ import java.util.List;
  * is optional in that case. Sessions obtained via
  * {@link SQL#template(String) SQL.template()} and
  * {@link SQL#skeleton(String) SQL.skeleton()} will tacitly close the moment you obtain a
- * {@link SQLStatement} from it &#8212; for example via {@link #prepareQuery()}. So,
- * unless an exception occurs, the following code pattern will not cause a resource leak:
+ * {@link SQLStatement} from them. So, unless an exception occurs, the following code
+ * pattern will not cause a resource leak:
  * {@code SQL.template("SELECT ...").session(con).prepareQuery()}. Even though closed
  * after obtaining a {@code SQLStatement} from it, you can still re-use the session
  * because the required resources will be created again if and when necessary. With SQL
- * skeletons there is no gain to be had from re-using sessions. With SQL templates,
- * however, you do save the (small) cost of extracting named parameters from the SQL
- * string.
+ * skeletons there is no gain to be had from re-using sessions. With SQL templates you do
+ * save the (small) cost of extracting named parameters from the SQL.
  */
 public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSession {
 
@@ -206,8 +205,8 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *    """);
    * }</pre></blockquote>
    *
-   * <p>And then simply call {@code session.setValues(persons)} (obviating the need to
-   * create and use a {@code BeanValueProcessor}).
+   * <p>And then simply call {@code session.setValues(persons)} (thus obviating the need
+   * to create and use a {@code BeanValueProcessor}).
    *
    * @param <T> the type of the beans or records to persist
    * @param beans the beans or records to persist (at least one required)
@@ -264,8 +263,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLSession setOrderBy(String sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
-    String orderBy = quoteIdentifier(sortColumn) + (isDescending ? " DESC" : " ASC");
-    return set("orderBy", orderBy);
+    throw notSupported("setOrderBy");
   }
 
   /**

@@ -6,6 +6,7 @@ import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.ps.MapBinder;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.templates.RenderSession;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -18,9 +19,9 @@ import static org.klojang.check.Tag.*;
 import static org.klojang.util.CollectionMethods.collectionToSet;
 
 /**
- * Abstract base class for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate}. An
- * {@code SQLStatement} allows you to bind the named parameters within the underlying SQL
- * (if present) and then execute it.
+ * Abstract base class for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate}. A
+ * {@code SQLStatement} allows you to bind the named parameters within the SQL and then
+ * execute the SQL.
  *
  * @param &lt;T&gt; the {@code SQLStatement} subtype returned by various methods in the
  *       fluent API.
@@ -38,15 +39,15 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
   final List&lt;Object&gt; bindings;
   final Set&lt;NamedParameter&gt; bound;
 
-<span class="fc" id="L41">  private boolean fresh = true;</span>
+<span class="fc" id="L42">  private boolean fresh = true;</span>
 
-<span class="fc" id="L43">  SQLStatement(PreparedStatement ps, AbstractSQLSession session, SQLInfo sqlInfo) {</span>
-<span class="fc" id="L44">    this.ps = ps;</span>
-<span class="fc" id="L45">    this.session = session;</span>
-<span class="fc" id="L46">    this.sqlInfo = sqlInfo;</span>
-<span class="fc" id="L47">    this.bindings = new ArrayList&lt;&gt;(5);</span>
-<span class="fc" id="L48">    this.bound = HashSet.newHashSet(sqlInfo.parameters().size());</span>
-<span class="fc" id="L49">  }</span>
+<span class="fc" id="L44">  SQLStatement(PreparedStatement ps, AbstractSQLSession session, SQLInfo sqlInfo) {</span>
+<span class="fc" id="L45">    this.ps = ps;</span>
+<span class="fc" id="L46">    this.session = session;</span>
+<span class="fc" id="L47">    this.sqlInfo = sqlInfo;</span>
+<span class="fc" id="L48">    this.bindings = new ArrayList&lt;&gt;(5);</span>
+<span class="fc" id="L49">    this.bound = HashSet.newHashSet(sqlInfo.parameters().size());</span>
+<span class="fc" id="L50">  }</span>
 
   /**
    * Binds the specified value to the specified parameter.
@@ -56,9 +57,9 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
    * @return this {@code SQLStatement} instance
    */
   public T bind(String param, Object value) {
-<span class="fc" id="L59">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
-<span class="fc" id="L60">    Check.notNull(param, PARAM).is(keyIn(), sqlInfo.parameterPositions(), NO_SUCH_PARAM);</span>
-<span class="fc" id="L61">    return bind(singletonMap(param, value));</span>
+<span class="fc" id="L60">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
+<span class="fc" id="L61">    Check.notNull(param, PARAM).is(keyIn(), sqlInfo.parameterPositions(), NO_SUCH_PARAM);</span>
+<span class="fc" id="L62">    return bind(singletonMap(param, value));</span>
   }
 
   /**
@@ -72,23 +73,23 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public T bind(Object bean) {
-<span class="fc" id="L75">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
-<span class="fc" id="L76">    Check.notNull(bean, BEAN).then(bindings::add);</span>
-<span class="fc" id="L77">    return (T) this;</span>
+<span class="fc" id="L76">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
+<span class="fc" id="L77">    Check.notNull(bean, BEAN).then(bindings::add);</span>
+<span class="fc" id="L78">    return (T) this;</span>
   }
 
   /**
    * Binds the components of the specified record to the parameters within the SQL
-   * statement. Components that do not correspond to named parameters are ignored.
+   * statement. Record components that do not correspond to named parameters are ignored.
    *
    * @param record the record
    * @return this {@code SQLStatement} instance
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public T bind(Record record) {
-<span class="fc" id="L89">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
-<span class="fc" id="L90">    Check.notNull(record, &quot;record&quot;).then(bindings::add);</span>
-<span class="fc" id="L91">    return (T) this;</span>
+<span class="fc" id="L90">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
+<span class="fc" id="L91">    Check.notNull(record, &quot;record&quot;).then(bindings::add);</span>
+<span class="fc" id="L92">    return (T) this;</span>
   }
 
   /**
@@ -101,30 +102,29 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public T bind(Map&lt;String, Object&gt; map) {
-<span class="fc" id="L104">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
-<span class="fc" id="L105">    Check.notNull(map, MAP).then(bindings::add);</span>
-<span class="fc" id="L106">    return (T) this;</span>
+<span class="fc" id="L105">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
+<span class="fc" id="L106">    Check.notNull(map, MAP).then(bindings::add);</span>
+<span class="fc" id="L107">    return (T) this;</span>
   }
 
   /**
    * Clears all bindings and allows the statement to be re-executed with new bindings.
    */
   public void reset() {
-<span class="fc" id="L113">    bindings.clear();</span>
-<span class="fc" id="L114">    bound.clear();</span>
-<span class="fc" id="L115">    fresh = true;</span>
-<span class="fc" id="L116">    initialize();</span>
-<span class="fc" id="L117">  }</span>
+<span class="fc" id="L114">    bindings.clear();</span>
+<span class="fc" id="L115">    bound.clear();</span>
+<span class="fc" id="L116">    fresh = true;</span>
+<span class="fc" id="L117">    initialize();</span>
+<span class="fc" id="L118">  }</span>
 
   abstract void initialize();
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   void applyBindings(PreparedStatement ps) throws Throwable {
-<span class="fc" id="L123">    fresh = false;</span>
-<span class="fc bfc" id="L124" title="All 2 branches covered.">    for (Object obj : bindings) {</span>
-<span class="fc bfc" id="L125" title="All 2 branches covered.">      if (obj instanceof Map map) {</span>
-<span class="fc" id="L126">        MapBinder binder = new MapBinder(</span>
-<span class="fc" id="L127">              sqlInfo.parameters(),</span>
+<span class="fc" id="L124">    fresh = false;</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">    for (Object obj : bindings) {</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">      if (obj instanceof Map map) {</span>
+<span class="fc" id="L127">        MapBinder binder = new MapBinder(sqlInfo.parameters(),</span>
 <span class="fc" id="L128">              session.getSQL().getBindInfo());</span>
 <span class="fc" id="L129">        binder.bind(map, ps, bound);</span>
 <span class="fc" id="L130">      } else {</span>

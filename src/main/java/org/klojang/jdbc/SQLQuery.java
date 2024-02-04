@@ -21,36 +21,40 @@ import java.util.function.Supplier;
 
 /**
  * <p>Facilitates the execution of SQL SELECT statements. {@code SQLQuery} instances are
- * obtained via {@link SQLSession#prepareQuery() SQLSession.prepareQuery()}. You should
- * always obtain them using a try-with-resources block. Here is a simple example of how to
- * use the {@code SQLQuery} class:
+ * obtained via {@link SQLSession#prepareQuery() SQLSession.prepareQuery()}. Here is an
+ * example of how to use the {@code SQLQuery} class:
  *
  * <blockquote><pre>{@code
  * SQL sql = SQL.simple("SELECT * FROM PERSON WHERE FIRST_NAME = :firstName");
  * try(Connection con = ...) {
- *   try(SQLQuery query = sql.session(con).prepareQuery(jdbcConnection)) {
- *     query.bind("firstName", "John");
- *     List<Person> persons = query.getBeanifier(Person.class).beanifyAll();
+ *   try(SQLSession session = sql.session(con)) {
+ *     try(SQLQuery query = session.prepareQuery()) {
+ *       query.bind("firstName", "John");
+ *       List<String> lastNames = query.firstColumn();
+ *     }
  *   }
  * }
  * }</pre></blockquote>
  *
- * <p>Here is an example of SQL that contains both named parameters and template
- * variables (see {@link SQL} for more information):
+ * <p>Here is an example of a query that that contains both named parameters and template
+ * variables (see the {@linkplain SQL SQL interface} for more information):
  *
  * <blockquote><pre>{@code
- * String queryString = """
+ * String query = """
  *  SELECT LAST_NAME
  *    FROM PERSON
  *   WHERE FIRST_NAME = :firstName
- *   ORDER BY :sortColumn
+ *   ORDER BY ~%sortColumn%
  *  """;
- * SQL sql = SQL.template(queryString);
- * SQLSession session = sql.session();
- * session.setSortColumn("BIRTH_DATE");
- * try(SQLQuery query = session.prepareQuery(jdbcConnection)) {
- *  query.bind("firstName", "John");
- *  List<String> lastNames = query.firstColumn();
+ * SQL sql = SQL.template(query);
+ * try(Connection con = ...) {
+ *   try(SQLSession session = sql.session(con)) {
+ *     session.setIdentifier("sortColumn", "SALARY");
+ *     try(SQLQuery query = session.prepareQuery()) {
+ *       query.bind("firstName", "John");
+ *       List<String> lastNames = query.firstColumn();
+ *     }
+ *   }
  * }
  * }</pre></blockquote>
  */

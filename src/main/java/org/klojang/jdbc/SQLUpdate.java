@@ -20,7 +20,7 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
   }
 
   /**
-   * Executes the UPDATE or DELETE statement and return the number of affected rows.
+   * Executes the UPDATE or DELETE statement and returns the number of affected rows.
    *
    * @return the number of affected rows
    */
