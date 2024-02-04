@@ -40,7 +40,7 @@ public final class JDBC {
 
   public static PreparedStatement getPreparedStatement(Connection con, SQLInfo sqlInfo) {
     try {
-<span class="fc" id="L43">      return con.prepareStatement(sqlInfo.jdbcSQL());</span>
+<span class="fc" id="L43">      return con.prepareStatement(sqlInfo.sql());</span>
 <span class="nc" id="L44">    } catch (SQLException e) {</span>
 <span class="nc" id="L45">      throw Utils.wrap(e, sqlInfo);</span>
     }
@@ -51,7 +51,7 @@ public final class JDBC {
         boolean retrieveKeys) {
 <span class="fc bfc" id="L52" title="All 2 branches covered.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
     try {
-<span class="fc" id="L54">      return con.prepareStatement(sqlInfo.jdbcSQL(), x);</span>
+<span class="fc" id="L54">      return con.prepareStatement(sqlInfo.sql(), x);</span>
 <span class="nc" id="L55">    } catch (SQLException e) {</span>
 <span class="nc" id="L56">      throw Utils.wrap(e, sqlInfo);</span>
     }

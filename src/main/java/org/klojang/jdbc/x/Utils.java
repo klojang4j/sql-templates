@@ -15,7 +15,7 @@ public final class Utils {
   }
 
   public static DatabaseException wrap(Throwable exc, SQLInfo sqlInfo) {
-    return wrap(exc, sqlInfo.jdbcSQL());
+    return wrap(exc, sqlInfo.sql());
   }
 
   public static DatabaseException wrap(Throwable exc, String sql) {

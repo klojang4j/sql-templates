@@ -281,7 +281,7 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 <span class="fc" id="L281">  }</span>
 
   private void executeSQL() throws Throwable {
-<span class="fc" id="L284">    LOG.trace(EXECUTING_SQL, sqlInfo.jdbcSQL());</span>
+<span class="fc" id="L284">    LOG.trace(EXECUTING_SQL, sqlInfo.sql());</span>
 <span class="fc" id="L285">    applyBindings(ps);</span>
 <span class="fc" id="L286">    ps.executeUpdate();</span>
 <span class="fc" id="L287">  }</span>

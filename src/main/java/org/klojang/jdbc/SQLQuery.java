@@ -90,7 +90,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public ResultSet getResultSet() {
     try {
-      executeQuery();
+      execute();
       return resultSet;
     } catch (Throwable t) {
       throw Utils.wrap(t);
@@ -111,7 +111,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> Result<T> lookup(Class<T> clazz) {
     try {
-      executeQuery();
+      execute();
       if (resultSet.next()) {
         int sqlType = resultSet.getMetaData().getColumnType(1);
         T val = ColumnReaderFactory
@@ -137,7 +137,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public Result<Integer> getInt() {
     try {
-      executeQuery();
+      execute();
       if (resultSet.next()) {
         return Result.of(resultSet.getInt(1));
       }
@@ -158,7 +158,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public Result<String> getString() {
     try {
-      executeQuery();
+      execute();
       if (resultSet.next()) {
         return Result.of(resultSet.getString(1));
       }
@@ -175,7 +175,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public boolean exists() {
     try {
-      executeQuery();
+      execute();
       return resultSet.next();
     } catch (Throwable t) {
       throw Utils.wrap(t);
@@ -212,7 +212,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> List<T> firstColumn(Class<T> clazz, int sizeEstimate) {
     try {
-      executeQuery();
+      execute();
       if (!resultSet.next()) {
         return Collections.emptyList();
       }
@@ -240,7 +240,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public ResultSetMappifier getMappifier() {
     try {
-      executeQuery();
+      execute();
       return session
             .getSQL()
             .getMappifierFactory(mapper)
@@ -261,7 +261,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> ResultSetBeanifier<T> getBeanifier(Class<T> beanClass) {
     try {
-      executeQuery();
+      execute();
       return session
             .getSQL()
             .getBeanifierFactory(beanClass, mapper)
@@ -287,7 +287,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
         Class<T> beanClass,
         Supplier<T> beanSupplier) {
     try {
-      executeQuery();
+      execute();
       return session
             .getSQL()
             .getBeanifierFactory(beanClass, beanSupplier, mapper)
@@ -310,9 +310,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
     }
   }
 
-  private void executeQuery() throws Throwable {
+  private void execute() throws Throwable {
     if (resultSet == null) {
-      LOG.trace(EXECUTING_SQL, sqlInfo.jdbcSQL());
+      LOG.trace(EXECUTING_SQL, sqlInfo.sql());
       applyBindings(ps);
       resultSet = ps.executeQuery();
     }

@@ -10,47 +10,49 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
+
 final class SimpleSQLSession extends AbstractSQLSession {
 
-<span class="fc" id="L15">  private static final Logger LOG = LoggerFactory.getLogger(SimpleSQLSession.class);</span>
+<span class="fc" id="L17">  private static final Logger LOG = LoggerFactory.getLogger(SimpleSQLSession.class);</span>
 
   private final SQLInfo sqlInfo;
 
   SimpleSQLSession(Connection con, AbstractSQL sql, SQLInfo sqlInfo) {
-<span class="fc" id="L20">    super(con, sql);</span>
-<span class="fc" id="L21">    this.sqlInfo = sqlInfo;</span>
-<span class="fc" id="L22">  }</span>
+<span class="fc" id="L22">    super(con, sql);</span>
+<span class="fc" id="L23">    this.sqlInfo = sqlInfo;</span>
+<span class="fc" id="L24">  }</span>
 
   @Override
   public SQLQuery prepareQuery() {
-<span class="fc" id="L26">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="fc" id="L27">    return new SQLQuery(ps, this, sqlInfo);</span>
+<span class="fc" id="L28">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="fc" id="L29">    return new SQLQuery(ps, this, sqlInfo);</span>
   }
 
   @Override
   public SQLInsert prepareInsert(boolean retrieveKeys) {
-<span class="fc" id="L32">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
-<span class="fc" id="L33">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
+<span class="fc" id="L34">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
+<span class="fc" id="L35">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
   }
 
   @Override
   public SQLUpdate prepareUpdate() {
-<span class="fc" id="L38">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="fc" id="L39">    return new SQLUpdate(ps, this, sqlInfo);</span>
+<span class="fc" id="L40">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="fc" id="L41">    return new SQLUpdate(ps, this, sqlInfo);</span>
   }
 
 
   @Override
   public void execute() {
     try {
-<span class="fc" id="L46">      Statement statement = con.createStatement();</span>
-<span class="fc" id="L47">      String str = sqlInfo.jdbcSQL();</span>
-<span class="fc" id="L48">      LOG.trace(&quot;Executing SQL: {}&quot;, str);</span>
-<span class="fc" id="L49">      statement.execute(str);</span>
-<span class="nc" id="L50">    } catch (SQLException e) {</span>
-<span class="nc" id="L51">      throw DatabaseException.wrap(e, sql);</span>
-<span class="fc" id="L52">    }</span>
-<span class="fc" id="L53">  }</span>
+<span class="fc" id="L48">      Statement statement = con.createStatement();</span>
+<span class="fc" id="L49">      String str = sqlInfo.sql();</span>
+<span class="fc" id="L50">      LOG.trace(EXECUTING_SQL, str);</span>
+<span class="fc" id="L51">      statement.execute(str);</span>
+<span class="nc" id="L52">    } catch (SQLException e) {</span>
+<span class="nc" id="L53">      throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L54">    }</span>
+<span class="fc" id="L55">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

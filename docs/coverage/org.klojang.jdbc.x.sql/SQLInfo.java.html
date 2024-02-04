@@ -5,24 +5,19 @@ import org.klojang.util.collection.IntList;
 import java.util.List;
 import java.util.Map;
 
-<span class="fc" id="L8">public record SQLInfo(String normalizedSQL,</span>
-      String jdbcSQL,
+<span class="fc" id="L8">public record SQLInfo(String sql,</span>
       List&lt;NamedParameter&gt; parameters,
       Map&lt;String, IntList&gt; parameterPositions) {
 
   public SQLInfo(ParamExtractor paramExtractor) {
-<span class="fc" id="L14">    this(paramExtractor.getNormalizedSQL(),</span>
-<span class="fc" id="L15">          paramExtractor.getNormalizedSQL(),</span>
-<span class="fc" id="L16">          paramExtractor.getParameters(),</span>
-<span class="fc" id="L17">          paramExtractor.getParameterPositions());</span>
-<span class="fc" id="L18">  }</span>
+<span class="fc" id="L13">    this(paramExtractor.getNormalizedSQL(),</span>
+<span class="fc" id="L14">          paramExtractor.getParameters(),</span>
+<span class="fc" id="L15">          paramExtractor.getParameterPositions());</span>
+<span class="fc" id="L16">  }</span>
 
-  public SQLInfo(String jdbcSQL, ParamExtractor paramExtractor) {
-<span class="fc" id="L21">    this(paramExtractor.getNormalizedSQL(),</span>
-          jdbcSQL,
-<span class="fc" id="L23">          paramExtractor.getParameters(),</span>
-<span class="fc" id="L24">          paramExtractor.getParameterPositions());</span>
-<span class="fc" id="L25">  }</span>
+  public SQLInfo(String sql, ParamExtractor paramExtractor) {
+<span class="fc" id="L19">    this(sql, paramExtractor.getParameters(), paramExtractor.getParameterPositions());</span>
+<span class="fc" id="L20">  }</span>
 
 
 }

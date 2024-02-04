@@ -27,7 +27,7 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
    * @return the number of affected rows
    */
   public int execute() {
-    LOG.trace(EXECUTING_SQL, sqlInfo.jdbcSQL());
+    LOG.trace(EXECUTING_SQL, sqlInfo.sql());
     try {
       applyBindings(ps);
       return ps.executeUpdate();

@@ -10,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
+
 final class SimpleSQLSession extends AbstractSQLSession {
 
   private static final Logger LOG = LoggerFactory.getLogger(SimpleSQLSession.class);
@@ -44,8 +46,8 @@ final class SimpleSQLSession extends AbstractSQLSession {
   public void execute() {
     try {
       Statement statement = con.createStatement();
-      String str = sqlInfo.jdbcSQL();
-      LOG.trace("Executing SQL: {}", str);
+      String str = sqlInfo.sql();
+      LOG.trace(EXECUTING_SQL, str);
       statement.execute(str);
     } catch (SQLException e) {
       throw DatabaseException.wrap(e, sql);

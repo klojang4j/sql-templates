@@ -281,7 +281,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
   }
 
   private void executeSQL() throws Throwable {
-    LOG.trace(EXECUTING_SQL, sqlInfo.jdbcSQL());
+    LOG.trace(EXECUTING_SQL, sqlInfo.sql());
     applyBindings(ps);
     ps.executeUpdate();
   }

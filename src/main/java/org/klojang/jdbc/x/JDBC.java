@@ -40,7 +40,7 @@ public final class JDBC {
 
   public static PreparedStatement getPreparedStatement(Connection con, SQLInfo sqlInfo) {
     try {
-      return con.prepareStatement(sqlInfo.jdbcSQL());
+      return con.prepareStatement(sqlInfo.sql());
     } catch (SQLException e) {
       throw Utils.wrap(e, sqlInfo);
     }
@@ -51,7 +51,7 @@ public final class JDBC {
         boolean retrieveKeys) {
     int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
     try {
-      return con.prepareStatement(sqlInfo.jdbcSQL(), x);
+      return con.prepareStatement(sqlInfo.sql(), x);
     } catch (SQLException e) {
       throw Utils.wrap(e, sqlInfo);
     }
