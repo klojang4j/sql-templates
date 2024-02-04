@@ -18,27 +18,14 @@ import java.util.List;
  * {@code SQLSession} straight away, without going through the creation of an
  * {@code SQLStatement}.
  *
- * &lt;h2&gt;AutoCloseable&lt;/h2&gt;
- * The {@code SQLSession} interface extends {@link AutoCloseable}, so in principle you
- * should set up a try-with-resources block for {@code SQLSession} instances. However, the
- * {@code SQLSession} implementation obtained via {@link SQL#simple(String) SQL.simple()}
- * does not manage any resources that need to be freed up, so a try-with-resources block
- * is optional in that case. Sessions obtained via
- * {@link SQL#template(String) SQL.template()} and
- * {@link SQL#skeleton(String) SQL.skeleton()} will tacitly close the moment you obtain a
- * {@link SQLStatement} from them. So, unless an exception occurs, the following code
- * pattern will not cause a resource leak:
- * {@code SQL.template(&quot;SELECT ...&quot;).session(con).prepareQuery()}. Even though closed
- * after obtaining a {@code SQLStatement} from it, you can still re-use the session
- * because the required resources will be created again if and when necessary. With SQL
- * skeletons there is no gain to be had from re-using sessions. With SQL templates you do
- * save the (small) cost of extracting named parameters from the SQL.
+ * &lt;p&gt;{@code SQLSession} instances are meant to be throw-away objects that should, in
+ * principle, not survive the method in which they are created.
  */
-public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSession {
+public sealed interface SQLSession permits AbstractSQLSession {
 
   /**
    * Sets the specified template variable to the specified value. Only use this method if
-   * you know and trust the source of the provided value. The value will not be escaped or
+   * you know and trust the origin of the provided value. The value will not be escaped or
    * quoted. Preferably use {@link #setValue(String, Object) setValue()} or
    * {@link #setIdentifier(String, String) setIdentifier()} to prevent SQL injection. If
    * the value is an array or collection, it will be &quot;imploded&quot; to a string, using
@@ -60,12 +47,12 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLSession set(String varName, Object value)
         throws UnsupportedOperationException {
-<span class="nc" id="L63">    throw notSupported(&quot;set&quot;);</span>
+<span class="nc" id="L50">    throw notSupported(&quot;set&quot;);</span>
   }
 
   /**
    * Sets the specified template variable to the escaped and quoted version of the
-   * specified value. Use this method if you do not know or trust the source of the value
+   * specified value. Use this method if you do not know or trust the origin of the value
    * to prevent SQL injection. If the value is an array or collection, it will be
    * &quot;imploded&quot; to a string, using {@code &quot;,&quot; } (comma) to separate the elements in the
    * array or collection, and using {@link #quoteValue(Object) quoteValue()} to escape and
@@ -81,7 +68,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLSession setValue(String varName, Object value)
         throws UnsupportedOperationException {
-<span class="nc" id="L84">    throw notSupported(&quot;setValue&quot;);</span>
+<span class="nc" id="L71">    throw notSupported(&quot;setValue&quot;);</span>
   }
 
   /**
@@ -97,7 +84,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLSession setIdentifier(String varName, String identifier)
         throws UnsupportedOperationException {
-<span class="nc" id="L100">    throw notSupported(&quot;setIdentifier&quot;);</span>
+<span class="nc" id="L87">    throw notSupported(&quot;setIdentifier&quot;);</span>
   }
 
   /**
@@ -116,7 +103,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   default &lt;T&gt; SQLSession setValues(T... beans) throws UnsupportedOperationException {
-<span class="nc" id="L119">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L106">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -126,6 +113,37 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * {@link #setValues(List, BeanValueProcessor) setValues(beans,
    * BeanValueProcessor.identity())}.
    *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * record Person(Integer id, String firstName, String lastName, int age) {}
+   *
+   * // ...
+   *
+   * List&lt;Person&gt; persons = List.of(
+   *    new Person(null, &quot;John&quot;, &quot;Smith&quot;, 34),
+   *    new Person(null, &quot;Francis&quot;, &quot;O'Donell&quot;, 27),
+   *    new Person(null, &quot;Mary&quot;, &quot;Bear&quot;, 52));
+   *
+   * SQL sql = SQL.skeleton(&quot;&quot;&quot;
+   *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+   *    ~%%begin:record%
+   *    (~%firstName%,~%lastName%,~%age%)
+   *    ~%%end:record%
+   *    &quot;&quot;&quot;);
+   *
+   * try(Connection con = ...) {
+   *   sql.session(con).setValues(persons).execute();
+   * }
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   *
+   * &lt;p&gt;The above code snippet will execute the following SQL:
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+   * ('John', 'Smith', 34),
+   * ('Francis', 'O''Donell', 27),
+   * ('Mary', 'Bear', 52)
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
    * @param &lt;T&gt; the type of the beans or records to persist
    * @param beans the beans or records to persist (at least one required).
    * @return this {@code SQLSession} instance
@@ -134,7 +152,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *       {@link SQL#template(String) SQL.template()} method
    */
   default &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans) throws UnsupportedOperationException {
-<span class="nc" id="L137">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L155">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -169,9 +187,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * };
    *
    * try(Connection con = ...) {
-   *   try(SQLSession session = sql.session(con)) {
-   *     session.setValues(persons, processor).execute();
-   *   }
+   *   sql.session(con).setValues(persons, processor).execute();
    *   String query = &quot;SELECT FIRST_NAME FROM PERSON&quot;;
    *   List&lt;String&gt; firstNames = SQL.simpleQuery(con, query).firstColumn();
    *   assertEquals(List.of(&quot;Joh&quot;, &quot;Fra&quot;, &quot;Mar&quot;), firstNames);
@@ -221,7 +237,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans, BeanValueProcessor&lt;T&gt; processor)
         throws UnsupportedOperationException {
-<span class="nc" id="L224">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L240">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -237,7 +253,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setOrderBy(String sortColumn) throws UnsupportedOperationException {
-<span class="nc" id="L240">    throw notSupported(&quot;setOrderBy&quot;);</span>
+<span class="nc" id="L256">    throw notSupported(&quot;setOrderBy&quot;);</span>
   }
 
   /**
@@ -263,7 +279,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLSession setOrderBy(String sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
-<span class="nc" id="L266">    throw notSupported(&quot;setOrderBy&quot;);</span>
+<span class="nc" id="L282">    throw notSupported(&quot;setOrderBy&quot;);</span>
   }
 
   /**
@@ -278,7 +294,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *     &lt;li&gt;Otherwise the value is escaped and quoted according to the quoting rules of
    *         the target database.
    * &lt;/ul&gt;
-   * &lt;p&gt;Use this method if you do not know or trust the source of the value to prevent
+   * &lt;p&gt;Use this method if you do not know or trust the origin of the value to prevent
    * SQL injection.
    *
    * @param value the value to be escaped and quoted
@@ -288,7 +304,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @see java.sql.Statement#enquoteLiteral(String)
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
-<span class="nc" id="L291">    throw notSupported(&quot;quoteValue&quot;);</span>
+<span class="nc" id="L307">    throw notSupported(&quot;quoteValue&quot;);</span>
   }
 
   /**
@@ -304,7 +320,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    */
   default SQLExpression sqlFunction(String name, Object... args)
         throws UnsupportedOperationException {
-<span class="nc" id="L307">    throw notSupported(&quot;sqlFunction&quot;);</span>
+<span class="nc" id="L323">    throw notSupported(&quot;sqlFunction&quot;);</span>
   }
 
   /**
@@ -319,7 +335,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @see java.sql.Statement#enquoteIdentifier(String, boolean)
    */
   default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
-<span class="nc" id="L322">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
+<span class="nc" id="L338">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
   }
 
   /**
@@ -349,7 +365,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * @return a {@code SQLInsert} instance
    */
   default SQLInsert prepareInsert() {
-<span class="fc" id="L352">    return prepareInsert(true);</span>
+<span class="fc" id="L368">    return prepareInsert(true);</span>
   }
 
   /**
@@ -371,12 +387,12 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
   SQLUpdate prepareUpdate();
 
   private static UnsupportedOperationException notSupported(String method) {
-<span class="nc" id="L374">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
-<span class="nc" id="L375">    return new UnsupportedOperationException(String.format(fmt, method));</span>
+<span class="nc" id="L390">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
+<span class="nc" id="L391">    return new UnsupportedOperationException(String.format(fmt, method));</span>
   }
 
   private static String sqlSkeletonsOnly() {
-<span class="nc" id="L379">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
+<span class="nc" id="L395">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
   }
 
 }

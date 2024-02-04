@@ -52,8 +52,4 @@ final class SimpleSQLSession extends AbstractSQLSession {
     }
   }
 
-  @Override
-  public void close() { }
-
-
 }

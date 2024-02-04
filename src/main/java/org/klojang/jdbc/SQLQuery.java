@@ -27,11 +27,9 @@ import java.util.function.Supplier;
  * <blockquote><pre>{@code
  * SQL sql = SQL.simple("SELECT * FROM PERSON WHERE FIRST_NAME = :firstName");
  * try(Connection con = ...) {
- *   try(SQLSession session = sql.session(con)) {
- *     try(SQLQuery query = session.prepareQuery()) {
- *       query.bind("firstName", "John");
- *       List<String> lastNames = query.firstColumn();
- *     }
+ *   try(SQLQuery query = sql.session(con).prepareQuery()) {
+ *     query.bind("firstName", "John");
+ *     List<String> lastNames = query.firstColumn();
  *   }
  * }
  * }</pre></blockquote>
@@ -48,12 +46,11 @@ import java.util.function.Supplier;
  *  """;
  * SQL sql = SQL.template(query);
  * try(Connection con = ...) {
- *   try(SQLSession session = sql.session(con)) {
- *     session.setIdentifier("sortColumn", "SALARY");
- *     try(SQLQuery query = session.prepareQuery()) {
- *       query.bind("firstName", "John");
- *       List<String> lastNames = query.firstColumn();
- *     }
+ *   SQLSession session = sql.session(con);
+ *   session.setIdentifier("sortColumn", "SALARY");
+ *   try(SQLQuery query = session.prepareQuery()) {
+ *     query.bind("firstName", "John");
+ *     List<String> lastNames = query.firstColumn();
  *   }
  * }
  * }</pre></blockquote>

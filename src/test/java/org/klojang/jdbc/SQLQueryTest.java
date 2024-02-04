@@ -148,13 +148,13 @@ public class SQLQueryTest {
           SELECT FALSE FROM PERSON
            LIMIT :limit
           """;
-    try (SQLSession session = SQL.simple(sql).session(MY_CON.get())) {
-      try (SQLQuery query = session.prepareQuery()) {
-        boolean b = query.bind("limit", 1).lookup(boolean.class).get();
-        assertFalse(b);
-      }
+    SQLSession session = SQL.simple(sql).session(MY_CON.get());
+    try (SQLQuery query = session.prepareQuery()) {
+      boolean b = query.bind("limit", 1).lookup(boolean.class).get();
+      assertFalse(b);
     }
   }
+
 
   @Test
   public void firstColumn00() throws Exception {
@@ -162,13 +162,13 @@ public class SQLQueryTest {
           SELECT ~%literal%, ~%limit% FROM PERSON
            LIMIT ~%limit%
           """;
-    try (SQLSession session = SQL.skeleton(sql).session(MY_CON.get())) {
-      session.setValue("literal", "O'Donell").setValue("limit", 2);
-      try (SQLQuery query = session.prepareQuery()) {
-        List<String> l = query.firstColumn();
-        assertEquals(List.of("O'Donell", "O'Donell"), l);
-      }
+    SQLSession session = SQL.skeleton(sql).session(MY_CON.get());
+    session.setValue("literal", "O'Donell").setValue("limit", 2);
+    try (SQLQuery query = session.prepareQuery()) {
+      List<String> l = query.firstColumn();
+      assertEquals(List.of("O'Donell", "O'Donell"), l);
     }
+
   }
 
   @Test
@@ -178,15 +178,15 @@ public class SQLQueryTest {
            ORDER BY ~%orderBy%
            LIMIT ~%limit%
           """;
-    try (SQLSession session = SQL.skeleton(sql).session(MY_CON.get())) {
-      session.setIdentifier("column", "LAST_NAME")
-            .setOrderBy("LAST_NAME")
-            .set("limit", 2);
-      try (SQLQuery query = session.prepareQuery()) {
-        List<String> l = query.firstColumn();
-        assertEquals(List.of("Bear", "Bester"), l);
-      }
+    SQLSession session = SQL.skeleton(sql).session(MY_CON.get());
+    session.setIdentifier("column", "LAST_NAME")
+          .setOrderBy("LAST_NAME")
+          .set("limit", 2);
+    try (SQLQuery query = session.prepareQuery()) {
+      List<String> l = query.firstColumn();
+      assertEquals(List.of("Bear", "Bester"), l);
     }
+
   }
 
 }

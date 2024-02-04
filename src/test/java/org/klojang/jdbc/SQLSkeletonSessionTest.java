@@ -77,9 +77,9 @@ public class SQLSkeletonSessionTest {
           ~%%end:record%
           """);
     try (Connection conn = MY_CON.get()) {
-      try (SQLSession session = sql.session(conn)) {
-        session.setValues(persons).execute();
-      }
+      SQLSession session = sql.session(conn);
+      session.setValues(persons).execute();
+
       int i = SQL.simpleQuery(MY_CON.get(), "SELECT COUNT(*) FROM PERSON")
             .getInt()
             .get();
@@ -101,11 +101,11 @@ public class SQLSkeletonSessionTest {
           ~%%end:foo_bar%
           """);
     try (Connection conn = MY_CON.get()) {
-      try (SQLSession session = sql.session(conn)) {
-        // missing nested template "records"
-        assertThrows(DatabaseException.class, () -> session.setValues(persons));
-      }
+      SQLSession session = sql.session(conn);
+      // missing nested template "records"
+      assertThrows(DatabaseException.class, () -> session.setValues(persons));
     }
+
   }
 
 
@@ -128,9 +128,8 @@ public class SQLSkeletonSessionTest {
       return val;
     };
     try (Connection conn = MY_CON.get()) {
-      try (SQLSession session = sql.session(conn)) {
-        session.setValues(persons, processor).execute();
-      }
+      SQLSession session = sql.session(conn);
+      session.setValues(persons, processor).execute();
       String query = "SELECT FIRST_NAME FROM PERSON";
       List<String> firstNames = SQL.simpleQuery(MY_CON.get(), query).firstColumn();
       assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);

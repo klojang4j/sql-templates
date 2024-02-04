@@ -7,9 +7,9 @@ package org.klojang.jdbc;
  * {@code CONCAT(FIRST_NAME, ' ' , LAST_NAME)}, or an operation like
  * {@code (SALARY * 0.05)}. Instances of {@code SQLExpression} are retrieved through
  * {@link SQL#expression(String) SQL.expression()}. SQL expressions will be injected as-is
- * into SQL statements. <i>Klojang JDBC</i> will not attempt to "understand" them. Use a
- * {@link Quoter} or {@link SQLSession#quoteValue(Object) SQLSession.quoteValue()} to
- * escape and quote the individual components of the expression if necessary.
+ * into SQL statements. Use a {@link Quoter} or
+ * {@link SQLSession#quoteValue(Object) SQLSession.quoteValue()} to escape and quote the
+ * individual components of the expression if necessary.
  */
 public final class SQLExpression {
 

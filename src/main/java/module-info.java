@@ -6,23 +6,22 @@
  * main features:
  *
  * <ol>
- *   <li>Convert {@link java.sql.ResultSet ResultSet} rows into JavaBeans or
- *   {@code Map<String, Object>} pseudo-objects. There is not pretense at all of providing
- *   full-fledged ORM functionality. The rows are converted to "flat" beans or maps. The
- *   type of the JavaBean may have additional structure, but only top-level properties are
- *   populated.
+ *   <li>Convert {@link java.sql.ResultSet ResultSet} rows into JavaBeans, records, or
+ *       {@code Map<String, Object>} pseudo-objects. There is not pretense here of
+ *       providing full-fledged ORM functionality. The rows are converted to "flat" beans,
+ *       records, or maps. The type of the JavaBean may have additional structure, but
+ *       only top-level properties are populated.
  *   <li>Enable parametrization of parts of SQL that cannot be parametrized using
- *   {@linkplain java.sql.PreparedStatement prepared statements} alone.
- *   <i>Klojang JDBC</i> allows you to do this without exposing yourself to the
- *   dangers of SQL Injection.
- *   <li>Special attention has been paid to persisting Java objects in potentially very
- *   large batches.
+ *       {@linkplain java.sql.PreparedStatement prepared statements} alone.
+ *       <i>Klojang JDBC</i> allows you to do this without exposing yourself to the
+ *       dangers of SQL Injection.
+ *   <li>Special attention has been paid to persisting Java objects in large batches.
  * </ol>
  *
- * <p>Here is an example that goes full-circle from INSERT to SELECT:
+ * <p>Here is an example that goes full-circle from CREATE TABLE, via INSERT to SELECT:
  *
  * <blockquote><pre>{@code
- * Connection con = ... // get/create JDBC Connection
+ * Connection con = ... // get or create JDBC Connection
  *
  * String sql = """
  *      CREATE TABLE PERSON(
@@ -46,7 +45,7 @@
  *    new Person("Joe", "Peterson", LocalDate.of(1998, 9, 23))
  * );
  *
- * SQLBatchInsert bi = SQL.prepareBatchInsert()
+ * SQLBatchInsert bi = SQL.configureBatchInsert()
  *    .of(Person.class)
  *    .into("PERSON")
  *    .excluding("personId")
@@ -57,20 +56,20 @@
  * sql = """
  *    SELECT * FROM PERSON
  *     WHERE LAST_NAME = :lastName
- *     ORDER BY ~%column% ~%direction%
+ *     ORDER BY ~%orderBy%
  *    """;
  *
- * try(SQLSession session = SQL.template(sql).session(con)) {
- *   session.set("column", "LAST_NAME").set("direction", "DESC");
- *   try (SQLQuery query = session.prepareQuery()) {
- *    List<Person> persons = query
- *        .withNameMapper(new SnakeCaseToCamelCase())
- *        .bind("lastName", "Smith")
- *        .getBeanifier(Person.class)
- *        .beanifyAll();
- *    for (Person person : persons) {
- *      System.out.println(person);
- *    }
+ * SQLSession session = SQL.template(sql).session(con);
+ * session.setOrderBy("SALARY");
+ * try (SQLQuery query = session.prepareQuery()) {
+ *   List<Person> persons = query
+ *       .withNameMapper(new SnakeCaseToCamelCase())
+ *       .bind("lastName", "Smith")
+ *       .getBeanifier(Person.class)
+ *       .beanifyAll();
+ *   for (Person person : persons) {
+ *     System.out.println(person);
+ *   }
  *  }
  * }
  *

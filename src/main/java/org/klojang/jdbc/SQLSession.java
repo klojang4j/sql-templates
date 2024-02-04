@@ -18,27 +18,14 @@ import java.util.List;
  * {@code SQLSession} straight away, without going through the creation of an
  * {@code SQLStatement}.
  *
- * <h2>AutoCloseable</h2>
- * The {@code SQLSession} interface extends {@link AutoCloseable}, so in principle you
- * should set up a try-with-resources block for {@code SQLSession} instances. However, the
- * {@code SQLSession} implementation obtained via {@link SQL#simple(String) SQL.simple()}
- * does not manage any resources that need to be freed up, so a try-with-resources block
- * is optional in that case. Sessions obtained via
- * {@link SQL#template(String) SQL.template()} and
- * {@link SQL#skeleton(String) SQL.skeleton()} will tacitly close the moment you obtain a
- * {@link SQLStatement} from them. So, unless an exception occurs, the following code
- * pattern will not cause a resource leak:
- * {@code SQL.template("SELECT ...").session(con).prepareQuery()}. Even though closed
- * after obtaining a {@code SQLStatement} from it, you can still re-use the session
- * because the required resources will be created again if and when necessary. With SQL
- * skeletons there is no gain to be had from re-using sessions. With SQL templates you do
- * save the (small) cost of extracting named parameters from the SQL.
+ * <p>{@code SQLSession} instances are meant to be throw-away objects that should, in
+ * principle, not survive the method in which they are created.
  */
-public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSession {
+public sealed interface SQLSession permits AbstractSQLSession {
 
   /**
    * Sets the specified template variable to the specified value. Only use this method if
-   * you know and trust the source of the provided value. The value will not be escaped or
+   * you know and trust the origin of the provided value. The value will not be escaped or
    * quoted. Preferably use {@link #setValue(String, Object) setValue()} or
    * {@link #setIdentifier(String, String) setIdentifier()} to prevent SQL injection. If
    * the value is an array or collection, it will be "imploded" to a string, using
@@ -65,7 +52,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
 
   /**
    * Sets the specified template variable to the escaped and quoted version of the
-   * specified value. Use this method if you do not know or trust the source of the value
+   * specified value. Use this method if you do not know or trust the origin of the value
    * to prevent SQL injection. If the value is an array or collection, it will be
    * "imploded" to a string, using {@code "," } (comma) to separate the elements in the
    * array or collection, and using {@link #quoteValue(Object) quoteValue()} to escape and
@@ -126,6 +113,37 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * {@link #setValues(List, BeanValueProcessor) setValues(beans,
    * BeanValueProcessor.identity())}.
    *
+   * <blockquote><pre>{@code
+   * record Person(Integer id, String firstName, String lastName, int age) {}
+   *
+   * // ...
+   *
+   * List<Person> persons = List.of(
+   *    new Person(null, "John", "Smith", 34),
+   *    new Person(null, "Francis", "O'Donell", 27),
+   *    new Person(null, "Mary", "Bear", 52));
+   *
+   * SQL sql = SQL.skeleton("""
+   *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+   *    ~%%begin:record%
+   *    (~%firstName%,~%lastName%,~%age%)
+   *    ~%%end:record%
+   *    """);
+   *
+   * try(Connection con = ...) {
+   *   sql.session(con).setValues(persons).execute();
+   * }
+   * }</pre></blockquote>
+   *
+   *
+   * <p>The above code snippet will execute the following SQL:
+   * <blockquote><pre>{@code
+   * INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+   * ('John', 'Smith', 34),
+   * ('Francis', 'O''Donell', 27),
+   * ('Mary', 'Bear', 52)
+   * }</pre></blockquote>
+   *
    * @param <T> the type of the beans or records to persist
    * @param beans the beans or records to persist (at least one required).
    * @return this {@code SQLSession} instance
@@ -169,9 +187,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    * };
    *
    * try(Connection con = ...) {
-   *   try(SQLSession session = sql.session(con)) {
-   *     session.setValues(persons, processor).execute();
-   *   }
+   *   sql.session(con).setValues(persons, processor).execute();
    *   String query = "SELECT FIRST_NAME FROM PERSON";
    *   List<String> firstNames = SQL.simpleQuery(con, query).firstColumn();
    *   assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);
@@ -278,7 +294,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *     <li>Otherwise the value is escaped and quoted according to the quoting rules of
    *         the target database.
    * </ul>
-   * <p>Use this method if you do not know or trust the source of the value to prevent
+   * <p>Use this method if you do not know or trust the origin of the value to prevent
    * SQL injection.
    *
    * @param value the value to be escaped and quoted

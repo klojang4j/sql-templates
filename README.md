@@ -65,7 +65,7 @@ List<Person> persons = List.of(
      new Person("Peter", "Peterson", LocalDate.of(1963, 5, 3)),
      new Person("Joe", "Peterson", LocalDate.of(1998, 9, 23)));
  
-SQLBatchInsert sbi = SQL.prepareBatchInsert()
+SQLBatchInsert sbi = SQL.configureBatchInsert()
      .of(Person.class)
      .into("PERSON")
      .excluding("personId")

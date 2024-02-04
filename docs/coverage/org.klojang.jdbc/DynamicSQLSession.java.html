@@ -128,37 +128,39 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
 <span class="fc" id="L128">      statement.execute(str);</span>
 <span class="nc" id="L129">    } catch (SQLException e) {</span>
 <span class="nc" id="L130">      throw DatabaseException.wrap(e, sql);</span>
-<span class="fc" id="L131">    }</span>
-<span class="fc" id="L132">  }</span>
+    } finally {
+<span class="fc" id="L132">      close();</span>
+    }
+<span class="fc" id="L134">  }</span>
 
 
   Supplier&lt;IllegalStateException&gt; unfinishedSession() {
-<span class="fc" id="L136">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
-<span class="fc" id="L137">    return illegalState(&quot;one or more template variables have not been set yet: &quot; + unset);</span>
+<span class="fc" id="L138">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
+<span class="fc" id="L139">    return illegalState(&quot;one or more template variables have not been set yet: &quot; + unset);</span>
   }
 
   Statement statement() {
-<span class="fc bfc" id="L141" title="All 2 branches covered.">    if (stmt == null) {</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">    if (stmt == null) {</span>
       try {
-<span class="fc" id="L143">        stmt = con.createStatement();</span>
-<span class="nc" id="L144">      } catch (SQLException e) {</span>
-<span class="nc" id="L145">        throw DatabaseException.wrap(e, sql);</span>
-<span class="fc" id="L146">      }</span>
+<span class="fc" id="L145">        stmt = con.createStatement();</span>
+<span class="nc" id="L146">      } catch (SQLException e) {</span>
+<span class="nc" id="L147">        throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L148">      }</span>
     }
-<span class="fc" id="L148">    return stmt;</span>
+<span class="fc" id="L150">    return stmt;</span>
   }
 
-  public void close() {
-<span class="fc bfc" id="L152" title="All 2 branches covered.">    if (stmt != null) {</span>
+  void close() {
+<span class="fc bfc" id="L154" title="All 2 branches covered.">    if (stmt != null) {</span>
       try {
-<span class="fc" id="L154">        stmt.close();</span>
-<span class="nc" id="L155">      } catch (SQLException e) {</span>
-<span class="nc" id="L156">        throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L156">        stmt.close();</span>
+<span class="nc" id="L157">      } catch (SQLException e) {</span>
+<span class="nc" id="L158">        throw DatabaseException.wrap(e, sql);</span>
       } finally {
-<span class="fc" id="L158">        stmt = null;</span>
+<span class="fc" id="L160">        stmt = null;</span>
       }
     }
-<span class="fc" id="L161">  }</span>
+<span class="fc" id="L163">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

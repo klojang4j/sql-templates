@@ -128,6 +128,8 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
       statement.execute(str);
     } catch (SQLException e) {
       throw DatabaseException.wrap(e, sql);
+    } finally {
+      close();
     }
   }
 
@@ -148,7 +150,7 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     return stmt;
   }
 
-  public void close() {
+  void close() {
     if (stmt != null) {
       try {
         stmt.close();
