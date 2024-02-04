@@ -8,16 +8,18 @@ import org.slf4j.LoggerFactory;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
+
 /**
  * Facilitates the execution of UPDATE, DELETE and DDL statements.
  */
 public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
 
-<span class="fc" id="L16">  private static final Logger LOG = LoggerFactory.getLogger(SQLUpdate.class);</span>
+<span class="fc" id="L18">  private static final Logger LOG = LoggerFactory.getLogger(SQLUpdate.class);</span>
 
   SQLUpdate(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
-<span class="fc" id="L19">    super(ps, sql, sqlInfo);</span>
-<span class="fc" id="L20">  }</span>
+<span class="fc" id="L21">    super(ps, sql, sqlInfo);</span>
+<span class="fc" id="L22">  }</span>
 
   /**
    * Executes the UPDATE or DELETE statement and returns the number of affected rows.
@@ -25,23 +27,23 @@ public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
    * @return the number of affected rows
    */
   public int execute() {
-<span class="fc" id="L28">    LOG.trace(&quot;Executing SQL: {}&quot;, sqlInfo.jdbcSQL());</span>
+<span class="fc" id="L30">    LOG.trace(EXECUTING_SQL, sqlInfo.jdbcSQL());</span>
     try {
-<span class="fc" id="L30">      applyBindings(ps);</span>
-<span class="fc" id="L31">      return ps.executeUpdate();</span>
-<span class="nc" id="L32">    } catch (Throwable t) {</span>
-<span class="nc" id="L33">      throw Utils.wrap(t);</span>
+<span class="fc" id="L32">      applyBindings(ps);</span>
+<span class="fc" id="L33">      return ps.executeUpdate();</span>
+<span class="nc" id="L34">    } catch (Throwable t) {</span>
+<span class="nc" id="L35">      throw Utils.wrap(t);</span>
     }
   }
 
   @Override
   void initialize() {
     try {
-<span class="nc" id="L40">      ps.clearParameters();</span>
-<span class="nc" id="L41">    } catch (SQLException e) {</span>
-<span class="nc" id="L42">      throw Utils.wrap(e, sqlInfo);</span>
-<span class="nc" id="L43">    }</span>
-<span class="nc" id="L44">  }</span>
+<span class="nc" id="L42">      ps.clearParameters();</span>
+<span class="nc" id="L43">    } catch (SQLException e) {</span>
+<span class="nc" id="L44">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="nc" id="L45">    }</span>
+<span class="nc" id="L46">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

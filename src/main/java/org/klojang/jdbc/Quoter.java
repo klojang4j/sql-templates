@@ -10,6 +10,8 @@ import java.sql.Statement;
 import java.util.List;
 
 import static org.klojang.check.Tag.VARARGS;
+import static org.klojang.jdbc.x.Strings.FUNCTION_NAME;
+import static org.klojang.jdbc.x.Strings.IDENTIFIER;
 import static org.klojang.util.StringMethods.append;
 
 /**
@@ -67,6 +69,25 @@ public final class Quoter {
   }
 
   /**
+   * If necessary, quotes the specified identifier (e&#46;g&#46; a column name or table
+   * name) according to the quoting rules of the target database. Use this method if the
+   * identifier is passed in from outside your program to prevent SQL injection.
+   *
+   * @param identifier the identifier to quote
+   * @return the quoted identifier
+   * @see java.sql.Statement#enquoteIdentifier(String, boolean)
+   */
+  public String quoteIdentifier(String identifier) {
+    Check.notNull(identifier, IDENTIFIER);
+    try {
+      return stmt.enquoteIdentifier(identifier, false);
+    } catch (SQLException e) {
+      throw Utils.wrap(e);
+    }
+  }
+
+
+  /**
    * Generates a SQL function call in which each of the function arguments is escaped and
    * quoted using the {@link #quoteValue(Object) quoteValue()} method.
    *
@@ -76,7 +97,7 @@ public final class Quoter {
    * @return an {@code SQLExpression} representing a SQL function call
    */
   public SQLExpression sqlFunction(String name, Object... args) {
-    Check.notNull(name, "SQL function name");
+    Check.notNull(name, FUNCTION_NAME);
     Check.notNull(args, VARARGS);
     String str = ArrayMethods.implode(args, this::quoteValue, ",");
     String expr = append(new StringBuilder(), name, '(', str, ')').toString();

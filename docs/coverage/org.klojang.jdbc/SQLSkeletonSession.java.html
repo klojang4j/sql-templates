@@ -3,8 +3,8 @@
 import org.klojang.check.Check;
 import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.jdbc.x.sql.ParamExtractor;
+import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.RenderSession;
 
 import java.sql.Connection;
@@ -13,91 +13,92 @@ import java.util.*;
 
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.Tag.VARARGS;
+import static org.klojang.jdbc.x.Strings.*;
 
 final class SQLSkeletonSession extends DynamicSQLSession {
 
   SQLSkeletonSession(Connection con, AbstractSQL sql, RenderSession session) {
-<span class="fc" id="L20">    super(con, sql, session);</span>
-<span class="fc" id="L21">  }</span>
+<span class="fc" id="L21">    super(con, sql, session);</span>
+<span class="fc" id="L22">  }</span>
 
   @Override
   @SafeVarargs
   @SuppressWarnings({&quot;unchecked&quot;})
   public final &lt;T&gt; SQLSession setValues(T... beans) {
-<span class="nc" id="L27">    Check.notNull(beans, VARARGS).is(deepNotNull()).isNot(empty());</span>
-<span class="nc" id="L28">    Class&lt;T&gt; clazz = (Class&lt;T&gt;) beans.getClass().getComponentType();</span>
-<span class="nc" id="L29">    BeanReader&lt;T&gt; reader = new BeanReader&lt;&gt;(clazz);</span>
-<span class="nc" id="L30">    return setValues(Arrays.asList(beans), reader, BeanValueProcessor.identity());</span>
+<span class="nc" id="L28">    Check.notNull(beans, VARARGS).is(deepNotNull()).isNot(empty());</span>
+<span class="nc" id="L29">    Class&lt;T&gt; clazz = (Class&lt;T&gt;) beans.getClass().getComponentType();</span>
+<span class="nc" id="L30">    BeanReader&lt;T&gt; reader = new BeanReader&lt;&gt;(clazz);</span>
+<span class="nc" id="L31">    return setValues(Arrays.asList(beans), reader, BeanValueProcessor.identity());</span>
   }
 
   @Override
   public &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans) {
-<span class="fc" id="L35">    return setValues(beans, BeanValueProcessor.identity());</span>
+<span class="fc" id="L36">    return setValues(beans, BeanValueProcessor.identity());</span>
   }
 
   @Override
   @SuppressWarnings(&quot;unchecked&quot;)
   public &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans, BeanValueProcessor&lt;T&gt; processor) {
-<span class="fc" id="L41">    Check.that(beans, &quot;beans&quot;).is(deepNotNull()).isNot(empty());</span>
-<span class="fc" id="L42">    Check.notNull(processor, &quot;processor&quot;);</span>
-<span class="fc" id="L43">    Class&lt;T&gt; clazz = (Class&lt;T&gt;) beans.getFirst().getClass();</span>
-<span class="fc" id="L44">    BeanReader&lt;T&gt; reader = new BeanReader&lt;&gt;(clazz);</span>
-<span class="fc" id="L45">    return setValues(beans, reader, processor);</span>
+<span class="fc" id="L42">    Check.that(beans, BEANS).is(deepNotNull()).isNot(empty());</span>
+<span class="fc" id="L43">    Check.notNull(processor, PROCESSOR);</span>
+<span class="fc" id="L44">    Class&lt;T&gt; clazz = (Class&lt;T&gt;) beans.getFirst().getClass();</span>
+<span class="fc" id="L45">    BeanReader&lt;T&gt; reader = new BeanReader&lt;&gt;(clazz);</span>
+<span class="fc" id="L46">    return setValues(beans, reader, processor);</span>
   }
 
   private &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans,
         BeanReader&lt;T&gt; reader,
         BeanValueProcessor&lt;T&gt; processor) {
-<span class="fc bfc" id="L51" title="All 2 branches covered.">    if (!session.getTemplate().hasNestedTemplate(&quot;record&quot;)) {</span>
-<span class="fc" id="L52">      throw new DatabaseException(&quot;missing nested template \&quot;record\&quot;&quot;);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">    if (!session.getTemplate().hasNestedTemplate(RECORD)) {</span>
+<span class="fc" id="L53">      throw new DatabaseException(&quot;missing nested template \&quot;record\&quot;&quot;);</span>
     }
-<span class="fc" id="L54">    String[] vars = session.getTemplate()</span>
-<span class="fc" id="L55">          .getNestedTemplate(&quot;record&quot;)</span>
-<span class="fc" id="L56">          .getVariables()</span>
-<span class="fc" id="L57">          .toArray(String[]::new);</span>
-<span class="fc" id="L58">    List&lt;Map&lt;String, String&gt;&gt; quoted = new ArrayList&lt;&gt;(beans.size());</span>
-<span class="fc" id="L59">    Quoter quoter = new Quoter(statement());</span>
-<span class="fc bfc" id="L60" title="All 2 branches covered.">    for (T bean : beans) {</span>
-<span class="fc" id="L61">      Map&lt;String, String&gt; map = HashMap.newHashMap(vars.length);</span>
-<span class="fc bfc" id="L62" title="All 2 branches covered.">      for (String var : vars) {</span>
-<span class="fc" id="L63">        Object in = reader.read(bean, var);</span>
-<span class="fc" id="L64">        String out = quoteValue(processor.process(bean, var, in, quoter));</span>
-<span class="fc" id="L65">        map.put(var, out);</span>
+<span class="fc" id="L55">    String[] vars = session.getTemplate()</span>
+<span class="fc" id="L56">          .getNestedTemplate(RECORD)</span>
+<span class="fc" id="L57">          .getVariables()</span>
+<span class="fc" id="L58">          .toArray(String[]::new);</span>
+<span class="fc" id="L59">    List&lt;Map&lt;String, String&gt;&gt; quoted = new ArrayList&lt;&gt;(beans.size());</span>
+<span class="fc" id="L60">    Quoter quoter = new Quoter(statement());</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">    for (T bean : beans) {</span>
+<span class="fc" id="L62">      Map&lt;String, String&gt; map = HashMap.newHashMap(vars.length);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">      for (String var : vars) {</span>
+<span class="fc" id="L64">        Object in = reader.read(bean, var);</span>
+<span class="fc" id="L65">        String out = quoteValue(processor.process(bean, var, in, quoter));</span>
+<span class="fc" id="L66">        map.put(var, out);</span>
       }
-<span class="fc" id="L67">      quoted.add(map);</span>
-<span class="fc" id="L68">    }</span>
-<span class="fc" id="L69">    session.populate(&quot;record&quot;, quoted, &quot;,&quot;);</span>
-<span class="fc" id="L70">    return this;</span>
+<span class="fc" id="L68">      quoted.add(map);</span>
+<span class="fc" id="L69">    }</span>
+<span class="fc" id="L70">    session.populate(RECORD, quoted, &quot;,&quot;);</span>
+<span class="fc" id="L71">    return this;</span>
   }
 
   @Override
   public SQLQuery prepareQuery() {
-<span class="fc" id="L75">    close();</span>
-<span class="fc" id="L76">    SQLInfo sqlInfo = getSQLInfo();</span>
-<span class="fc" id="L77">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="fc" id="L78">    return new SQLQuery(ps, this, sqlInfo);</span>
+<span class="fc" id="L76">    close();</span>
+<span class="fc" id="L77">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="fc" id="L78">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="fc" id="L79">    return new SQLQuery(ps, this, sqlInfo);</span>
   }
 
   @Override
   public SQLInsert prepareInsert(boolean retrieveKeys) {
-<span class="nc" id="L83">    close();</span>
-<span class="nc" id="L84">    SQLInfo sqlInfo = getSQLInfo();</span>
-<span class="nc" id="L85">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
-<span class="nc" id="L86">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L84">    close();</span>
+<span class="nc" id="L85">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="nc" id="L86">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L87">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
   }
 
   @Override
   public SQLUpdate prepareUpdate() {
-<span class="nc" id="L91">    close();</span>
-<span class="nc" id="L92">    SQLInfo sqlInfo = getSQLInfo();</span>
-<span class="nc" id="L93">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="nc" id="L94">    return new SQLUpdate(ps, this, sqlInfo);</span>
+<span class="nc" id="L92">    close();</span>
+<span class="nc" id="L93">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="nc" id="L94">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="nc" id="L95">    return new SQLUpdate(ps, this, sqlInfo);</span>
   }
 
   private SQLInfo getSQLInfo() {
-<span class="fc" id="L98">    Check.that(session.hasUnsetVariables()).is(no(), unfinishedSession());</span>
-<span class="fc" id="L99">    String sql = session.render();</span>
-<span class="fc" id="L100">    return new SQLInfo(sql, new ParamExtractor(sql));</span>
+<span class="fc" id="L99">    Check.that(session.hasUnsetVariables()).is(no(), unfinishedSession());</span>
+<span class="fc" id="L100">    String sql = session.render();</span>
+<span class="fc" id="L101">    return new SQLInfo(sql, new ParamExtractor(sql));</span>
   }
 
 

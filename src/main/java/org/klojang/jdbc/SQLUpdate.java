@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
+
 /**
  * Facilitates the execution of UPDATE, DELETE and DDL statements.
  */
@@ -25,7 +27,7 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
    * @return the number of affected rows
    */
   public int execute() {
-    LOG.trace("Executing SQL: {}", sqlInfo.jdbcSQL());
+    LOG.trace(EXECUTING_SQL, sqlInfo.jdbcSQL());
     try {
       applyBindings(ps);
       return ps.executeUpdate();

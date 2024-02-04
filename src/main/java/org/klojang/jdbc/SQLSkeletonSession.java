@@ -3,8 +3,8 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.jdbc.x.sql.ParamExtractor;
+import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.RenderSession;
 
 import java.sql.Connection;
@@ -13,6 +13,7 @@ import java.util.*;
 
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.Tag.VARARGS;
+import static org.klojang.jdbc.x.Strings.*;
 
 final class SQLSkeletonSession extends DynamicSQLSession {
 
@@ -38,8 +39,8 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   @Override
   @SuppressWarnings("unchecked")
   public <T> SQLSession setValues(List<T> beans, BeanValueProcessor<T> processor) {
-    Check.that(beans, "beans").is(deepNotNull()).isNot(empty());
-    Check.notNull(processor, "processor");
+    Check.that(beans, BEANS).is(deepNotNull()).isNot(empty());
+    Check.notNull(processor, PROCESSOR);
     Class<T> clazz = (Class<T>) beans.getFirst().getClass();
     BeanReader<T> reader = new BeanReader<>(clazz);
     return setValues(beans, reader, processor);
@@ -48,11 +49,11 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   private <T> SQLSession setValues(List<T> beans,
         BeanReader<T> reader,
         BeanValueProcessor<T> processor) {
-    if (!session.getTemplate().hasNestedTemplate("record")) {
+    if (!session.getTemplate().hasNestedTemplate(RECORD)) {
       throw new DatabaseException("missing nested template \"record\"");
     }
     String[] vars = session.getTemplate()
-          .getNestedTemplate("record")
+          .getNestedTemplate(RECORD)
           .getVariables()
           .toArray(String[]::new);
     List<Map<String, String>> quoted = new ArrayList<>(beans.size());
@@ -66,7 +67,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
       }
       quoted.add(map);
     }
-    session.populate("record", quoted, ",");
+    session.populate(RECORD, quoted, ",");
     return this;
   }
 

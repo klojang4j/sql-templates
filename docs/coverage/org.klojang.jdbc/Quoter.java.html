@@ -10,6 +10,8 @@ import java.sql.Statement;
 import java.util.List;
 
 import static org.klojang.check.Tag.VARARGS;
+import static org.klojang.jdbc.x.Strings.FUNCTION_NAME;
+import static org.klojang.jdbc.x.Strings.IDENTIFIER;
 import static org.klojang.util.StringMethods.append;
 
 /**
@@ -36,9 +38,9 @@ public final class Quoter {
 
   private final Statement stmt;
 
-<span class="fc" id="L39">  Quoter(Statement stmt) {</span>
-<span class="fc" id="L40">    this.stmt = stmt;</span>
-<span class="fc" id="L41">  }</span>
+<span class="fc" id="L41">  Quoter(Statement stmt) {</span>
+<span class="fc" id="L42">    this.stmt = stmt;</span>
+<span class="fc" id="L43">  }</span>
 
   /**
    * &lt;p&gt;Returns a properly escaped and quoted string. More precisely:
@@ -60,11 +62,30 @@ public final class Quoter {
    */
   public String quoteValue(Object value) {
     try {
-<span class="fc" id="L63">      return JDBC.quote(stmt, value);</span>
-<span class="nc" id="L64">    } catch (SQLException e) {</span>
-<span class="nc" id="L65">      throw Utils.wrap(e);</span>
+<span class="fc" id="L65">      return JDBC.quote(stmt, value);</span>
+<span class="nc" id="L66">    } catch (SQLException e) {</span>
+<span class="nc" id="L67">      throw Utils.wrap(e);</span>
     }
   }
+
+  /**
+   * If necessary, quotes the specified identifier (e&amp;#46;g&amp;#46; a column name or table
+   * name) according to the quoting rules of the target database. Use this method if the
+   * identifier is passed in from outside your program to prevent SQL injection.
+   *
+   * @param identifier the identifier to quote
+   * @return the quoted identifier
+   * @see java.sql.Statement#enquoteIdentifier(String, boolean)
+   */
+  public String quoteIdentifier(String identifier) {
+<span class="nc" id="L81">    Check.notNull(identifier, IDENTIFIER);</span>
+    try {
+<span class="nc" id="L83">      return stmt.enquoteIdentifier(identifier, false);</span>
+<span class="nc" id="L84">    } catch (SQLException e) {</span>
+<span class="nc" id="L85">      throw Utils.wrap(e);</span>
+    }
+  }
+
 
   /**
    * Generates a SQL function call in which each of the function arguments is escaped and
@@ -76,11 +97,11 @@ public final class Quoter {
    * @return an {@code SQLExpression} representing a SQL function call
    */
   public SQLExpression sqlFunction(String name, Object... args) {
-<span class="fc" id="L79">    Check.notNull(name, &quot;SQL function name&quot;);</span>
-<span class="fc" id="L80">    Check.notNull(args, VARARGS);</span>
-<span class="fc" id="L81">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
-<span class="fc" id="L82">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
-<span class="fc" id="L83">    return new SQLExpression(expr);</span>
+<span class="fc" id="L100">    Check.notNull(name, FUNCTION_NAME);</span>
+<span class="fc" id="L101">    Check.notNull(args, VARARGS);</span>
+<span class="fc" id="L102">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
+<span class="fc" id="L103">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
+<span class="fc" id="L104">    return new SQLExpression(expr);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

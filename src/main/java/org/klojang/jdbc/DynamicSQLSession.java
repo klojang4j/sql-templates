@@ -2,6 +2,7 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.JDBC;
+import org.klojang.jdbc.x.Strings;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
 import org.klojang.util.CollectionMethods;
@@ -16,6 +17,7 @@ import java.util.function.Supplier;
 
 import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.check.Tag.VARARGS;
+import static org.klojang.jdbc.x.Strings.*;
 import static org.klojang.util.StringMethods.append;
 
 abstract sealed class DynamicSQLSession extends AbstractSQLSession
@@ -34,7 +36,7 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
 
   @Override
   public final SQLSession set(String varName, Object value) {
-    Check.notNull(varName, "varName");
+    Check.notNull(varName, VAR_NAME);
     if (value instanceof Collection<?> c) {
       session.set(varName, CollectionMethods.implode(c));
     } else if (value.getClass().isArray()) {
@@ -47,7 +49,7 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
 
   @Override
   public final SQLSession setValue(String varName, Object value) {
-    Check.notNull(varName, "varName");
+    Check.notNull(varName, VAR_NAME);
     switch (value) {
       case Collection<?> x -> {
         String val = CollectionMethods.implode(x, this::quoteValue, ",");
@@ -73,22 +75,22 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
 
   @Override
   public final SQLSession setIdentifier(String varName, String identifier) {
-    Check.notNull(varName, "varName");
-    Check.notNull(identifier, "identifier");
+    Check.notNull(varName, VAR_NAME);
+    Check.notNull(identifier, IDENTIFIER);
     session.set(varName, quoteIdentifier(identifier));
     return this;
   }
 
   @Override
   public final SQLSession setOrderBy(String sortColumn) {
-    Check.notNull(sortColumn, "sortColumn");
-    return setIdentifier("orderBy", sortColumn);
+    Check.notNull(sortColumn, SORT_COLUMN);
+    return setIdentifier(ORDER_BY, sortColumn);
   }
 
   @Override
   public final SQLSession setOrderBy(String sortColumn, boolean isDescending) {
     String orderBy = quoteIdentifier(sortColumn) + (isDescending ? " DESC" : " ASC");
-    return set("orderBy", orderBy);
+    return set(ORDER_BY, orderBy);
   }
 
 
@@ -97,13 +99,14 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     try {
       return JDBC.quote(statement(), obj);
     } catch (SQLException e) {
+      close();
       throw DatabaseException.wrap(e, sql);
     }
   }
 
   @Override
   public final SQLExpression sqlFunction(String name, Object... args) {
-    Check.notNull(name, "SQL function name");
+    Check.notNull(name, FUNCTION_NAME);
     Check.notNull(args, VARARGS);
     String str = ArrayMethods.implode(args, this::quoteValue, ",");
     String expr = append(new StringBuilder(), name, '(', str, ')').toString();
@@ -111,10 +114,12 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   @Override
-  public final String quoteIdentifier(String obj) {
+  public final String quoteIdentifier(String identifier) {
+    Check.notNull(identifier, IDENTIFIER);
     try {
-      return statement().enquoteIdentifier(obj, false);
+      return statement().enquoteIdentifier(identifier, false);
     } catch (SQLException e) {
+      close();
       throw DatabaseException.wrap(e, sql);
     }
   }

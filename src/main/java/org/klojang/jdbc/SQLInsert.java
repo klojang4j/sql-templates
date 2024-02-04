@@ -16,6 +16,7 @@ import java.util.Map;
 import static org.klojang.check.CommonChecks.empty;
 import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.illegalState;
+import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
 
 /**
  * Facilitates the execution of SQL INSERT statements.
@@ -138,8 +139,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
    */
   public long execute() {
     try {
-      applyBindings(ps);
-      ps.executeUpdate();
+      executeSQL();
       return retrieveKeys ? JDBC.getGeneratedKeys(ps, 1)[0] : -1;
     } catch (Throwable t) {
       throw Utils.wrap(t, sqlInfo);
@@ -164,8 +164,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
   public long executeAndSetID() {
     Check.that(retrieveKeys).is(yes(), illegalState(KEY_RETRIEVAL_DISABLED));
     try {
-      applyBindings(ps);
-      ps.executeUpdate();
+      executeSQL();
       long dbKey = JDBC.getGeneratedKeys(ps, 1)[0];
       for (int i = 0; i < idProperties.size(); ++i) {
         String idProperty = idProperties.get(i);
@@ -203,9 +202,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
     Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));
     try {
       for (U bean : beans) {
-        bind(bean);
-        applyBindings(ps);
-        ps.executeUpdate();
+        bind(bean).executeSQL();
         reset();
       }
     } catch (Throwable t) {
@@ -236,9 +233,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
     try {
       int i = 0;
       for (U bean : beans) {
-        bind(bean);
-        applyBindings(ps);
-        ps.executeUpdate();
+        bind(bean).executeSQL();
         keys[i++] = JDBC.getGeneratedKeys(ps, 1)[0];
         reset();
       }
@@ -265,7 +260,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
     Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));
     try {
       for (U bean : beans) {
-        bind(bean, idProperty).exec();
+        bind(bean, idProperty).executeSQL();
         long key = JDBC.getGeneratedKeys(ps, 1)[0];
         JDBC.setID(bean, idProperty, key);
         reset();
@@ -285,7 +280,8 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
     }
   }
 
-  private void exec() throws Throwable {
+  private void executeSQL() throws Throwable {
+    LOG.trace(EXECUTING_SQL, sqlInfo.jdbcSQL());
     applyBindings(ps);
     ps.executeUpdate();
   }

@@ -19,13 +19,15 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.function.Supplier;
 
+import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
+
 /**
  * <p>Facilitates the execution of SQL SELECT statements. {@code SQLQuery} instances are
  * obtained via {@link SQLSession#prepareQuery() SQLSession.prepareQuery()}. Here is an
  * example of how to use the {@code SQLQuery} class:
  *
  * <blockquote><pre>{@code
- * SQL sql = SQL.simple("SELECT * FROM PERSON WHERE FIRST_NAME = :firstName");
+ * SQL sql = SQL.simple("SELECT LAST_NAME FROM PERSON WHERE FIRST_NAME = :firstName");
  * try(Connection con = ...) {
  *   try(SQLQuery query = sql.session(con).prepareQuery()) {
  *     query.bind("firstName", "John");
@@ -98,8 +100,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Returns the value of the first column in the first row. The second time you call this
    * method, you get the value of the first column in the second row, and so on. If there
-   * are no (more) rows in the {@code ResultSet}. If there are no (more) rows in the
-   * {@code ResultSet}, {@link Result#notAvailable() Result.notAvailable()} is returned.
+   * are no (more) rows in the {@code ResultSet},
+   * {@link Result#notAvailable() Result.notAvailable()} is returned.
    *
    * @param <T> the type of the value to be returned
    * @param clazz the class of the value to be returned
@@ -310,7 +312,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   private void executeQuery() throws Throwable {
     if (resultSet == null) {
-      LOG.trace("Executing SQL: {}", sqlInfo.jdbcSQL());
+      LOG.trace(EXECUTING_SQL, sqlInfo.jdbcSQL());
       applyBindings(ps);
       resultSet = ps.executeQuery();
     }
