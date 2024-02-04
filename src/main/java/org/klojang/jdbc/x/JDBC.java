@@ -18,6 +18,7 @@ import static org.klojang.invoke.NoSuchPropertyException.noSuchProperty;
 import static org.klojang.util.ClassMethods.box;
 
 public final class JDBC {
+
   private static final String NO_KEYS_GENERATED = "no keys were generated";
   private static final String MULTIPLE_AUTO_KEYS = "multiple auto-increment keys not supported";
 

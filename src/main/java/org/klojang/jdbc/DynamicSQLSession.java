@@ -80,6 +80,19 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   @Override
+  public final SQLSession setOrderBy(String sortColumn) {
+    Check.notNull(sortColumn, "sortColumn");
+    return setIdentifier("orderBy", sortColumn);
+  }
+
+  @Override
+  public final SQLSession setOrderBy(String sortColumn, boolean isDescending) {
+    String orderBy = quoteIdentifier(sortColumn) + (isDescending ? " DESC" : " ASC");
+    return set("orderBy", orderBy);
+  }
+
+
+  @Override
   public final String quoteValue(Object obj) {
     try {
       return JDBC.quote(statement(), obj);
@@ -119,9 +132,9 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
 
-  static Supplier<IllegalStateException> sessionNotFinished(RenderSession session) {
+  Supplier<IllegalStateException> unfinishedSession() {
     String unset = CollectionMethods.implode(session.getAllUnsetVariables());
-    return illegalState("one or more variables have not been set yet: " + unset);
+    return illegalState("one or more template variables have not been set yet: " + unset);
   }
 
   Statement statement() {

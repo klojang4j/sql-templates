@@ -238,7 +238,7 @@ public sealed interface SQLSession extends AutoCloseable permits AbstractSQLSess
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setOrderBy(String sortColumn) throws UnsupportedOperationException {
-<span class="fc" id="L241">    return setIdentifier(&quot;orderBy&quot;, sortColumn);</span>
+<span class="nc" id="L241">    throw notSupported(&quot;setOrderBy&quot;);</span>
   }
 
   /**

@@ -90,7 +90,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL staticSQL(String sql) {
-<span class="nc" id="L93">    return new SimpleSQL(sql, true, noBindInfo());</span>
+<span class="fc" id="L93">    return new SimpleSQL(sql, true, noBindInfo());</span>
   }
 
   /**

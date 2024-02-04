@@ -18,81 +18,82 @@ import static org.klojang.invoke.NoSuchPropertyException.noSuchProperty;
 import static org.klojang.util.ClassMethods.box;
 
 public final class JDBC {
+
   private static final String NO_KEYS_GENERATED = &quot;no keys were generated&quot;;
   private static final String MULTIPLE_AUTO_KEYS = &quot;multiple auto-increment keys not supported&quot;;
 
-<span class="nc" id="L24">  private JDBC() { throw new UnsupportedOperationException(); }</span>
+<span class="nc" id="L25">  private JDBC() { throw new UnsupportedOperationException(); }</span>
 
   public static String[] getColumnNames(ResultSet rs) {
     try {
-<span class="fc" id="L28">      ResultSetMetaData rsmd = rs.getMetaData();</span>
-<span class="fc" id="L29">      int sz = rsmd.getColumnCount();</span>
-<span class="fc" id="L30">      String[] colNames = new String[sz];</span>
-<span class="fc bfc" id="L31" title="All 2 branches covered.">      for (int i = 0; i &lt; rsmd.getColumnCount(); ++i) {</span>
-<span class="fc" id="L32">        colNames[i] = rsmd.getColumnLabel(i + 1);</span>
+<span class="fc" id="L29">      ResultSetMetaData rsmd = rs.getMetaData();</span>
+<span class="fc" id="L30">      int sz = rsmd.getColumnCount();</span>
+<span class="fc" id="L31">      String[] colNames = new String[sz];</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">      for (int i = 0; i &lt; rsmd.getColumnCount(); ++i) {</span>
+<span class="fc" id="L33">        colNames[i] = rsmd.getColumnLabel(i + 1);</span>
       }
-<span class="fc" id="L34">      return colNames;</span>
-<span class="nc" id="L35">    } catch (SQLException e) {</span>
-<span class="nc" id="L36">      throw Utils.wrap(e);</span>
+<span class="fc" id="L35">      return colNames;</span>
+<span class="nc" id="L36">    } catch (SQLException e) {</span>
+<span class="nc" id="L37">      throw Utils.wrap(e);</span>
     }
   }
 
   public static PreparedStatement getPreparedStatement(Connection con, SQLInfo sqlInfo) {
     try {
-<span class="fc" id="L42">      return con.prepareStatement(sqlInfo.jdbcSQL());</span>
-<span class="nc" id="L43">    } catch (SQLException e) {</span>
-<span class="nc" id="L44">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="fc" id="L43">      return con.prepareStatement(sqlInfo.jdbcSQL());</span>
+<span class="nc" id="L44">    } catch (SQLException e) {</span>
+<span class="nc" id="L45">      throw Utils.wrap(e, sqlInfo);</span>
     }
   }
 
   public static PreparedStatement getPreparedStatement(Connection con,
         SQLInfo sqlInfo,
         boolean retrieveKeys) {
-<span class="fc bfc" id="L51" title="All 2 branches covered.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
     try {
-<span class="fc" id="L53">      return con.prepareStatement(sqlInfo.jdbcSQL(), x);</span>
-<span class="nc" id="L54">    } catch (SQLException e) {</span>
-<span class="nc" id="L55">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="fc" id="L54">      return con.prepareStatement(sqlInfo.jdbcSQL(), x);</span>
+<span class="nc" id="L55">    } catch (SQLException e) {</span>
+<span class="nc" id="L56">      throw Utils.wrap(e, sqlInfo);</span>
     }
   }
 
   public static long[] getGeneratedKeys(Statement stmt, int rowCount)
         throws SQLException {
-<span class="fc" id="L61">    long[] keys = new long[rowCount];</span>
-<span class="fc" id="L62">    try (ResultSet rs = stmt.getGeneratedKeys()) {</span>
-<span class="fc" id="L63">      Check.that(rs.next()).is(yes(),</span>
-<span class="nc" id="L64">            () -&gt; new DatabaseException(NO_KEYS_GENERATED));</span>
-<span class="fc" id="L65">      Check.that(rs.getMetaData().getColumnCount()).is(eq(), 1,</span>
-<span class="nc" id="L66">            () -&gt; new DatabaseException(MULTIPLE_AUTO_KEYS));</span>
-<span class="fc" id="L67">      keys[0] = rs.getLong(1);</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">      for (int i = 1; i &lt; rowCount; ++i) {</span>
-<span class="fc" id="L69">        rs.next();</span>
-<span class="fc" id="L70">        keys[i] = rs.getLong(1);</span>
+<span class="fc" id="L62">    long[] keys = new long[rowCount];</span>
+<span class="fc" id="L63">    try (ResultSet rs = stmt.getGeneratedKeys()) {</span>
+<span class="fc" id="L64">      Check.that(rs.next()).is(yes(),</span>
+<span class="nc" id="L65">            () -&gt; new DatabaseException(NO_KEYS_GENERATED));</span>
+<span class="fc" id="L66">      Check.that(rs.getMetaData().getColumnCount()).is(eq(), 1,</span>
+<span class="nc" id="L67">            () -&gt; new DatabaseException(MULTIPLE_AUTO_KEYS));</span>
+<span class="fc" id="L68">      keys[0] = rs.getLong(1);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">      for (int i = 1; i &lt; rowCount; ++i) {</span>
+<span class="fc" id="L70">        rs.next();</span>
+<span class="fc" id="L71">        keys[i] = rs.getLong(1);</span>
       }
     }
-<span class="fc" id="L73">    return keys;</span>
+<span class="fc" id="L74">    return keys;</span>
   }
 
   public static String quote(Statement stmt, Object value) throws SQLException {
-<span class="pc bpc" id="L77" title="2 of 5 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L78">      case null -&gt; &quot;NULL&quot;;</span>
-<span class="fc" id="L79">      case Number n -&gt; n.toString();</span>
-<span class="nc" id="L80">      case Boolean b -&gt; b.toString();</span>
-<span class="fc" id="L81">      case SQLExpression s -&gt; s.toString();</span>
-<span class="fc" id="L82">      default -&gt; stmt.enquoteLiteral(value.toString());</span>
+<span class="pc bpc" id="L78" title="2 of 5 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L79">      case null -&gt; &quot;NULL&quot;;</span>
+<span class="fc" id="L80">      case Number n -&gt; n.toString();</span>
+<span class="nc" id="L81">      case Boolean b -&gt; b.toString();</span>
+<span class="fc" id="L82">      case SQLExpression s -&gt; s.toString();</span>
+<span class="fc" id="L83">      default -&gt; stmt.enquoteLiteral(value.toString());</span>
     };
   }
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   public static void setID(Object bean, String idProperty, long value)
         throws Throwable {
-<span class="fc" id="L89">    SetterFactory sf = SetterFactory.INSTANCE;</span>
-<span class="fc" id="L90">    Map&lt;String, Setter&gt; setters = sf.getSetters(bean.getClass());</span>
-<span class="pc" id="L91">    Check.that(idProperty).is(keyIn(), setters, () -&gt; noSuchProperty(bean, idProperty));</span>
-<span class="fc" id="L92">    Setter setter = setters.get(idProperty);</span>
+<span class="fc" id="L90">    SetterFactory sf = SetterFactory.INSTANCE;</span>
+<span class="fc" id="L91">    Map&lt;String, Setter&gt; setters = sf.getSetters(bean.getClass());</span>
+<span class="pc" id="L92">    Check.that(idProperty).is(keyIn(), setters, () -&gt; noSuchProperty(bean, idProperty));</span>
+<span class="fc" id="L93">    Setter setter = setters.get(idProperty);</span>
     // make sure we're OK if the ID property is not a long
-<span class="fc" id="L94">    Number id = convert(value, (Class) box(setter.getParamType()));</span>
-<span class="fc" id="L95">    setter.write(bean, id);</span>
-<span class="fc" id="L96">  }</span>
+<span class="fc" id="L95">    Number id = convert(value, (Class) box(setter.getParamType()));</span>
+<span class="fc" id="L96">    setter.write(bean, id);</span>
+<span class="fc" id="L97">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

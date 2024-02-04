@@ -44,7 +44,7 @@ final class SimpleSQLSession extends AbstractSQLSession {
   public void execute() {
     try {
       Statement statement = con.createStatement();
-      String str = sqlInfo.normalizedSQL();
+      String str = sqlInfo.jdbcSQL();
       LOG.trace("Executing SQL: {}", str);
       statement.execute(str);
     } catch (SQLException e) {

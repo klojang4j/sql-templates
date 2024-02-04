@@ -80,72 +80,85 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   @Override
+  public final SQLSession setOrderBy(String sortColumn) {
+<span class="fc" id="L84">    Check.notNull(sortColumn, &quot;sortColumn&quot;);</span>
+<span class="fc" id="L85">    return setIdentifier(&quot;orderBy&quot;, sortColumn);</span>
+  }
+
+  @Override
+  public final SQLSession setOrderBy(String sortColumn, boolean isDescending) {
+<span class="nc bnc" id="L90" title="All 2 branches missed.">    String orderBy = quoteIdentifier(sortColumn) + (isDescending ? &quot; DESC&quot; : &quot; ASC&quot;);</span>
+<span class="nc" id="L91">    return set(&quot;orderBy&quot;, orderBy);</span>
+  }
+
+
+  @Override
   public final String quoteValue(Object obj) {
     try {
-<span class="fc" id="L85">      return JDBC.quote(statement(), obj);</span>
-<span class="nc" id="L86">    } catch (SQLException e) {</span>
-<span class="nc" id="L87">      throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L98">      return JDBC.quote(statement(), obj);</span>
+<span class="nc" id="L99">    } catch (SQLException e) {</span>
+<span class="nc" id="L100">      throw DatabaseException.wrap(e, sql);</span>
     }
   }
 
   @Override
   public final SQLExpression sqlFunction(String name, Object... args) {
-<span class="nc" id="L93">    Check.notNull(name, &quot;SQL function name&quot;);</span>
-<span class="nc" id="L94">    Check.notNull(args, VARARGS);</span>
-<span class="nc" id="L95">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
-<span class="nc" id="L96">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
-<span class="nc" id="L97">    return new SQLExpression(expr);</span>
+<span class="nc" id="L106">    Check.notNull(name, &quot;SQL function name&quot;);</span>
+<span class="nc" id="L107">    Check.notNull(args, VARARGS);</span>
+<span class="nc" id="L108">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L109">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
+<span class="nc" id="L110">    return new SQLExpression(expr);</span>
   }
 
   @Override
   public final String quoteIdentifier(String obj) {
     try {
-<span class="fc" id="L103">      return statement().enquoteIdentifier(obj, false);</span>
-<span class="nc" id="L104">    } catch (SQLException e) {</span>
-<span class="nc" id="L105">      throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L116">      return statement().enquoteIdentifier(obj, false);</span>
+<span class="nc" id="L117">    } catch (SQLException e) {</span>
+<span class="nc" id="L118">      throw DatabaseException.wrap(e, sql);</span>
     }
   }
 
   @Override
   public final void execute() {
     try {
-<span class="fc" id="L112">      Statement statement = con.createStatement();</span>
-<span class="fc" id="L113">      String str = session.render();</span>
-<span class="fc" id="L114">      LOG.trace(&quot;Executing SQL: {}&quot;, str);</span>
-<span class="fc" id="L115">      statement.execute(str);</span>
-<span class="nc" id="L116">    } catch (SQLException e) {</span>
-<span class="nc" id="L117">      throw DatabaseException.wrap(e, sql);</span>
-<span class="fc" id="L118">    }</span>
-<span class="fc" id="L119">  }</span>
+<span class="fc" id="L125">      Statement statement = con.createStatement();</span>
+<span class="fc" id="L126">      String str = session.render();</span>
+<span class="fc" id="L127">      LOG.trace(&quot;Executing SQL: {}&quot;, str);</span>
+<span class="fc" id="L128">      statement.execute(str);</span>
+<span class="nc" id="L129">    } catch (SQLException e) {</span>
+<span class="nc" id="L130">      throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L131">    }</span>
+<span class="fc" id="L132">  }</span>
 
 
-  static Supplier&lt;IllegalStateException&gt; sessionNotFinished(RenderSession session) {
-<span class="fc" id="L123">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
-<span class="fc" id="L124">    return illegalState(&quot;one or more variables have not been set yet: &quot; + unset);</span>
+  Supplier&lt;IllegalStateException&gt; unfinishedSession() {
+<span class="fc" id="L136">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
+<span class="fc" id="L137">    return illegalState(&quot;one or more template variables have not been set yet: &quot; + unset);</span>
   }
 
   Statement statement() {
-<span class="fc bfc" id="L128" title="All 2 branches covered.">    if (stmt == null) {</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">    if (stmt == null) {</span>
       try {
-<span class="fc" id="L130">        stmt = con.createStatement();</span>
-<span class="nc" id="L131">      } catch (SQLException e) {</span>
-<span class="nc" id="L132">        throw DatabaseException.wrap(e, sql);</span>
-<span class="fc" id="L133">      }</span>
+<span class="fc" id="L143">        stmt = con.createStatement();</span>
+<span class="nc" id="L144">      } catch (SQLException e) {</span>
+<span class="nc" id="L145">        throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L146">      }</span>
     }
-<span class="fc" id="L135">    return stmt;</span>
+<span class="fc" id="L148">    return stmt;</span>
   }
 
   public void close() {
-<span class="fc bfc" id="L139" title="All 2 branches covered.">    if (stmt != null) {</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">    if (stmt != null) {</span>
       try {
-<span class="fc" id="L141">        stmt.close();</span>
-<span class="nc" id="L142">      } catch (SQLException e) {</span>
-<span class="nc" id="L143">        throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L154">        stmt.close();</span>
+<span class="nc" id="L155">      } catch (SQLException e) {</span>
+<span class="nc" id="L156">        throw DatabaseException.wrap(e, sql);</span>
       } finally {
-<span class="fc" id="L145">        stmt = null;</span>
+<span class="fc" id="L158">        stmt = null;</span>
       }
     }
-<span class="fc" id="L148">  }</span>
+<span class="fc" id="L161">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

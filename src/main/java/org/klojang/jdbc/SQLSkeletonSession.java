@@ -24,7 +24,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   @SafeVarargs
   @SuppressWarnings({"unchecked"})
   public final <T> SQLSession setValues(T... beans) {
-    Check.notNull(beans, VARARGS).isNot(empty());
+    Check.notNull(beans, VARARGS).is(deepNotNull()).isNot(empty());
     Class<T> clazz = (Class<T>) beans.getClass().getComponentType();
     BeanReader<T> reader = new BeanReader<>(clazz);
     return setValues(Arrays.asList(beans), reader, BeanValueProcessor.identity());
@@ -95,7 +95,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   }
 
   private SQLInfo getSQLInfo() {
-    Check.that(session.hasUnsetVariables()).is(no(), sessionNotFinished(session));
+    Check.that(session.hasUnsetVariables()).is(no(), unfinishedSession());
     String sql = session.render();
     return new SQLInfo(sql, new ParamExtractor(sql));
   }

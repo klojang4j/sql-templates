@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SQLSkeletonSessionTest {
 
-  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-db-template-session-test";
+  private static final String DB_DIR = System.getProperty("user.home") + "/h2.SQLSkeletonSessionTest";
   private static final ThreadLocal<Connection> MY_CON = new ThreadLocal<>();
 
   public record Person(Integer id, String firstName, String lastName, int age) { }

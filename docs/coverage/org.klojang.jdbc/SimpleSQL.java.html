@@ -11,8 +11,8 @@ final class SimpleSQL extends AbstractSQL {
 
   SimpleSQL(String sql, boolean isStatic, BindInfo bindInfo) {
 <span class="fc" id="L13">    super(sql, bindInfo);</span>
-<span class="pc bpc" id="L14" title="1 of 2 branches missed.">    if (isStatic) {</span>
-<span class="nc" id="L15">      sqlInfo = new SQLInfo(new ParamExtractor(sql, 0));</span>
+<span class="fc bfc" id="L14" title="All 2 branches covered.">    if (isStatic) {</span>
+<span class="fc" id="L15">      sqlInfo = new SQLInfo(new ParamExtractor(sql, 0));</span>
     } else {
 <span class="fc" id="L17">      sqlInfo = new SQLInfo(new ParamExtractor(sql));</span>
     }

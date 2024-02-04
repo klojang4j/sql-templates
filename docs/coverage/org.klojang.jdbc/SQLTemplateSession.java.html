@@ -43,8 +43,8 @@ final class SQLTemplateSession extends DynamicSQLSession {
 <span class="nc" id="L43">    return new SQLUpdate(ps, this, sqlInfo);</span>
   }
 
-  private static SQLInfo getSQLInfo(RenderSession session, ParamExtractor extractor) {
-<span class="fc" id="L47">    Check.that(session.hasUnsetVariables()).is(no(), sessionNotFinished(session));</span>
+  private SQLInfo getSQLInfo(RenderSession session, ParamExtractor extractor) {
+<span class="fc" id="L47">    Check.that(session.hasUnsetVariables()).is(no(), unfinishedSession());</span>
 <span class="fc" id="L48">    return new SQLInfo(session.render(), extractor);</span>
   }
 

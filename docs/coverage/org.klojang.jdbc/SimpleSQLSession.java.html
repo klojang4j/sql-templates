@@ -43,14 +43,14 @@ final class SimpleSQLSession extends AbstractSQLSession {
   @Override
   public void execute() {
     try {
-<span class="nc" id="L46">      Statement statement = con.createStatement();</span>
-<span class="nc" id="L47">      String str = sqlInfo.normalizedSQL();</span>
-<span class="nc" id="L48">      LOG.trace(&quot;Executing SQL: {}&quot;, str);</span>
-<span class="nc" id="L49">      statement.execute(str);</span>
+<span class="fc" id="L46">      Statement statement = con.createStatement();</span>
+<span class="fc" id="L47">      String str = sqlInfo.jdbcSQL();</span>
+<span class="fc" id="L48">      LOG.trace(&quot;Executing SQL: {}&quot;, str);</span>
+<span class="fc" id="L49">      statement.execute(str);</span>
 <span class="nc" id="L50">    } catch (SQLException e) {</span>
 <span class="nc" id="L51">      throw DatabaseException.wrap(e, sql);</span>
-<span class="nc" id="L52">    }</span>
-<span class="nc" id="L53">  }</span>
+<span class="fc" id="L52">    }</span>
+<span class="fc" id="L53">  }</span>
 
   @Override
 <span class="fc" id="L56">  public void close() { }</span>
