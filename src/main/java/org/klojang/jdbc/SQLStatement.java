@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import static java.util.Collections.singletonMap;
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.Tag.*;
+import static org.klojang.jdbc.x.Strings.RECORD;
 import static org.klojang.util.CollectionMethods.collectionToSet;
 
 /**
@@ -88,7 +89,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   @SuppressWarnings("unchecked")
   public T bind(Record record) {
     Check.that(fresh).is(yes(), DIRTY_INSTANCE);
-    Check.notNull(record, "record").then(bindings::add);
+    Check.notNull(record, RECORD).then(bindings::add);
     return (T) this;
   }
 

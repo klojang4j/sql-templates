@@ -13,6 +13,7 @@ import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.invoke.IncludeExclude.EXCLUDE;
 import static org.klojang.invoke.IncludeExclude.INCLUDE;
+import static org.klojang.jdbc.x.Strings.BEAN_CLASS;
 import static org.klojang.util.ArrayMethods.EMPTY_STRING_ARRAY;
 
 /**
@@ -154,7 +155,7 @@ public final class BatchInsertBuilder {
    */
   public <T> SQLBatchInsert<T> prepare(Connection con) {
     Check.notNull(con);
-    Check.on(STATE, beanClass, "beanClass").is(notNull());
+    Check.on(STATE, beanClass, BEAN_CLASS).is(notNull());
     BeanReader reader = new BeanReader<>(beanClass, includeExclude, properties);
     BatchInsertConfig cfg = new BatchInsertConfig<>(con,
           reader,

@@ -11,7 +11,9 @@ import java.util.*;
 
 import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.no;
-import static org.klojang.check.CommonExceptions.illegalState;
+import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.jdbc.x.Strings.LIMIT;
+import static org.klojang.jdbc.x.Strings.NO_MORE_ROWS;
 import static org.klojang.jdbc.x.rs.KeyWriter.toMap;
 
 final class DefaultMappifier implements ResultSetMappifier {
@@ -34,7 +36,7 @@ final class DefaultMappifier implements ResultSetMappifier {
 
     @Override
     public Map<String, Object> next() {
-      Check.that(m.isEmpty()).is(no(), illegalState("no more rows in result set"));
+      Check.on(STATE, m.isEmpty()).is(no(), NO_MORE_ROWS);
       return m.mappify().get();
     }
   }
@@ -65,7 +67,7 @@ final class DefaultMappifier implements ResultSetMappifier {
 
   @Override
   public List<Map<String, Object>> mappify(int limit) {
-    Check.that(limit, "limit").is(gt(), 0);
+    Check.that(limit, LIMIT).is(gt(), 0);
     if (empty) {
       return Collections.emptyList();
     }

@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import static java.util.Collections.singletonMap;
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.Tag.*;
+import static org.klojang.jdbc.x.Strings.RECORD;
 import static org.klojang.util.CollectionMethods.collectionToSet;
 
 /**
@@ -39,15 +40,15 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
   final List&lt;Object&gt; bindings;
   final Set&lt;NamedParameter&gt; bound;
 
-<span class="fc" id="L42">  private boolean fresh = true;</span>
+<span class="fc" id="L43">  private boolean fresh = true;</span>
 
-<span class="fc" id="L44">  SQLStatement(PreparedStatement ps, AbstractSQLSession session, SQLInfo sqlInfo) {</span>
-<span class="fc" id="L45">    this.ps = ps;</span>
-<span class="fc" id="L46">    this.session = session;</span>
-<span class="fc" id="L47">    this.sqlInfo = sqlInfo;</span>
-<span class="fc" id="L48">    this.bindings = new ArrayList&lt;&gt;(5);</span>
-<span class="fc" id="L49">    this.bound = HashSet.newHashSet(sqlInfo.parameters().size());</span>
-<span class="fc" id="L50">  }</span>
+<span class="fc" id="L45">  SQLStatement(PreparedStatement ps, AbstractSQLSession session, SQLInfo sqlInfo) {</span>
+<span class="fc" id="L46">    this.ps = ps;</span>
+<span class="fc" id="L47">    this.session = session;</span>
+<span class="fc" id="L48">    this.sqlInfo = sqlInfo;</span>
+<span class="fc" id="L49">    this.bindings = new ArrayList&lt;&gt;(5);</span>
+<span class="fc" id="L50">    this.bound = HashSet.newHashSet(sqlInfo.parameters().size());</span>
+<span class="fc" id="L51">  }</span>
 
   /**
    * Binds the specified value to the specified parameter.
@@ -57,9 +58,9 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
    * @return this {@code SQLStatement} instance
    */
   public T bind(String param, Object value) {
-<span class="fc" id="L60">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
-<span class="fc" id="L61">    Check.notNull(param, PARAM).is(keyIn(), sqlInfo.parameterPositions(), NO_SUCH_PARAM);</span>
-<span class="fc" id="L62">    return bind(singletonMap(param, value));</span>
+<span class="fc" id="L61">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
+<span class="fc" id="L62">    Check.notNull(param, PARAM).is(keyIn(), sqlInfo.parameterPositions(), NO_SUCH_PARAM);</span>
+<span class="fc" id="L63">    return bind(singletonMap(param, value));</span>
   }
 
   /**
@@ -73,9 +74,9 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public T bind(Object bean) {
-<span class="fc" id="L76">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
-<span class="fc" id="L77">    Check.notNull(bean, BEAN).then(bindings::add);</span>
-<span class="fc" id="L78">    return (T) this;</span>
+<span class="fc" id="L77">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
+<span class="fc" id="L78">    Check.notNull(bean, BEAN).then(bindings::add);</span>
+<span class="fc" id="L79">    return (T) this;</span>
   }
 
   /**
@@ -87,9 +88,9 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public T bind(Record record) {
-<span class="fc" id="L90">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
-<span class="fc" id="L91">    Check.notNull(record, &quot;record&quot;).then(bindings::add);</span>
-<span class="fc" id="L92">    return (T) this;</span>
+<span class="fc" id="L91">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
+<span class="fc" id="L92">    Check.notNull(record, RECORD).then(bindings::add);</span>
+<span class="fc" id="L93">    return (T) this;</span>
   }
 
   /**
@@ -102,39 +103,39 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public T bind(Map&lt;String, Object&gt; map) {
-<span class="fc" id="L105">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
-<span class="fc" id="L106">    Check.notNull(map, MAP).then(bindings::add);</span>
-<span class="fc" id="L107">    return (T) this;</span>
+<span class="fc" id="L106">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
+<span class="fc" id="L107">    Check.notNull(map, MAP).then(bindings::add);</span>
+<span class="fc" id="L108">    return (T) this;</span>
   }
 
   /**
    * Clears all bindings and allows the statement to be re-executed with new bindings.
    */
   public void reset() {
-<span class="fc" id="L114">    bindings.clear();</span>
-<span class="fc" id="L115">    bound.clear();</span>
-<span class="fc" id="L116">    fresh = true;</span>
-<span class="fc" id="L117">    initialize();</span>
-<span class="fc" id="L118">  }</span>
+<span class="fc" id="L115">    bindings.clear();</span>
+<span class="fc" id="L116">    bound.clear();</span>
+<span class="fc" id="L117">    fresh = true;</span>
+<span class="fc" id="L118">    initialize();</span>
+<span class="fc" id="L119">  }</span>
 
   abstract void initialize();
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   void applyBindings(PreparedStatement ps) throws Throwable {
-<span class="fc" id="L124">    fresh = false;</span>
-<span class="fc bfc" id="L125" title="All 2 branches covered.">    for (Object obj : bindings) {</span>
-<span class="fc bfc" id="L126" title="All 2 branches covered.">      if (obj instanceof Map map) {</span>
-<span class="fc" id="L127">        MapBinder binder = new MapBinder(sqlInfo.parameters(),</span>
-<span class="fc" id="L128">              session.getSQL().getBindInfo());</span>
-<span class="fc" id="L129">        binder.bind(map, ps, bound);</span>
-<span class="fc" id="L130">      } else {</span>
-<span class="fc" id="L131">        BeanBinder binder = session.getSQL().getBeanBinder(obj.getClass(), sqlInfo);</span>
-<span class="fc" id="L132">        binder.bind(obj, ps);</span>
-<span class="fc" id="L133">        bound.addAll(binder.getBoundParameters());</span>
+<span class="fc" id="L125">    fresh = false;</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">    for (Object obj : bindings) {</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">      if (obj instanceof Map map) {</span>
+<span class="fc" id="L128">        MapBinder binder = new MapBinder(sqlInfo.parameters(),</span>
+<span class="fc" id="L129">              session.getSQL().getBindInfo());</span>
+<span class="fc" id="L130">        binder.bind(map, ps, bound);</span>
+<span class="fc" id="L131">      } else {</span>
+<span class="fc" id="L132">        BeanBinder binder = session.getSQL().getBeanBinder(obj.getClass(), sqlInfo);</span>
+<span class="fc" id="L133">        binder.bind(obj, ps);</span>
+<span class="fc" id="L134">        bound.addAll(binder.getBoundParameters());</span>
       }
-<span class="fc" id="L135">    }</span>
-<span class="fc" id="L136">    Check.that(bound.size()).is(eq(), sqlInfo.parameters().size(), incompleteBindings());</span>
-<span class="fc" id="L137">  }</span>
+<span class="fc" id="L136">    }</span>
+<span class="fc" id="L137">    Check.that(bound.size()).is(eq(), sqlInfo.parameters().size(), incompleteBindings());</span>
+<span class="fc" id="L138">  }</span>
 
   /**
    * Releases all resources held by this instance. You cannot reuse the instance after a
@@ -143,17 +144,17 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
   @Override
   public void close() {
     try {
-<span class="fc" id="L146">      ps.close();</span>
-<span class="nc" id="L147">    } catch (SQLException e) {</span>
-<span class="nc" id="L148">      throw Utils.wrap(e, sqlInfo);</span>
-<span class="fc" id="L149">    }</span>
-<span class="fc" id="L150">  }</span>
+<span class="fc" id="L147">      ps.close();</span>
+<span class="nc" id="L148">    } catch (SQLException e) {</span>
+<span class="nc" id="L149">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="fc" id="L150">    }</span>
+<span class="fc" id="L151">  }</span>
 
   private Supplier&lt;DatabaseException&gt; incompleteBindings() {
-<span class="fc" id="L153">    Set&lt;String&gt; all = new HashSet&lt;&gt;(sqlInfo.parameterPositions().keySet());</span>
-<span class="fc" id="L154">    all.removeAll(collectionToSet(bound, NamedParameter::name));</span>
-<span class="fc" id="L155">    String fmt = &quot;some query parameters have not been bound yet: %s&quot;;</span>
-<span class="pc" id="L156">    return () -&gt; new DatabaseException(String.format(fmt, all));</span>
+<span class="fc" id="L154">    Set&lt;String&gt; all = new HashSet&lt;&gt;(sqlInfo.parameterPositions().keySet());</span>
+<span class="fc" id="L155">    all.removeAll(collectionToSet(bound, NamedParameter::name));</span>
+<span class="fc" id="L156">    String fmt = &quot;some query parameters have not been bound yet: %s&quot;;</span>
+<span class="pc" id="L157">    return () -&gt; new DatabaseException(String.format(fmt, all));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

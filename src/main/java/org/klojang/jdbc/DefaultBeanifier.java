@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.jdbc.x.Strings.*;
 
 final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
@@ -34,7 +35,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
     @Override
     public T next() {
-      Check.on(STATE, beanifier.empty).is(yes(), "no more rows in result set");
+      Check.on(STATE, beanifier.empty).is(yes(), NO_MORE_ROWS);
       return beanifier.beanify().get();
     }
   }
@@ -67,7 +68,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
   @Override
   public List<T> beanify(int limit) {
-    Check.that(limit, "limit").is(gt(), 0);
+    Check.that(limit, LIMIT).is(gt(), 0);
     if (empty) {
       return Collections.emptyList();
     }
@@ -90,7 +91,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
   @Override
   public List<T> beanifyAll(int sizeEstimate) {
-    Check.that(sizeEstimate, "sizeEstimate").is(gt(), 0);
+    Check.that(sizeEstimate, SIZE_ESTIMATE).is(gt(), 0);
     if (empty) {
       return Collections.emptyList();
     }

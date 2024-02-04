@@ -13,29 +13,30 @@ import java.util.function.Supplier;
 import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.jdbc.x.Strings.*;
 
 final class DefaultBeanifier&lt;T&gt; implements ResultSetBeanifier&lt;T&gt; {
 
   @SuppressWarnings(&quot;unused&quot;)
-<span class="fc" id="L20">  private static final Logger LOG = LoggerFactory.getLogger(DefaultBeanifier.class);</span>
+<span class="fc" id="L21">  private static final Logger LOG = LoggerFactory.getLogger(DefaultBeanifier.class);</span>
 
   private static class BeanIterator&lt;T&gt; implements Iterator&lt;T&gt; {
 
     private final DefaultBeanifier&lt;T&gt; beanifier;
 
-<span class="nc" id="L26">    BeanIterator(DefaultBeanifier&lt;T&gt; beanifier) {</span>
-<span class="nc" id="L27">      this.beanifier = beanifier;</span>
-<span class="nc" id="L28">    }</span>
+<span class="nc" id="L27">    BeanIterator(DefaultBeanifier&lt;T&gt; beanifier) {</span>
+<span class="nc" id="L28">      this.beanifier = beanifier;</span>
+<span class="nc" id="L29">    }</span>
 
     @Override
     public boolean hasNext() {
-<span class="nc bnc" id="L32" title="All 2 branches missed.">      return !beanifier.empty;</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">      return !beanifier.empty;</span>
     }
 
     @Override
     public T next() {
-<span class="nc" id="L37">      Check.on(STATE, beanifier.empty).is(yes(), &quot;no more rows in result set&quot;);</span>
-<span class="nc" id="L38">      return beanifier.beanify().get();</span>
+<span class="nc" id="L38">      Check.on(STATE, beanifier.empty).is(yes(), NO_MORE_ROWS);</span>
+<span class="nc" id="L39">      return beanifier.beanify().get();</span>
     }
   }
 
@@ -45,75 +46,75 @@ final class DefaultBeanifier&lt;T&gt; implements ResultSetBeanifier&lt;T&gt; {
 
   private boolean empty;
 
-<span class="fc" id="L48">  DefaultBeanifier(ResultSet rs, PropertyWriter&lt;?, ?&gt;[] writers, Supplier&lt;T&gt; supplier) {</span>
-<span class="fc" id="L49">    this.rs = rs;</span>
-<span class="fc" id="L50">    this.writers = writers;</span>
-<span class="fc" id="L51">    this.beanSupplier = supplier;</span>
-<span class="fc" id="L52">  }</span>
+<span class="fc" id="L49">  DefaultBeanifier(ResultSet rs, PropertyWriter&lt;?, ?&gt;[] writers, Supplier&lt;T&gt; supplier) {</span>
+<span class="fc" id="L50">    this.rs = rs;</span>
+<span class="fc" id="L51">    this.writers = writers;</span>
+<span class="fc" id="L52">    this.beanSupplier = supplier;</span>
+<span class="fc" id="L53">  }</span>
 
   @Override
   public Optional&lt;T&gt; beanify() {
-<span class="nc bnc" id="L56" title="All 2 branches missed.">    if (empty) {</span>
-<span class="nc" id="L57">      return Optional.empty();</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">    if (empty) {</span>
+<span class="nc" id="L58">      return Optional.empty();</span>
     }
     try {
-<span class="nc" id="L60">      Optional&lt;T&gt; bean = Optional.of(PropertyWriter.writeAll(rs, beanSupplier, writers));</span>
-<span class="nc bnc" id="L61" title="All 2 branches missed.">      empty = !rs.next();</span>
-<span class="nc" id="L62">      return bean;</span>
-<span class="nc" id="L63">    } catch (Throwable t) {</span>
-<span class="nc" id="L64">      throw Utils.wrap(t);</span>
+<span class="nc" id="L61">      Optional&lt;T&gt; bean = Optional.of(PropertyWriter.writeAll(rs, beanSupplier, writers));</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">      empty = !rs.next();</span>
+<span class="nc" id="L63">      return bean;</span>
+<span class="nc" id="L64">    } catch (Throwable t) {</span>
+<span class="nc" id="L65">      throw Utils.wrap(t);</span>
     }
   }
 
   @Override
   public List&lt;T&gt; beanify(int limit) {
-<span class="nc" id="L70">    Check.that(limit, &quot;limit&quot;).is(gt(), 0);</span>
-<span class="nc bnc" id="L71" title="All 2 branches missed.">    if (empty) {</span>
-<span class="nc" id="L72">      return Collections.emptyList();</span>
+<span class="nc" id="L71">    Check.that(limit, LIMIT).is(gt(), 0);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">    if (empty) {</span>
+<span class="nc" id="L73">      return Collections.emptyList();</span>
     }
-<span class="nc" id="L74">    List&lt;T&gt; beans = new ArrayList&lt;&gt;(limit);</span>
-<span class="nc" id="L75">    int i = 0;</span>
+<span class="nc" id="L75">    List&lt;T&gt; beans = new ArrayList&lt;&gt;(limit);</span>
+<span class="nc" id="L76">    int i = 0;</span>
     try {
       do {
-<span class="nc" id="L78">        beans.add(PropertyWriter.writeAll(rs, beanSupplier, writers));</span>
-<span class="nc bnc" id="L79" title="All 6 branches missed.">      } while (++i &lt; limit &amp;&amp; (empty = !rs.next()));</span>
-<span class="nc" id="L80">    } catch (Throwable t) {</span>
-<span class="nc" id="L81">      throw Utils.wrap(t);</span>
-<span class="nc" id="L82">    }</span>
-<span class="nc" id="L83">    return beans;</span>
+<span class="nc" id="L79">        beans.add(PropertyWriter.writeAll(rs, beanSupplier, writers));</span>
+<span class="nc bnc" id="L80" title="All 6 branches missed.">      } while (++i &lt; limit &amp;&amp; (empty = !rs.next()));</span>
+<span class="nc" id="L81">    } catch (Throwable t) {</span>
+<span class="nc" id="L82">      throw Utils.wrap(t);</span>
+<span class="nc" id="L83">    }</span>
+<span class="nc" id="L84">    return beans;</span>
   }
 
   @Override
   public List&lt;T&gt; beanifyAll() {
-<span class="fc" id="L88">    return beanifyAll(10);</span>
+<span class="fc" id="L89">    return beanifyAll(10);</span>
   }
 
   @Override
   public List&lt;T&gt; beanifyAll(int sizeEstimate) {
-<span class="fc" id="L93">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
-<span class="pc bpc" id="L94" title="1 of 2 branches missed.">    if (empty) {</span>
-<span class="nc" id="L95">      return Collections.emptyList();</span>
+<span class="fc" id="L94">    Check.that(sizeEstimate, SIZE_ESTIMATE).is(gt(), 0);</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">    if (empty) {</span>
+<span class="nc" id="L96">      return Collections.emptyList();</span>
     }
-<span class="fc" id="L97">    List&lt;T&gt; beans = new ArrayList&lt;&gt;(sizeEstimate);</span>
+<span class="fc" id="L98">    List&lt;T&gt; beans = new ArrayList&lt;&gt;(sizeEstimate);</span>
     try {
       do {
-<span class="fc" id="L100">        beans.add(PropertyWriter.writeAll(rs, beanSupplier, writers));</span>
-<span class="fc bfc" id="L101" title="All 2 branches covered.">      } while (rs.next());</span>
-<span class="nc" id="L102">    } catch (Throwable t) {</span>
-<span class="nc" id="L103">      throw Utils.wrap(t);</span>
-<span class="fc" id="L104">    }</span>
-<span class="fc" id="L105">    empty = true;</span>
-<span class="fc" id="L106">    return beans;</span>
+<span class="fc" id="L101">        beans.add(PropertyWriter.writeAll(rs, beanSupplier, writers));</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">      } while (rs.next());</span>
+<span class="nc" id="L103">    } catch (Throwable t) {</span>
+<span class="nc" id="L104">      throw Utils.wrap(t);</span>
+<span class="fc" id="L105">    }</span>
+<span class="fc" id="L106">    empty = true;</span>
+<span class="fc" id="L107">    return beans;</span>
   }
 
   @Override
   public boolean isEmpty() {
-<span class="nc" id="L111">    return empty;</span>
+<span class="nc" id="L112">    return empty;</span>
   }
 
   @Override
   public Iterator&lt;T&gt; iterator() {
-<span class="nc" id="L116">    return new BeanIterator&lt;&gt;(this);</span>
+<span class="nc" id="L117">    return new BeanIterator&lt;&gt;(this);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

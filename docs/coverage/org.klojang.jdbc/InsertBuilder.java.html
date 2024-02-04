@@ -15,6 +15,7 @@ import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.check.Tag.PROPERTIES;
+import static org.klojang.jdbc.x.Strings.BEAN_CLASS;
 import static org.klojang.util.CollectionMethods.implode;
 import static org.klojang.util.ObjectMethods.ifNull;
 import static org.klojang.util.ObjectMethods.isEmpty;
@@ -34,11 +35,11 @@ public final class InsertBuilder {
   private String[] properties;
   private boolean exclude;
 
-<span class="fc" id="L37">  private NameMapper mapper = NameMapper.AS_IS;</span>
-<span class="fc" id="L38">  private BindInfo bindInfo = new BindInfo() { };</span>
-<span class="fc" id="L39">  private boolean returnKeys = true;</span>
+<span class="fc" id="L38">  private NameMapper mapper = NameMapper.AS_IS;</span>
+<span class="fc" id="L39">  private BindInfo bindInfo = new BindInfo() { };</span>
+<span class="fc" id="L40">  private boolean returnKeys = true;</span>
 
-<span class="fc" id="L41">  InsertBuilder() { }</span>
+<span class="fc" id="L42">  InsertBuilder() { }</span>
 
   /**
    * Sets the type of the beans to be persisted.
@@ -47,8 +48,8 @@ public final class InsertBuilder {
    * @return this {@code SQLInsertBuilder}
    */
   public InsertBuilder of(Class&lt;?&gt; beanClass) {
-<span class="fc" id="L50">    this.beanClass = Check.notNull(beanClass).ok();</span>
-<span class="fc" id="L51">    return this;</span>
+<span class="fc" id="L51">    this.beanClass = Check.notNull(beanClass).ok();</span>
+<span class="fc" id="L52">    return this;</span>
   }
 
   /**
@@ -59,8 +60,8 @@ public final class InsertBuilder {
    * @return this {@code SQLInsertBuilder}
    */
   public InsertBuilder into(String tableName) {
-<span class="fc" id="L62">    this.tableName = Check.that(tableName).isNot(empty()).ok();</span>
-<span class="fc" id="L63">    return this;</span>
+<span class="fc" id="L63">    this.tableName = Check.that(tableName).isNot(empty()).ok();</span>
+<span class="fc" id="L64">    return this;</span>
   }
 
   /**
@@ -74,10 +75,10 @@ public final class InsertBuilder {
    * @return this {@code SQLInsertBuilder}
    */
   public InsertBuilder excluding(String... properties) {
-<span class="fc" id="L77">    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));</span>
-<span class="fc" id="L78">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
-<span class="fc" id="L79">    this.exclude = true;</span>
-<span class="fc" id="L80">    return this;</span>
+<span class="fc" id="L78">    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));</span>
+<span class="fc" id="L79">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
+<span class="fc" id="L80">    this.exclude = true;</span>
+<span class="fc" id="L81">    return this;</span>
   }
 
   /**
@@ -90,10 +91,10 @@ public final class InsertBuilder {
    * @return this {@code SQLInsertBuilder}
    */
   public InsertBuilder including(String... properties) {
-<span class="nc" id="L93">    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));</span>
-<span class="nc" id="L94">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
-<span class="nc" id="L95">    this.exclude = false;</span>
-<span class="nc" id="L96">    return this;</span>
+<span class="nc" id="L94">    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));</span>
+<span class="nc" id="L95">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
+<span class="nc" id="L96">    this.exclude = false;</span>
+<span class="nc" id="L97">    return this;</span>
   }
 
   /**
@@ -106,8 +107,8 @@ public final class InsertBuilder {
    * @return this {@code SQLInsertBuilder}
    */
   public InsertBuilder retrieveKeys(boolean b) {
-<span class="fc" id="L109">    this.returnKeys = b;</span>
-<span class="fc" id="L110">    return this;</span>
+<span class="fc" id="L110">    this.returnKeys = b;</span>
+<span class="fc" id="L111">    return this;</span>
   }
 
   /**
@@ -119,8 +120,8 @@ public final class InsertBuilder {
    * @return this {@code SQLInsertBuilder}
    */
   public InsertBuilder withMapper(NameMapper propertyToColumnMapper) {
-<span class="nc" id="L122">    this.mapper = Check.notNull(propertyToColumnMapper).ok();</span>
-<span class="nc" id="L123">    return this;</span>
+<span class="nc" id="L123">    this.mapper = Check.notNull(propertyToColumnMapper).ok();</span>
+<span class="nc" id="L124">    return this;</span>
   }
 
   /**
@@ -131,8 +132,8 @@ public final class InsertBuilder {
    * @return this {@code SQLInsertBuilder}
    */
   public InsertBuilder withBindInfo(BindInfo bindInfo) {
-<span class="nc" id="L134">    this.bindInfo = Check.notNull(bindInfo).ok();</span>
-<span class="nc" id="L135">    return this;</span>
+<span class="nc" id="L135">    this.bindInfo = Check.notNull(bindInfo).ok();</span>
+<span class="nc" id="L136">    return this;</span>
   }
 
   /**
@@ -142,38 +143,38 @@ public final class InsertBuilder {
    * @return a {@code SQLInsert} instance that allows you to execute the INSERT statement
    */
   public SQLInsert prepare(Connection con) {
-<span class="fc" id="L145">    Check.notNull(con);</span>
-<span class="fc" id="L146">    Check.on(STATE, beanClass, &quot;beanClass&quot;).is(notNull());</span>
-<span class="fc" id="L147">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
-<span class="fc" id="L148">    Set&lt;String&gt; props = getters.keySet();</span>
-<span class="fc bfc" id="L149" title="All 2 branches covered.">    if (!isEmpty(properties)) {</span>
-<span class="pc bpc" id="L150" title="1 of 2 branches missed.">      if (exclude) {</span>
-<span class="fc" id="L151">        props = new LinkedHashSet&lt;&gt;(props);</span>
-<span class="fc bfc" id="L152" title="All 2 branches covered.">        for (String prop : properties) {</span>
-<span class="fc" id="L153">          checkProperty(props, prop).then(props::remove);</span>
+<span class="fc" id="L146">    Check.notNull(con);</span>
+<span class="fc" id="L147">    Check.on(STATE, beanClass, BEAN_CLASS).is(notNull());</span>
+<span class="fc" id="L148">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
+<span class="fc" id="L149">    Set&lt;String&gt; props = getters.keySet();</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">    if (!isEmpty(properties)) {</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">      if (exclude) {</span>
+<span class="fc" id="L152">        props = new LinkedHashSet&lt;&gt;(props);</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        for (String prop : properties) {</span>
+<span class="fc" id="L154">          checkProperty(props, prop).then(props::remove);</span>
         }
       } else {
-<span class="nc" id="L156">        Set&lt;String&gt; tmp = new LinkedHashSet&lt;&gt;(properties.length);</span>
-<span class="nc bnc" id="L157" title="All 2 branches missed.">        for (String prop : properties) {</span>
-<span class="nc" id="L158">          checkProperty(props, prop).then(tmp::add);</span>
+<span class="nc" id="L157">        Set&lt;String&gt; tmp = new LinkedHashSet&lt;&gt;(properties.length);</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        for (String prop : properties) {</span>
+<span class="nc" id="L159">          checkProperty(props, prop).then(tmp::add);</span>
         }
-<span class="nc" id="L160">        props = tmp;</span>
+<span class="nc" id="L161">        props = tmp;</span>
       }
     }
-<span class="fc" id="L163">    String cols = implode(props, mapper::map, &quot;,&quot;);</span>
-<span class="fc" id="L164">    String params = implode(props, s -&gt; &quot;:&quot; + s, &quot;,&quot;);</span>
-<span class="fc" id="L165">    String table = ifNull(tableName, beanClass.getSimpleName());</span>
-<span class="fc" id="L166">    StringBuilder sb = new StringBuilder(100);</span>
-<span class="fc" id="L167">    append(sb, &quot;INSERT INTO &quot;, table, &quot; (&quot;, cols, &quot;) VALUES(&quot;, params, &quot;)&quot;);</span>
-<span class="fc" id="L168">    SQLSession sql = SQL.simple(sb.toString(), bindInfo).session(con);</span>
-<span class="fc" id="L169">    return sql.prepareInsert(returnKeys);</span>
+<span class="fc" id="L164">    String cols = implode(props, mapper::map, &quot;,&quot;);</span>
+<span class="fc" id="L165">    String params = implode(props, s -&gt; &quot;:&quot; + s, &quot;,&quot;);</span>
+<span class="fc" id="L166">    String table = ifNull(tableName, beanClass.getSimpleName());</span>
+<span class="fc" id="L167">    StringBuilder sb = new StringBuilder(100);</span>
+<span class="fc" id="L168">    append(sb, &quot;INSERT INTO &quot;, table, &quot; (&quot;, cols, &quot;) VALUES(&quot;, params, &quot;)&quot;);</span>
+<span class="fc" id="L169">    SQLSession sql = SQL.simple(sb.toString(), bindInfo).session(con);</span>
+<span class="fc" id="L170">    return sql.prepareInsert(returnKeys);</span>
   }
 
   private ObjectCheck&lt;String, IllegalStateException&gt; checkProperty(Set&lt;String&gt; props,
         String prop) {
-<span class="fc" id="L174">    return Check.on(STATE, prop)</span>
-<span class="fc" id="L175">          .isNot(emptyString(), EMPTY_PROPERTY_NAME)</span>
-<span class="fc" id="L176">          .is(in(), props, NO_SUCH_PROPERTY, beanClass.getSimpleName());</span>
+<span class="fc" id="L175">    return Check.on(STATE, prop)</span>
+<span class="fc" id="L176">          .isNot(emptyString(), EMPTY_PROPERTY_NAME)</span>
+<span class="fc" id="L177">          .is(in(), props, NO_SUCH_PROPERTY, beanClass.getSimpleName());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

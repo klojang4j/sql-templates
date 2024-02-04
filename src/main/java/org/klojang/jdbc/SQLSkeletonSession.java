@@ -97,8 +97,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
 
   private SQLInfo getSQLInfo() {
     Check.that(session.hasUnsetVariables()).is(no(), unfinishedSession());
-    String sql = session.render();
-    return new SQLInfo(sql, new ParamExtractor(sql));
+    return new SQLInfo(new ParamExtractor(session.render()));
   }
 
 
