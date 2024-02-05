@@ -21,7 +21,9 @@ import static org.klojang.util.CollectionMethods.collectionToSet;
 /**
  * Abstract base class for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate}. A
  * {@code SQLStatement} allows you to bind the named parameters within a SQL statement and
- * then execute it.
+ * then execute it. {@code SQLStatement} instances are not thread-safe. They should be
+ * created, operated upon, and closed by one and the same thread. They are not supposed to
+ * survive the method in which they are created.
  *
  * @param <T> the {@code SQLStatement} subtype returned by various methods in the
  *       fluent API.

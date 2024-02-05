@@ -180,7 +180,11 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * Executes the query and returns {@code true} if the query yielded at least one row;
    * {@code false} otherwise. If the query had already been executed, it will not be
    * executed again. Call {@link SQLStatement#reset() reset()} to force the query to be
-   * re-executed.
+   * re-executed. Note that this method will call {@link ResultSet#next()}, moving the
+   * cursor to the next row in the {@code ResultSet}. This will influence the outcome of
+   * the other methods of {@code SQLQuery}, and of subsequent calls to {@code exists()}
+   * for that matter. Only call this method if the only thing you are interested in is
+   * figuring out if a query yields a result, and nothing else.
    *
    * @return {@code true} if the query yielded at least one row; {@code false} otherwise
    */
