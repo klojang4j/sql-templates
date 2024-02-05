@@ -11,9 +11,9 @@ package org.klojang.jdbc;
  *   <li>an already properly escaped and quoted string literal like
  *       <b>{@code 'Chicago O''Hare International Airport'}</b>
  * </ul>
- * SQL expressions will be injected as-is into SQL statements. Use a {@link Quoter} or
- * {@link SQLSession#quoteValue(Object) SQLSession.quoteValue()} to escape and quote the
- * individual components of the expression if necessary.
+ * SQL expressions will be injected as-is into SQL statements. Use a {@link Quoter} or the
+ * various {@code quote} methods in {@link SQLSession} to escape and quote the individual
+ * components of the expression if necessary.
  */
 public final class SQLExpression {
 

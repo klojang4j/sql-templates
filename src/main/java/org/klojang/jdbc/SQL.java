@@ -56,7 +56,10 @@ import java.sql.Connection;
  * <p>SQL templates can be created using the {@link #template(String) SQL.template()}
  * method. <i>Klojang JDBC</i> is agnostic about, and has no opinion on what gets
  * parametrized this way. You could also parametrize the table(s) in the FROM clause for
- * example.
+ * example. <i>Klojang JDBC</i> lets you do this in a safe manner by providing the
+ * {@link SQLSession#setIdentifier(String, String) setIdentifier()} method. This method
+ * protects you against SQL injection by applying the quoting rules of the target database
+ * to the provided identifier.
  *
  * <h2>SQL Skeletons</h2>
  * <p>The implementation obtained via the {@link #skeleton(String) SQL.skeleton()}

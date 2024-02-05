@@ -56,7 +56,10 @@ import java.sql.Connection;
  * &lt;p&gt;SQL templates can be created using the {@link #template(String) SQL.template()}
  * method. &lt;i&gt;Klojang JDBC&lt;/i&gt; is agnostic about, and has no opinion on what gets
  * parametrized this way. You could also parametrize the table(s) in the FROM clause for
- * example.
+ * example. &lt;i&gt;Klojang JDBC&lt;/i&gt; lets you do this in a safe manner by providing the
+ * {@link SQLSession#setIdentifier(String, String) setIdentifier()} method. This method
+ * protects you against SQL injection by applying the quoting rules of the target database
+ * to the provided identifier.
  *
  * &lt;h2&gt;SQL Skeletons&lt;/h2&gt;
  * &lt;p&gt;The implementation obtained via the {@link #skeleton(String) SQL.skeleton()}
@@ -90,7 +93,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL staticSQL(String sql) {
-<span class="fc" id="L93">    return new SimpleSQL(sql, true, noBindInfo());</span>
+<span class="fc" id="L96">    return new SimpleSQL(sql, true, noBindInfo());</span>
   }
 
   /**
@@ -102,7 +105,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL simple(String sql) {
-<span class="fc" id="L105">    return simple(sql, noBindInfo());</span>
+<span class="fc" id="L108">    return simple(sql, noBindInfo());</span>
   }
 
   /**
@@ -115,7 +118,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL simple(String sql, BindInfo bindInfo) {
-<span class="fc" id="L118">    return new SimpleSQL(sql, false, bindInfo);</span>
+<span class="fc" id="L121">    return new SimpleSQL(sql, false, bindInfo);</span>
   }
 
   /**
@@ -133,7 +136,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql) {
-<span class="fc" id="L136">    return simpleQuery(con, sql, noBindInfo());</span>
+<span class="fc" id="L139">    return simpleQuery(con, sql, noBindInfo());</span>
   }
 
   /**
@@ -153,7 +156,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql, BindInfo bindInfo) {
-<span class="fc" id="L156">    return simple(sql, bindInfo).session(con).prepareQuery();</span>
+<span class="fc" id="L159">    return simple(sql, bindInfo).session(con).prepareQuery();</span>
   }
 
   /**
@@ -171,7 +174,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareInsert()
    */
   static SQLInsert simpleInsert(Connection con, String sql) {
-<span class="nc" id="L174">    return simple(sql, noBindInfo()).session(con).prepareInsert();</span>
+<span class="nc" id="L177">    return simple(sql, noBindInfo()).session(con).prepareInsert();</span>
   }
 
   /**
@@ -196,7 +199,7 @@ public sealed interface SQL permits AbstractSQL {
         String sql,
         boolean retrieveKeys,
         BindInfo bindInfo) {
-<span class="nc" id="L199">    return simple(sql, bindInfo).session(con).prepareInsert(retrieveKeys);</span>
+<span class="nc" id="L202">    return simple(sql, bindInfo).session(con).prepareInsert(retrieveKeys);</span>
   }
 
   /**
@@ -214,7 +217,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql) {
-<span class="nc" id="L217">    return simpleUpdate(con, sql, noBindInfo());</span>
+<span class="nc" id="L220">    return simpleUpdate(con, sql, noBindInfo());</span>
   }
 
   /**
@@ -234,7 +237,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L237">    return simple(sql, bindInfo).session(con).prepareUpdate();</span>
+<span class="nc" id="L240">    return simple(sql, bindInfo).session(con).prepareUpdate();</span>
   }
 
 
@@ -247,7 +250,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(String sql) {
-<span class="fc" id="L250">    return template(sql, noBindInfo());</span>
+<span class="fc" id="L253">    return template(sql, noBindInfo());</span>
   }
 
   /**
@@ -261,7 +264,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(String sql, BindInfo bindInfo) {
-<span class="fc" id="L264">    return new SQLTemplate(sql, bindInfo);</span>
+<span class="fc" id="L267">    return new SQLTemplate(sql, bindInfo);</span>
   }
 
   /**
@@ -274,7 +277,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(String sql) {
-<span class="fc" id="L277">    return skeleton(sql, noBindInfo());</span>
+<span class="fc" id="L280">    return skeleton(sql, noBindInfo());</span>
   }
 
 
@@ -290,7 +293,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="fc" id="L293">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="fc" id="L296">    return new SQLSkeleton(sql, bindInfo);</span>
   }
 
   /**
@@ -301,7 +304,7 @@ public sealed interface SQL permits AbstractSQL {
    *       INSERT statement
    */
   static InsertBuilder configureInsert() {
-<span class="fc" id="L304">    return new InsertBuilder();</span>
+<span class="fc" id="L307">    return new InsertBuilder();</span>
   }
 
   /**
@@ -312,7 +315,7 @@ public sealed interface SQL permits AbstractSQL {
    *       batch inserts.
    */
   static BatchInsertBuilder configureBatchInsert() {
-<span class="fc" id="L315">    return new BatchInsertBuilder();</span>
+<span class="fc" id="L318">    return new BatchInsertBuilder();</span>
   }
 
   /**
@@ -327,7 +330,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see Quoter
    */
   static SQLExpression expression(String expression) {
-<span class="nc" id="L330">    return new SQLExpression(expression);</span>
+<span class="nc" id="L333">    return new SQLExpression(expression);</span>
   }
 
   /**
@@ -339,7 +342,7 @@ public sealed interface SQL permits AbstractSQL {
   SQLSession session(Connection con);
 
   private static BindInfo noBindInfo() {
-<span class="fc" id="L342">    return new BindInfo() { };</span>
+<span class="fc" id="L345">    return new BindInfo() { };</span>
   }
 
 
