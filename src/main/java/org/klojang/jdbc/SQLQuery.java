@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.OptionalInt;
 import java.util.function.Supplier;
 
 import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
@@ -99,8 +98,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Executes the query and returns the value of the first column in the first row. The
-   * second time you call this method, you get the value of the first column in the second
+   * Executes the query and returns the value of the first column of the first row. The
+   * second time you call this method, you get the value of the first column of the second
    * row, and so on. If there are no (more) rows in the {@code ResultSet},
    * {@link Result#notAvailable() Result.notAvailable()} is returned. If the query had
    * already been executed, it will not be executed again. Call
@@ -108,9 +107,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    *
    * @param <T> the type of the value to be returned
    * @param clazz the class of the value to be returned
-   * @return the value of the first column in the first row or
-   *       {@link Result#notAvailable() Result.notAvailable()} if there are no (more) rows
-   *       in the {@code ResultSet}
+   * @return a {@code Result} containing the value of the first column of the first row or
+   *       {@link Result#notAvailable()} if there are no (more) rows in the
+   *       {@code ResultSet}
    */
   public <T> Result<T> lookup(Class<T> clazz) {
     try {
@@ -130,14 +129,16 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Executes the query and returns the value of the first column in the first row as an
+   * Executes the query and returns the value of the first column of the first row as an
    * {@code Integer}. Equivalent to {@code lookup(Integer.class}). The second time you
-   * call this method, you get the value of the first column in the second row, and so on.
-   * If there are no (more) rows in the {@code ResultSet}, {@link OptionalInt#empty()} is
-   * returned. If the query had already been executed, it will not be executed again. Call
-   * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
+   * call this method, you get the value of the first column of the second row, and so on.
+   * If there are no (more) rows in the {@code ResultSet}, {@link Result#notAvailable()}
+   * is returned. If the query had already been executed, it will not be executed again.
+   * Call {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
-   * @return the value of the first column in the first row as an integer
+   * @return a {@code Result} containing the value of the first column of the first row or
+   *       {@link Result#notAvailable()} if there are no (more) rows in the
+   *       {@code ResultSet}
    */
   public Result<Integer> getInt() {
     try {
@@ -154,12 +155,14 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   /**
    * Executes the query and returns the value of the first column of the first row as a
    * {@code String}. Equivalent to {@code lookup(String.class}). The second time you call
-   * this method, you get the value of the first column in the second row, and so on. If
+   * this method, you get the value of the first column of the second row, and so on. If
    * there are no (more) rows in the {@code ResultSet}, {@link Result#notAvailable()} is
    * returned. If the query had already been executed, it will not be executed again. Call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
-   * @return the value of the first column of the first row as a {@code String}
+   * @return a {@code Result} containing the value of the first column of the first row or
+   *       {@link Result#notAvailable()} if there are no (more) rows in the
+   *       {@code ResultSet}
    */
   public Result<String> getString() {
     try {

@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.OptionalInt;
 import java.util.function.Supplier;
 
 import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
@@ -59,14 +58,14 @@ import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
  */
 public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
 
-<span class="fc" id="L62">  private static final Logger LOG = LoggerFactory.getLogger(SQLQuery.class);</span>
+<span class="fc" id="L61">  private static final Logger LOG = LoggerFactory.getLogger(SQLQuery.class);</span>
 
-<span class="fc" id="L64">  private NameMapper mapper = NameMapper.AS_IS;</span>
+<span class="fc" id="L63">  private NameMapper mapper = NameMapper.AS_IS;</span>
   private ResultSet resultSet;
 
   SQLQuery(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
-<span class="fc" id="L68">    super(ps, sql, sqlInfo);</span>
-<span class="fc" id="L69">  }</span>
+<span class="fc" id="L67">    super(ps, sql, sqlInfo);</span>
+<span class="fc" id="L68">  }</span>
 
   /**
    * Sets the column-to-property mapper to be used when populating JavaBeans or maps from
@@ -77,8 +76,8 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @return this {@code SQLQuery} instance
    */
   public SQLQuery withNameMapper(NameMapper columnToPropertyMapper) {
-<span class="fc" id="L80">    this.mapper = Check.notNull(columnToPropertyMapper).ok();</span>
-<span class="fc" id="L81">    return this;</span>
+<span class="fc" id="L79">    this.mapper = Check.notNull(columnToPropertyMapper).ok();</span>
+<span class="fc" id="L80">    return this;</span>
   }
 
   /**
@@ -91,16 +90,16 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public ResultSet execute() {
     try {
-<span class="nc" id="L94">      executeSQL();</span>
-<span class="nc" id="L95">      return resultSet;</span>
-<span class="nc" id="L96">    } catch (Throwable t) {</span>
-<span class="nc" id="L97">      throw Utils.wrap(t);</span>
+<span class="nc" id="L93">      executeSQL();</span>
+<span class="nc" id="L94">      return resultSet;</span>
+<span class="nc" id="L95">    } catch (Throwable t) {</span>
+<span class="nc" id="L96">      throw Utils.wrap(t);</span>
     }
   }
 
   /**
-   * Executes the query and returns the value of the first column in the first row. The
-   * second time you call this method, you get the value of the first column in the second
+   * Executes the query and returns the value of the first column of the first row. The
+   * second time you call this method, you get the value of the first column of the second
    * row, and so on. If there are no (more) rows in the {@code ResultSet},
    * {@link Result#notAvailable() Result.notAvailable()} is returned. If the query had
    * already been executed, it will not be executed again. Call
@@ -108,68 +107,72 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    *
    * @param &lt;T&gt; the type of the value to be returned
    * @param clazz the class of the value to be returned
-   * @return the value of the first column in the first row or
-   *       {@link Result#notAvailable() Result.notAvailable()} if there are no (more) rows
-   *       in the {@code ResultSet}
+   * @return a {@code Result} containing the value of the first column of the first row or
+   *       {@link Result#notAvailable()} if there are no (more) rows in the
+   *       {@code ResultSet}
    */
   public &lt;T&gt; Result&lt;T&gt; lookup(Class&lt;T&gt; clazz) {
     try {
-<span class="fc" id="L117">      executeSQL();</span>
-<span class="pc bpc" id="L118" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
-<span class="fc" id="L119">        int sqlType = resultSet.getMetaData().getColumnType(1);</span>
+<span class="fc" id="L116">      executeSQL();</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
+<span class="fc" id="L118">        int sqlType = resultSet.getMetaData().getColumnType(1);</span>
         T val = ColumnReaderFactory
-<span class="fc" id="L121">              .getInstance()</span>
-<span class="fc" id="L122">              .getReader(clazz, sqlType)</span>
-<span class="fc" id="L123">              .getValue(resultSet, 1, clazz);</span>
-<span class="fc" id="L124">        return Result.of(val);</span>
+<span class="fc" id="L120">              .getInstance()</span>
+<span class="fc" id="L121">              .getReader(clazz, sqlType)</span>
+<span class="fc" id="L122">              .getValue(resultSet, 1, clazz);</span>
+<span class="fc" id="L123">        return Result.of(val);</span>
       }
-<span class="nc" id="L126">      return Result.notAvailable();</span>
-<span class="nc" id="L127">    } catch (Throwable t) {</span>
-<span class="nc" id="L128">      throw Utils.wrap(t);</span>
+<span class="nc" id="L125">      return Result.notAvailable();</span>
+<span class="nc" id="L126">    } catch (Throwable t) {</span>
+<span class="nc" id="L127">      throw Utils.wrap(t);</span>
     }
   }
 
   /**
-   * Executes the query and returns the value of the first column in the first row as an
+   * Executes the query and returns the value of the first column of the first row as an
    * {@code Integer}. Equivalent to {@code lookup(Integer.class}). The second time you
-   * call this method, you get the value of the first column in the second row, and so on.
-   * If there are no (more) rows in the {@code ResultSet}, {@link OptionalInt#empty()} is
-   * returned. If the query had already been executed, it will not be executed again. Call
-   * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
+   * call this method, you get the value of the first column of the second row, and so on.
+   * If there are no (more) rows in the {@code ResultSet}, {@link Result#notAvailable()}
+   * is returned. If the query had already been executed, it will not be executed again.
+   * Call {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
-   * @return the value of the first column in the first row as an integer
+   * @return a {@code Result} containing the value of the first column of the first row or
+   *       {@link Result#notAvailable()} if there are no (more) rows in the
+   *       {@code ResultSet}
    */
   public Result&lt;Integer&gt; getInt() {
     try {
-<span class="fc" id="L144">      executeSQL();</span>
-<span class="pc bpc" id="L145" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
-<span class="fc" id="L146">        return Result.of(resultSet.getInt(1));</span>
+<span class="fc" id="L145">      executeSQL();</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
+<span class="fc" id="L147">        return Result.of(resultSet.getInt(1));</span>
       }
-<span class="nc" id="L148">      return Result.notAvailable();</span>
-<span class="nc" id="L149">    } catch (Throwable t) {</span>
-<span class="nc" id="L150">      throw Utils.wrap(t);</span>
+<span class="nc" id="L149">      return Result.notAvailable();</span>
+<span class="nc" id="L150">    } catch (Throwable t) {</span>
+<span class="nc" id="L151">      throw Utils.wrap(t);</span>
     }
   }
 
   /**
    * Executes the query and returns the value of the first column of the first row as a
    * {@code String}. Equivalent to {@code lookup(String.class}). The second time you call
-   * this method, you get the value of the first column in the second row, and so on. If
+   * this method, you get the value of the first column of the second row, and so on. If
    * there are no (more) rows in the {@code ResultSet}, {@link Result#notAvailable()} is
    * returned. If the query had already been executed, it will not be executed again. Call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
-   * @return the value of the first column of the first row as a {@code String}
+   * @return a {@code Result} containing the value of the first column of the first row or
+   *       {@link Result#notAvailable()} if there are no (more) rows in the
+   *       {@code ResultSet}
    */
   public Result&lt;String&gt; getString() {
     try {
-<span class="fc" id="L166">      executeSQL();</span>
-<span class="pc bpc" id="L167" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
-<span class="fc" id="L168">        return Result.of(resultSet.getString(1));</span>
+<span class="fc" id="L169">      executeSQL();</span>
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
+<span class="fc" id="L171">        return Result.of(resultSet.getString(1));</span>
       }
-<span class="nc" id="L170">      return Result.notAvailable();</span>
-<span class="nc" id="L171">    } catch (Throwable t) {</span>
-<span class="nc" id="L172">      throw Utils.wrap(t);</span>
+<span class="nc" id="L173">      return Result.notAvailable();</span>
+<span class="nc" id="L174">    } catch (Throwable t) {</span>
+<span class="nc" id="L175">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -183,10 +186,10 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public boolean exists() {
     try {
-<span class="nc" id="L186">      executeSQL();</span>
-<span class="nc" id="L187">      return resultSet.next();</span>
-<span class="nc" id="L188">    } catch (Throwable t) {</span>
-<span class="nc" id="L189">      throw Utils.wrap(t);</span>
+<span class="nc" id="L189">      executeSQL();</span>
+<span class="nc" id="L190">      return resultSet.next();</span>
+<span class="nc" id="L191">    } catch (Throwable t) {</span>
+<span class="nc" id="L192">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -198,7 +201,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    *
    * @return the values of the first column in the result set
    */
-<span class="fc" id="L201">  public List&lt;String&gt; firstColumn() { return firstColumn(String.class); }</span>
+<span class="fc" id="L204">  public List&lt;String&gt; firstColumn() { return firstColumn(String.class); }</span>
 
   /**
    * Executes the query and returns all values in the first column of the SELECT clause.
@@ -210,7 +213,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @param clazz the desired class of the values
    * @return the values of the first column in the result set
    */
-<span class="fc" id="L213">  public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz) { return firstColumn(clazz, 10); }</span>
+<span class="fc" id="L216">  public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz) { return firstColumn(clazz, 10); }</span>
 
   /**
    * Executes the query and returns all values in the first column of the SELECT clause.
@@ -226,21 +229,21 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz, int sizeEstimate) {
     try {
-<span class="fc" id="L229">      executeSQL();</span>
-<span class="pc bpc" id="L230" title="1 of 2 branches missed.">      if (!resultSet.next()) {</span>
-<span class="nc" id="L231">        return Collections.emptyList();</span>
+<span class="fc" id="L232">      executeSQL();</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">      if (!resultSet.next()) {</span>
+<span class="nc" id="L234">        return Collections.emptyList();</span>
       }
-<span class="fc" id="L233">      int sqlType = resultSet.getMetaData().getColumnType(1);</span>
+<span class="fc" id="L236">      int sqlType = resultSet.getMetaData().getColumnType(1);</span>
       ColumnReader&lt;?, T&gt; reader = ColumnReaderFactory
-<span class="fc" id="L235">            .getInstance()</span>
-<span class="fc" id="L236">            .getReader(clazz, sqlType);</span>
-<span class="fc" id="L237">      List&lt;T&gt; list = new ArrayList&lt;&gt;(sizeEstimate);</span>
+<span class="fc" id="L238">            .getInstance()</span>
+<span class="fc" id="L239">            .getReader(clazz, sqlType);</span>
+<span class="fc" id="L240">      List&lt;T&gt; list = new ArrayList&lt;&gt;(sizeEstimate);</span>
       do {
-<span class="fc" id="L239">        list.add(reader.getValue(resultSet, 1, clazz));</span>
-<span class="fc bfc" id="L240" title="All 2 branches covered.">      } while (resultSet.next());</span>
-<span class="fc" id="L241">      return list;</span>
-<span class="nc" id="L242">    } catch (Throwable t) {</span>
-<span class="nc" id="L243">      throw Utils.wrap(t);</span>
+<span class="fc" id="L242">        list.add(reader.getValue(resultSet, 1, clazz));</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">      } while (resultSet.next());</span>
+<span class="fc" id="L244">      return list;</span>
+<span class="nc" id="L245">    } catch (Throwable t) {</span>
+<span class="nc" id="L246">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -256,13 +259,13 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public ResultSetMappifier getMappifier() {
     try {
-<span class="nc" id="L259">      executeSQL();</span>
-<span class="nc" id="L260">      return session</span>
-<span class="nc" id="L261">            .getSQL()</span>
-<span class="nc" id="L262">            .getMappifierFactory(mapper)</span>
-<span class="nc" id="L263">            .getMappifier(resultSet);</span>
-<span class="nc" id="L264">    } catch (Throwable t) {</span>
-<span class="nc" id="L265">      throw Utils.wrap(t);</span>
+<span class="nc" id="L262">      executeSQL();</span>
+<span class="nc" id="L263">      return session</span>
+<span class="nc" id="L264">            .getSQL()</span>
+<span class="nc" id="L265">            .getMappifierFactory(mapper)</span>
+<span class="nc" id="L266">            .getMappifier(resultSet);</span>
+<span class="nc" id="L267">    } catch (Throwable t) {</span>
+<span class="nc" id="L268">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -279,13 +282,13 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; ResultSetBeanifier&lt;T&gt; getBeanifier(Class&lt;T&gt; beanClass) {
     try {
-<span class="fc" id="L282">      executeSQL();</span>
-<span class="fc" id="L283">      return session</span>
-<span class="fc" id="L284">            .getSQL()</span>
-<span class="fc" id="L285">            .getBeanifierFactory(beanClass, mapper)</span>
-<span class="fc" id="L286">            .getBeanifier(resultSet);</span>
-<span class="nc" id="L287">    } catch (Throwable t) {</span>
-<span class="nc" id="L288">      throw Utils.wrap(t);</span>
+<span class="fc" id="L285">      executeSQL();</span>
+<span class="fc" id="L286">      return session</span>
+<span class="fc" id="L287">            .getSQL()</span>
+<span class="fc" id="L288">            .getBeanifierFactory(beanClass, mapper)</span>
+<span class="fc" id="L289">            .getBeanifier(resultSet);</span>
+<span class="nc" id="L290">    } catch (Throwable t) {</span>
+<span class="nc" id="L291">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -307,36 +310,36 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
         Class&lt;T&gt; beanClass,
         Supplier&lt;T&gt; beanSupplier) {
     try {
-<span class="nc" id="L310">      executeSQL();</span>
-<span class="nc" id="L311">      return session</span>
-<span class="nc" id="L312">            .getSQL()</span>
-<span class="nc" id="L313">            .getBeanifierFactory(beanClass, beanSupplier, mapper)</span>
-<span class="nc" id="L314">            .getBeanifier(resultSet);</span>
-<span class="nc" id="L315">    } catch (Throwable t) {</span>
-<span class="nc" id="L316">      throw Utils.wrap(t);</span>
+<span class="nc" id="L313">      executeSQL();</span>
+<span class="nc" id="L314">      return session</span>
+<span class="nc" id="L315">            .getSQL()</span>
+<span class="nc" id="L316">            .getBeanifierFactory(beanClass, beanSupplier, mapper)</span>
+<span class="nc" id="L317">            .getBeanifier(resultSet);</span>
+<span class="nc" id="L318">    } catch (Throwable t) {</span>
+<span class="nc" id="L319">      throw Utils.wrap(t);</span>
     }
   }
 
   @Override
   void initialize() {
     try {
-<span class="nc bnc" id="L323" title="All 2 branches missed.">      if (resultSet != null) {</span>
-<span class="nc" id="L324">        resultSet.close();</span>
-<span class="nc" id="L325">        resultSet = null;</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">      if (resultSet != null) {</span>
+<span class="nc" id="L327">        resultSet.close();</span>
+<span class="nc" id="L328">        resultSet = null;</span>
       }
-<span class="nc" id="L327">      ps.clearParameters();</span>
-<span class="nc" id="L328">    } catch (SQLException e) {</span>
-<span class="nc" id="L329">      throw Utils.wrap(e);</span>
-<span class="nc" id="L330">    }</span>
-<span class="nc" id="L331">  }</span>
+<span class="nc" id="L330">      ps.clearParameters();</span>
+<span class="nc" id="L331">    } catch (SQLException e) {</span>
+<span class="nc" id="L332">      throw Utils.wrap(e);</span>
+<span class="nc" id="L333">    }</span>
+<span class="nc" id="L334">  }</span>
 
   private void executeSQL() throws Throwable {
-<span class="pc bpc" id="L334" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
-<span class="fc" id="L335">      LOG.trace(EXECUTING_SQL, sqlInfo.sql());</span>
-<span class="fc" id="L336">      applyBindings(ps);</span>
-<span class="fc" id="L337">      resultSet = ps.executeQuery();</span>
+<span class="pc bpc" id="L337" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
+<span class="fc" id="L338">      LOG.trace(EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L339">      applyBindings(ps);</span>
+<span class="fc" id="L340">      resultSet = ps.executeQuery();</span>
     }
-<span class="fc" id="L339">  }</span>
+<span class="fc" id="L342">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
