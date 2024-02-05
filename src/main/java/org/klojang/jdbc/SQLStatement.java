@@ -6,7 +6,6 @@ import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.ps.MapBinder;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.klojang.jdbc.x.sql.SQLInfo;
-import org.klojang.templates.RenderSession;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -21,8 +20,8 @@ import static org.klojang.util.CollectionMethods.collectionToSet;
 
 /**
  * Abstract base class for {@link SQLQuery}, {@link SQLInsert} and {@link SQLUpdate}. A
- * {@code SQLStatement} allows you to bind the named parameters within the SQL and then
- * execute the SQL.
+ * {@code SQLStatement} allows you to bind the named parameters within a SQL statement and
+ * then execute it.
  *
  * @param <T> the {@code SQLStatement} subtype returned by various methods in the
  *       fluent API.
@@ -51,9 +50,9 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   }
 
   /**
-   * Binds the specified value to the specified parameter.
+   * Binds the specified value to the specified named parameter.
    *
-   * @param param the parameter
+   * @param param the named parameter
    * @param value the value
    * @return this {@code SQLStatement} instance
    */
@@ -64,10 +63,10 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   }
 
   /**
-   * Binds the properties of the specified JavaBean to the parameters within the SQL
-   * statement. Properties that do not correspond to named parameters are ignored. The
-   * effect of passing anything other than a proper JavaBean (e.g. an {@code Integer},
-   * {@code String} or array) is undefined.
+   * Binds the properties of the specified JavaBean to the named parameters within the SQL
+   * statement. Properties that do not correspond to named parameters will tacitly be
+   * ignored. The effect of passing anything other than a proper JavaBean (e.g. an
+   * {@code Integer}, {@code String} or array) is undefined.
    *
    * @param bean the bean
    * @return this {@code SQLStatement} instance
@@ -80,8 +79,9 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   }
 
   /**
-   * Binds the components of the specified record to the parameters within the SQL
-   * statement. Record components that do not correspond to named parameters are ignored.
+   * Binds the components of the specified record to the named parameters within the SQL
+   * statement. Record components that do not correspond to named parameters will tacitly
+   * be ignored.
    *
    * @param record the record
    * @return this {@code SQLStatement} instance
@@ -94,8 +94,9 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   }
 
   /**
-   * Binds the values in the specified map to the parameters within the SQL statement.
-   * Keys that do not correspond to named parameters will be ignored.
+   * Binds the values in the specified map to the named parameters within the SQL
+   * statement. Map keys that do not correspond to named parameters will tacitly be
+   * ignored.
    *
    * @param map the map whose values to bind to the named parameters within the SQL
    *       statement
@@ -124,17 +125,17 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   void applyBindings(PreparedStatement ps) throws Throwable {
     fresh = false;
     for (Object obj : bindings) {
+      AbstractSQL sql = session.getSQL();
       if (obj instanceof Map map) {
-        MapBinder binder = new MapBinder(sqlInfo.parameters(),
-              session.getSQL().getBindInfo());
+        MapBinder binder = sql.getMapBinder(sqlInfo);
         binder.bind(map, ps, bound);
       } else {
-        BeanBinder binder = session.getSQL().getBeanBinder(obj.getClass(), sqlInfo);
+        BeanBinder binder = sql.getBeanBinder(sqlInfo, obj.getClass());
         binder.bind(obj, ps);
         bound.addAll(binder.getBoundParameters());
       }
     }
-    Check.that(bound.size()).is(eq(), sqlInfo.parameters().size(), incompleteBindings());
+    Check.that(bound.size()).is(eq(), sqlInfo.parameters().size(), unboundParameters());
   }
 
   /**
@@ -150,10 +151,12 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     }
   }
 
-  private Supplier<DatabaseException> incompleteBindings() {
-    Set<String> all = new HashSet<>(sqlInfo.parameterPositions().keySet());
+  private Supplier<DatabaseException> unboundParameters() {
+    Set<String> all = HashSet.newHashSet(sqlInfo.parameters().size());
+    all.addAll(sqlInfo.parameterPositions().keySet());
     all.removeAll(collectionToSet(bound, NamedParameter::name));
-    String fmt = "some query parameters have not been bound yet: %s";
-    return () -> new DatabaseException(String.format(fmt, all));
+    String fmt = "SQL contains named parameters that have not been bound yet: %s";
+    String msg = String.format(fmt, all);
+    return () -> Utils.exception(msg, session.getSQL().unparsed());
   }
 }

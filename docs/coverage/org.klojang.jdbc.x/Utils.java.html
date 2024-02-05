@@ -34,8 +34,20 @@ public final class Utils {
     };
   }
 
+  public static DatabaseException exception(String message, SQLInfo sqlInfo) {
+<span class="nc" id="L38">    return exception(message, sqlInfo.sql());</span>
+  }
+
+  public static DatabaseException exception(String message, String sql) {
+<span class="nc" id="L42">    return new DatabaseException(message(message, sql));</span>
+  }
+
   private static String message(Throwable cause, String sql) {
-<span class="nc" id="L38">    return cause.toString() + &quot; **** while executing: &quot; + sql;</span>
+<span class="nc" id="L46">    return message(cause.toString(), sql);</span>
+  }
+
+  private static String message(String message, String sql) {
+<span class="nc" id="L50">    return message + &quot; **** while executing: &quot; + sql;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

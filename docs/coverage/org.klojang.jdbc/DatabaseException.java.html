@@ -13,7 +13,7 @@ import java.sql.SQLException;
 public final class DatabaseException extends RuntimeException {
 
   static DatabaseException wrap(Throwable exc, SQL sql) {
-<span class="nc" id="L16">    return Utils.wrap(exc, ((AbstractSQL) sql).getUnparsedSQL());</span>
+<span class="nc" id="L16">    return Utils.wrap(exc, ((AbstractSQL) sql).unparsed());</span>
   }
 
   /**

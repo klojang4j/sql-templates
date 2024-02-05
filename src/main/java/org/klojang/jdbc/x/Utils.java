@@ -34,7 +34,19 @@ public final class Utils {
     };
   }
 
+  public static DatabaseException exception(String message, SQLInfo sqlInfo) {
+    return exception(message, sqlInfo.sql());
+  }
+
+  public static DatabaseException exception(String message, String sql) {
+    return new DatabaseException(message(message, sql));
+  }
+
   private static String message(Throwable cause, String sql) {
-    return cause.toString() + " **** while executing: " + sql;
+    return message(cause.toString(), sql);
+  }
+
+  private static String message(String message, String sql) {
+    return message + " **** while executing: " + sql;
   }
 }
