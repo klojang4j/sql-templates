@@ -66,7 +66,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    * Binds the properties of the specified JavaBean to the named parameters within the SQL
    * statement. Properties that do not correspond to named parameters will tacitly be
    * ignored. The effect of passing anything other than a proper JavaBean (e.g. an
-   * {@code Integer}, {@code String} or array) is undefined.
+   * {@code Integer}, a {@code String}, or an array) is undefined.
    *
    * @param bean the bean
    * @return this {@code SQLStatement} instance
