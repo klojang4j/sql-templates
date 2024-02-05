@@ -17,7 +17,7 @@ public final class DatabaseException extends RuntimeException {
   }
 
   /**
-   * Instantiates a {@code KlojangSQLException} with the specified message.
+   * Instantiates a {@code DatabaseException} with the specified message.
    *
    * @param message the message
    */
@@ -26,7 +26,7 @@ public final class DatabaseException extends RuntimeException {
   }
 
   /**
-   * Instantiates a {@code KlojangSQLException} with the specified underlying cause.
+   * Instantiates a {@code DatabaseException} with the specified underlying cause.
    *
    * @param cause the cause of the exception
    */
@@ -35,7 +35,7 @@ public final class DatabaseException extends RuntimeException {
   }
 
   /**
-   * Instantiates a {@code KlojangSQLException} with the specified message and underlying
+   * Instantiates a {@code DatabaseException} with the specified message and underlying
    * cause.
    *
    * @param message the message

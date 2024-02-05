@@ -1,6 +1,6 @@
 package org.klojang.jdbc.x;
 
-public class Strings {
+public final class Strings {
 
   public static final String IDENTIFIER = "identifier";
   public static final String FUNCTION_NAME = "function name";
@@ -15,6 +15,8 @@ public class Strings {
   public static final String LIMIT = "limit";
   public static final String SIZE_ESTIMATE = "sizeEstimate";
   public static final String BEAN_CLASS = "beanClass";
+  public static final String ID_PROPERTY = "ID property";
+  public static final String ID_KEY = "ID key";
 
   private Strings() { throw new UnsupportedOperationException(); }
 

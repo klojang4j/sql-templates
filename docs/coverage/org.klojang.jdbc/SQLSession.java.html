@@ -232,8 +232,8 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} or
    *       {@link SQL#template(String) SQL.template()} method
-   * @see SQLInsert#insertBatchAndGetIDs(List)
-   * @see SQLInsert#insertBatchAndSetIDs(String, List)
+   * @see SQLInsert#insertBatch(List)
+   * @see SQLBatchInsert
    */
   default &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans, BeanValueProcessor&lt;T&gt; processor)
         throws UnsupportedOperationException {
@@ -302,9 +302,10 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    * @see java.sql.Statement#enquoteLiteral(String)
+   * @see Quoter#quoteValue(Object) 
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
-<span class="nc" id="L307">    throw notSupported(&quot;quoteValue&quot;);</span>
+<span class="nc" id="L308">    throw notSupported(&quot;quoteValue&quot;);</span>
   }
 
   /**
@@ -320,7 +321,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLExpression sqlFunction(String name, Object... args)
         throws UnsupportedOperationException {
-<span class="nc" id="L323">    throw notSupported(&quot;sqlFunction&quot;);</span>
+<span class="nc" id="L324">    throw notSupported(&quot;sqlFunction&quot;);</span>
   }
 
   /**
@@ -333,9 +334,10 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    * @see java.sql.Statement#enquoteIdentifier(String, boolean)
+   * @see Quoter#quoteIdentifier(String)
    */
   default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
-<span class="nc" id="L338">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
+<span class="nc" id="L340">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
   }
 
   /**
@@ -365,7 +367,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @return a {@code SQLInsert} instance
    */
   default SQLInsert prepareInsert() {
-<span class="fc" id="L368">    return prepareInsert(true);</span>
+<span class="fc" id="L370">    return prepareInsert(true);</span>
   }
 
   /**
@@ -387,12 +389,12 @@ public sealed interface SQLSession permits AbstractSQLSession {
   SQLUpdate prepareUpdate();
 
   private static UnsupportedOperationException notSupported(String method) {
-<span class="nc" id="L390">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
-<span class="nc" id="L391">    return new UnsupportedOperationException(String.format(fmt, method));</span>
+<span class="nc" id="L392">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
+<span class="nc" id="L393">    return new UnsupportedOperationException(String.format(fmt, method));</span>
   }
 
   private static String sqlSkeletonsOnly() {
-<span class="nc" id="L395">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
+<span class="nc" id="L397">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
   }
 
 }

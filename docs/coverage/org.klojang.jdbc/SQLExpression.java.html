@@ -3,11 +3,15 @@
 /**
  * A special string wrapper object whose type signals to &lt;i&gt;Klojang JDBC&lt;/i&gt; that the
  * wrapped string must be treated as a native SQL expression and hence must not be escaped
- * or quoted. The SQL expression could be a SQL function call like
- * {@code CONCAT(FIRST_NAME, ' ' , LAST_NAME)}, or an operation like
- * {@code (SALARY * 0.05)}. Instances of {@code SQLExpression} are retrieved through
- * {@link SQL#expression(String) SQL.expression()}. SQL expressions will be injected as-is
- * into SQL statements. Use a {@link Quoter} or
+ * or quoted. The SQL expression could be, for example:
+ * &lt;ul&gt;
+ *   &lt;li&gt;a SQL function call like &lt;b&gt;{@code CONCAT(FIRST_NAME, ' ' , LAST_NAME)}&lt;/b&gt;
+ *   &lt;li&gt;an operation like &lt;b&gt;{@code (SALARY * 1.05)}&lt;/b&gt;
+ *   &lt;li&gt;a number constant like &lt;b&gt;{@code 42}&lt;/b&gt;
+ *   &lt;li&gt;an already properly escaped and quoted string literal like
+ *       &lt;b&gt;{@code 'Chicago O''Hare International Airport'}&lt;/b&gt;
+ * &lt;/ul&gt;
+ * SQL expressions will be injected as-is into SQL statements. Use a {@link Quoter} or
  * {@link SQLSession#quoteValue(Object) SQLSession.quoteValue()} to escape and quote the
  * individual components of the expression if necessary.
  */
@@ -15,9 +19,9 @@ public final class SQLExpression {
 
   private final String expression;
 
-<span class="fc" id="L18">  SQLExpression(String expression) {</span>
-<span class="fc" id="L19">    this.expression = expression;</span>
-<span class="fc" id="L20">  }</span>
+<span class="fc" id="L22">  SQLExpression(String expression) {</span>
+<span class="fc" id="L23">    this.expression = expression;</span>
+<span class="fc" id="L24">  }</span>
 
   /**
    * Returns the SQL expression.
@@ -25,6 +29,6 @@ public final class SQLExpression {
    * @return the SQL expression
    */
   @Override
-<span class="fc" id="L28">  public String toString() { return expression; }</span>
+<span class="fc" id="L32">  public String toString() { return expression; }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

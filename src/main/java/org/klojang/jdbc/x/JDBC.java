@@ -3,7 +3,6 @@ package org.klojang.jdbc.x;
 import org.klojang.check.Check;
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
-import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.SQLExpression;
 import org.klojang.jdbc.x.sql.SQLInfo;
 
@@ -19,8 +18,10 @@ import static org.klojang.util.ClassMethods.box;
 
 public final class JDBC {
 
-  private static final String NO_KEYS_GENERATED = "no keys were generated";
-  private static final String MULTIPLE_AUTO_KEYS = "multiple auto-increment keys not supported";
+  private static final String NOT_THAT_MANY_KEYS =
+        "number of requested keys (${0}) exceeds number of generated keys (${1})";
+  private static final String TOO_MANY_KEYS =
+        "number of requested keys (${0}) must match number of generated keys (> ${0})";
 
   private JDBC() { throw new UnsupportedOperationException(); }
 
@@ -61,13 +62,8 @@ public final class JDBC {
         throws SQLException {
     long[] keys = new long[rowCount];
     try (ResultSet rs = stmt.getGeneratedKeys()) {
-      Check.that(rs.next()).is(yes(),
-            () -> new DatabaseException(NO_KEYS_GENERATED));
-      Check.that(rs.getMetaData().getColumnCount()).is(eq(), 1,
-            () -> new DatabaseException(MULTIPLE_AUTO_KEYS));
-      keys[0] = rs.getLong(1);
-      for (int i = 1; i < rowCount; ++i) {
-        rs.next();
+      for (int i = 0; i < rowCount; ++i) {
+        Check.that(rs.next()).is(yes(), NOT_THAT_MANY_KEYS, i + 1, rowCount);
         keys[i] = rs.getLong(1);
       }
     }

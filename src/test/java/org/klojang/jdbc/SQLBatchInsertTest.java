@@ -50,7 +50,7 @@ public class SQLBatchInsertTest {
     }
   }
 
-  public SQLBatchInsertTest() {}
+  public SQLBatchInsertTest() { }
 
   @BeforeEach
   public void before() throws IOException, SQLException {
@@ -74,16 +74,16 @@ public class SQLBatchInsertTest {
 
   @Test
   public void insertBatch00() {
-    try (SQLBatchInsert<Person> insert = SQL
+    SQLBatchInsert<Person> insert = SQL
           .configureBatchInsert()
           .of(Person.class)
           .into("TEST")
           .excluding("id")
-          .prepare(MY_CON.get())) {
-      insert.insertBatch(List.of(new Person("John"),
-            new Person("Mark"),
-            new Person("Edward")));
-    }
+          .prepare(MY_CON.get());
+    insert.insertBatch(List.of(new Person("John"),
+          new Person("Mark"),
+          new Person("Edward")));
+
     try (SQLQuery query = SQL.simple("SELECT COUNT(*) FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
@@ -94,16 +94,16 @@ public class SQLBatchInsertTest {
   @Test
   public void insertAllAndGetIDs00() {
     long[] ids;
-    try (SQLBatchInsert<Person> insert = SQL
+    SQLBatchInsert<Person> insert = SQL
           .configureBatchInsert()
           .of(Person.class)
           .into("TEST")
           .excluding("id")
-          .prepare(MY_CON.get())) {
-      ids = insert.insertBatchAndGetIDs(List.of(new Person("John"),
-            new Person("Mark"),
-            new Person("Edward")));
-    }
+          .prepare(MY_CON.get());
+    ids = insert.insertBatchAndGetIDs(List.of(new Person("John"),
+          new Person("Mark"),
+          new Person("Edward")));
+
     assertEquals(3, ids.length);
     try (SQLQuery query = SQL.simple("SELECT ID FROM TEST")
           .session(MY_CON.get())
@@ -118,14 +118,13 @@ public class SQLBatchInsertTest {
     List<Person> persons = List.of(new Person("John"),
           new Person("Mark"),
           new Person("Edward"));
-    try (SQLBatchInsert<Person> insert = SQL
+    SQLBatchInsert<Person> insert = SQL
           .configureBatchInsert()
           .of(Person.class)
           .into("TEST")
           .excluding("id")
-          .prepare(MY_CON.get())) {
-      insert.insertBatchAndSetIDs("id", persons);
-    }
+          .prepare(MY_CON.get());
+    insert.insertBatchAndSetIDs("id", persons);
     int[] ids = persons.stream().mapToInt(Person::getId).toArray();
     try (SQLQuery query = SQL.simple("SELECT ID FROM TEST")
           .session(MY_CON.get())

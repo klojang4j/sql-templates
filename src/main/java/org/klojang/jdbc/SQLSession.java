@@ -232,8 +232,8 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} or
    *       {@link SQL#template(String) SQL.template()} method
-   * @see SQLInsert#insertBatchAndGetIDs(List)
-   * @see SQLInsert#insertBatchAndSetIDs(String, List)
+   * @see SQLInsert#insertBatch(List)
+   * @see SQLBatchInsert
    */
   default <T> SQLSession setValues(List<T> beans, BeanValueProcessor<T> processor)
         throws UnsupportedOperationException {
@@ -302,6 +302,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    * @see java.sql.Statement#enquoteLiteral(String)
+   * @see Quoter#quoteValue(Object) 
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
     throw notSupported("quoteValue");
@@ -333,6 +334,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    * @see java.sql.Statement#enquoteIdentifier(String, boolean)
+   * @see Quoter#quoteIdentifier(String)
    */
   default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
     throw notSupported("quoteIdentifier");
