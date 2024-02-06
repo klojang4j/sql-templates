@@ -3,17 +3,24 @@ package org.klojang.jdbc;
 import java.util.List;
 
 /**
- * Used to selectively modify values within a list of JavaBeans or records. If you want to
- * return a {@link SQLExpression} object from the
- * {@link #process(Object, String, Object, Quoter) process()} method, you can use the
- * provided {@link Quoter} to escape and quote string literals <b>within</b> the
- * expression. Do not use this interface just to return a quoted version of the input
- * value (the {@code propertyValue} argument to the {@code process() method}). <i>Klojang
- * JDBC</i> already takes care of that. That is: the return value of
- * {@link #process(Object, String, Object, Quoter) BeanValueProcessor.process()} will
- * always be processed again by {@link Quoter#quoteValue(Object) Quoter.quoteValue()}. An
- * example of how to use a {@code BeanValueProcessor} is provided in the comments for
- * {@link SQLSession#setValues(List, BeanValueProcessor)}.
+ * Used to selectively modify values within a batch of JavaBeans or records. A
+ * {@code BeanValueProcessor} can be specified for batch inserts to apply last-minute
+ * transformations on the beans or records before they are saved to the database. Although
+ * you can apply any transformations you like, it os mainly there for a rather special and
+ * specific purpose: to replace bean values with
+ * {@linkplain SQLExpression SQL expressions}.
+ * <i>Klojang JDBC</i> does not aim to be a SQL parser, and hence it does not know if and
+ * how to escape the parts making up the expression. If you want to return a
+ * {@link SQLExpression} from
+ * {@link #process(Object, String, Object, Quoter) BeanValueProcessor.process()}, you can
+ * use the provided {@link Quoter} to escape and quote strings <b>within</b> the
+ * expression. Do not use a {@code BeanValueProcessor} just to return a quoted version of
+ * the input value. <i>Klojang JDBC</i> already takes care of that. Each and every value
+ * that is going to be saved to the database will always be processed by
+ * {@link Quoter#quoteValue(Object) Quoter.quoteValue()}, even it is the return value of
+ * {@code BeanValueProcessor.process()}. See
+ * {@link SQLSession#setValues(List, BeanValueProcessor)} for an example of how to use a
+ * {@code BeanValueProcessor}.
  *
  * @param <T> the type of the bean containing the value to be processed
  * @see Quoter

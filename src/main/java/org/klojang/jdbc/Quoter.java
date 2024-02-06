@@ -17,17 +17,16 @@ import static org.klojang.util.StringMethods.append;
 /**
  * <p>Escapes and quotes values according to the quoting rules of the target database.
  * You do not normally need to concern yourself with quoting and escaping unless you want
- * to generate an {@link SQLExpression SQL expression} from one or more values in your
- * program, and embed this expression in the SQL to be executed. For example, suppose you
- * have a variable {@code firstName} in your program, and you want to embed the following
- * expression in your SQL:
- * <b>{@code "SUBSTRING(" + firstName + ", 1, 3)"}</b>. If the value of {@code firstName}
- * comes from outside your program, you expose yourself to the risk of SQL injection. In
- * this case you should use a {@code Quoter} to eliminate the risk:
+ * to dynamically generate and inject a {@link SQLExpression SQL expression} in the SQL to
+ * be executed. For example, suppose (somewhat unrealistically) you have a variable
+ * {@code firstName} in your program, and you want to embed the following expression in
+ * your SQL: <b>{@code "SUBSTRING(" + firstName + ", 1, 3)"}</b>. If the value of
+ * {@code firstName} comes from outside your program, you expose yourself to the risk of
+ * SQL injection. In this case you should use a {@code Quoter} to eliminate the risk:
  * <b>{@code "SUBSTRING(" + quoter.quoteValue(firstName) + ", 1, 3)"}</b>. For SQL
- * function calls in particular (a subset of valid SQL expressions), you can also use
+ * function calls in particular, you can also use
  * {@link #sqlFunction(String, Object...) Quoter.sqlFunction()}:
- * <b>{@code "quoter.sqlFunction("SUBSTRING", 1, 3)}</b>.
+ * <b>{@code quoter.sqlFunction("SUBSTRING", 1, 3)}</b>.
  *
  * <p>Only use a {@code Quoter} to escape and quote strings <b>within</b> the SQL
  * expression. In any other case escaping and quoting is taken care of by <i>Klojang

@@ -51,6 +51,8 @@
  *    .excluding("personId")
  *    .withNameMapper(new CamelCaseToSnakeUpperCase())
  *    .prepare(con);
+ * // Save the beans to the database and put the database-generated keys
+ * // back onto the beans
  * bi.insertBatchAndSetIDs("personId", persons);
  *
  * sql = """
