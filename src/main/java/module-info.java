@@ -70,7 +70,6 @@
  *   for (Person person : persons) {
  *     System.out.println(person);
  *   }
- *  }
  * }
  *
  * }</pre></blockquote>

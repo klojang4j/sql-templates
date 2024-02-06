@@ -20,8 +20,8 @@ public final class Utils {
 
   public static DatabaseException wrap(Throwable exc, String sql) {
     return switch (exc) {
-      case DatabaseException e0 -> e0;
-      case UncheckedException e1 -> wrap(e1.unwrap(), sql);
+      case DatabaseException e -> e;
+      case UncheckedException e -> wrap(e.unwrap(), sql);
       default -> new DatabaseException(message(exc, sql), exc);
     };
   }

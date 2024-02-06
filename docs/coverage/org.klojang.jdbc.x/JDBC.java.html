@@ -20,76 +20,74 @@ public final class JDBC {
 
   private static final String NOT_THAT_MANY_KEYS =
         &quot;number of requested keys (${0}) exceeds number of generated keys (${1})&quot;;
-  private static final String TOO_MANY_KEYS =
-        &quot;number of requested keys (${0}) must match number of generated keys (&gt; ${0})&quot;;
 
-<span class="nc" id="L26">  private JDBC() { throw new UnsupportedOperationException(); }</span>
+<span class="nc" id="L24">  private JDBC() { throw new UnsupportedOperationException(); }</span>
 
   public static String[] getColumnNames(ResultSet rs) {
     try {
-<span class="fc" id="L30">      ResultSetMetaData rsmd = rs.getMetaData();</span>
-<span class="fc" id="L31">      int sz = rsmd.getColumnCount();</span>
-<span class="fc" id="L32">      String[] colNames = new String[sz];</span>
-<span class="fc bfc" id="L33" title="All 2 branches covered.">      for (int i = 0; i &lt; rsmd.getColumnCount(); ++i) {</span>
-<span class="fc" id="L34">        colNames[i] = rsmd.getColumnLabel(i + 1);</span>
+<span class="fc" id="L28">      ResultSetMetaData rsmd = rs.getMetaData();</span>
+<span class="fc" id="L29">      int sz = rsmd.getColumnCount();</span>
+<span class="fc" id="L30">      String[] colNames = new String[sz];</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">      for (int i = 0; i &lt; rsmd.getColumnCount(); ++i) {</span>
+<span class="fc" id="L32">        colNames[i] = rsmd.getColumnLabel(i + 1);</span>
       }
-<span class="fc" id="L36">      return colNames;</span>
-<span class="nc" id="L37">    } catch (SQLException e) {</span>
-<span class="nc" id="L38">      throw Utils.wrap(e);</span>
+<span class="fc" id="L34">      return colNames;</span>
+<span class="nc" id="L35">    } catch (SQLException e) {</span>
+<span class="nc" id="L36">      throw Utils.wrap(e);</span>
     }
   }
 
   public static PreparedStatement getPreparedStatement(Connection con, SQLInfo sqlInfo) {
     try {
-<span class="fc" id="L44">      return con.prepareStatement(sqlInfo.sql());</span>
-<span class="nc" id="L45">    } catch (SQLException e) {</span>
-<span class="nc" id="L46">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="fc" id="L42">      return con.prepareStatement(sqlInfo.sql());</span>
+<span class="nc" id="L43">    } catch (SQLException e) {</span>
+<span class="nc" id="L44">      throw Utils.wrap(e, sqlInfo);</span>
     }
   }
 
   public static PreparedStatement getPreparedStatement(Connection con,
         SQLInfo sqlInfo,
         boolean retrieveKeys) {
-<span class="fc bfc" id="L53" title="All 2 branches covered.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
     try {
-<span class="fc" id="L55">      return con.prepareStatement(sqlInfo.sql(), x);</span>
-<span class="nc" id="L56">    } catch (SQLException e) {</span>
-<span class="nc" id="L57">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="fc" id="L53">      return con.prepareStatement(sqlInfo.sql(), x);</span>
+<span class="nc" id="L54">    } catch (SQLException e) {</span>
+<span class="nc" id="L55">      throw Utils.wrap(e, sqlInfo);</span>
     }
   }
 
   public static long[] getGeneratedKeys(Statement stmt, int rowCount)
         throws SQLException {
-<span class="fc" id="L63">    long[] keys = new long[rowCount];</span>
-<span class="fc" id="L64">    try (ResultSet rs = stmt.getGeneratedKeys()) {</span>
-<span class="fc bfc" id="L65" title="All 2 branches covered.">      for (int i = 0; i &lt; rowCount; ++i) {</span>
-<span class="fc" id="L66">        Check.that(rs.next()).is(yes(), NOT_THAT_MANY_KEYS, i + 1, rowCount);</span>
-<span class="fc" id="L67">        keys[i] = rs.getLong(1);</span>
+<span class="fc" id="L61">    long[] keys = new long[rowCount];</span>
+<span class="fc" id="L62">    try (ResultSet rs = stmt.getGeneratedKeys()) {</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">      for (int i = 0; i &lt; rowCount; ++i) {</span>
+<span class="fc" id="L64">        Check.that(rs.next()).is(yes(), NOT_THAT_MANY_KEYS, i + 1, rowCount);</span>
+<span class="fc" id="L65">        keys[i] = rs.getLong(1);</span>
       }
     }
-<span class="fc" id="L70">    return keys;</span>
+<span class="fc" id="L68">    return keys;</span>
   }
 
   public static String quote(Statement stmt, Object value) throws SQLException {
-<span class="pc bpc" id="L74" title="2 of 5 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L75">      case null -&gt; &quot;NULL&quot;;</span>
-<span class="fc" id="L76">      case Number n -&gt; n.toString();</span>
-<span class="nc" id="L77">      case Boolean b -&gt; b.toString();</span>
-<span class="fc" id="L78">      case SQLExpression s -&gt; s.toString();</span>
-<span class="fc" id="L79">      default -&gt; stmt.enquoteLiteral(value.toString());</span>
+<span class="pc bpc" id="L72" title="2 of 5 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L73">      case null -&gt; &quot;NULL&quot;;</span>
+<span class="fc" id="L74">      case Number x -&gt; x.toString();</span>
+<span class="nc" id="L75">      case Boolean x -&gt; x.toString();</span>
+<span class="fc" id="L76">      case SQLExpression x -&gt; x.toString();</span>
+<span class="fc" id="L77">      default -&gt; stmt.enquoteLiteral(value.toString());</span>
     };
   }
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   public static void setID(Object bean, String idProperty, long value)
         throws Throwable {
-<span class="fc" id="L86">    SetterFactory sf = SetterFactory.INSTANCE;</span>
-<span class="fc" id="L87">    Map&lt;String, Setter&gt; setters = sf.getSetters(bean.getClass());</span>
-<span class="pc" id="L88">    Check.that(idProperty).is(keyIn(), setters, () -&gt; noSuchProperty(bean, idProperty));</span>
-<span class="fc" id="L89">    Setter setter = setters.get(idProperty);</span>
+<span class="fc" id="L84">    SetterFactory sf = SetterFactory.INSTANCE;</span>
+<span class="fc" id="L85">    Map&lt;String, Setter&gt; setters = sf.getSetters(bean.getClass());</span>
+<span class="pc" id="L86">    Check.that(idProperty).is(keyIn(), setters, () -&gt; noSuchProperty(bean, idProperty));</span>
+<span class="fc" id="L87">    Setter setter = setters.get(idProperty);</span>
     // make sure we're OK if the ID property is not a long
-<span class="fc" id="L91">    Number id = convert(value, (Class) box(setter.getParamType()));</span>
-<span class="fc" id="L92">    setter.write(bean, id);</span>
-<span class="fc" id="L93">  }</span>
+<span class="fc" id="L89">    Number id = convert(value, (Class) box(setter.getParamType()));</span>
+<span class="fc" id="L90">    setter.write(bean, id);</span>
+<span class="fc" id="L91">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

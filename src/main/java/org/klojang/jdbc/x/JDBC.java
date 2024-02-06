@@ -20,8 +20,6 @@ public final class JDBC {
 
   private static final String NOT_THAT_MANY_KEYS =
         "number of requested keys (${0}) exceeds number of generated keys (${1})";
-  private static final String TOO_MANY_KEYS =
-        "number of requested keys (${0}) must match number of generated keys (> ${0})";
 
   private JDBC() { throw new UnsupportedOperationException(); }
 
@@ -73,9 +71,9 @@ public final class JDBC {
   public static String quote(Statement stmt, Object value) throws SQLException {
     return switch (value) {
       case null -> "NULL";
-      case Number n -> n.toString();
-      case Boolean b -> b.toString();
-      case SQLExpression s -> s.toString();
+      case Number x -> x.toString();
+      case Boolean x -> x.toString();
+      case SQLExpression x -> x.toString();
       default -> stmt.enquoteLiteral(value.toString());
     };
   }

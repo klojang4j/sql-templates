@@ -2,7 +2,6 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.jdbc.x.Strings;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
 import org.klojang.util.CollectionMethods;
@@ -15,6 +14,7 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.function.Supplier;
 
+import static org.klojang.check.CommonChecks.no;
 import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.check.Tag.VARARGS;
 import static org.klojang.jdbc.x.Strings.*;
@@ -23,6 +23,7 @@ import static org.klojang.util.StringMethods.append;
 abstract sealed class DynamicSQLSession extends AbstractSQLSession
       permits SQLTemplateSession, SQLSkeletonSession {
 
+  @SuppressWarnings({"unused"})
   private static final Logger LOG = LoggerFactory.getLogger(DynamicSQLSession.class);
 
   final RenderSession session;
@@ -63,7 +64,7 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
         session.set(varName, ArrayMethods.implodeInts(x, ","));
       }
       default -> {
-        if (value != null && value.getClass().isArray()) {
+        if (value.getClass().isArray()) {
           session.set(varName, ArrayMethods.implodeAny(value, this::quoteValue, ","));
         } else {
           session.set(varName, quoteValue(value));
@@ -127,12 +128,8 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   @Override
   public final void execute() {
     try {
-      Statement statement = con.createStatement();
-      String str = session.render();
-      LOG.trace("Executing SQL: {}", str);
-      statement.execute(str);
-    } catch (SQLException e) {
-      throw DatabaseException.wrap(e, sql);
+      Check.that(session.hasUnsetVariables()).is(no(), unfinishedSession());
+      execute(session.render());
     } finally {
       close();
     }

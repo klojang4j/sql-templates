@@ -20,8 +20,8 @@ public final class Utils {
 
   public static DatabaseException wrap(Throwable exc, String sql) {
 <span class="nc bnc" id="L22" title="All 3 branches missed.">    return switch (exc) {</span>
-<span class="nc" id="L23">      case DatabaseException e0 -&gt; e0;</span>
-<span class="nc" id="L24">      case UncheckedException e1 -&gt; wrap(e1.unwrap(), sql);</span>
+<span class="nc" id="L23">      case DatabaseException e -&gt; e;</span>
+<span class="nc" id="L24">      case UncheckedException e -&gt; wrap(e.unwrap(), sql);</span>
 <span class="nc" id="L25">      default -&gt; new DatabaseException(message(exc, sql), exc);</span>
     };
   }

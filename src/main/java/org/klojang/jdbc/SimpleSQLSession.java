@@ -7,10 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
 
 final class SimpleSQLSession extends AbstractSQLSession {
 
@@ -44,14 +40,7 @@ final class SimpleSQLSession extends AbstractSQLSession {
 
   @Override
   public void execute() {
-    try {
-      Statement statement = con.createStatement();
-      String str = sqlInfo.sql();
-      LOG.trace(EXECUTING_SQL, str);
-      statement.execute(str);
-    } catch (SQLException e) {
-      throw DatabaseException.wrap(e, sql);
-    }
+    execute(sqlInfo.sql());
   }
 
 }

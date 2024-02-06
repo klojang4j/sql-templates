@@ -3,12 +3,17 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.ParamExtractor;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.RenderSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 import static org.klojang.check.CommonChecks.*;
@@ -16,6 +21,8 @@ import static org.klojang.check.Tag.VARARGS;
 import static org.klojang.jdbc.x.Strings.*;
 
 final class SQLSkeletonSession extends DynamicSQLSession {
+
+  private static final Logger LOG = LoggerFactory.getLogger(SQLSkeletonSession.class);
 
   SQLSkeletonSession(Connection con, AbstractSQL sql, RenderSession session) {
     super(con, sql, session);
@@ -44,6 +51,24 @@ final class SQLSkeletonSession extends DynamicSQLSession {
     Class<T> clazz = (Class<T>) beans.getFirst().getClass();
     BeanReader<T> reader = new BeanReader<>(clazz);
     return setValues(beans, reader, processor);
+  }
+
+  @Override
+  public <T> long[] setValuesAndExecute(List<T> beans, BeanValueProcessor<T> processor) {
+    String executable = sql.unparsed();
+    try {
+      setValues(beans, processor);
+      Check.that(session).isNot(RenderSession::hasUnsetVariables, unfinishedSession());
+      executable = session.render();
+      Statement stmt = con.createStatement();
+      LOG.trace(EXECUTING_SQL, executable);
+      stmt.execute(executable);
+      return JDBC.getGeneratedKeys(stmt, beans.size());
+    } catch (SQLException e) {
+      throw Utils.wrap(e, executable);
+    } finally {
+      close();
+    }
   }
 
   private <T> SQLSession setValues(List<T> beans,
