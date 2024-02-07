@@ -1,10 +1,10 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.PropertyWriter;
 import org.klojang.jdbc.x.rs.RecordFactory;
 import org.klojang.templates.NameMapper;
-import org.klojang.util.ExceptionMethods;
 import org.klojang.util.InvokeMethods;
 
 import java.sql.ResultSet;
@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import static org.klojang.jdbc.x.Strings.*;
 import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 import static org.klojang.templates.NameMapper.AS_IS;
 
@@ -41,10 +42,7 @@ import static org.klojang.templates.NameMapper.AS_IS;
 @SuppressWarnings("rawtypes")
 public final class BeanifierFactory<T> {
 
-  private static final String BEAN_CLASS = "bean class";
-  private static final String BEAN_SUPPLIER = "bean supplier";
-  private static final String COLUMN_TO_PROPERTY_MAPPER = "column-to-property mapper";
-  private static final String BEAN_SUPPLIER_NOT_SUPPORTED = "bean supplier not supported for records";
+  private static final String RECORDS_NOT_ALLOWED = "bean supplier not supported for records";
 
   /**
    * The object held by the AtomicReference will either be a RecordFactory in case the
@@ -84,7 +82,7 @@ public final class BeanifierFactory<T> {
    */
   public BeanifierFactory(Class<T> beanClass, Supplier<T> beanSupplier) {
     Check.notNull(beanClass, BEAN_CLASS);
-    Check.that(beanClass).isNot(Class::isRecord, BEAN_SUPPLIER_NOT_SUPPORTED);
+    Check.that(beanClass).isNot(Class::isRecord, RECORDS_NOT_ALLOWED);
     Check.notNull(beanSupplier, BEAN_SUPPLIER);
     this.beanClass = beanClass;
     this.beanSupplier = beanSupplier;
@@ -123,7 +121,7 @@ public final class BeanifierFactory<T> {
         Supplier<T> beanSupplier,
         NameMapper columnToPropertyMapper) {
     Check.notNull(beanClass, BEAN_CLASS);
-    Check.that(beanClass).isNot(Class::isRecord, BEAN_SUPPLIER_NOT_SUPPORTED);
+    Check.that(beanClass).isNot(Class::isRecord, RECORDS_NOT_ALLOWED);
     Check.notNull(beanSupplier, BEAN_SUPPLIER);
     Check.notNull(columnToPropertyMapper, COLUMN_TO_PROPERTY_MAPPER);
     this.beanClass = beanClass;
@@ -142,8 +140,9 @@ public final class BeanifierFactory<T> {
    */
   @SuppressWarnings("unchecked")
   public ResultSetBeanifier<T> getBeanifier(ResultSet rs) throws SQLException {
-    return rs.next() ? beanClass.isRecord() ? getRecordBeanifier(rs) : getDefaultBeanifier(
-          rs) : EmptyBeanifier.INSTANCE;
+    return rs.next() ? beanClass.isRecord()
+          ? getRecordBeanifier(rs) : getDefaultBeanifier(rs)
+          : EmptyBeanifier.INSTANCE;
   }
 
   private DefaultBeanifier<T> getDefaultBeanifier(ResultSet rs) {
@@ -181,7 +180,7 @@ public final class BeanifierFactory<T> {
     try {
       return InvokeMethods.newInstance(beanClass);
     } catch (Exception e) {
-      throw ExceptionMethods.uncheck(e);
+      throw Utils.wrap(e);
     }
   }
 }

@@ -17,6 +17,8 @@ public final class Strings {
   public static final String BEAN_CLASS = "beanClass";
   public static final String ID_PROPERTY = "ID property";
   public static final String ID_KEY = "ID key";
+  public static final String BEAN_SUPPLIER = "bean supplier";
+  public static final String COLUMN_TO_PROPERTY_MAPPER = "column-to-property mapper";
 
   private Strings() { throw new UnsupportedOperationException(); }
 
