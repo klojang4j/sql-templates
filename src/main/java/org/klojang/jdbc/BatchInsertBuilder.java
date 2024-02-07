@@ -90,9 +90,9 @@ public final class BatchInsertBuilder {
   }
 
   /**
-   * Sets number of beans that will be saved at a time. By default the entire batch will
-   * be saved at once. Make sure this does not exceed the limits of your database or JDBC
-   * driver.
+   * Sets the number of beans that will be saved at a time. By default the entire batch
+   * will be saved at once. Make sure this does not exceed the limits of your database or
+   * JDBC driver.
    *
    * @param chunkSize the number of beans that will be saved at a time
    * @return this {@code BatchInsertBuilder}
