@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
  * through an anonymous class:
  *
  * <blockquote><pre>{@code
- * BindInfo bindInf = new BindInfo() {
+ * BindInfo bindInfo = new BindInfo() {
  *   public boolean saveEnumAsString(Class<?> beanType, String enumProperty) {
  *     return true;
  *   }
