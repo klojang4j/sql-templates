@@ -14,6 +14,7 @@ import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.invoke.IncludeExclude.EXCLUDE;
 import static org.klojang.invoke.IncludeExclude.INCLUDE;
 import static org.klojang.jdbc.x.Strings.BEAN_CLASS;
+import static org.klojang.jdbc.x.Strings.PROCESSOR;
 import static org.klojang.util.ArrayMethods.EMPTY_STRING_ARRAY;
 
 /**
@@ -125,7 +126,7 @@ public final class BatchInsertBuilder {
    * @return this {@code BatchInsertBuilder}
    */
   public BatchInsertBuilder withValueProcessor(BeanValueProcessor<?> processor) {
-    this.processor = Check.notNull(processor, "processor").ok();
+    this.processor = Check.notNull(processor, PROCESSOR).ok();
     return this;
   }
 

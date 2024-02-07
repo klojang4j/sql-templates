@@ -14,6 +14,7 @@ import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.invoke.IncludeExclude.EXCLUDE;
 import static org.klojang.invoke.IncludeExclude.INCLUDE;
 import static org.klojang.jdbc.x.Strings.BEAN_CLASS;
+import static org.klojang.jdbc.x.Strings.PROCESSOR;
 import static org.klojang.util.ArrayMethods.EMPTY_STRING_ARRAY;
 
 /**
@@ -23,17 +24,17 @@ import static org.klojang.util.ArrayMethods.EMPTY_STRING_ARRAY;
 @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
 public final class BatchInsertBuilder {
 
-<span class="fc" id="L26">  private BeanValueProcessor processor = BeanValueProcessor.identity();</span>
-<span class="fc" id="L27">  private IncludeExclude includeExclude = INCLUDE;</span>
-<span class="fc" id="L28">  private String[] properties = EMPTY_STRING_ARRAY;</span>
-<span class="fc" id="L29">  private NameMapper nameMapper = NameMapper.AS_IS;</span>
-<span class="fc" id="L30">  private int chunkSize = -1;</span>
-<span class="fc" id="L31">  boolean commitPerChunk = true;</span>
+<span class="fc" id="L27">  private BeanValueProcessor processor = BeanValueProcessor.identity();</span>
+<span class="fc" id="L28">  private IncludeExclude includeExclude = INCLUDE;</span>
+<span class="fc" id="L29">  private String[] properties = EMPTY_STRING_ARRAY;</span>
+<span class="fc" id="L30">  private NameMapper nameMapper = NameMapper.AS_IS;</span>
+<span class="fc" id="L31">  private int chunkSize = -1;</span>
+<span class="fc" id="L32">  boolean commitPerChunk = true;</span>
 
   private Class beanClass;
   private String tableName;
 
-<span class="fc" id="L36">  BatchInsertBuilder() { }</span>
+<span class="fc" id="L37">  BatchInsertBuilder() { }</span>
 
   /**
    * Sets the type of the beans or records to be saved.
@@ -42,8 +43,8 @@ public final class BatchInsertBuilder {
    * @return this {@code BatchInsertBuilder}
    */
   public BatchInsertBuilder of(Class&lt;?&gt; beanClass) {
-<span class="fc" id="L45">    this.beanClass = Check.notNull(beanClass).ok();</span>
-<span class="fc" id="L46">    return this;</span>
+<span class="fc" id="L46">    this.beanClass = Check.notNull(beanClass).ok();</span>
+<span class="fc" id="L47">    return this;</span>
   }
 
   /**
@@ -54,8 +55,8 @@ public final class BatchInsertBuilder {
    * @return this {@code BatchInsertBuilder}
    */
   public BatchInsertBuilder into(String tableName) {
-<span class="fc" id="L57">    this.tableName = Check.notNull(tableName).ok();</span>
-<span class="fc" id="L58">    return this;</span>
+<span class="fc" id="L58">    this.tableName = Check.notNull(tableName).ok();</span>
+<span class="fc" id="L59">    return this;</span>
   }
 
   /**
@@ -69,9 +70,9 @@ public final class BatchInsertBuilder {
    * @return this {@code BatchInsertBuilder}
    */
   public BatchInsertBuilder excluding(String... properties) {
-<span class="fc" id="L72">    this.properties = Check.notNull(properties).ok();</span>
-<span class="fc" id="L73">    this.includeExclude = EXCLUDE;</span>
-<span class="fc" id="L74">    return this;</span>
+<span class="fc" id="L73">    this.properties = Check.notNull(properties).ok();</span>
+<span class="fc" id="L74">    this.includeExclude = EXCLUDE;</span>
+<span class="fc" id="L75">    return this;</span>
   }
 
   /**
@@ -84,9 +85,9 @@ public final class BatchInsertBuilder {
    * @return this {@code BatchInsertBuilder}
    */
   public BatchInsertBuilder including(String... properties) {
-<span class="nc" id="L87">    this.properties = Check.notNull(properties).ok();</span>
-<span class="nc" id="L88">    this.includeExclude = INCLUDE;</span>
-<span class="nc" id="L89">    return this;</span>
+<span class="nc" id="L88">    this.properties = Check.notNull(properties).ok();</span>
+<span class="nc" id="L89">    this.includeExclude = INCLUDE;</span>
+<span class="nc" id="L90">    return this;</span>
   }
 
   /**
@@ -98,8 +99,8 @@ public final class BatchInsertBuilder {
    * @return this {@code BatchInsertBuilder}
    */
   public BatchInsertBuilder withChunkSize(int chunkSize) {
-<span class="nc" id="L101">    this.chunkSize = Check.that(chunkSize).is(gt(), 0).ok();</span>
-<span class="nc" id="L102">    return this;</span>
+<span class="nc" id="L102">    this.chunkSize = Check.that(chunkSize).is(gt(), 0).ok();</span>
+<span class="nc" id="L103">    return this;</span>
   }
 
   /**
@@ -112,8 +113,8 @@ public final class BatchInsertBuilder {
    * @return this {@code BatchInsertBuilder}
    */
   public BatchInsertBuilder withCommitPerChunk(boolean commitPerChunk) {
-<span class="nc" id="L115">    this.commitPerChunk = commitPerChunk;</span>
-<span class="nc" id="L116">    return this;</span>
+<span class="nc" id="L116">    this.commitPerChunk = commitPerChunk;</span>
+<span class="nc" id="L117">    return this;</span>
   }
 
   /**
@@ -125,8 +126,8 @@ public final class BatchInsertBuilder {
    * @return this {@code BatchInsertBuilder}
    */
   public BatchInsertBuilder withValueProcessor(BeanValueProcessor&lt;?&gt; processor) {
-<span class="nc" id="L128">    this.processor = Check.notNull(processor, &quot;processor&quot;).ok();</span>
-<span class="nc" id="L129">    return this;</span>
+<span class="nc" id="L129">    this.processor = Check.notNull(processor, PROCESSOR).ok();</span>
+<span class="nc" id="L130">    return this;</span>
   }
 
   /**
@@ -138,9 +139,9 @@ public final class BatchInsertBuilder {
    * @return this {@code SQLBatchInsertBuilder}
    */
   public BatchInsertBuilder withNameMapper(NameMapper propertyToColumnMapper) {
-<span class="fc" id="L141">    Check.notNull(propertyToColumnMapper);</span>
-<span class="fc" id="L142">    this.nameMapper = propertyToColumnMapper;</span>
-<span class="fc" id="L143">    return this;</span>
+<span class="fc" id="L142">    Check.notNull(propertyToColumnMapper);</span>
+<span class="fc" id="L143">    this.nameMapper = propertyToColumnMapper;</span>
+<span class="fc" id="L144">    return this;</span>
   }
 
 
@@ -154,17 +155,17 @@ public final class BatchInsertBuilder {
    * @return a {@code SQLBatchInsert} instance
    */
   public &lt;T&gt; SQLBatchInsert&lt;T&gt; prepare(Connection con) {
-<span class="fc" id="L157">    Check.notNull(con);</span>
-<span class="fc" id="L158">    Check.on(STATE, beanClass, BEAN_CLASS).is(notNull());</span>
-<span class="fc" id="L159">    BeanReader reader = new BeanReader&lt;&gt;(beanClass, includeExclude, properties);</span>
-<span class="fc" id="L160">    BatchInsertConfig cfg = new BatchInsertConfig&lt;&gt;(con,</span>
+<span class="fc" id="L158">    Check.notNull(con);</span>
+<span class="fc" id="L159">    Check.on(STATE, beanClass, BEAN_CLASS).is(notNull());</span>
+<span class="fc" id="L160">    BeanReader reader = new BeanReader&lt;&gt;(beanClass, includeExclude, properties);</span>
+<span class="fc" id="L161">    BatchInsertConfig cfg = new BatchInsertConfig&lt;&gt;(con,</span>
           reader,
           processor,
           nameMapper,
           tableName,
           chunkSize,
           commitPerChunk);
-<span class="fc" id="L167">    return new SQLBatchInsert&lt;&gt;(cfg);</span>
+<span class="fc" id="L168">    return new SQLBatchInsert&lt;&gt;(cfg);</span>
   }
 
 }
