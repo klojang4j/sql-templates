@@ -1,8 +1,11 @@
 package org.klojang.jdbc;
 
+import org.klojang.check.Check;
 import org.klojang.jdbc.x.SQLCache;
 
 import java.sql.Connection;
+
+import static org.klojang.jdbc.x.Strings.*;
 
 /**
  * <p>Encapsulates a user-provided SQL statement. <i>Klojang JDBC</i> provides three
@@ -95,6 +98,7 @@ public sealed interface SQL permits AbstractSQL {
    *       <i>Klojang Templates</i> variables
    */
   static SQL staticSQL(String sql) {
+    Check.notNull(sql, SQL_ARGUMENT);
     return new SimpleSQL(sql, true, noBindInfo());
   }
 
@@ -105,9 +109,8 @@ public sealed interface SQL permits AbstractSQL {
    * {@code SQL} instance is cached and returned upon every subsequent call with the same
    * {@code clazz} and {@code path} arguments. This method returns the same {@code SQL}
    * implementation as the one returned by {@link #simple(String) SQL.simple()}, but does
-   * so under the
-   * <i>assumption</i> that the SQL does not contain any named parameters, thus saving on
-   * the cost of parsing the SQL in order to extract the named parameters.
+   * so under the <i>assumption</i> that the SQL does not contain any named parameters,
+   * thus saving on the cost of parsing the SQL in order to extract the named parameters.
    *
    * @param clazz a {@code Class} object that provides access to the SQL file by
    *       calling {@code getResourceAsStream} on it
@@ -128,6 +131,7 @@ public sealed interface SQL permits AbstractSQL {
    *       <i>Klojang Templates</i> variables
    */
   static SQL simple(String sql) {
+    Check.notNull(sql, SQL_ARGUMENT);
     return simple(sql, noBindInfo());
   }
 
@@ -157,6 +161,8 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL simple(String sql, BindInfo bindInfo) {
+    Check.notNull(sql, SQL_ARGUMENT);
+    Check.notNull(bindInfo, BIND_INFO);
     return new SimpleSQL(sql, false, bindInfo);
   }
 
@@ -213,6 +219,9 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql, BindInfo bindInfo) {
+    Check.notNull(con, CONNECTION);
+    Check.notNull(sql, SQL_ARGUMENT);
+    Check.notNull(bindInfo, BIND_INFO);
     return simple(sql, bindInfo).session(con).prepareQuery();
   }
 
@@ -256,6 +265,9 @@ public sealed interface SQL permits AbstractSQL {
         String sql,
         boolean retrieveKeys,
         BindInfo bindInfo) {
+    Check.notNull(con, CONNECTION);
+    Check.notNull(sql, SQL_ARGUMENT);
+    Check.notNull(bindInfo, BIND_INFO);
     return simple(sql, bindInfo).session(con).prepareInsert(retrieveKeys);
   }
 
@@ -294,6 +306,9 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql, BindInfo bindInfo) {
+    Check.notNull(con, CONNECTION);
+    Check.notNull(sql, SQL_ARGUMENT);
+    Check.notNull(bindInfo, BIND_INFO);
     return simple(sql, bindInfo).session(con).prepareUpdate();
   }
 
@@ -338,6 +353,8 @@ public sealed interface SQL permits AbstractSQL {
    *       <i>Klojang Templates</i> variables
    */
   static SQL template(String sql, BindInfo bindInfo) {
+    Check.notNull(sql, SQL_ARGUMENT);
+    Check.notNull(bindInfo, BIND_INFO);
     return new SQLTemplate(sql, bindInfo);
   }
 
@@ -404,6 +421,8 @@ public sealed interface SQL permits AbstractSQL {
    *       <i>Klojang Templates</i> variables
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
+    Check.notNull(sql, SQL_ARGUMENT);
+    Check.notNull(bindInfo, BIND_INFO);
     return new SQLSkeleton(sql, bindInfo);
   }
 
@@ -461,6 +480,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see Quoter
    */
   static SQLExpression expression(String expression) {
+    Check.notNull(expression);
     return new SQLExpression(expression);
   }
 

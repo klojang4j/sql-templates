@@ -51,7 +51,7 @@ Klojang JDBC,org.klojang.jdbc,SQLSkeleton,4,19,0,0,2,5,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,SQLSession,65,4,0,0,16,1,15,1,15,1
 Klojang JDBC,org.klojang.jdbc,BatchInsertBuilder,35,98,0,0,9,22,4,6,4,6
 Klojang JDBC,org.klojang.jdbc,DefaultMappifier,140,0,16,0,37,0,16,0,8,0
-Klojang JDBC,org.klojang.jdbc,SQL,69,60,0,0,12,12,12,12,12,12
+Klojang JDBC,org.klojang.jdbc,SQL,96,104,0,0,19,23,12,12,12,12
 Klojang JDBC,org.klojang.jdbc,SQLQuery,99,149,7,7,44,40,11,12,5,11
 Klojang JDBC,org.klojang.jdbc,SimpleSQL,0,35,0,2,0,6,0,3,0,2
 Klojang JDBC,org.klojang.jdbc,InsertBuilder,72,193,3,5,12,33,5,10,3,8
@@ -69,7 +69,7 @@ Klojang JDBC,org.klojang.jdbc.x.ps.writer,StringWriterLookup,0,121,0,0,0,15,0,2,
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,IntWriterLookup,0,64,0,0,0,9,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x,JDBC,32,145,2,9,9,26,4,11,2,6
 Klojang JDBC,org.klojang.jdbc.x,Strings,6,0,0,0,1,0,1,0,1,0
-Klojang JDBC,org.klojang.jdbc.x,SQLCache,58,0,0,0,12,0,6,0,6,0
+Klojang JDBC,org.klojang.jdbc.x,SQLCache,66,0,0,0,14,0,6,0,6,0
 Klojang JDBC,org.klojang.jdbc.x,Utils,92,4,6,0,14,1,12,1,8,1
 Klojang JDBC,org.klojang.jdbc.x,SQLTypeNames,4,93,0,2,2,15,0,6,0,5
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,BooleanReaderLookup,0,114,0,0,0,11,0,1,0,1

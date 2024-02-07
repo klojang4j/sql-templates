@@ -5,8 +5,17 @@ import java.sql.PreparedStatement;
 /**
  * {@code BindInfo} objects allow you to determine how values are bound into a
  * {@link PreparedStatement}. Ordinarily &lt;i&gt;Klojang JDBC&lt;/i&gt; will have enough context to
- * figure this out automatically. However, if you want or need to, this class enables you
- * to override the default behaviour.
+ * figure this out automatically. However, if you want or need to, this interface enables
+ * you to override the default behaviour. You might want to implement {@code BindInfo}
+ * through an anonymous class:
+ *
+ * &lt;blockquote&gt;&lt;pre&gt;{@code
+ * BindInfo bindInf = new BindInfo() {
+ *   public boolean saveEnumAsString(Class&lt;?&gt; beanType, String enumProperty) {
+ *     return true;
+ *   }
+ * };
+ * }&lt;/pre&gt;&lt;/blockquote&gt;
  *
  * @author Ayco Holleman
  */
@@ -15,7 +24,7 @@ public interface BindInfo {
   /**
    * A {@code BindInfo} that does not override the default binding behaviour.
    */
-<span class="fc" id="L18">  BindInfo DEFAULT = new BindInfo() { };</span>
+<span class="fc" id="L27">  BindInfo DEFAULT = new BindInfo() { };</span>
 
   /**
    * Specifies the SQL datatype of the column corresponding to a bean property. The return
@@ -40,7 +49,7 @@ public interface BindInfo {
   default Integer getSqlType(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L43">    return null;</span>
+<span class="fc" id="L52">    return null;</span>
   }
 
   /**
@@ -58,7 +67,7 @@ public interface BindInfo {
    * @return whether to bind enums as strings ({@code true}) or as ints ({@code false})
    */
   default boolean saveEnumAsString(Class&lt;?&gt; beanType, String enumProperty) {
-<span class="nc" id="L61">    return false;</span>
+<span class="nc" id="L70">    return false;</span>
   }
 
 }

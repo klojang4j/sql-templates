@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLCache.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x</a> &gt; <span class="el_source">SQLCache.java</span></div><h1>SQLCache.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x;
 
+import org.klojang.check.Check;
 import org.klojang.jdbc.BindInfo;
 import org.klojang.jdbc.SQL;
 import org.klojang.util.IOMethods;
@@ -10,17 +11,22 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-<span class="nc" id="L13">public final class SQLCache {</span>
+import static org.klojang.check.Tag.CLASS;
+import static org.klojang.check.Tag.PATH;
 
-<span class="nc" id="L15">  private static final Map&lt;Tuple2&lt;Class&lt;?&gt;, String&gt;, SQL&gt; cache = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L17">public final class SQLCache {</span>
+
+<span class="nc" id="L19">  private static final Map&lt;Tuple2&lt;Class&lt;?&gt;, String&gt;, SQL&gt; cache = new HashMap&lt;&gt;();</span>
 
   public static SQL get(Class&lt;?&gt; clazz, String path, Function&lt;String, SQL&gt; factory) {
-<span class="nc" id="L18">    return cache.computeIfAbsent(Tuple2.of(clazz, path), k -&gt; {</span>
+<span class="nc" id="L22">    Check.notNull(clazz, CLASS);</span>
+<span class="nc" id="L23">    Check.notNull(path, PATH);</span>
+<span class="nc" id="L24">    return cache.computeIfAbsent(Tuple2.of(clazz, path), k -&gt; {</span>
       try {
-<span class="nc" id="L20">        String sql = IOMethods.getContents(clazz, path);</span>
-<span class="nc" id="L21">        return factory.apply(sql);</span>
-<span class="nc" id="L22">      } catch (Throwable t) {</span>
-<span class="nc" id="L23">        throw Utils.wrap(t);</span>
+<span class="nc" id="L26">        String sql = IOMethods.getContents(clazz, path);</span>
+<span class="nc" id="L27">        return factory.apply(sql);</span>
+<span class="nc" id="L28">      } catch (Throwable t) {</span>
+<span class="nc" id="L29">        throw Utils.wrap(t);</span>
       }
     });
   }
@@ -29,12 +35,12 @@ import java.util.function.Function;
         String path,
         BindInfo bindInfo,
         BiFunction&lt;String, BindInfo, SQL&gt; factory) {
-<span class="nc" id="L32">    return cache.computeIfAbsent(Tuple2.of(clazz, path), k -&gt; {</span>
+<span class="nc" id="L38">    return cache.computeIfAbsent(Tuple2.of(clazz, path), k -&gt; {</span>
       try {
-<span class="nc" id="L34">        String sql = IOMethods.getContents(clazz, path);</span>
-<span class="nc" id="L35">        return factory.apply(sql, bindInfo);</span>
-<span class="nc" id="L36">      } catch (Throwable t) {</span>
-<span class="nc" id="L37">        throw Utils.wrap(t);</span>
+<span class="nc" id="L40">        String sql = IOMethods.getContents(clazz, path);</span>
+<span class="nc" id="L41">        return factory.apply(sql, bindInfo);</span>
+<span class="nc" id="L42">      } catch (Throwable t) {</span>
+<span class="nc" id="L43">        throw Utils.wrap(t);</span>
       }
     });
   }

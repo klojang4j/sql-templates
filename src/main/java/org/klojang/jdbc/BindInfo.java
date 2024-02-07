@@ -5,8 +5,17 @@ import java.sql.PreparedStatement;
 /**
  * {@code BindInfo} objects allow you to determine how values are bound into a
  * {@link PreparedStatement}. Ordinarily <i>Klojang JDBC</i> will have enough context to
- * figure this out automatically. However, if you want or need to, this class enables you
- * to override the default behaviour.
+ * figure this out automatically. However, if you want or need to, this interface enables
+ * you to override the default behaviour. You might want to implement {@code BindInfo}
+ * through an anonymous class:
+ *
+ * <blockquote><pre>{@code
+ * BindInfo bindInf = new BindInfo() {
+ *   public boolean saveEnumAsString(Class<?> beanType, String enumProperty) {
+ *     return true;
+ *   }
+ * };
+ * }</pre></blockquote>
  *
  * @author Ayco Holleman
  */

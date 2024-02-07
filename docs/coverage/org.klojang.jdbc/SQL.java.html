@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQL.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQL.java</span></div><h1>SQL.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
+import org.klojang.check.Check;
 import org.klojang.jdbc.x.SQLCache;
 
 import java.sql.Connection;
+
+import static org.klojang.jdbc.x.Strings.*;
 
 /**
  * &lt;p&gt;Encapsulates a user-provided SQL statement. &lt;i&gt;Klojang JDBC&lt;/i&gt; provides three
@@ -95,7 +98,8 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL staticSQL(String sql) {
-<span class="fc" id="L98">    return new SimpleSQL(sql, true, noBindInfo());</span>
+<span class="fc" id="L101">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L102">    return new SimpleSQL(sql, true, noBindInfo());</span>
   }
 
   /**
@@ -105,9 +109,8 @@ public sealed interface SQL permits AbstractSQL {
    * {@code SQL} instance is cached and returned upon every subsequent call with the same
    * {@code clazz} and {@code path} arguments. This method returns the same {@code SQL}
    * implementation as the one returned by {@link #simple(String) SQL.simple()}, but does
-   * so under the
-   * &lt;i&gt;assumption&lt;/i&gt; that the SQL does not contain any named parameters, thus saving on
-   * the cost of parsing the SQL in order to extract the named parameters.
+   * so under the &lt;i&gt;assumption&lt;/i&gt; that the SQL does not contain any named parameters,
+   * thus saving on the cost of parsing the SQL in order to extract the named parameters.
    *
    * @param clazz a {@code Class} object that provides access to the SQL file by
    *       calling {@code getResourceAsStream} on it
@@ -116,7 +119,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL staticSQL(Class&lt;?&gt; clazz, String path) {
-<span class="nc" id="L119">    return SQLCache.get(clazz, path, SQL::staticSQL);</span>
+<span class="nc" id="L122">    return SQLCache.get(clazz, path, SQL::staticSQL);</span>
   }
 
   /**
@@ -128,7 +131,8 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL simple(String sql) {
-<span class="fc" id="L131">    return simple(sql, noBindInfo());</span>
+<span class="fc" id="L134">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L135">    return simple(sql, noBindInfo());</span>
   }
 
   /**
@@ -144,7 +148,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL simple(Class&lt;?&gt; clazz, String path) {
-<span class="nc" id="L147">    return SQLCache.get(clazz, path, SQL::simple);</span>
+<span class="nc" id="L151">    return SQLCache.get(clazz, path, SQL::simple);</span>
   }
 
   /**
@@ -157,7 +161,9 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL simple(String sql, BindInfo bindInfo) {
-<span class="fc" id="L160">    return new SimpleSQL(sql, false, bindInfo);</span>
+<span class="fc" id="L164">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L165">    Check.notNull(bindInfo, BIND_INFO);</span>
+<span class="fc" id="L166">    return new SimpleSQL(sql, false, bindInfo);</span>
   }
 
   /**
@@ -175,7 +181,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL simple(Class&lt;?&gt; clazz, String path, BindInfo bindInfo) {
-<span class="nc" id="L178">    return SQLCache.get(clazz, path, SQL::simple);</span>
+<span class="nc" id="L184">    return SQLCache.get(clazz, path, SQL::simple);</span>
   }
 
   /**
@@ -193,7 +199,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql) {
-<span class="fc" id="L196">    return simpleQuery(con, sql, noBindInfo());</span>
+<span class="fc" id="L202">    return simpleQuery(con, sql, noBindInfo());</span>
   }
 
   /**
@@ -213,7 +219,10 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql, BindInfo bindInfo) {
-<span class="fc" id="L216">    return simple(sql, bindInfo).session(con).prepareQuery();</span>
+<span class="fc" id="L222">    Check.notNull(con, CONNECTION);</span>
+<span class="fc" id="L223">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L224">    Check.notNull(bindInfo, BIND_INFO);</span>
+<span class="fc" id="L225">    return simple(sql, bindInfo).session(con).prepareQuery();</span>
   }
 
   /**
@@ -231,7 +240,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareInsert()
    */
   static SQLInsert simpleInsert(Connection con, String sql) {
-<span class="nc" id="L234">    return simple(sql, noBindInfo()).session(con).prepareInsert();</span>
+<span class="nc" id="L243">    return simple(sql, noBindInfo()).session(con).prepareInsert();</span>
   }
 
   /**
@@ -256,7 +265,10 @@ public sealed interface SQL permits AbstractSQL {
         String sql,
         boolean retrieveKeys,
         BindInfo bindInfo) {
-<span class="nc" id="L259">    return simple(sql, bindInfo).session(con).prepareInsert(retrieveKeys);</span>
+<span class="nc" id="L268">    Check.notNull(con, CONNECTION);</span>
+<span class="nc" id="L269">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="nc" id="L270">    Check.notNull(bindInfo, BIND_INFO);</span>
+<span class="nc" id="L271">    return simple(sql, bindInfo).session(con).prepareInsert(retrieveKeys);</span>
   }
 
   /**
@@ -274,7 +286,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql) {
-<span class="nc" id="L277">    return simpleUpdate(con, sql, noBindInfo());</span>
+<span class="nc" id="L289">    return simpleUpdate(con, sql, noBindInfo());</span>
   }
 
   /**
@@ -294,7 +306,10 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L297">    return simple(sql, bindInfo).session(con).prepareUpdate();</span>
+<span class="nc" id="L309">    Check.notNull(con, CONNECTION);</span>
+<span class="nc" id="L310">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="nc" id="L311">    Check.notNull(bindInfo, BIND_INFO);</span>
+<span class="nc" id="L312">    return simple(sql, bindInfo).session(con).prepareUpdate();</span>
   }
 
 
@@ -307,7 +322,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(String sql) {
-<span class="fc" id="L310">    return template(sql, noBindInfo());</span>
+<span class="fc" id="L325">    return template(sql, noBindInfo());</span>
   }
 
   /**
@@ -323,7 +338,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(Class&lt;?&gt; clazz, String path) {
-<span class="nc" id="L326">    return SQLCache.get(clazz, path, SQL::template);</span>
+<span class="nc" id="L341">    return SQLCache.get(clazz, path, SQL::template);</span>
   }
 
 
@@ -338,7 +353,9 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(String sql, BindInfo bindInfo) {
-<span class="fc" id="L341">    return new SQLTemplate(sql, bindInfo);</span>
+<span class="fc" id="L356">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L357">    Check.notNull(bindInfo, BIND_INFO);</span>
+<span class="fc" id="L358">    return new SQLTemplate(sql, bindInfo);</span>
   }
 
   /**
@@ -356,7 +373,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(Class&lt;?&gt; clazz, String path, BindInfo bindInfo) {
-<span class="nc" id="L359">    return SQLCache.get(clazz, path, bindInfo, SQL::template);</span>
+<span class="nc" id="L376">    return SQLCache.get(clazz, path, bindInfo, SQL::template);</span>
   }
 
 
@@ -370,7 +387,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(String sql) {
-<span class="fc" id="L373">    return skeleton(sql, noBindInfo());</span>
+<span class="fc" id="L390">    return skeleton(sql, noBindInfo());</span>
   }
 
 
@@ -388,7 +405,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(Class&lt;?&gt; clazz, String path) {
-<span class="nc" id="L391">    return SQLCache.get(clazz, path, SQL::skeleton);</span>
+<span class="nc" id="L408">    return SQLCache.get(clazz, path, SQL::skeleton);</span>
   }
 
 
@@ -404,7 +421,9 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="fc" id="L407">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="fc" id="L424">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L425">    Check.notNull(bindInfo, BIND_INFO);</span>
+<span class="fc" id="L426">    return new SQLSkeleton(sql, bindInfo);</span>
   }
 
   /**
@@ -423,7 +442,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(Class&lt;?&gt; clazz, String path, BindInfo bindInfo) {
-<span class="nc" id="L426">    return SQLCache.get(clazz, path, bindInfo, SQL::skeleton);</span>
+<span class="nc" id="L445">    return SQLCache.get(clazz, path, bindInfo, SQL::skeleton);</span>
   }
 
 
@@ -435,7 +454,7 @@ public sealed interface SQL permits AbstractSQL {
    *       INSERT statement
    */
   static InsertBuilder insert() {
-<span class="fc" id="L438">    return new InsertBuilder();</span>
+<span class="fc" id="L457">    return new InsertBuilder();</span>
   }
 
   /**
@@ -446,7 +465,7 @@ public sealed interface SQL permits AbstractSQL {
    *       batch inserts.
    */
   static BatchInsertBuilder batchInsert() {
-<span class="fc" id="L449">    return new BatchInsertBuilder();</span>
+<span class="fc" id="L468">    return new BatchInsertBuilder();</span>
   }
 
   /**
@@ -461,7 +480,8 @@ public sealed interface SQL permits AbstractSQL {
    * @see Quoter
    */
   static SQLExpression expression(String expression) {
-<span class="nc" id="L464">    return new SQLExpression(expression);</span>
+<span class="nc" id="L483">    Check.notNull(expression);</span>
+<span class="nc" id="L484">    return new SQLExpression(expression);</span>
   }
 
   /**
@@ -473,7 +493,7 @@ public sealed interface SQL permits AbstractSQL {
   SQLSession session(Connection con);
 
   private static BindInfo noBindInfo() {
-<span class="fc" id="L476">    return BindInfo.DEFAULT;</span>
+<span class="fc" id="L496">    return BindInfo.DEFAULT;</span>
   }
 
 
