@@ -295,7 +295,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *
    * <blockquote><pre>{@code
    * try(Connection con = ...) {
-   *   List<Person> lastName = SQL.template("SELECT  FROM PERSON ORDER BY ~%orderBy%")
+   *   List<Person> lastNames = SQL.template("SELECT * FROM PERSON ORDER BY ~%orderBy%")
    *       .session(con)
    *       .setOrderBy("LAST_NAME")
    *       .prepareQuery(con)
