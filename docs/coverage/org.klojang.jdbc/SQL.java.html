@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQL.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQL.java</span></div><h1>SQL.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
+import org.klojang.jdbc.x.SQLCache;
+
 import java.sql.Connection;
 
 /**
@@ -81,7 +83,7 @@ import java.sql.Connection;
 public sealed interface SQL permits AbstractSQL {
 
   /**
-   * Returns an {@code SQL} implementation that supports neither named parameters nor
+   * Returns a {@code SQL} implementation that supports neither named parameters nor
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. In other words, it only supports completely
    * static SQL. This method returns the same {@code SQL} implementation as the one
    * returned by {@link #simple(String) SQL.simple()}, but does so under the
@@ -89,27 +91,64 @@ public sealed interface SQL permits AbstractSQL {
    * the cost of parsing the SQL in order to extract the named parameters.
    *
    * @param sql the SQL statement
-   * @return an {@code SQL} implementation that supports neither named parameters nor
+   * @return a {@code SQL} implementation that supports neither named parameters nor
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL staticSQL(String sql) {
-<span class="fc" id="L96">    return new SimpleSQL(sql, true, noBindInfo());</span>
+<span class="fc" id="L98">    return new SimpleSQL(sql, true, noBindInfo());</span>
   }
 
   /**
-   * Returns an {@code SQL} implementation that allows for named parameters, but not for
+   * Returns a {@code SQL} implementation that supports neither named parameters nor
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. In other words, it only supports completely
+   * static SQL. The SQL is read from the specified classpath resource. The resulting
+   * {@code SQL} instance is cached and returned upon every subsequent call with the same
+   * {@code clazz} and {@code path} arguments. This method returns the same {@code SQL}
+   * implementation as the one returned by {@link #simple(String) SQL.simple()}, but does
+   * so under the
+   * &lt;i&gt;assumption&lt;/i&gt; that the SQL does not contain any named parameters, thus saving on
+   * the cost of parsing the SQL in order to extract the named parameters.
+   *
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code getResourceAsStream} on it
+   * @param path the location of the SQL file
+   * @return a {@code SQL} implementation that supports neither named parameters nor
+   *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
+   */
+  static SQL staticSQL(Class&lt;?&gt; clazz, String path) {
+<span class="nc" id="L119">    return SQLCache.get(clazz, path, SQL::staticSQL);</span>
+  }
+
+  /**
+   * Returns a {@code SQL} implementation that allows for named parameters, but not for
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL statement
-   * @return an {@code SQL} implementation that allows for named parameters, but not for
+   * @return a {@code SQL} implementation that allows for named parameters, but not for
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL simple(String sql) {
-<span class="fc" id="L108">    return simple(sql, noBindInfo());</span>
+<span class="fc" id="L131">    return simple(sql, noBindInfo());</span>
   }
 
   /**
-   * Returns an {@code SQL} implementation that allows for named parameters, but not for
+   * Returns a {@code SQL} implementation that allows for named parameters, but not for
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. The SQL is read from the specified classpath
+   * resource. The resulting {@code SQL} instance is cached and returned upon every
+   * subsequent call with the same {@code clazz} and {@code path} arguments.
+   *
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code getResourceAsStream} on it
+   * @param path the location of the SQL file
+   * @return a {@code SQL} implementation that allows for named parameters, but not for
+   *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
+   */
+  static SQL simple(Class&lt;?&gt; clazz, String path) {
+<span class="nc" id="L147">    return SQLCache.get(clazz, path, SQL::simple);</span>
+  }
+
+  /**
+   * Returns a {@code SQL} implementation that allows for named parameters, but not for
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL statement
@@ -118,7 +157,25 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL simple(String sql, BindInfo bindInfo) {
-<span class="fc" id="L121">    return new SimpleSQL(sql, false, bindInfo);</span>
+<span class="fc" id="L160">    return new SimpleSQL(sql, false, bindInfo);</span>
+  }
+
+  /**
+   * Returns a {@code SQL} implementation that allows for named parameters, but not for
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. The SQL is read from the specified classpath
+   * resource. The resulting {@code SQL} instance is cached and returned upon every
+   * subsequent call with the same {@code clazz} and {@code path} arguments.
+   *
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code getResourceAsStream} on it
+   * @param path the location of the SQL file
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   * @return a {@code SQL} implementation that allows for named parameters, but not for
+   *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
+   */
+  static SQL simple(Class&lt;?&gt; clazz, String path, BindInfo bindInfo) {
+<span class="nc" id="L178">    return SQLCache.get(clazz, path, SQL::simple);</span>
   }
 
   /**
@@ -126,7 +183,7 @@ public sealed interface SQL permits AbstractSQL {
    * Templates&lt;/i&gt; variables. Equivalent to:
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
-   * SQL.simple(sql, new BindInfo() {}).session(con).prepareQuery();
+   * SQL.simple(sql, BindInfo.DEFAULT).session(con).prepareQuery();
    * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
    * @param con the JDBC connection to use
@@ -136,7 +193,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql) {
-<span class="fc" id="L139">    return simpleQuery(con, sql, noBindInfo());</span>
+<span class="fc" id="L196">    return simpleQuery(con, sql, noBindInfo());</span>
   }
 
   /**
@@ -156,7 +213,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql, BindInfo bindInfo) {
-<span class="fc" id="L159">    return simple(sql, bindInfo).session(con).prepareQuery();</span>
+<span class="fc" id="L216">    return simple(sql, bindInfo).session(con).prepareQuery();</span>
   }
 
   /**
@@ -164,7 +221,7 @@ public sealed interface SQL permits AbstractSQL {
    * Templates&lt;/i&gt; variables. Equivalent to:
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
-   * SQL.simple(sql, new BindInfo() {}).session(con).prepareInsert();
+   * SQL.simple(sql, BindInfo.DEFAULT).session(con).prepareInsert();
    * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
    * @param con the JDBC connection to use
@@ -174,7 +231,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareInsert()
    */
   static SQLInsert simpleInsert(Connection con, String sql) {
-<span class="nc" id="L177">    return simple(sql, noBindInfo()).session(con).prepareInsert();</span>
+<span class="nc" id="L234">    return simple(sql, noBindInfo()).session(con).prepareInsert();</span>
   }
 
   /**
@@ -199,7 +256,7 @@ public sealed interface SQL permits AbstractSQL {
         String sql,
         boolean retrieveKeys,
         BindInfo bindInfo) {
-<span class="nc" id="L202">    return simple(sql, bindInfo).session(con).prepareInsert(retrieveKeys);</span>
+<span class="nc" id="L259">    return simple(sql, bindInfo).session(con).prepareInsert(retrieveKeys);</span>
   }
 
   /**
@@ -207,7 +264,7 @@ public sealed interface SQL permits AbstractSQL {
    * Templates&lt;/i&gt; variables. Equivalent to:
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
-   * SQL.simple(sql, new BindInfo() {}).session(con).prepareUpdate();
+   * SQL.simple(sql, BindInfo.DEFAULT).session(con).prepareUpdate();
    * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
    * @param con the JDBC connection to use
@@ -217,7 +274,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql) {
-<span class="nc" id="L220">    return simpleUpdate(con, sql, noBindInfo());</span>
+<span class="nc" id="L277">    return simpleUpdate(con, sql, noBindInfo());</span>
   }
 
   /**
@@ -237,64 +294,138 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L240">    return simple(sql, bindInfo).session(con).prepareUpdate();</span>
+<span class="nc" id="L297">    return simple(sql, bindInfo).session(con).prepareUpdate();</span>
   }
 
 
   /**
-   * Returns an {@code SQL} implementation that allows for named parameters and
+   * Returns a {@code SQL} implementation that allows for named parameters and
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL statement
-   * @return an {@code SQL} implementation that allows for named parameters and
+   * @return a {@code SQL} implementation that allows for named parameters and
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(String sql) {
-<span class="fc" id="L253">    return template(sql, noBindInfo());</span>
+<span class="fc" id="L310">    return template(sql, noBindInfo());</span>
   }
 
   /**
-   * Returns an {@code SQL} implementation that allows for named parameters and
+   * Returns a {@code SQL} implementation that allows for named parameters and
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. The SQL is read from the specified classpath
+   * resource. The resulting {@code SQL} instance is cached and returned upon every
+   * subsequent call with the same {@code clazz} and {@code path} arguments.
+   *
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code getResourceAsStream} on it
+   * @param path the location of the SQL file
+   * @return a {@code SQL} implementation that allows for named parameters and
+   *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
+   */
+  static SQL template(Class&lt;?&gt; clazz, String path) {
+<span class="nc" id="L326">    return SQLCache.get(clazz, path, SQL::template);</span>
+  }
+
+
+  /**
+   * Returns a {@code SQL} implementation that allows for named parameters and
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL statement
    * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
-   * @return an {@code SQL} implementation that allows for named parameters and
+   * @return a {@code SQL} implementation that allows for named parameters and
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(String sql, BindInfo bindInfo) {
-<span class="fc" id="L267">    return new SQLTemplate(sql, bindInfo);</span>
+<span class="fc" id="L341">    return new SQLTemplate(sql, bindInfo);</span>
   }
 
   /**
-   * Returns an {@code SQL} implementation that allows for named parameters and
+   * Returns a {@code SQL} implementation that allows for named parameters and
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. The SQL is read from the specified classpath
+   * resource. The resulting {@code SQL} instance is cached and returned upon every
+   * subsequent call with the same {@code clazz} and {@code path} arguments.
+   *
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code getResourceAsStream} on it
+   * @param path the location of the SQL file
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   * @return a {@code SQL} implementation that allows for named parameters and
+   *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
+   */
+  static SQL template(Class&lt;?&gt; clazz, String path, BindInfo bindInfo) {
+<span class="nc" id="L359">    return SQLCache.get(clazz, path, bindInfo, SQL::template);</span>
+  }
+
+
+  /**
+   * Returns a {@code SQL} implementation that allows for named parameters and
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. The template variables may be set to SQL
    * fragments that again contain named parameters.
    *
    * @param sql the SQL statement
-   * @return an {@code SQL} implementation that allows for named parameters and
+   * @return a {@code SQL} implementation that allows for named parameters and
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(String sql) {
-<span class="fc" id="L280">    return skeleton(sql, noBindInfo());</span>
+<span class="fc" id="L373">    return skeleton(sql, noBindInfo());</span>
   }
 
 
   /**
-   * Returns an {@code SQL} implementation that allows for named parameters and
+   * Returns a {@code SQL} implementation that allows for named parameters and
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. The template variables may be set to SQL
+   * fragments that again contain named parameters. The SQL is read from the specified
+   * classpath resource. The resulting {@code SQL} instance is cached and returned upon
+   * every subsequent call with the same {@code clazz} and {@code path} arguments.
+   *
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code getResourceAsStream} on it
+   * @param path the location of the SQL file
+   * @return a {@code SQL} implementation that allows for named parameters and
+   *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
+   */
+  static SQL skeleton(Class&lt;?&gt; clazz, String path) {
+<span class="nc" id="L391">    return SQLCache.get(clazz, path, SQL::skeleton);</span>
+  }
+
+
+  /**
+   * Returns a {@code SQL} implementation that allows for named parameters and
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. The template variables may be set to SQL
    * fragments that again contain named parameters.
    *
    * @param sql the SQL statement
    * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
-   * @return an {@code SQL} implementation that allows for named parameters and
+   * @return a {@code SQL} implementation that allows for named parameters and
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(String sql, BindInfo bindInfo) {
-<span class="fc" id="L296">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="fc" id="L407">    return new SQLSkeleton(sql, bindInfo);</span>
   }
+
+  /**
+   * Returns a {@code SQL} implementation that allows for named parameters and
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. The template variables may be set to SQL
+   * fragments that again contain named parameters. The SQL is read from the specified
+   * classpath resource. The resulting {@code SQL} instance is cached and returned upon
+   * every subsequent call with the same {@code clazz} and {@code path} arguments.
+   *
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code getResourceAsStream} on it
+   * @param path the location of the SQL file
+   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   * @return a {@code SQL} implementation that allows for named parameters and
+   *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
+   */
+  static SQL skeleton(Class&lt;?&gt; clazz, String path, BindInfo bindInfo) {
+<span class="nc" id="L426">    return SQLCache.get(clazz, path, bindInfo, SQL::skeleton);</span>
+  }
+
 
   /**
    * Returns an {@link InsertBuilder} that enables you to easily configure an SQL INSERT
@@ -303,8 +434,8 @@ public sealed interface SQL permits AbstractSQL {
    * @return an {@code SQLInsertBuilder} that enables you to easily configure an SQL
    *       INSERT statement
    */
-  static InsertBuilder configureInsert() {
-<span class="fc" id="L307">    return new InsertBuilder();</span>
+  static InsertBuilder insert() {
+<span class="fc" id="L438">    return new InsertBuilder();</span>
   }
 
   /**
@@ -314,8 +445,8 @@ public sealed interface SQL permits AbstractSQL {
    * @return an {@code SQLBatchInsertBuilder} that enables you to easily configure large
    *       batch inserts.
    */
-  static BatchInsertBuilder configureBatchInsert() {
-<span class="fc" id="L318">    return new BatchInsertBuilder();</span>
+  static BatchInsertBuilder batchInsert() {
+<span class="fc" id="L449">    return new BatchInsertBuilder();</span>
   }
 
   /**
@@ -330,7 +461,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see Quoter
    */
   static SQLExpression expression(String expression) {
-<span class="nc" id="L333">    return new SQLExpression(expression);</span>
+<span class="nc" id="L464">    return new SQLExpression(expression);</span>
   }
 
   /**
@@ -342,7 +473,7 @@ public sealed interface SQL permits AbstractSQL {
   SQLSession session(Connection con);
 
   private static BindInfo noBindInfo() {
-<span class="fc" id="L345">    return new BindInfo() { };</span>
+<span class="fc" id="L476">    return BindInfo.DEFAULT;</span>
   }
 
 

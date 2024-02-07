@@ -18,7 +18,7 @@ import static org.klojang.util.ArrayMethods.EMPTY_STRING_ARRAY;
 
 /**
  * A builder class for {@link SQLBatchInsert} instances. {@code BatchInsertBuilder}
- * instances are obtained via {@link SQL#configureBatchInsert()}.
+ * instances are obtained via {@link SQL#batchInsert()}.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class BatchInsertBuilder {

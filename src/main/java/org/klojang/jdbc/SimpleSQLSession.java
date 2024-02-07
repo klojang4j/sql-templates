@@ -39,8 +39,8 @@ final class SimpleSQLSession extends AbstractSQLSession {
 
 
   @Override
-  public void execute() {
-    execute(sqlInfo.sql());
+  public int execute() {
+    return execute(sqlInfo.sql());
   }
 
 }

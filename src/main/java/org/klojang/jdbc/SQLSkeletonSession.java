@@ -54,13 +54,17 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   }
 
   @Override
+  public <T> long[] setValuesAndExecute(List<T> beans) {
+    return setValuesAndExecute(beans, BeanValueProcessor.identity());
+  }
+
+  @Override
   public <T> long[] setValuesAndExecute(List<T> beans, BeanValueProcessor<T> processor) {
     String executable = sql.unparsed();
-    try {
+    try (Statement stmt = con.createStatement()) {
       setValues(beans, processor);
-      Check.that(session).isNot(RenderSession::hasUnsetVariables, unfinishedSession());
+      Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());
       executable = session.render();
-      Statement stmt = con.createStatement();
       LOG.trace(EXECUTING_SQL, executable);
       stmt.execute(executable);
       return JDBC.getGeneratedKeys(stmt, beans.size());
@@ -121,7 +125,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   }
 
   private SQLInfo getSQLInfo() {
-    Check.that(session.hasUnsetVariables()).is(no(), unfinishedSession());
+    Check.that(session.hasUnsetVariables()).is(no(), rogueVariables());
     return new SQLInfo(new ParamExtractor(session.render()));
   }
 

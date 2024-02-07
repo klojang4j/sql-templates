@@ -14,7 +14,6 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-import static org.klojang.check.CommonChecks.no;
 import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.check.Tag.VARARGS;
 import static org.klojang.jdbc.x.Strings.*;
@@ -126,20 +125,15 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   @Override
-  public final void execute() {
+  public final int execute() {
     try {
-      Check.that(session.hasUnsetVariables()).is(no(), unfinishedSession());
-      execute(session.render());
+      Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());
+      return execute(session.render());
     } finally {
       close();
     }
   }
 
-
-  Supplier<IllegalStateException> unfinishedSession() {
-    String unset = CollectionMethods.implode(session.getAllUnsetVariables());
-    return illegalState("one or more template variables have not been set yet: " + unset);
-  }
 
   Statement statement() {
     if (stmt == null) {
@@ -163,5 +157,11 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
       }
     }
   }
+
+  Supplier<IllegalStateException> rogueVariables() {
+    String unset = CollectionMethods.implode(session.getAllUnsetVariables());
+    return illegalState("unset variables in SQL template: " + unset);
+  }
+
 
 }

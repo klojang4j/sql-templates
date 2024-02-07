@@ -19,14 +19,13 @@ import static org.klojang.util.StringMethods.append;
 /**
  * <p>{@code SQLBatchInsert} specializes in saving large batches of
  * JavaBeans or records to the database. Instances are configured and obtained via a
- * {@link BatchInsertBuilder}. {@code SQLBatchInsert} does not rely on
- * {@linkplain java.sql.PreparedStatement prepared statements} for the binding and
- * execution phases of the INSERT statement. Yet, it provides just as much protection
- * against SQL injection as a {@code PreparedStatement}, as it will process each and every
- * value in the batch using {@link Quoter#quoteValue(Object) Quoter.quoteValue()}, which
+ * {@link BatchInsertBuilder}. They are not underpinned by
+ * {@linkplain java.sql.PreparedStatement prepared statements}. Yet, they provide just as
+ * much protection against SQL injection, as they will process each and every value in the
+ * batch using {@link Quoter#quoteValue(Object) Quoter.quoteValue()}. This method
  * ultimately relies on
- * {@link Statement#enquoteLiteral(String) Statement.enquoteLiteral()} (in other words,
- * the JDBC driver's own escape-and-quote mechanism).
+ * {@link Statement#enquoteLiteral(String) Statement.enquoteLiteral()} &#8212; in other
+ * words, the JDBC driver's own escape-and-quote mechanism.
  *
  * <h2>Batch Insert Options</h2>
  *
@@ -47,8 +46,8 @@ import static org.klojang.util.StringMethods.append;
  * of taste.
  *
  * @param <T> the type of the JavaBeans or records to save to the database.
- * @see InsertBuilder
- * @see SQLInsert
+ * @see BatchInsertBuilder
+ * @see SQL#batchInsert()
  */
 @SuppressWarnings({"resource"})
 public final class SQLBatchInsert<T> {

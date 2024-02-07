@@ -6,7 +6,7 @@ import java.util.List;
  * Used to selectively modify values within a batch of JavaBeans or records. A
  * {@code BeanValueProcessor} can be specified for batch inserts to apply last-minute
  * transformations on the beans or records before they are saved to the database. Although
- * you can apply any transformations you like, it os mainly there for a rather special and
+ * you can apply any transformations you like, it is mainly there for a rather special and
  * specific purpose: to replace bean values with
  * {@linkplain SQLExpression SQL expressions}.
  * <i>Klojang JDBC</i> does not aim to be a SQL parser, and hence it does not know if and

@@ -13,6 +13,11 @@ import java.sql.PreparedStatement;
 public interface BindInfo {
 
   /**
+   * A {@code BindInfo} that does not override the default binding behaviour.
+   */
+  BindInfo DEFAULT = new BindInfo() { };
+
+  /**
    * Specifies the SQL datatype of the column corresponding to a bean property. The return
    * value must either be one of the constants in the
    * {@link java.sql.Types java.sql.Types} class (like
@@ -47,7 +52,8 @@ public interface BindInfo {
    * you don't need in order to determine the storage type. To save <i>all</i> enums in
    * your application as strings, simply return {@code true} straight away.
    *
-   * @param beanType the class containing the enum property (may be a {@code record} type)
+   * @param beanType the class containing the enum property (may be a {@code record}
+   *       type)
    * @param enumProperty the enum property for which to specify the storage type.
    * @return whether to bind enums as strings ({@code true}) or as ints ({@code false})
    */

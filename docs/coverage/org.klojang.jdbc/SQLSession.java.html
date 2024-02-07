@@ -289,9 +289,20 @@ public sealed interface SQLSession permits AbstractSQLSession {
   /**
    * Sets the sort column of the ORDER BY clause within a SQL template. This presumes and
    * requires that the template contains a template variable named &quot;orderBy&quot;. This is a
-   * convenience method facilitating a common use case for template variables:
-   * parametrizing the sort column within the ORDER BY clause. It is equivalent to calling
+   * convenience method facilitating a common use case for template variables: to
+   * parametrize the sort column within the ORDER BY clause. It is equivalent to calling
    * {@code setIdentifier(&quot;orderBy&quot;, sortColumn)}.
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * try(Connection con = ...) {
+   *   List&lt;Person&gt; lastName = SQL.template(&quot;SELECT  FROM PERSON ORDER BY ~%orderBy%&quot;)
+   *       .session(con)
+   *       .setOrderBy(&quot;LAST_NAME&quot;)
+   *       .prepareQuery(con)
+   *       .getBeanifier(Person.class)
+   *       .beanifyAll();
+   * }
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
    * @param sortColumn the column to sort on
    * @return this {@code SQLSession} instance
@@ -299,14 +310,14 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setOrderBy(String sortColumn) throws UnsupportedOperationException {
-<span class="nc" id="L302">    throw notSupported(&quot;setOrderBy&quot;);</span>
+<span class="nc" id="L313">    throw notSupported(&quot;setOrderBy&quot;);</span>
   }
 
   /**
    * Sets the sort column and sort order of the ORDER BY clause within a SQL template.
    * This presumes and requires that the template contains a template variable named
    * &quot;orderBy&quot;. This is a convenience method facilitating a common use case for template
-   * variables: parametrizing the sort column and sort order within the ORDER BY clause.
+   * variables: to parametrize the sort column and sort order within the ORDER BY clause.
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
    * SQL sql = SQL.template(&quot;SELECT LAST_NAME FROM EMPLOYEE ORDER BY ~%orderBy%&quot;);
@@ -325,7 +336,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setOrderBy(String sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
-<span class="nc" id="L328">    throw notSupported(&quot;setOrderBy&quot;);</span>
+<span class="nc" id="L339">    throw notSupported(&quot;setOrderBy&quot;);</span>
   }
 
   /**
@@ -351,7 +362,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @see Quoter#quoteValue(Object)
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
-<span class="nc" id="L354">    throw notSupported(&quot;quoteValue&quot;);</span>
+<span class="nc" id="L365">    throw notSupported(&quot;quoteValue&quot;);</span>
   }
 
   /**
@@ -367,7 +378,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLExpression sqlFunction(String name, Object... args)
         throws UnsupportedOperationException {
-<span class="nc" id="L370">    throw notSupported(&quot;sqlFunction&quot;);</span>
+<span class="nc" id="L381">    throw notSupported(&quot;sqlFunction&quot;);</span>
   }
 
   /**
@@ -383,19 +394,18 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @see Quoter#quoteIdentifier(String)
    */
   default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
-<span class="nc" id="L386">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
+<span class="nc" id="L397">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
   }
 
   /**
    * Executes the SQL. You can call this method either if the SQL is completely static, or
    * if you have set all template variables and the SQL does not contain any named
-   * parameters. If the SQL &lt;i&gt;does&lt;/i&gt; contain named parameters, you will first have to
-   * bind them. Call {@link #prepareInsert()}, or {@link #prepareUpdate()} to obtain a
-   * {@link SQLStatement} that enables you to bind the named parameters. Although you
-   * &lt;i&gt;could&lt;/i&gt; call this method for SQL SELECT statements, it does not make much sense
-   * because this method does not return any feedback from the database.
+   * parameters. If the SQL &lt;i&gt;does&lt;/i&gt; contain named parameters, you must first bind them
+   * using a {@link SQLStatement} obtained from the {@code SQLSession}.
+   *
+   * @return the number of inserted, updated, or deleted rows, if applicable; -1 otherwise
    */
-  void execute();
+  int execute();
 
   /**
    * Returns a {@code SQLQuery} instance that allows you to provide values for named
@@ -413,7 +423,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @return a {@code SQLInsert} instance
    */
   default SQLInsert prepareInsert() {
-<span class="fc" id="L416">    return prepareInsert(true);</span>
+<span class="fc" id="L426">    return prepareInsert(true);</span>
   }
 
   /**
@@ -435,12 +445,12 @@ public sealed interface SQLSession permits AbstractSQLSession {
   SQLUpdate prepareUpdate();
 
   private static UnsupportedOperationException notSupported(String method) {
-<span class="nc" id="L438">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
-<span class="nc" id="L439">    return new UnsupportedOperationException(String.format(fmt, method));</span>
+<span class="nc" id="L448">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
+<span class="nc" id="L449">    return new UnsupportedOperationException(String.format(fmt, method));</span>
   }
 
   private static String sqlSkeletonsOnly() {
-<span class="nc" id="L443">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
+<span class="nc" id="L453">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
   }
 
 }

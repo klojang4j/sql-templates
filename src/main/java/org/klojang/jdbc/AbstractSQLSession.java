@@ -27,11 +27,11 @@ abstract sealed class AbstractSQLSession implements SQLSession
     return sql;
   }
 
-  final void execute(String sql) {
-    try {
-      Statement stmt = con.createStatement();
+  final int execute(String sql) {
+    try(Statement stmt = con.createStatement()) {
       LOG.trace(EXECUTING_SQL, sql);
       stmt.execute(sql);
+      return stmt.getUpdateCount();
      } catch (SQLException e) {
       throw Utils.wrap(e, sql);
     }

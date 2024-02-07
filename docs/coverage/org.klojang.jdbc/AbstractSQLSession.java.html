@@ -27,15 +27,15 @@ abstract sealed class AbstractSQLSession implements SQLSession
 <span class="fc" id="L27">    return sql;</span>
   }
 
-  final void execute(String sql) {
-    try {
-<span class="fc" id="L32">      Statement stmt = con.createStatement();</span>
-<span class="fc" id="L33">      LOG.trace(EXECUTING_SQL, sql);</span>
-<span class="fc" id="L34">      stmt.execute(sql);</span>
+  final int execute(String sql) {
+<span class="fc" id="L31">    try(Statement stmt = con.createStatement()) {</span>
+<span class="fc" id="L32">      LOG.trace(EXECUTING_SQL, sql);</span>
+<span class="fc" id="L33">      stmt.execute(sql);</span>
+<span class="fc" id="L34">      return stmt.getUpdateCount();</span>
 <span class="nc" id="L35">     } catch (SQLException e) {</span>
 <span class="nc" id="L36">      throw Utils.wrap(e, sql);</span>
-<span class="fc" id="L37">    }</span>
-<span class="fc" id="L38">  }</span>
+    }
+  }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

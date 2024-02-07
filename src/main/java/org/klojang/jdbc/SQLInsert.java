@@ -19,7 +19,12 @@ import static org.klojang.jdbc.x.Strings.*;
 import static org.klojang.util.ClassMethods.className;
 
 /**
- * Facilitates the execution of SQL INSERT statements.
+ * Facilitates the execution of SQL INSERT statements. {@code SQLInsert} instances can be
+ * obtained either via {@link SQLSession#prepareInsert()} or via an
+ * {@link InsertBuilder}.
+ *
+ * @see SQLSession#prepareInsert()
+ * @see SQL#insert()
  */
 public final class SQLInsert extends SQLStatement<SQLInsert> {
 

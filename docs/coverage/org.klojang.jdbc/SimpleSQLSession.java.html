@@ -39,9 +39,9 @@ final class SimpleSQLSession extends AbstractSQLSession {
 
 
   @Override
-  public void execute() {
-<span class="fc" id="L43">    execute(sqlInfo.sql());</span>
-<span class="fc" id="L44">  }</span>
+  public int execute() {
+<span class="fc" id="L43">    return execute(sqlInfo.sql());</span>
+  }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -289,9 +289,20 @@ public sealed interface SQLSession permits AbstractSQLSession {
   /**
    * Sets the sort column of the ORDER BY clause within a SQL template. This presumes and
    * requires that the template contains a template variable named "orderBy". This is a
-   * convenience method facilitating a common use case for template variables:
-   * parametrizing the sort column within the ORDER BY clause. It is equivalent to calling
+   * convenience method facilitating a common use case for template variables: to
+   * parametrize the sort column within the ORDER BY clause. It is equivalent to calling
    * {@code setIdentifier("orderBy", sortColumn)}.
+   *
+   * <blockquote><pre>{@code
+   * try(Connection con = ...) {
+   *   List<Person> lastName = SQL.template("SELECT  FROM PERSON ORDER BY ~%orderBy%")
+   *       .session(con)
+   *       .setOrderBy("LAST_NAME")
+   *       .prepareQuery(con)
+   *       .getBeanifier(Person.class)
+   *       .beanifyAll();
+   * }
+   * }</pre></blockquote>
    *
    * @param sortColumn the column to sort on
    * @return this {@code SQLSession} instance
@@ -306,7 +317,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * Sets the sort column and sort order of the ORDER BY clause within a SQL template.
    * This presumes and requires that the template contains a template variable named
    * "orderBy". This is a convenience method facilitating a common use case for template
-   * variables: parametrizing the sort column and sort order within the ORDER BY clause.
+   * variables: to parametrize the sort column and sort order within the ORDER BY clause.
    *
    * <blockquote><pre>{@code
    * SQL sql = SQL.template("SELECT LAST_NAME FROM EMPLOYEE ORDER BY ~%orderBy%");
@@ -389,13 +400,12 @@ public sealed interface SQLSession permits AbstractSQLSession {
   /**
    * Executes the SQL. You can call this method either if the SQL is completely static, or
    * if you have set all template variables and the SQL does not contain any named
-   * parameters. If the SQL <i>does</i> contain named parameters, you will first have to
-   * bind them. Call {@link #prepareInsert()}, or {@link #prepareUpdate()} to obtain a
-   * {@link SQLStatement} that enables you to bind the named parameters. Although you
-   * <i>could</i> call this method for SQL SELECT statements, it does not make much sense
-   * because this method does not return any feedback from the database.
+   * parameters. If the SQL <i>does</i> contain named parameters, you must first bind them
+   * using a {@link SQLStatement} obtained from the {@code SQLSession}.
+   *
+   * @return the number of inserted, updated, or deleted rows, if applicable; -1 otherwise
    */
-  void execute();
+  int execute();
 
   /**
    * Returns a {@code SQLQuery} instance that allows you to provide values for named
