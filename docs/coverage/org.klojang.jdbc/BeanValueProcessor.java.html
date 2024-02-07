@@ -12,11 +12,12 @@ import java.util.List;
  * how to escape the parts making up the expression. If you want to return a
  * {@link SQLExpression} from the
  * {@link #process(Object, String, Object, Quoter) process()} method, use the provided
- * {@link Quoter} to escape and quote strings &lt;b&gt;within&lt;/b&gt; the expression. Do
+ * {@link Quoter} to escape and quote strings &lt;i&gt;within&lt;/i&gt; the expression. Do
  * &lt;i&gt;not&lt;/i&gt; use a {@code BeanValueProcessor} just to return a quoted version of the
  * input value. &lt;i&gt;Klojang JDBC&lt;/i&gt; already takes care of that. Every value that is saved
- * to the database will go through {@link Quoter#quoteValue(Object) Quoter.quoteValue()},
- * even it is the return value of {@code BeanValueProcessor.process()}.
+ * to the database will (again) go through
+ * {@link Quoter#quoteValue(Object) Quoter.quoteValue()}, even it is the return value of
+ * {@code BeanValueProcessor.process()}.
  *
  * @param &lt;T&gt; the type of the bean containing the value to be processed
  * @see Quoter
@@ -34,7 +35,7 @@ public interface BeanValueProcessor&lt;T&gt; {
    * @see SQLSession#quoteValue(Object)
    */
   static &lt;U&gt; BeanValueProcessor&lt;U&gt; identity() {
-<span class="fc" id="L37">    return (bean, prop, val, quoter) -&gt; val;</span>
+<span class="fc" id="L38">    return (bean, prop, val, quoter) -&gt; val;</span>
   }
 
   /**
