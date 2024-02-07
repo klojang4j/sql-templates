@@ -137,7 +137,7 @@ public final class InsertBuilder {
   }
 
   /**
-   * Returns an {SQLInsert} instance that allows you to execute the INSERT statement.
+   * Returns an {@code SQLInsert} instance that allows you to execute the INSERT statement.
    *
    * @param con the JDBC {@code Connection} to use for the INSERT statement
    * @return a {@code SQLInsert} instance that allows you to execute the INSERT statement
