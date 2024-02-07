@@ -4,23 +4,19 @@ import java.util.List;
 
 /**
  * Used to selectively modify values within a batch of JavaBeans or records. A
- * {@code BeanValueProcessor} can be specified for batch inserts to apply last-minute
- * transformations on the beans or records before they are saved to the database. Although
- * you can apply any transformations you like, it is mainly there for a rather special and
- * specific purpose: to replace bean values with
- * {@linkplain SQLExpression SQL expressions}.
+ * {@code BeanValueProcessor} can be &quot;plugged into&quot; batch inserts to apply last-minute
+ * transformations on the beans or records, just before they are saved to the database.
+ * Although it allows you to apply any transformations you like, its main purpose is to
+ * enable you to generate {@linkplain SQLExpression SQL expressions} from bean values.
  * &lt;i&gt;Klojang JDBC&lt;/i&gt; does not aim to be a SQL parser, and hence it does not know if and
  * how to escape the parts making up the expression. If you want to return a
- * {@link SQLExpression} from
- * {@link #process(Object, String, Object, Quoter) BeanValueProcessor.process()}, you can
- * use the provided {@link Quoter} to escape and quote strings &lt;b&gt;within&lt;/b&gt; the
- * expression. Do not use a {@code BeanValueProcessor} just to return a quoted version of
- * the input value. &lt;i&gt;Klojang JDBC&lt;/i&gt; already takes care of that. Each and every value
- * that is going to be saved to the database will always be processed by
- * {@link Quoter#quoteValue(Object) Quoter.quoteValue()}, even it is the return value of
- * {@code BeanValueProcessor.process()}. See
- * {@link SQLSession#setValues(List, BeanValueProcessor)} for an example of how to use a
- * {@code BeanValueProcessor}.
+ * {@link SQLExpression} from the
+ * {@link #process(Object, String, Object, Quoter) process()} method, use the provided
+ * {@link Quoter} to escape and quote strings &lt;b&gt;within&lt;/b&gt; the expression. Do
+ * &lt;i&gt;not&lt;/i&gt; use a {@code BeanValueProcessor} just to return a quoted version of the
+ * input value. &lt;i&gt;Klojang JDBC&lt;/i&gt; already takes care of that. Every value that is saved
+ * to the database will go through {@link Quoter#quoteValue(Object) Quoter.quoteValue()},
+ * even it is the return value of {@code BeanValueProcessor.process()}.
  *
  * @param &lt;T&gt; the type of the bean containing the value to be processed
  * @see Quoter
@@ -31,24 +27,24 @@ import java.util.List;
 public interface BeanValueProcessor&lt;T&gt; {
 
   /**
-   * Returns a {@code BeanValueProcessor} that returns any value passed to it as-is.
+   * Returns a {@code BeanValueProcessor} that returns the input value as-is.
    *
    * @param &lt;U&gt; the type of the bean or record containing the value
    * @return a {@code BeanValueProcessor} that returns any value passed to it as-is
    * @see SQLSession#quoteValue(Object)
    */
   static &lt;U&gt; BeanValueProcessor&lt;U&gt; identity() {
-<span class="fc" id="L41">    return (bean, prop, val, quoter) -&gt; val;</span>
+<span class="fc" id="L37">    return (bean, prop, val, quoter) -&gt; val;</span>
   }
 
   /**
    * Converts the value of a bean property or record component, potentially involving the
    * specified {@link Quoter} object.
    *
-   * @param bean the bean or {@code record} containing the value
-   * @param propertyName the name of the property or record component
-   * @param propertyValue the value of the specified property within the specified
-   *       bean
+   * @param bean the bean or {@code record} containing the value to be converted
+   * @param propertyName the name of the property or record component whose value to
+   *       convert
+   * @param propertyValue the value to be converted
    * @param quoter a {@code Quoter} to be used if you intend to return an
    *       {@link SQLExpression} containing string literals
    * @return the converted value
