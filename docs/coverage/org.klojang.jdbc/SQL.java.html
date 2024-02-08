@@ -240,7 +240,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareInsert()
    */
   static SQLInsert simpleInsert(Connection con, String sql) {
-<span class="nc" id="L243">    return simple(sql, noBindInfo()).session(con).prepareInsert();</span>
+<span class="fc" id="L243">    return simple(sql, noBindInfo()).session(con).prepareInsert();</span>
   }
 
   /**
@@ -286,7 +286,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql) {
-<span class="nc" id="L289">    return simpleUpdate(con, sql, noBindInfo());</span>
+<span class="fc" id="L289">    return simpleUpdate(con, sql, noBindInfo());</span>
   }
 
   /**
@@ -306,10 +306,10 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql, BindInfo bindInfo) {
-<span class="nc" id="L309">    Check.notNull(con, CONNECTION);</span>
-<span class="nc" id="L310">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="nc" id="L311">    Check.notNull(bindInfo, BIND_INFO);</span>
-<span class="nc" id="L312">    return simple(sql, bindInfo).session(con).prepareUpdate();</span>
+<span class="fc" id="L309">    Check.notNull(con, CONNECTION);</span>
+<span class="fc" id="L310">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L311">    Check.notNull(bindInfo, BIND_INFO);</span>
+<span class="fc" id="L312">    return simple(sql, bindInfo).session(con).prepareUpdate();</span>
   }
 
 

@@ -17,8 +17,7 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SQLQueryTest {
   private static final String DB_DIR = System.getProperty("user.home") + "/klojang-db-query-test";
@@ -143,7 +142,7 @@ public class SQLQueryTest {
   }
 
   @Test
-  public void lookup00() throws Exception {
+  public void lookup00() {
     String sql = """
           SELECT FALSE FROM PERSON
            LIMIT :limit
@@ -155,6 +154,25 @@ public class SQLQueryTest {
     }
   }
 
+  @Test
+  public void lookup01() {
+    String sql = "SELECT BIRTH_DATE FROM PERSON WHERE FIRST_NAME='John' AND LAST_NAME='Smith'";
+    SQLSession session = SQL.simple(sql).session(MY_CON.get());
+    try (SQLQuery query = session.prepareQuery()) {
+      LocalDate date = query.lookup(LocalDate.class).get();
+      assertEquals(LocalDate.of(1960, 4, 15), date);
+    }
+  }
+
+  @Test
+  public void lookupToString00() {
+    String sql = "SELECT BIRTH_DATE FROM PERSON WHERE FIRST_NAME='John' AND LAST_NAME='Smith'";
+    SQLSession session = SQL.simple(sql).session(MY_CON.get());
+    try (SQLQuery query = session.prepareQuery()) {
+      String date = query.getString().get();
+      assertEquals(LocalDate.of(1960, 4, 15).toString(), date);
+    }
+  }
 
   @Test
   public void firstColumn00() throws Exception {
@@ -168,7 +186,6 @@ public class SQLQueryTest {
       List<String> l = query.firstColumn();
       assertEquals(List.of("O'Donell", "O'Donell"), l);
     }
-
   }
 
   @Test
@@ -186,7 +203,21 @@ public class SQLQueryTest {
       List<String> l = query.firstColumn();
       assertEquals(List.of("Bear", "Bester"), l);
     }
+  }
 
+  @Test
+  public void nullTest00() {
+    SQL.simpleUpdate(MY_CON.get(), "TRUNCATE TABLE PERSON").execute();
+    SQL.simpleInsert(MY_CON.get(),
+                "INSERT INTO PERSON(FIRST_NAME,LAST_NAME,BIRTH_DATE)VALUES(NULL,NULL,NULL)")
+          .execute();
+    Person person = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM PERSON")
+          .getBeanifier(Person.class)
+          .beanify()
+          .get();
+    assertNull(person.getFirstName());
+    assertNull(person.getLastName());
+    assertNull(person.getBirthDate());
   }
 
 }
