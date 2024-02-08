@@ -15,34 +15,34 @@ import static org.klojang.util.ClassMethods.isSubtype;
 
 
 /**
- * Binds a bean property (its value) into a PreparedStatement.
+ * Binds a single bean property or record component to a PreparedStatement.
  *
  * @param <FIELD_TYPE> the type of the bean property
  * @param <PARAM_TYPE> the type of the value passed to
  *       PreparedStatement.setXXX(parameterIndex, value)
  * @author Ayco Holleman
  */
-final class PropertyReader<FIELD_TYPE, PARAM_TYPE> {
+final class PropertyBinder<FIELD_TYPE, PARAM_TYPE> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PropertyReader.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PropertyBinder.class);
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  static <T> void readAll(PreparedStatement ps, T bean, PropertyReader[] readers)
+  static <T> void readAll(PreparedStatement ps, T bean, PropertyBinder[] readers)
         throws Throwable {
     LOG.debug("Binding {} to PreparedStatement", bean.getClass().getSimpleName());
-    for (PropertyReader reader : readers) {
+    for (PropertyBinder reader : readers) {
       reader.bindProperty(ps, bean);
     }
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  static PropertyReader[] createReaders(Class beanClass,
+  static PropertyBinder[] createReaders(Class beanClass,
         List<NamedParameter> params,
         BindInfo bindInfo,
         List<NamedParameter> bound) {
     ColumnWriterFactory factory = ColumnWriterFactory.getInstance();
     Map<String, Getter> getters = GetterFactory.INSTANCE.getGetters(beanClass, true);
-    List<PropertyReader> readers = new ArrayList<>(params.size());
+    List<PropertyBinder> readers = new ArrayList<>(params.size());
     for (NamedParameter param : params) {
       Getter getter = getters.get(param.name());
       if (getter == null) {
@@ -62,16 +62,16 @@ final class PropertyReader<FIELD_TYPE, PARAM_TYPE> {
           writer = factory.getWriter(type, sqlType);
         }
       }
-      readers.add(new PropertyReader(getter, writer, param));
+      readers.add(new PropertyBinder(getter, writer, param));
     }
-    return readers.toArray(PropertyReader[]::new);
+    return readers.toArray(PropertyBinder[]::new);
   }
 
   private final Getter getter;
   private final ColumnWriter<FIELD_TYPE, PARAM_TYPE> writer;
   private final NamedParameter param;
 
-  private PropertyReader(Getter getter,
+  private PropertyBinder(Getter getter,
         ColumnWriter<FIELD_TYPE, PARAM_TYPE> writer,
         NamedParameter param) {
     this.getter = getter;

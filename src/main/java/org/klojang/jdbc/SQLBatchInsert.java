@@ -11,19 +11,19 @@ import java.util.List;
 
 import static java.sql.Statement.NO_GENERATED_KEYS;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.util.stream.Collectors.joining;
 import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.jdbc.x.Strings.ID_PROPERTY;
 import static org.klojang.util.ArrayMethods.EMPTY_LONG_ARRAY;
+import static org.klojang.util.ArrayMethods.implode;
 import static org.klojang.util.StringMethods.append;
 
 /**
  * <p>{@code SQLBatchInsert} specializes in saving large batches of
  * JavaBeans or records to the database. Instances are configured and obtained via a
- * {@link BatchInsertBuilder}. They are not underpinned by
- * {@linkplain java.sql.PreparedStatement prepared statements}. Yet, they provide just as
- * much protection against SQL injection, as they will process each and every value in the
- * batch using {@link Quoter#quoteValue(Object) Quoter.quoteValue()}. This method
- * ultimately relies on
+ * {@link BatchInsertBuilder}. A {@code SQLBatchInsert} is not underpinned by a
+ * {@link java.sql.PreparedStatement}. Yet, it provides just as much protection against
+ * SQL injection, as it will process each and every value in the batch using
+ * {@link Quoter#quoteValue(Object) Quoter.quoteValue()}. This method ultimately relies on
  * {@link Statement#enquoteLiteral(String) Statement.enquoteLiteral()} &#8212; in other
  * words, the JDBC driver's own escape-and-quote mechanism.
  *
@@ -55,11 +55,13 @@ public final class SQLBatchInsert<T> {
   private static final String RECORDS_DONT_HAVE_SETTERS = "cannot set id on record types";
 
   private final BatchInsertConfig<T> cfg;
+  private final String[] props;
   private final String sqlBase;
 
   SQLBatchInsert(BatchInsertConfig<T> cfg) {
     this.cfg = cfg;
-    this.sqlBase = getSqlBase(cfg);
+    this.props = cfg.reader().getReadableProperties().toArray(String[]::new);
+    this.sqlBase = getSqlBase(cfg, props);
   }
 
   /**
@@ -100,6 +102,7 @@ public final class SQLBatchInsert<T> {
    * @param beans the beans to save
    */
   public void insertBatchAndSetIDs(String idProperty, List<T> beans) {
+    Check.notNull(idProperty, ID_PROPERTY);
     Check.notNull(beans);
     Class<T> clazz = cfg.reader().getBeanClass();
     Check.on(STATE, clazz).isNot(Class::isRecord, RECORDS_DONT_HAVE_SETTERS);
@@ -195,7 +198,6 @@ public final class SQLBatchInsert<T> {
   private void addRow(StringBuilder sql, Statement stmt, T bean) {
     BatchInsertConfig<T> cfg = this.cfg;
     Quoter quoter = new Quoter(stmt);
-    String[] props = cfg.reader().getReadableProperties().toArray(String[]::new);
     List<Object> values = cfg.reader().readAllProperties(bean);
     sql.append('(');
     for (int i = 0; i < props.length; ++i) {
@@ -214,19 +216,15 @@ public final class SQLBatchInsert<T> {
     }
   }
 
-  private static String getSqlBase(BatchInsertConfig<?> cfg) {
-    String cols = cfg.reader()
-          .getReadableProperties()
-          .stream()
-          .map(cfg.mapper()::map)
-          .collect(joining(","));
+  private static String getSqlBase(BatchInsertConfig<?> cfg, String[] props) {
+    String cols = implode(props, cfg.mapper()::map, ",");
     StringBuilder sb = new StringBuilder(cols.length() + 40);
     append(sb, "INSERT INTO ", cfg.tableName(), '(', cols, ")VALUES");
     return sb.toString();
   }
 
   private int guessSize(List<T> beans) {
-    return 50 + (cfg.reader().getReadableProperties().size() * beans.size() * 12);
+    return 50 + (props.length * beans.size() * 12);
   }
 
 }
