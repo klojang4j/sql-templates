@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.Tag.VARARGS;
 import static org.klojang.jdbc.x.Strings.*;
@@ -66,7 +67,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
       Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());
       executable = session.render();
       LOG.trace(EXECUTING_SQL, executable);
-      stmt.execute(executable);
+      stmt.executeUpdate(executable, RETURN_GENERATED_KEYS);
       return JDBC.getGeneratedKeys(stmt, beans.size());
     } catch (SQLException e) {
       throw Utils.wrap(e, executable);

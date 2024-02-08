@@ -10,19 +10,22 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 public final class LongReaderLookup extends ColumnReaderLookup&lt;Long&gt; {
 
 <span class="fc" id="L12">  public LongReaderLookup() {</span>
-<span class="fc" id="L13">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG));</span>
-<span class="fc" id="L14">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT));</span>
-<span class="fc" id="L15">    add(SMALLINT, new ColumnReader&lt;&gt;(GET_SHORT));</span>
-<span class="fc" id="L16">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE));</span>
-<span class="fc" id="L17">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, NumberMethods::convert));</span>
-<span class="fc" id="L18">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE, NumberMethods::convert),</span>
+<span class="fc" id="L13">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, NumberMethods::convert));</span>
+<span class="fc" id="L14">    addMultiple(new ColumnReader&lt;&gt;(GET_LONG),</span>
+          BIGINT,
+          INTEGER,
+          SMALLINT,
+          TINYINT);
+<span class="fc" id="L19">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE, NumberMethods::convert),</span>
           FLOAT,
           DOUBLE);
-<span class="fc" id="L21">    addMultiple(new ColumnReader&lt;&gt;(GET_BIG_DECIMAL, NumberMethods::convert),</span>
+<span class="fc" id="L22">    addMultiple(new ColumnReader&lt;&gt;(GET_BIG_DECIMAL, NumberMethods::convert),</span>
           NUMERIC,
           DECIMAL);
-<span class="fc" id="L24">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse), VARCHAR, CHAR);</span>
-<span class="fc" id="L25">  }</span>
+<span class="fc" id="L25">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse),</span>
+          VARCHAR,
+          CHAR);
+<span class="fc" id="L28">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

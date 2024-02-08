@@ -54,22 +54,22 @@ public class ColumnReaderFactory {
 <span class="fc" id="L54">  }</span>
 
   @SuppressWarnings({&quot;unchecked&quot;})
-  public &lt;T, U&gt; ColumnReader&lt;T, U&gt; getReader(Class&lt;U&gt; fieldType, int sqlType) {
-<span class="fc" id="L58">    Map&lt;Integer, ColumnReader&gt; readers = predefined.get(fieldType);</span>
+  public &lt;T, U&gt; ColumnReader&lt;T, U&gt; getReader(Class&lt;U&gt; targetType, int columnType) {
+<span class="fc" id="L58">    Map&lt;Integer, ColumnReader&gt; readers = predefined.get(targetType);</span>
     ColumnReader reader;
 <span class="fc bfc" id="L60" title="All 2 branches covered.">    if (readers == null) {</span>
       // Then we'll call ResultSet.getString() and pass the string to a static factory
       // method or constructor on the provided class, one that takes a single string and
       // returns an instance of fieldType. Provided such a method or constructor exists
       // of course. If not, we give up and throw an exception.
-<span class="fc" id="L65">      reader = createOnDemand(fieldType);</span>
-<span class="fc" id="L66">      Utils.check(reader).is(notNull(), TYPE_NOT_SUPPORTED, className(fieldType));</span>
+<span class="fc" id="L65">      reader = createOnDemand(targetType);</span>
+<span class="fc" id="L66">      Utils.check(reader).is(notNull(), TYPE_NOT_SUPPORTED, className(targetType));</span>
     } else {
       // Implicitly checks that the specified int is one of the
       // static final int constants in java.sql.Types
-<span class="fc" id="L70">      String typeName = getTypeName(sqlType);</span>
-<span class="fc" id="L71">      reader = readers.get(sqlType);</span>
-<span class="fc" id="L72">      Utils.check(reader).is(notNull(), NOT_CONVERTIBLE, typeName, className(fieldType));</span>
+<span class="fc" id="L70">      String typeName = getTypeName(columnType);</span>
+<span class="fc" id="L71">      reader = readers.get(columnType);</span>
+<span class="fc" id="L72">      Utils.check(reader).is(notNull(), NOT_CONVERTIBLE, typeName, className(targetType));</span>
     }
 <span class="fc" id="L74">    return reader;</span>
   }
@@ -77,7 +77,7 @@ public class ColumnReaderFactory {
   private static Map configure() {
 <span class="fc" id="L78">    return TypeMap.nativeTypeMapBuilder()</span>
 <span class="fc" id="L79">          .autobox(true)</span>
-<span class="fc" id="L80">          .add(String.class, immutable(new StringReaderLookup()))</span>
+<span class="fc" id="L80">          .add(String.class, new StringReaderLookup())</span>
 <span class="fc" id="L81">          .add(Integer.class, immutable(new IntReaderLookup()))</span>
 <span class="fc" id="L82">          .add(Double.class, immutable(new DoubleReaderLookup()))</span>
 <span class="fc" id="L83">          .add(Long.class, immutable(new LongReaderLookup()))</span>

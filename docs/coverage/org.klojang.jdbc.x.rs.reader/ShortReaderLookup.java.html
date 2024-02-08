@@ -11,21 +11,22 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 public final class ShortReaderLookup extends ColumnReaderLookup&lt;Short&gt; {
 
 <span class="fc" id="L13">  public ShortReaderLookup() {</span>
-<span class="fc" id="L14">    add(SMALLINT, new ColumnReader&lt;&gt;(ResultSetMethod.GET_SHORT));</span>
-<span class="fc" id="L15">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE, NumberMethods::convert));</span>
-<span class="fc" id="L16">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT, NumberMethods::convert));</span>
-<span class="fc" id="L17">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, NumberMethods::convert));</span>
-<span class="fc" id="L18">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, NumberMethods::convert));</span>
-<span class="fc" id="L19">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE, NumberMethods::convert),</span>
+<span class="fc" id="L14">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT, NumberMethods::convert));</span>
+<span class="fc" id="L15">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, NumberMethods::convert));</span>
+<span class="fc" id="L16">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, NumberMethods::convert));</span>
+<span class="fc" id="L17">    addMultiple(new ColumnReader&lt;&gt;(ResultSetMethod.GET_SHORT),</span>
+          SMALLINT,
+          TINYINT);
+<span class="fc" id="L20">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE, NumberMethods::convert),</span>
           FLOAT,
           DOUBLE);
-<span class="fc" id="L22">    addMultiple(new ColumnReader&lt;&gt;(GET_BIG_DECIMAL, NumberMethods::convert),</span>
+<span class="fc" id="L23">    addMultiple(new ColumnReader&lt;&gt;(GET_BIG_DECIMAL, NumberMethods::convert),</span>
           NUMERIC,
           DECIMAL);
-<span class="fc" id="L25">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse),</span>
+<span class="fc" id="L26">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse),</span>
           VARCHAR,
           CHAR);
-<span class="fc" id="L28">  }</span>
+<span class="fc" id="L29">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

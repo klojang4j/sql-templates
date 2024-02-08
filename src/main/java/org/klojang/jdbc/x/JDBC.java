@@ -11,15 +11,12 @@ import java.util.Map;
 
 import static java.sql.Statement.NO_GENERATED_KEYS;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static org.klojang.check.CommonChecks.*;
+import static org.klojang.check.CommonChecks.keyIn;
 import static org.klojang.convert.NumberMethods.convert;
 import static org.klojang.invoke.NoSuchPropertyException.noSuchProperty;
 import static org.klojang.util.ClassMethods.box;
 
 public final class JDBC {
-
-  private static final String NOT_THAT_MANY_KEYS =
-        "number of requested keys (${0}) exceeds number of generated keys (${1})";
 
   private JDBC() { throw new UnsupportedOperationException(); }
 
@@ -56,13 +53,13 @@ public final class JDBC {
     }
   }
 
-  public static long[] getGeneratedKeys(Statement stmt, int rowCount)
+  public static long[] getGeneratedKeys(Statement stmt, int expected)
         throws SQLException {
-    long[] keys = new long[rowCount];
+    long[] keys = new long[expected];
     try (ResultSet rs = stmt.getGeneratedKeys()) {
-      for (int i = 0; i < rowCount; ++i) {
-        Check.that(rs.next()).is(yes(), NOT_THAT_MANY_KEYS, i + 1, rowCount);
-        keys[i] = rs.getLong(1);
+      int i = 0;
+      while (rs.next()) {
+        keys[i++] = rs.getLong(1);
       }
     }
     return keys;

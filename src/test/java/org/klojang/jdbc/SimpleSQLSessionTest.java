@@ -95,4 +95,27 @@ public class SimpleSQLSessionTest {
     assertEquals("BOZO", s);
     SQL.staticSQL("DROP TABLE FOO").session(con).prepareUpdate().execute();
   }
+
+  @Test
+  public void staticSQL02() {
+    Connection con = MY_CON.get();
+    SQL.staticSQL(getClass(), "/SimpleSQLSessionTest.staticSQL02.create.sql")
+          .session(con)
+          .prepareUpdate()
+          .execute();
+    SQL.staticSQL(getClass(), "/SimpleSQLSessionTest.staticSQL02.insert.sql")
+          .session(con)
+          .prepareUpdate()
+          .execute();
+    String s = SQL.staticSQL(getClass(), "/SimpleSQLSessionTest.staticSQL02.select.sql")
+          .session(con)
+          .prepareQuery()
+          .getString()
+          .get();
+    assertEquals("BOZO", s);
+    SQL.staticSQL(getClass(), "/SimpleSQLSessionTest.staticSQL02.drop.sql")
+          .session(con)
+          .prepareUpdate()
+          .execute();
+  }
 }

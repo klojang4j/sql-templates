@@ -16,15 +16,15 @@ import static org.klojang.check.Tag.PATH;
 
 <span class="nc" id="L17">public final class SQLCache {</span>
 
-<span class="nc" id="L19">  private static final Map&lt;Tuple2&lt;Class&lt;?&gt;, String&gt;, SQL&gt; cache = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L19">  private static final Map&lt;Tuple2&lt;Class&lt;?&gt;, String&gt;, SQL&gt; cache = new HashMap&lt;&gt;();</span>
 
   public static SQL get(Class&lt;?&gt; clazz, String path, Function&lt;String, SQL&gt; factory) {
-<span class="nc" id="L22">    Check.notNull(clazz, CLASS);</span>
-<span class="nc" id="L23">    Check.notNull(path, PATH);</span>
-<span class="nc" id="L24">    return cache.computeIfAbsent(Tuple2.of(clazz, path), k -&gt; {</span>
+<span class="fc" id="L22">    Check.notNull(clazz, CLASS);</span>
+<span class="fc" id="L23">    Check.notNull(path, PATH);</span>
+<span class="fc" id="L24">    return cache.computeIfAbsent(Tuple2.of(clazz, path), k -&gt; {</span>
       try {
-<span class="nc" id="L26">        String sql = IOMethods.getContents(clazz, path);</span>
-<span class="nc" id="L27">        return factory.apply(sql);</span>
+<span class="fc" id="L26">        String sql = IOMethods.getContents(clazz, path);</span>
+<span class="fc" id="L27">        return factory.apply(sql);</span>
 <span class="nc" id="L28">      } catch (Throwable t) {</span>
 <span class="nc" id="L29">        throw Utils.wrap(t);</span>
       }

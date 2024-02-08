@@ -10,18 +10,21 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 public final class LongReaderLookup extends ColumnReaderLookup<Long> {
 
   public LongReaderLookup() {
-    add(BIGINT, new ColumnReader<>(GET_LONG));
-    add(INTEGER, new ColumnReader<>(GET_INT));
-    add(SMALLINT, new ColumnReader<>(GET_SHORT));
-    add(TINYINT, new ColumnReader<>(GET_BYTE));
     add(REAL, new ColumnReader<>(GET_FLOAT, NumberMethods::convert));
+    addMultiple(new ColumnReader<>(GET_LONG),
+          BIGINT,
+          INTEGER,
+          SMALLINT,
+          TINYINT);
     addMultiple(new ColumnReader<>(GET_DOUBLE, NumberMethods::convert),
           FLOAT,
           DOUBLE);
     addMultiple(new ColumnReader<>(GET_BIG_DECIMAL, NumberMethods::convert),
           NUMERIC,
           DECIMAL);
-    addMultiple(new ColumnReader<>(GET_STRING, NumberMethods::parse), VARCHAR, CHAR);
+    addMultiple(new ColumnReader<>(GET_STRING, NumberMethods::parse),
+          VARCHAR,
+          CHAR);
   }
 
 }

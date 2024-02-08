@@ -6,9 +6,26 @@ import java.util.HashMap;
 import java.util.stream.IntStream;
 
 /**
- * Maps SQL types like VARCHAR to ColumnReader instances. Used when copying values from a
- * ResultSet to a JavaBean. The map keys are supposed to be integer constants from
- * {@link java.sql.Types java.sql.Types}.
+ * Maps column types to a given Java type. The Java type is specified, in subclasses of
+ * ColumnReaderLookup, through type parameter {@code &lt;T&gt;}. More specifically, this class
+ * determines to most suitable {@code ResultSet.getXXX()} for producing a value of the
+ * requested target type (which is a Java type). Obviously, if the column type is INTEGER
+ * and the target type is {@code int} or {@code Integer}, that would be
+ * {@code ResultSet.getInt()}. If the column type is SMALLINT or TINYINT, it would
+ * &lt;i&gt;still&lt;/i&gt; be {@code ResultSet.getInt()}, even though {@code ResultSet} has methods
+ * like {@code getShort()} and {@code getByte()}! After all, what we want is an
+ * {@code int} value, and the JDBC driver will not have a problem applying
+ * {@code getInt()} to a SMALLINT column - that's a simple widening conversion. However,
+ * if the column type would be NUMBER or VARCHAR, we need to pick some {@code getXXX()}
+ * method, and post-process its result with a custom conversion function. This combination
+ * of a {@code getXXX()} method and a custom conversion function is what is encapsulated
+ * by the {@code ColumnReader} class.
+ *
+ * The map keys are supposed to be integer constants from
+ * {@link java.sql.Types java.sql.Types} (e.g. {@code Types.INTEGER} or
+ * {@code Types.VARCHAR}).
+ *
+ * @param &lt;T&gt; the Java type to which we want to convert the column type
  */
 public sealed class ColumnReaderLookup&lt;T&gt; extends HashMap&lt;Integer, ColumnReader&lt;?, ?&gt;&gt;
       permits BooleanReaderLookup,
@@ -25,16 +42,16 @@ public sealed class ColumnReaderLookup&lt;T&gt; extends HashMap&lt;Integer, Colu
       UUIDReaderLookup {
 
   public ColumnReaderLookup() {
-<span class="fc" id="L28">    super();</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L45">    super();</span>
+<span class="fc" id="L46">  }</span>
 
   public final void add(int sqlType, ColumnReader&lt;?, T&gt; reader) {
-<span class="fc" id="L32">    put(sqlType, reader);</span>
-<span class="fc" id="L33">  }</span>
+<span class="fc" id="L49">    put(sqlType, reader);</span>
+<span class="fc" id="L50">  }</span>
 
   public final void addMultiple(ColumnReader&lt;?, T&gt; reader, int... sqlTypes) {
-<span class="fc" id="L36">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, reader));</span>
-<span class="fc" id="L37">  }</span>
+<span class="fc" id="L53">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, reader));</span>
+<span class="fc" id="L54">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

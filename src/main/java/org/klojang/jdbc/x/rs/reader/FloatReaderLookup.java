@@ -17,11 +17,12 @@ public final class FloatReaderLookup extends ColumnReaderLookup<Float> {
     add(REAL, new ColumnReader<>(GET_FLOAT, Float::floatValue));
     add(BIGINT, new ColumnReader<>(GET_LONG, Long::floatValue));
     add(BOOLEAN, new ColumnReader<>(GET_BOOLEAN, x -> x ? 1.0F : 0));
-    addMultiple(
-          new ColumnReader<>(GET_BIG_DECIMAL, NumberMethods::convert),
+    addMultiple(new ColumnReader<>(GET_BIG_DECIMAL, NumberMethods::convert),
           NUMERIC,
           DECIMAL);
-    add(VARCHAR, new ColumnReader<>(GET_STRING, NumberMethods::parse));
+    addMultiple(new ColumnReader<>(GET_STRING, NumberMethods::parse),
+          VARCHAR,
+          CHAR);
   }
 
 }

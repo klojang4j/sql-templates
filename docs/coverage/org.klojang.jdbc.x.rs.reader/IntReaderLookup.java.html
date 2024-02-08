@@ -4,27 +4,30 @@ import org.klojang.convert.NumberMethods;
 import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderLookup;
 
-import java.math.BigDecimal;
-
 import static java.sql.Types.*;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
 public final class IntReaderLookup extends ColumnReaderLookup&lt;Integer&gt; {
 
-<span class="fc" id="L14">  public IntReaderLookup() {</span>
-<span class="fc" id="L15">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT));</span>
-<span class="pc" id="L16">    add(SMALLINT, new ColumnReader&lt;&gt;(GET_SHORT, x -&gt; (int) x));</span>
-<span class="pc" id="L17">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE, x -&gt; (int) x));</span>
-<span class="pc bnc" id="L18" title="All 2 branches missed.">    add(BOOLEAN, new ColumnReader&lt;&gt;(GET_BOOLEAN, x -&gt; x ? 1 : 0));</span>
-<span class="fc" id="L19">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, NumberMethods::convert));</span>
-<span class="fc" id="L20">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, NumberMethods::convert));</span>
-<span class="fc" id="L21">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE, NumberMethods::convert), FLOAT, DOUBLE);</span>
-<span class="fc" id="L22">    addMultiple(</span>
+<span class="fc" id="L12">  public IntReaderLookup() {</span>
+<span class="pc bnc" id="L13" title="All 2 branches missed.">    add(BOOLEAN, new ColumnReader&lt;&gt;(GET_BOOLEAN, x -&gt; x ? 1 : 0));</span>
+<span class="fc" id="L14">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, NumberMethods::convert));</span>
+<span class="fc" id="L15">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, NumberMethods::convert));</span>
+<span class="fc" id="L16">    addMultiple(new ColumnReader&lt;&gt;(GET_INT),</span>
+          INTEGER,
+          SMALLINT,
+          TINYINT);
+<span class="fc" id="L20">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE, NumberMethods::convert),</span>
+          FLOAT,
+          DOUBLE);
+<span class="fc" id="L23">    addMultiple(</span>
           new ColumnReader&lt;&gt;(GET_BIG_DECIMAL, NumberMethods::convert),
           NUMERIC,
           DECIMAL);
-<span class="fc" id="L26">    add(VARCHAR, new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse));</span>
-<span class="fc" id="L27">  }</span>
+<span class="fc" id="L27">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, NumberMethods::parse),</span>
+          VARCHAR,
+          CHAR);
+<span class="fc" id="L30">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -119,7 +119,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL staticSQL(Class&lt;?&gt; clazz, String path) {
-<span class="nc" id="L122">    return SQLCache.get(clazz, path, SQL::staticSQL);</span>
+<span class="fc" id="L122">    return SQLCache.get(clazz, path, SQL::staticSQL);</span>
   }
 
   /**

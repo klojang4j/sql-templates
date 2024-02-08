@@ -54,22 +54,22 @@ public class ColumnReaderFactory {
   }
 
   @SuppressWarnings({"unchecked"})
-  public <T, U> ColumnReader<T, U> getReader(Class<U> fieldType, int sqlType) {
-    Map<Integer, ColumnReader> readers = predefined.get(fieldType);
+  public <T, U> ColumnReader<T, U> getReader(Class<U> targetType, int columnType) {
+    Map<Integer, ColumnReader> readers = predefined.get(targetType);
     ColumnReader reader;
     if (readers == null) {
       // Then we'll call ResultSet.getString() and pass the string to a static factory
       // method or constructor on the provided class, one that takes a single string and
       // returns an instance of fieldType. Provided such a method or constructor exists
       // of course. If not, we give up and throw an exception.
-      reader = createOnDemand(fieldType);
-      Utils.check(reader).is(notNull(), TYPE_NOT_SUPPORTED, className(fieldType));
+      reader = createOnDemand(targetType);
+      Utils.check(reader).is(notNull(), TYPE_NOT_SUPPORTED, className(targetType));
     } else {
       // Implicitly checks that the specified int is one of the
       // static final int constants in java.sql.Types
-      String typeName = getTypeName(sqlType);
-      reader = readers.get(sqlType);
-      Utils.check(reader).is(notNull(), NOT_CONVERTIBLE, typeName, className(fieldType));
+      String typeName = getTypeName(columnType);
+      reader = readers.get(columnType);
+      Utils.check(reader).is(notNull(), NOT_CONVERTIBLE, typeName, className(targetType));
     }
     return reader;
   }
@@ -77,7 +77,7 @@ public class ColumnReaderFactory {
   private static Map configure() {
     return TypeMap.nativeTypeMapBuilder()
           .autobox(true)
-          .add(String.class, immutable(new StringReaderLookup()))
+          .add(String.class, new StringReaderLookup())
           .add(Integer.class, immutable(new IntReaderLookup()))
           .add(Double.class, immutable(new DoubleReaderLookup()))
           .add(Long.class, immutable(new LongReaderLookup()))

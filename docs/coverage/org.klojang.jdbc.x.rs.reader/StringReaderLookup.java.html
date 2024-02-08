@@ -2,20 +2,21 @@
 
 import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderLookup;
-import org.klojang.util.ObjectMethods;
 
-import static java.sql.Types.*;
-import static org.klojang.jdbc.x.rs.ResultSetMethod.GET_INT;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.GET_STRING;
 
+// This one is special. If the target type is java.lang.String, we don't even bother
+// checking what the column type is. We are going to call ResultSet.getString() no
+// matter what.
 public final class StringReaderLookup extends ColumnReaderLookup&lt;String&gt; {
 
-<span class="fc" id="L13">  public StringReaderLookup() {</span>
-<span class="fc" id="L14">    put(VARCHAR, new ColumnReader&lt;&gt;(GET_STRING));</span>
-<span class="fc" id="L15">    put(CHAR, new ColumnReader&lt;&gt;(GET_STRING));</span>
-<span class="fc" id="L16">    put(OTHER, new ColumnReader&lt;&gt;(GET_STRING));</span>
-<span class="fc" id="L17">    put(INTEGER, new ColumnReader&lt;&gt;(GET_INT, ObjectMethods::stringify));</span>
-<span class="fc" id="L18">  }</span>
+<span class="fc" id="L13">  private static final ColumnReader&lt;?, String&gt; UNIVERSAL = new ColumnReader&lt;&gt;(GET_STRING);</span>
 
+<span class="fc" id="L15">  public StringReaderLookup() { }</span>
+
+  @Override
+  public ColumnReader&lt;?, ?&gt; get(Object key) {
+<span class="fc" id="L19">    return UNIVERSAL;</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

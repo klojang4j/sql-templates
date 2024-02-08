@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 import static org.klojang.check.CommonChecks.keyIn;
 
-public class SQLTypeNames {
+public final class SQLTypeNames {
 
 <span class="fc" id="L15">  private static final SQLTypeNames instance = new SQLTypeNames();</span>
 
@@ -20,24 +20,28 @@ public class SQLTypeNames {
 <span class="fc" id="L20">          .ok(instance.map::get);</span>
   }
 
+  public static int[] getAllTypes() {
+<span class="nc" id="L24">    return instance.map.keySet().stream().mapToInt(Integer::intValue).toArray();</span>
+  }
+
   public static void printAll(PrintStream out) {
-<span class="fc" id="L24">    Check.notNull(out);</span>
-<span class="fc" id="L25">    instance.map.forEach((k, v) -&gt; out.printf(&quot;%5d : %s%n&quot;, k, v));</span>
-<span class="fc" id="L26">  }</span>
+<span class="fc" id="L28">    Check.notNull(out);</span>
+<span class="fc" id="L29">    instance.map.forEach((k, v) -&gt; out.printf(&quot;%5d : %s%n&quot;, k, v));</span>
+<span class="fc" id="L30">  }</span>
 
   private Map&lt;Integer, String&gt; map;
 
-<span class="fc" id="L30">  private SQLTypeNames() {</span>
-<span class="fc" id="L31">    Class&lt;Types&gt; clazz = Types.class;</span>
-<span class="fc" id="L32">    Field[] fields = clazz.getDeclaredFields();</span>
-<span class="fc" id="L33">    map = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L34">  private SQLTypeNames() {</span>
+<span class="fc" id="L35">    Class&lt;Types&gt; clazz = Types.class;</span>
+<span class="fc" id="L36">    Field[] fields = clazz.getDeclaredFields();</span>
+<span class="fc" id="L37">    map = new TreeMap&lt;&gt;();</span>
     try {
-<span class="fc bfc" id="L35" title="All 2 branches covered.">      for (Field f : fields) {</span>
-<span class="fc" id="L36">        map.put(f.getInt(null), f.getName());</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">      for (Field f : fields) {</span>
+<span class="fc" id="L40">        map.put(f.getInt(null), f.getName());</span>
       }
-<span class="nc" id="L38">    } catch (Throwable t) {</span>
-<span class="nc" id="L39">      throw Utils.wrap(t);</span>
-<span class="fc" id="L40">    }</span>
-<span class="fc" id="L41">  }</span>
+<span class="nc" id="L42">    } catch (Throwable t) {</span>
+<span class="nc" id="L43">      throw Utils.wrap(t);</span>
+<span class="fc" id="L44">    }</span>
+<span class="fc" id="L45">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

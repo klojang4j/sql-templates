@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 import static org.klojang.check.CommonChecks.keyIn;
 
-public class SQLTypeNames {
+public final class SQLTypeNames {
 
   private static final SQLTypeNames instance = new SQLTypeNames();
 
@@ -18,6 +18,10 @@ public class SQLTypeNames {
     return Check.that((Integer) sqlType)
           .is(keyIn(), instance.map, "no such constant in java.sql.Types: %d", sqlType)
           .ok(instance.map::get);
+  }
+
+  public static int[] getAllTypes() {
+    return instance.map.keySet().stream().mapToInt(Integer::intValue).toArray();
   }
 
   public static void printAll(PrintStream out) {

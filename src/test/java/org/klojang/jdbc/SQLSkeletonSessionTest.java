@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.klojang.util.ArrayMethods;
 import org.klojang.util.IOMethods;
 
 import java.io.IOException;
@@ -133,6 +134,27 @@ public class SQLSkeletonSessionTest {
       String query = "SELECT FIRST_NAME FROM PERSON";
       List<String> firstNames = SQL.simpleQuery(MY_CON.get(), query).firstColumn();
       assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);
+    }
+  }
+
+  @Test
+  public void setValuesAndExecute00() throws Exception {
+    List<Person> persons = List.of(
+          new Person(null, "John", "Smith", 34),
+          new Person(null, "Francis", "O'Donell", 27),
+          new Person(null, "Mary", "Bear", 52));
+    SQL sql = SQL.skeleton("""
+          INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
+          ~%%begin:record%
+          (~%firstName%,~%lastName%,~%age%)
+          ~%%end:record%
+          """);
+    try (Connection conn = MY_CON.get()) {
+      SQLSession session = sql.session(conn);
+      List<Long> ids0 = ArrayMethods.asList(session.setValuesAndExecute(persons));
+      String query = "SELECT ID FROM PERSON";
+      List<Long> ids1 = SQL.simpleQuery(MY_CON.get(), query).firstColumn(Long.class);
+      assertEquals(ids0, ids1);
     }
   }
 
