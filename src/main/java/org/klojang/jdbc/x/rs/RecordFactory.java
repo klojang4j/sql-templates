@@ -37,9 +37,7 @@ public final class RecordFactory<T extends Record> {
   public T createRecord(ResultSet rs) throws Throwable {
     Object[] args = new Object[writers.length];
     for (int i = 0; i < writers.length; ++i) {
-      Object val = writers[i].readValue(rs);
-      LOG.trace("-> {}: {}: ", writers[i].component(), val);
-      args[i] = val;
+      args[i] = writers[i].readValue(rs);
     }
     return (T) constructor.invokeWithArguments(args);
   }

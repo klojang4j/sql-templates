@@ -18,7 +18,7 @@ public final class BooleanWriterLookup extends ColumnWriterLookup<Boolean> {
   }
 
   private String asNumberString(Boolean b) {
-    return b == null || b.equals(Boolean.FALSE) ? "0" : "1";
+    return b == null || !b ? "0" : "1";
   }
 
 }

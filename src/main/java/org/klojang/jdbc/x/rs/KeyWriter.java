@@ -2,6 +2,8 @@ package org.klojang.jdbc.x.rs;
 
 import org.klojang.jdbc.DatabaseException;
 import org.klojang.templates.NameMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -15,7 +17,10 @@ import java.util.Map;
  * @param <COLUMN_TYPE>
  */
 @SuppressWarnings("rawtypes")
-public class KeyWriter<COLUMN_TYPE> {
+public final class KeyWriter<COLUMN_TYPE> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(KeyWriter.class);
+
 
   public static Map<String, Object> toMap(ResultSet resultset, KeyWriter[] writers)
         throws Throwable {
@@ -58,7 +63,9 @@ public class KeyWriter<COLUMN_TYPE> {
   }
 
   public void write(ResultSet resultset, Map<String, Object> map) throws Throwable {
-    map.put(key, method.invoke(resultset, columnIndex));
+    Object val = method.invoke(resultset, columnIndex);
+    LOG.trace("==> {}: {}", key, val);
+    map.put(key, val);
   }
 
 }

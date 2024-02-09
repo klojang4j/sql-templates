@@ -87,6 +87,7 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
   public void write(ResultSet resultset, Object bean) throws Throwable {
     Class cls = setter.getParamType();
     Object val = reader.getValue(resultset, columnIndex, cls);
+    LOG.trace("==> {}: {}", setter.getProperty(), val);
     setter.write(bean, val);
   }
 

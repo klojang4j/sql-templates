@@ -63,18 +63,13 @@ public class ColumnReaderFinderTest {
 
   @Test
   public void test00() {
-    System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  uuid1: " + uuid1);
-    System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  uuid2: " + uuid2);
     String sql = "SELECT * FROM STUFF";
     SQLSession session = SQL.staticSQL(sql).session(MY_CON.get());
     Stuff stuff = session.prepareQuery()
           .withNameMapper(new SnakeCaseToCamelCase())
           .getBeanifier(Stuff.class)
           .beanify()
-          .get();
-    System.out.println("******************************  uuid1: " + stuff.uuid1());
-    System.out.println("******************************  uuid2: " + stuff.uuid2());
-    assertEquals(uuid1, stuff.uuid1());
+          .get();assertEquals(uuid1, stuff.uuid1());
     assertEquals(uuid2, stuff.uuid2());
     assertEquals(url, stuff.url());
     assertEquals(sb.toString(), stuff.sb().toString());

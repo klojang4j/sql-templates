@@ -24,8 +24,4 @@ public final class UUIDReaderLookup extends AbstractColumnReaderLookup<UUID> {
   private static Function<String, UUID> stringToUUID() {
     return UUID::fromString;
   }
-
-  private static Function<byte[], UUID> binaryToUUID() {
-    return UUID::nameUUIDFromBytes;
-  }
 }

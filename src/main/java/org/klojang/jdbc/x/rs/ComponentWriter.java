@@ -1,5 +1,8 @@
 package org.klojang.jdbc.x.rs;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.ResultSet;
 
 /**
@@ -9,6 +12,9 @@ import java.sql.ResultSet;
  * @param <COMPONENT_TYPE>
  */
 final class ComponentWriter<COLUMN_TYPE, COMPONENT_TYPE> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ComponentWriter.class);
+
 
   private final ColumnReader<COLUMN_TYPE, COMPONENT_TYPE> reader;
   private final String component;
@@ -26,9 +32,9 @@ final class ComponentWriter<COLUMN_TYPE, COMPONENT_TYPE> {
     this.componentType = componentType;
   }
 
-  String component() { return component; }
-
   COMPONENT_TYPE readValue(ResultSet resultset) throws Throwable {
-    return reader.getValue(resultset, columnIndex, componentType);
+    COMPONENT_TYPE val = reader.getValue(resultset, columnIndex, componentType);
+    LOG.trace("==> {}: {}", component, val);
+    return val;
   }
 }
