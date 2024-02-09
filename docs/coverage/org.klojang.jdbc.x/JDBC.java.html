@@ -45,7 +45,7 @@ public final class JDBC {
   public static PreparedStatement getPreparedStatement(Connection con,
         SQLInfo sqlInfo,
         boolean retrieveKeys) {
-<span class="fc bfc" id="L48" title="All 2 branches covered.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
     try {
 <span class="fc" id="L50">      return con.prepareStatement(sqlInfo.sql(), x);</span>
 <span class="nc" id="L51">    } catch (SQLException e) {</span>

@@ -1,11 +1,15 @@
 package org.klojang.jdbc.x.rs;
 
-/*
- * Converts a value retrieved through one of the ResultSet.getXXX() methods such that it
- * can be assigned to a JavaBean property.
+/**
+ * A conversion function used to adapt the value and/or type of a database value to its
+ * destination (e.g. a bean property or a record component).
+ *
+ * @param <COLUMN_TYPE> the column type
+ * @param <TARGET_TYPE> the required type
+ * @see ColumnReader
  */
 @FunctionalInterface
-public interface Adapter<COLUMN_TYPE, FIELD_TYPE> {
+public interface Adapter<COLUMN_TYPE, TARGET_TYPE> {
 
-  FIELD_TYPE adapt(COLUMN_TYPE value, Class<FIELD_TYPE> targetType);
+  TARGET_TYPE adapt(COLUMN_TYPE value, Class<TARGET_TYPE> targetType);
 }

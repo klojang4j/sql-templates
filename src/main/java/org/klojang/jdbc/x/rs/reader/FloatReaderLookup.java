@@ -1,28 +1,58 @@
 package org.klojang.jdbc.x.rs.reader;
 
-import org.klojang.convert.NumberMethods;
 import org.klojang.jdbc.x.rs.ColumnReader;
-import org.klojang.jdbc.x.rs.ColumnReaderLookup;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 import static java.sql.Types.*;
+import static java.util.Map.Entry;
+import static org.klojang.convert.NumberMethods.convert;
+import static org.klojang.convert.NumberMethods.parse;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
-public final class FloatReaderLookup extends ColumnReaderLookup<Float> {
+public final class FloatReaderLookup extends AbstractColumnReaderLookup<Float> {
 
-  public FloatReaderLookup() {
-    add(FLOAT, new ColumnReader<>(GET_FLOAT));
-    add(INTEGER, new ColumnReader<>(GET_INT, Integer::floatValue));
-    add(SMALLINT, new ColumnReader<>(GET_SHORT, Short::floatValue));
-    add(TINYINT, new ColumnReader<>(GET_BYTE, Byte::floatValue));
-    add(REAL, new ColumnReader<>(GET_FLOAT, Float::floatValue));
-    add(BIGINT, new ColumnReader<>(GET_LONG, Long::floatValue));
-    add(BOOLEAN, new ColumnReader<>(GET_BOOLEAN, x -> x ? 1.0F : 0));
-    addMultiple(new ColumnReader<>(GET_BIG_DECIMAL, NumberMethods::convert),
-          NUMERIC,
-          DECIMAL);
-    addMultiple(new ColumnReader<>(GET_STRING, NumberMethods::parse),
-          VARCHAR,
-          CHAR);
+  @Override
+  List<Entry<Integer, ColumnReader<?, Float>>> getColumnReaders() {
+    List<Entry<Integer, ColumnReader<?, Float>>> entries = new ArrayList<>(16);
+    // Confusingly, Types.REAL corresponds to the Java float type while both
+    // Types.DOUBLE and Types.FLOAT correspond to the Java double type. Types.NUMERIC
+    // and Types.DECIMAL both correspond to BigDecimal.
+    entries.add(entry(GET_FLOAT, REAL));
+    entries.add(entry(GET_BOOLEAN, boolToFloat(), BOOLEAN));
+    entries.add(entry(GET_LONG, longToFloat(), BIGINT));
+    entries.addAll(entries(GET_INT, intToFloat(), INTEGER, SMALLINT, TINYINT));
+    entries.addAll(entries(GET_DOUBLE, doubleToFloat(), DOUBLE, FLOAT));
+    entries.addAll(entries(GET_BIG_DECIMAL, bdToFloat(), NUMERIC, DECIMAL));
+    entries.addAll(entries(GET_STRING, stringToFloat(), VARCHAR, CHAR));
+    return entries;
+  }
+
+  private static Function<Boolean, Float> boolToFloat() {
+    return x -> x == null || !x ? 0F : 1F;
+  }
+
+  private static Function<Integer, Float> intToFloat() {
+    return Integer::floatValue;
+  }
+
+  private static Function<Long, Float> longToFloat() {
+    return x -> convert(x, Float.class);
+  }
+
+  private static Function<Double, Float> doubleToFloat() {
+    return x -> convert(x, Float.class);
+  }
+
+  private static Function<BigDecimal, Float> bdToFloat() {
+    return x -> convert(x, Float.class);
+  }
+
+  private static Function<String, Float> stringToFloat() {
+    return x -> parse(x, Float.class);
   }
 
 }

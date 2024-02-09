@@ -2,32 +2,28 @@ package org.klojang.jdbc.x.rs.reader;
 
 import org.klojang.convert.Bool;
 import org.klojang.jdbc.x.rs.ColumnReader;
-import org.klojang.jdbc.x.rs.ColumnReaderLookup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.sql.Types.*;
+import static java.util.Map.Entry;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
 
-public final class BooleanReaderLookup extends ColumnReaderLookup<Boolean> {
+public final class BooleanReaderLookup extends AbstractColumnReaderLookup<Boolean> {
 
-  public BooleanReaderLookup() {
-    add(INTEGER, new ColumnReader<>(GET_INT, Bool::from));
-    add(SMALLINT, new ColumnReader<>(GET_SHORT, Bool::from));
-    add(TINYINT, new ColumnReader<>(GET_BYTE, Bool::from));
-    add(BIGINT, new ColumnReader<>(GET_LONG, Bool::from));
-    add(REAL, new ColumnReader<>(GET_FLOAT, Bool::from));
-    addMultiple(new ColumnReader<>(GET_BOOLEAN),
-          BOOLEAN,
-          BIT);
-    addMultiple(new ColumnReader<>(GET_DOUBLE, Bool::from),
-          FLOAT,
-          DOUBLE);
-    addMultiple(new ColumnReader<>(GET_BIG_DECIMAL, Bool::from),
-          NUMERIC,
-          DECIMAL);
-    addMultiple(new ColumnReader<>(GET_STRING, Bool::from),
-          CHAR,
-          VARCHAR);
+  @Override
+  List<Entry<Integer, ColumnReader<?, Boolean>>> getColumnReaders() {
+    List<Entry<Integer, ColumnReader<?, Boolean>>> entries = new ArrayList<>(16);
+    entries.addAll(entries(GET_BOOLEAN, BOOLEAN));
+    entries.add(entry(GET_LONG, Bool::from, BIGINT));
+    entries.add(entry(GET_FLOAT, Bool::from, REAL));
+    entries.addAll(entries(GET_INT, Bool::from, INTEGER, SMALLINT, TINYINT));
+    entries.addAll(entries(GET_DOUBLE, Bool::from, FLOAT, DOUBLE));
+    entries.addAll(entries(GET_BIG_DECIMAL, Bool::from, NUMERIC, DECIMAL));
+    entries.addAll(entries(GET_STRING, Bool::from, VARCHAR, CHAR));
+    return entries;
   }
 
 }

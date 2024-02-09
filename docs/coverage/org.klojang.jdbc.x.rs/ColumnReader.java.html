@@ -3,46 +3,48 @@
 import java.sql.ResultSet;
 import java.util.function.Function;
 
-import static org.klojang.util.ObjectMethods.ifNotNull;
-
 /**
  * A ColumnReader is responsible for extracting a single value from a ResultSet. Since the
  * value will be destined for a bean property, it needs to be assignment-compatible with
  * the property. The ColumnReader can be instantiated with an Adapter function that will
  * convert the value to the type of the property.
+ *
+ * @param &lt;COLUMN_TYPE&gt; The return type of the ResultSet.getXXX() method
+ *       encapsulated by this instance
+ * @param &lt;TARGET_TYPE&gt; The desired type (may be the same a {@code &lt;COLUMN_TYPE&gt;})
  */
-public final class ColumnReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
+public final class ColumnReader&lt;COLUMN_TYPE, TARGET_TYPE&gt; {
 
   // One of the getXXX() methods of the ResultSet class
   private final ResultSetMethod&lt;COLUMN_TYPE&gt; method;
-  private final Adapter&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter;
+  private final Adapter&lt;? super COLUMN_TYPE, TARGET_TYPE&gt; adapter;
 
-<span class="fc" id="L20">  public ColumnReader(ResultSetMethod&lt;COLUMN_TYPE&gt; method) {</span>
-<span class="fc" id="L21">    this.method = method;</span>
-<span class="fc" id="L22">    this.adapter = null;</span>
-<span class="fc" id="L23">  }</span>
-
-  public ColumnReader(
-        ResultSetMethod&lt;COLUMN_TYPE&gt; method,
-        Function&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {
-<span class="fc" id="L28">    this(method, (x, y) -&gt; ifNotNull(x, adapter::apply));</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L22">  public ColumnReader(ResultSetMethod&lt;COLUMN_TYPE&gt; method) {</span>
+<span class="fc" id="L23">    this.method = method;</span>
+<span class="fc" id="L24">    this.adapter = null;</span>
+<span class="fc" id="L25">  }</span>
 
   public ColumnReader(
         ResultSetMethod&lt;COLUMN_TYPE&gt; method,
-<span class="fc" id="L33">        Adapter&lt;? super COLUMN_TYPE, FIELD_TYPE&gt; adapter) {</span>
-<span class="fc" id="L34">    this.method = method;</span>
-<span class="fc" id="L35">    this.adapter = adapter;</span>
-<span class="fc" id="L36">  }</span>
+        Function&lt;? super COLUMN_TYPE, TARGET_TYPE&gt; adapter) {
+<span class="fc" id="L30">    this(method, (x, y) -&gt; adapter.apply(x));</span>
+<span class="fc" id="L31">  }</span>
+
+  public ColumnReader(
+        ResultSetMethod&lt;COLUMN_TYPE&gt; method,
+<span class="fc" id="L35">        Adapter&lt;? super COLUMN_TYPE, TARGET_TYPE&gt; adapter) {</span>
+<span class="fc" id="L36">    this.method = method;</span>
+<span class="fc" id="L37">    this.adapter = adapter;</span>
+<span class="fc" id="L38">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
-  public FIELD_TYPE getValue(ResultSet rs, int columnIndex, Class&lt;FIELD_TYPE&gt; toType)
+  public TARGET_TYPE getValue(ResultSet rs, int columnIndex, Class&lt;TARGET_TYPE&gt; toType)
         throws Throwable {
-<span class="fc" id="L41">    COLUMN_TYPE val = method.invoke(rs, columnIndex);</span>
-<span class="fc bfc" id="L42" title="All 2 branches covered.">    if (adapter == null) {</span>
-<span class="fc" id="L43">      return (FIELD_TYPE) val;</span>
+<span class="fc" id="L43">    COLUMN_TYPE val = method.invoke(rs, columnIndex);</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">    if (adapter == null) {</span>
+<span class="fc" id="L45">      return (TARGET_TYPE) val;</span>
     }
-<span class="fc" id="L45">    return adapter.adapt(val, toType);</span>
+<span class="fc" id="L47">    return adapter.adapt(val, toType);</span>
   }
 
 }

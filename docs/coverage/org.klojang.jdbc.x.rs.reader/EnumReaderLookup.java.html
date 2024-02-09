@@ -1,76 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnumReaderLookup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs.reader</a> &gt; <span class="el_source">EnumReaderLookup.java</span></div><h1>EnumReaderLookup.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs.reader;
 
 import org.klojang.convert.NumberMethods;
+import org.klojang.convert.TypeConversionException;
 import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.x.rs.Adapter;
 import org.klojang.jdbc.x.rs.ColumnReader;
-import org.klojang.jdbc.x.rs.ColumnReaderLookup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.sql.Types.*;
+import static java.util.Map.Entry;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
-public final class EnumReaderLookup extends ColumnReaderLookup&lt;Enum&lt;?&gt;&gt; {
+<span class="fc" id="L16">public final class EnumReaderLookup extends AbstractColumnReaderLookup&lt;Enum&lt;?&gt;&gt; {</span>
 
-<span class="fc" id="L14">  public EnumReaderLookup() {</span>
-<span class="fc" id="L15">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, new NumberAdapter&lt;&gt;()));</span>
-<span class="fc" id="L16">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT, new NumberAdapter&lt;&gt;()));</span>
-<span class="fc" id="L17">    add(SMALLINT, new ColumnReader&lt;&gt;(GET_SHORT, new NumberAdapter&lt;&gt;()));</span>
-<span class="fc" id="L18">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE, new NumberAdapter&lt;&gt;()));</span>
-<span class="fc" id="L19">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, new StringAdapter()), CHAR, VARCHAR);</span>
-<span class="fc" id="L20">  }</span>
-
-  private static class NumberAdapter&lt;T extends Number&gt; implements
-        Adapter&lt;T, Enum&lt;?&gt;&gt; {
-
-    @Override
-    public Enum&lt;?&gt; adapt(T i, Class&lt;Enum&lt;?&gt;&gt; t) {
-<span class="nc" id="L27">      return asOrdinal(i, t);</span>
-    }
-
+  @Override
+  List&lt;Entry&lt;Integer, ColumnReader&lt;?, Enum&lt;?&gt;&gt;&gt;&gt; getColumnReaders() {
+<span class="fc" id="L20">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, Enum&lt;?&gt;&gt;&gt;&gt; entries = new ArrayList&lt;&gt;(16);</span>
+<span class="fc" id="L21">    entries.add(entry(GET_LONG, numberToEnum(), BIGINT));</span>
+<span class="fc" id="L22">    entries.add(entry(GET_INT, numberToEnum(), INTEGER));</span>
+<span class="fc" id="L23">    entries.add(entry(GET_SHORT, numberToEnum(), SMALLINT));</span>
+<span class="fc" id="L24">    entries.add(entry(GET_BYTE, numberToEnum(), TINYINT));</span>
+<span class="fc" id="L25">    entries.addAll(entries(GET_STRING, stringToEnum(), VARCHAR, CHAR));</span>
+<span class="fc" id="L26">    return entries;</span>
   }
 
-  private static class StringAdapter implements Adapter&lt;String, Enum&lt;?&gt;&gt; {
-
-    @Override
-    public Enum&lt;?&gt; adapt(String s, Class&lt;Enum&lt;?&gt;&gt; t) {
-      int i;
-      try {
-<span class="nc" id="L38">        i = NumberMethods.parse(s, Integer.class);</span>
-<span class="nc" id="L39">      } catch (IllegalArgumentException e) {</span>
-<span class="nc" id="L40">        return asName(s, t);</span>
-<span class="nc" id="L41">      }</span>
-<span class="nc" id="L42">      return asOrdinal(i, t);</span>
-    }
-
+  private static &lt;T extends Number&gt; Adapter&lt;T, Enum&lt;?&gt;&gt; numberToEnum() {
+<span class="pc" id="L30">    return (x, y) -&gt; asOrdinal(x, y);</span>
   }
 
+  private static Adapter&lt;String, Enum&lt;?&gt;&gt; stringToEnum() {
+<span class="pc" id="L34">    return (x, y) -&gt; stringToEnum(x, y);</span>
+  }
 
-  private static &lt;T extends Number&gt; Enum&lt;?&gt; asOrdinal(T number,
+  private static &lt;T extends Number&gt; Enum&lt;?&gt; asOrdinal(T n,
         Class&lt;Enum&lt;?&gt;&gt; enumClass) {
-<span class="nc bnc" id="L50" title="All 2 branches missed.">    if (number == null) {</span>
-<span class="nc" id="L51">      return null;</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">    if (n == null) {</span>
+<span class="nc" id="L40">      return null;</span>
     }
-<span class="nc" id="L53">    int i = number.intValue();</span>
-<span class="nc bnc" id="L54" title="All 4 branches missed.">    if (i &lt; 0 || i &gt;= enumClass.getEnumConstants().length) {</span>
-<span class="nc" id="L55">      String fmt = &quot;invalid ordinal number for enum type %s: %d&quot;;</span>
-<span class="nc" id="L56">      String msg = String.format(fmt, enumClass.getSimpleName(), i);</span>
-<span class="nc" id="L57">      throw new DatabaseException(msg);</span>
+<span class="nc" id="L42">    int i = n.intValue();</span>
+<span class="nc bnc" id="L43" title="All 4 branches missed.">    if (i &lt; 0 || i &gt;= enumClass.getEnumConstants().length) {</span>
+<span class="nc" id="L44">      String fmt = &quot;invalid ordinal number for enum type %s: %d&quot;;</span>
+<span class="nc" id="L45">      String msg = String.format(fmt, enumClass.getSimpleName(), i);</span>
+<span class="nc" id="L46">      throw new DatabaseException(msg);</span>
     }
-<span class="nc" id="L59">    return enumClass.getEnumConstants()[i];</span>
+<span class="nc" id="L48">    return enumClass.getEnumConstants()[i];</span>
   }
+
+  private static Enum&lt;?&gt; stringToEnum(String s, Class&lt;Enum&lt;?&gt;&gt; enumClass) {
+<span class="nc bnc" id="L52" title="All 2 branches missed.">    if (s == null) {</span>
+<span class="nc" id="L53">      return null;</span>
+    }
+    int i;
+    try {
+<span class="nc" id="L57">      i = NumberMethods.parse(s, Integer.class);</span>
+<span class="nc" id="L58">    } catch (TypeConversionException e) {</span>
+<span class="nc" id="L59">      return asName(s, enumClass);</span>
+<span class="nc" id="L60">    }</span>
+<span class="nc" id="L61">    return asOrdinal(i, enumClass);</span>
+  }
+
 
   private static Enum&lt;?&gt; asName(String s, Class&lt;Enum&lt;?&gt;&gt; enumClass) {
-<span class="nc bnc" id="L63" title="All 2 branches missed.">    if (s == null) {</span>
-<span class="nc" id="L64">      return null;</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">    if (s == null) {</span>
+<span class="nc" id="L67">      return null;</span>
     }
-<span class="nc bnc" id="L66" title="All 2 branches missed.">    for (Enum&lt;?&gt; c : enumClass.getEnumConstants()) {</span>
-<span class="nc bnc" id="L67" title="All 4 branches missed.">      if (s.equals(c.name()) || s.equals(c.toString())) {</span>
-<span class="nc" id="L68">        return c;</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">    for (Enum&lt;?&gt; c : enumClass.getEnumConstants()) {</span>
+<span class="nc bnc" id="L70" title="All 4 branches missed.">      if (s.equals(c.name()) || s.equals(c.toString())) {</span>
+<span class="nc" id="L71">        return c;</span>
       }
     }
-<span class="nc" id="L71">    String fmt = &quot;unable to parse \&quot;%s\&quot; into %s&quot;;</span>
-<span class="nc" id="L72">    String msg = String.format(fmt, s, enumClass.getSimpleName());</span>
-<span class="nc" id="L73">    throw new DatabaseException(msg);</span>
+<span class="nc" id="L74">    String fmt = &quot;cannot parse \&quot;%s\&quot; into %s&quot;;</span>
+<span class="nc" id="L75">    String msg = String.format(fmt, s, enumClass.getSimpleName());</span>
+<span class="nc" id="L76">    throw new DatabaseException(msg);</span>
   }
 
 }

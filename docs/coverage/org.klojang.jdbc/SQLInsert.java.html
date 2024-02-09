@@ -77,9 +77,9 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    */
   @Override
   public SQLInsert bind(Record record) {
-<span class="fc" id="L80">    super.bind(record);</span>
-<span class="fc" id="L81">    idProperties.add(null);</span>
-<span class="fc" id="L82">    return this;</span>
+<span class="nc" id="L80">    super.bind(record);</span>
+<span class="nc" id="L81">    idProperties.add(null);</span>
+<span class="nc" id="L82">    return this;</span>
   }
 
   /**
@@ -159,7 +159,7 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
   public long execute() {
     try {
 <span class="fc" id="L161">      executeSQL();</span>
-<span class="fc bfc" id="L162" title="All 2 branches covered.">      return retrieveKeys ? JDBC.getGeneratedKeys(ps, 1)[0] : -1;</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">      return retrieveKeys ? JDBC.getGeneratedKeys(ps, 1)[0] : -1;</span>
 <span class="nc" id="L163">    } catch (Throwable t) {</span>
 <span class="nc" id="L164">      throw Utils.wrap(t, sqlInfo);</span>
     } finally {

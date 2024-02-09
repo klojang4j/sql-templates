@@ -1,19 +1,38 @@
 package org.klojang.jdbc.x.rs.reader;
 
-import org.klojang.jdbc.x.rs.ResultSetMethod;
 import org.klojang.jdbc.x.rs.ColumnReader;
-import org.klojang.jdbc.x.rs.ColumnReaderLookup;
 
 import java.sql.Date;
+import java.time.Instant;
 import java.time.LocalDate;
-import static java.sql.Types.DATE;
-import static java.sql.Types.TIMESTAMP;
-import static org.klojang.util.ObjectMethods.ifNotNull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
-public final class LocalDateReaderLookup extends ColumnReaderLookup<LocalDate> {
+import static java.sql.Types.*;
+import static java.time.ZoneId.systemDefault;
+import static java.util.Map.Entry;
+import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
-  public LocalDateReaderLookup() {
-    add(DATE, new ColumnReader<>(ResultSetMethod.GET_DATE, x -> ifNotNull(x, Date::toLocalDate)));
-    add(TIMESTAMP, new ColumnReader<>(ResultSetMethod.objectGetter(LocalDate.class)));
+public final class LocalDateReaderLookup extends AbstractColumnReaderLookup<LocalDate> {
+
+  @Override
+  List<Entry<Integer, ColumnReader<?, LocalDate>>> getColumnReaders() {
+    List<Entry<Integer, ColumnReader<?, LocalDate>>> entries = new ArrayList<>(16);
+    entries.add(entry(GET_DATE, sqlDateToLocalDate(), DATE));
+    entries.add(entry(GET_LONG, longToLocalDate(), BIGINT));
+    entries.add(entry(objectGetter(LocalDate.class), TIMESTAMP));
+    return entries;
   }
+
+  private static Function<Date, LocalDate> sqlDateToLocalDate() {
+    return x -> x == null ? null : x.toLocalDate();
+  }
+
+  private static Function<Long, LocalDate> longToLocalDate() {
+    return x -> x == null
+          ? null
+          : Instant.ofEpochSecond(x).atZone(systemDefault()).toLocalDate();
+  }
+
 }

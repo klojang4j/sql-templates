@@ -2,33 +2,29 @@
 
 import org.klojang.convert.Bool;
 import org.klojang.jdbc.x.rs.ColumnReader;
-import org.klojang.jdbc.x.rs.ColumnReaderLookup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.sql.Types.*;
+import static java.util.Map.Entry;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
 
-public final class BooleanReaderLookup extends ColumnReaderLookup&lt;Boolean&gt; {
+<span class="fc" id="L14">public final class BooleanReaderLookup extends AbstractColumnReaderLookup&lt;Boolean&gt; {</span>
 
-<span class="fc" id="L13">  public BooleanReaderLookup() {</span>
-<span class="fc" id="L14">    add(INTEGER, new ColumnReader&lt;&gt;(GET_INT, Bool::from));</span>
-<span class="fc" id="L15">    add(SMALLINT, new ColumnReader&lt;&gt;(GET_SHORT, Bool::from));</span>
-<span class="fc" id="L16">    add(TINYINT, new ColumnReader&lt;&gt;(GET_BYTE, Bool::from));</span>
-<span class="fc" id="L17">    add(BIGINT, new ColumnReader&lt;&gt;(GET_LONG, Bool::from));</span>
-<span class="fc" id="L18">    add(REAL, new ColumnReader&lt;&gt;(GET_FLOAT, Bool::from));</span>
-<span class="fc" id="L19">    addMultiple(new ColumnReader&lt;&gt;(GET_BOOLEAN),</span>
-          BOOLEAN,
-          BIT);
-<span class="fc" id="L22">    addMultiple(new ColumnReader&lt;&gt;(GET_DOUBLE, Bool::from),</span>
-          FLOAT,
-          DOUBLE);
-<span class="fc" id="L25">    addMultiple(new ColumnReader&lt;&gt;(GET_BIG_DECIMAL, Bool::from),</span>
-          NUMERIC,
-          DECIMAL);
-<span class="fc" id="L28">    addMultiple(new ColumnReader&lt;&gt;(GET_STRING, Bool::from),</span>
-          CHAR,
-          VARCHAR);
-<span class="fc" id="L31">  }</span>
+  @Override
+  List&lt;Entry&lt;Integer, ColumnReader&lt;?, Boolean&gt;&gt;&gt; getColumnReaders() {
+<span class="fc" id="L18">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, Boolean&gt;&gt;&gt; entries = new ArrayList&lt;&gt;(16);</span>
+<span class="fc" id="L19">    entries.addAll(entries(GET_BOOLEAN, BOOLEAN));</span>
+<span class="fc" id="L20">    entries.add(entry(GET_LONG, Bool::from, BIGINT));</span>
+<span class="fc" id="L21">    entries.add(entry(GET_FLOAT, Bool::from, REAL));</span>
+<span class="fc" id="L22">    entries.addAll(entries(GET_INT, Bool::from, INTEGER, SMALLINT, TINYINT));</span>
+<span class="fc" id="L23">    entries.addAll(entries(GET_DOUBLE, Bool::from, FLOAT, DOUBLE));</span>
+<span class="fc" id="L24">    entries.addAll(entries(GET_BIG_DECIMAL, Bool::from, NUMERIC, DECIMAL));</span>
+<span class="fc" id="L25">    entries.addAll(entries(GET_STRING, Bool::from, VARCHAR, CHAR));</span>
+<span class="fc" id="L26">    return entries;</span>
+  }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -2,31 +2,45 @@ package org.klojang.jdbc.x.rs.reader;
 
 import org.klojang.convert.NumberMethods;
 import org.klojang.jdbc.x.rs.ColumnReader;
-import org.klojang.jdbc.x.rs.ColumnReaderLookup;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 import static java.sql.Types.*;
+import static java.util.Map.Entry;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
-public final class DoubleReaderLookup extends ColumnReaderLookup<Double> {
+public final class DoubleReaderLookup extends AbstractColumnReaderLookup<Double> {
 
-  public DoubleReaderLookup() {
-    // We don't really need to add the conversion functions (like  Integer::doubleValue)
-    // because the compiler can figure this out by itself. But we like to be explicit.
-    add(INTEGER, new ColumnReader<>(GET_INT, Integer::doubleValue));
-    add(SMALLINT, new ColumnReader<>(GET_SHORT, Short::doubleValue));
-    add(TINYINT, new ColumnReader<>(GET_BYTE, Byte::doubleValue));
-    add(REAL, new ColumnReader<>(GET_FLOAT, Float::doubleValue));
-    add(BIGINT, new ColumnReader<>(GET_LONG, Long::doubleValue));
-    add(BOOLEAN, new ColumnReader<>(GET_BOOLEAN, x -> x ? 1.0 : 0));
-    addMultiple(new ColumnReader<>(GET_DOUBLE),
+  @Override
+  List<Entry<Integer, ColumnReader<?, Double>>> getColumnReaders() {
+    List<Entry<Integer, ColumnReader<?, Double>>> entries = new ArrayList<>(16);
+    entries.add(entry(GET_BOOLEAN, boolToDouble(), BOOLEAN));
+    entries.addAll(entries(GET_DOUBLE,
+          DOUBLE,
           FLOAT,
-          DOUBLE);
-    addMultiple(new ColumnReader<>(GET_BIG_DECIMAL, NumberMethods::convert),
-          NUMERIC,
-          DECIMAL);
-    addMultiple(new ColumnReader<>(GET_STRING, NumberMethods::parse),
-          VARCHAR,
-          CHAR);
+          REAL,
+          BIGINT,
+          INTEGER,
+          SMALLINT,
+          TINYINT));
+    entries.addAll(entries(GET_BIG_DECIMAL, bigDecimalToDouble(), NUMERIC, DECIMAL));
+    entries.addAll(entries(GET_STRING, stringToDouble(), VARCHAR, CHAR));
+    return entries;
+  }
+
+  private Function<Boolean, Double> boolToDouble() {
+    return x -> x ? 1D : 0D;
+  }
+
+  private static Function<BigDecimal, Double> bigDecimalToDouble() {
+    return x -> NumberMethods.convert(x, Double.class);
+  }
+
+  private static Function<String, Double> stringToDouble() {
+    return x -> NumberMethods.parse(x, Double.class);
   }
 
 }

@@ -1,56 +1,45 @@
 package org.klojang.jdbc.x.rs.reader;
 
 import org.klojang.convert.NumberMethods;
+import org.klojang.convert.TypeConversionException;
 import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.x.rs.Adapter;
 import org.klojang.jdbc.x.rs.ColumnReader;
-import org.klojang.jdbc.x.rs.ColumnReaderLookup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.sql.Types.*;
+import static java.util.Map.Entry;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
-public final class EnumReaderLookup extends ColumnReaderLookup<Enum<?>> {
+public final class EnumReaderLookup extends AbstractColumnReaderLookup<Enum<?>> {
 
-  public EnumReaderLookup() {
-    add(BIGINT, new ColumnReader<>(GET_LONG, new NumberAdapter<>()));
-    add(INTEGER, new ColumnReader<>(GET_INT, new NumberAdapter<>()));
-    add(SMALLINT, new ColumnReader<>(GET_SHORT, new NumberAdapter<>()));
-    add(TINYINT, new ColumnReader<>(GET_BYTE, new NumberAdapter<>()));
-    addMultiple(new ColumnReader<>(GET_STRING, new StringAdapter()), CHAR, VARCHAR);
+  @Override
+  List<Entry<Integer, ColumnReader<?, Enum<?>>>> getColumnReaders() {
+    List<Entry<Integer, ColumnReader<?, Enum<?>>>> entries = new ArrayList<>(16);
+    entries.add(entry(GET_LONG, numberToEnum(), BIGINT));
+    entries.add(entry(GET_INT, numberToEnum(), INTEGER));
+    entries.add(entry(GET_SHORT, numberToEnum(), SMALLINT));
+    entries.add(entry(GET_BYTE, numberToEnum(), TINYINT));
+    entries.addAll(entries(GET_STRING, stringToEnum(), VARCHAR, CHAR));
+    return entries;
   }
 
-  private static class NumberAdapter<T extends Number> implements
-        Adapter<T, Enum<?>> {
-
-    @Override
-    public Enum<?> adapt(T i, Class<Enum<?>> t) {
-      return asOrdinal(i, t);
-    }
-
+  private static <T extends Number> Adapter<T, Enum<?>> numberToEnum() {
+    return (x, y) -> asOrdinal(x, y);
   }
 
-  private static class StringAdapter implements Adapter<String, Enum<?>> {
-
-    @Override
-    public Enum<?> adapt(String s, Class<Enum<?>> t) {
-      int i;
-      try {
-        i = NumberMethods.parse(s, Integer.class);
-      } catch (IllegalArgumentException e) {
-        return asName(s, t);
-      }
-      return asOrdinal(i, t);
-    }
-
+  private static Adapter<String, Enum<?>> stringToEnum() {
+    return (x, y) -> stringToEnum(x, y);
   }
 
-
-  private static <T extends Number> Enum<?> asOrdinal(T number,
+  private static <T extends Number> Enum<?> asOrdinal(T n,
         Class<Enum<?>> enumClass) {
-    if (number == null) {
+    if (n == null) {
       return null;
     }
-    int i = number.intValue();
+    int i = n.intValue();
     if (i < 0 || i >= enumClass.getEnumConstants().length) {
       String fmt = "invalid ordinal number for enum type %s: %d";
       String msg = String.format(fmt, enumClass.getSimpleName(), i);
@@ -58,6 +47,20 @@ public final class EnumReaderLookup extends ColumnReaderLookup<Enum<?>> {
     }
     return enumClass.getEnumConstants()[i];
   }
+
+  private static Enum<?> stringToEnum(String s, Class<Enum<?>> enumClass) {
+    if (s == null) {
+      return null;
+    }
+    int i;
+    try {
+      i = NumberMethods.parse(s, Integer.class);
+    } catch (TypeConversionException e) {
+      return asName(s, enumClass);
+    }
+    return asOrdinal(i, enumClass);
+  }
+
 
   private static Enum<?> asName(String s, Class<Enum<?>> enumClass) {
     if (s == null) {
@@ -68,7 +71,7 @@ public final class EnumReaderLookup extends ColumnReaderLookup<Enum<?>> {
         return c;
       }
     }
-    String fmt = "unable to parse \"%s\" into %s";
+    String fmt = "cannot parse \"%s\" into %s";
     String msg = String.format(fmt, s, enumClass.getSimpleName());
     throw new DatabaseException(msg);
   }

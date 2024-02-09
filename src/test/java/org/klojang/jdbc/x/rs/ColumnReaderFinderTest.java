@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,25 +53,27 @@ public class ColumnReaderFinderTest {
           """;
     SQL.simple(sql).session(con).prepareUpdate().execute();
     Stuff stuff = new Stuff(uuid1, uuid2, url, sb);
-    SQL.insert()
+    SQL.batchInsert()
           .of(Stuff.class)
           .into("STUFF")
-          .retrieveKeys(false)
           .prepare(con)
-          .bind(stuff)
-          .execute();
+          .insertBatch(List.of(stuff));
     MY_CON.set(con);
   }
 
   @Test
   public void test00() {
+    System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  uuid1: " + uuid1);
+    System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  uuid2: " + uuid2);
     String sql = "SELECT * FROM STUFF";
-    SQLSession session = SQL.template(sql).session(MY_CON.get());
+    SQLSession session = SQL.staticSQL(sql).session(MY_CON.get());
     Stuff stuff = session.prepareQuery()
           .withNameMapper(new SnakeCaseToCamelCase())
           .getBeanifier(Stuff.class)
           .beanify()
           .get();
+    System.out.println("******************************  uuid1: " + stuff.uuid1());
+    System.out.println("******************************  uuid2: " + stuff.uuid2());
     assertEquals(uuid1, stuff.uuid1());
     assertEquals(uuid2, stuff.uuid2());
     assertEquals(url, stuff.url());

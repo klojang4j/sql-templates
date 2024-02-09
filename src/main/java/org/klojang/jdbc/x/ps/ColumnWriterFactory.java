@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import static org.klojang.check.CommonChecks.notNull;
-import static org.klojang.jdbc.x.SQLTypeNames.getTypeName;
+import static org.klojang.jdbc.util.SQLTypeUtil.getTypeName;
 import static org.klojang.util.ClassMethods.className;
 
 @SuppressWarnings({"rawtypes", "unchecked"})

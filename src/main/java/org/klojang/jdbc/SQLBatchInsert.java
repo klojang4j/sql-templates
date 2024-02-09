@@ -4,6 +4,8 @@ import org.klojang.check.Check;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.BatchInsertConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -12,6 +14,7 @@ import java.util.List;
 import static java.sql.Statement.NO_GENERATED_KEYS;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
 import static org.klojang.jdbc.x.Strings.ID_PROPERTY;
 import static org.klojang.util.ArrayMethods.EMPTY_LONG_ARRAY;
 import static org.klojang.util.ArrayMethods.implode;
@@ -53,6 +56,9 @@ import static org.klojang.util.StringMethods.append;
 public final class SQLBatchInsert<T> {
 
   private static final String RECORDS_DONT_HAVE_SETTERS = "cannot set id on record types";
+
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);
+
 
   private final BatchInsertConfig<T> cfg;
   private final String[] props;
@@ -153,7 +159,9 @@ public final class SQLBatchInsert<T> {
     sql.append(sqlBase);
     try (Statement stmt = cfg.connection().createStatement()) {
       addRows(sql, stmt, beans);
-      stmt.executeUpdate(sql.toString(), NO_GENERATED_KEYS);
+      String s = sql.toString();
+      LOG.trace(EXECUTING_SQL, s);
+      stmt.executeUpdate(s, NO_GENERATED_KEYS);
     }
     commit();
   }
@@ -164,7 +172,9 @@ public final class SQLBatchInsert<T> {
     sql.append(sqlBase);
     try (Statement stmt = cfg.connection().createStatement()) {
       addRows(sql, stmt, beans);
-      stmt.executeUpdate(sql.toString(), RETURN_GENERATED_KEYS);
+      String s = sql.toString();
+      LOG.trace(EXECUTING_SQL, s);
+      stmt.executeUpdate(s, RETURN_GENERATED_KEYS);
       keys = JDBC.getGeneratedKeys(stmt, beans.size());
     }
     commit();
@@ -176,7 +186,9 @@ public final class SQLBatchInsert<T> {
     sql.append(sqlBase);
     try (Statement stmt = cfg.connection().createStatement()) {
       addRows(sql, stmt, beans);
-      stmt.executeUpdate(sql.toString(), RETURN_GENERATED_KEYS);
+      String s = sql.toString();
+      LOG.trace(EXECUTING_SQL, s);
+      stmt.executeUpdate(s, RETURN_GENERATED_KEYS);
       long[] keys = JDBC.getGeneratedKeys(stmt, beans.size());
       for (int i = 0; i < keys.length; ++i) {
         JDBC.setID(beans.get(i), idProperty, keys[i]);

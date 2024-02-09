@@ -42,6 +42,8 @@ public final class ResultSetMethod<COLUMN_TYPE> {
         = getter("getTimestamp", Timestamp.class);
   public static final ResultSetMethod<BigDecimal> GET_BIG_DECIMAL
         = getter("getBigDecimal", BigDecimal.class);
+  public static final ResultSetMethod<byte[]> GET_BYTES
+        = getter("getBytes", byte[].class);
 
   // Invokes <T> ResultSet.getObject(columnIndex, Class<T>)
   public static <T> ResultSetMethod<T> objectGetter(Class<T> returnType) {

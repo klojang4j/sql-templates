@@ -19,7 +19,7 @@ public final class ColumnWriter&lt;FIELD_TYPE, PARAM_TYPE&gt; {
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
 <span class="fc" id="L21">  public static final ColumnWriter&lt;?, String&gt; ANY_TO_STRING</span>
-<span class="fc" id="L22">        = new ColumnWriter(SET_STRING, x -&gt; ifNotNull(x, Object::toString));</span>
+<span class="nc" id="L22">        = new ColumnWriter(SET_STRING, x -&gt; ifNotNull(x, Object::toString));</span>
 
   private final PreparedStatementMethod&lt;PARAM_TYPE&gt; setter;
   private final Adapter&lt;FIELD_TYPE, PARAM_TYPE&gt; adapter;
@@ -31,7 +31,7 @@ public final class ColumnWriter&lt;FIELD_TYPE, PARAM_TYPE&gt; {
 
   public ColumnWriter(PreparedStatementMethod&lt;PARAM_TYPE&gt; setter,
         Function&lt;FIELD_TYPE, PARAM_TYPE&gt; adapter) {
-<span class="fc" id="L34">    this(setter, (x, y) -&gt; ifNotEmpty(x, adapter));</span>
+<span class="pc" id="L34">    this(setter, (x, y) -&gt; ifNotEmpty(x, adapter));</span>
 <span class="fc" id="L35">  }</span>
 
   public ColumnWriter(PreparedStatementMethod&lt;PARAM_TYPE&gt; setter,
@@ -42,9 +42,9 @@ public final class ColumnWriter&lt;FIELD_TYPE, PARAM_TYPE&gt; {
 
   @SuppressWarnings(&quot;unchecked&quot;)
   PARAM_TYPE getParamValue(FIELD_TYPE beanValue) {
-<span class="fc bfc" id="L45" title="All 2 branches covered.">    return adapter == null</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">    return adapter == null</span>
 <span class="fc" id="L46">          ? (PARAM_TYPE) beanValue</span>
-<span class="fc" id="L47">          : adapter.adapt(beanValue, setter.getParamType());</span>
+<span class="nc" id="L47">          : adapter.adapt(beanValue, setter.getParamType());</span>
   }
 
   void bind(PreparedStatement ps, int paramIndex, PARAM_TYPE value) throws Throwable {

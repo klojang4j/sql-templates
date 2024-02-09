@@ -8,14 +8,14 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.GET_STRING;
 // This one is special. If the target type is java.lang.String, we don't even bother
 // checking what the column type is. We are going to call ResultSet.getString() no
 // matter what.
-public final class StringReaderLookup extends ColumnReaderLookup&lt;String&gt; {
+public final class StringReaderLookup implements ColumnReaderLookup&lt;String&gt; {
 
 <span class="fc" id="L13">  private static final ColumnReader&lt;?, String&gt; UNIVERSAL = new ColumnReader&lt;&gt;(GET_STRING);</span>
 
 <span class="fc" id="L15">  public StringReaderLookup() { }</span>
 
   @Override
-  public ColumnReader&lt;?, ?&gt; get(Object key) {
+  public ColumnReader&lt;?, String&gt; getColumnReader(int columnType) {
 <span class="fc" id="L19">    return UNIVERSAL;</span>
   }
 }

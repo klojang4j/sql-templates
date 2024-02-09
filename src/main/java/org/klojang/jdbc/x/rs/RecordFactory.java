@@ -37,7 +37,9 @@ public final class RecordFactory<T extends Record> {
   public T createRecord(ResultSet rs) throws Throwable {
     Object[] args = new Object[writers.length];
     for (int i = 0; i < writers.length; ++i) {
-      args[i] = writers[i].readValue(rs);
+      Object val = writers[i].readValue(rs);
+      LOG.trace("-> {}: {}: ", writers[i].component(), val);
+      args[i] = val;
     }
     return (T) constructor.invokeWithArguments(args);
   }
@@ -59,17 +61,17 @@ public final class RecordFactory<T extends Record> {
         int jdbcIdx = idx + 1; // JDBC is one-based
         int sqlType = rsmd.getColumnType(jdbcIdx);
         String label = rsmd.getColumnLabel(jdbcIdx);
-        String property = mapper.map(label);
-        RecordComponent component = components.get(property);
-        if (component == null) {
-          String fmt = "Column {} cannot be mapped to a property of {}";
+        String component = mapper.map(label);
+        RecordComponent rc = components.get(component);
+        if (rc == null) {
+          String fmt = "Column {} cannot be mapped to a component of {}";
           LOG.warn(fmt, label, recordClass.getSimpleName());
           continue;
         }
-        Class<?> javaType = component.getType();
-        ColumnReader reader = factory.getReader(javaType, sqlType);
-        ComponentWriter writer = new ComponentWriter(reader, jdbcIdx, javaType);
-        paramTypes.add(javaType);
+        Class<?> type = rc.getType();
+        ColumnReader reader = factory.getReader(type, sqlType);
+        ComponentWriter writer = new ComponentWriter(reader, component, jdbcIdx, type);
+        paramTypes.add(type);
         writers.add(writer);
       }
       MethodHandle mh = publicLookup().findConstructor(
@@ -91,7 +93,7 @@ public final class RecordFactory<T extends Record> {
     Set<String> props = new TreeSet<>(cmp);
     props.addAll(components.keySet());
     LOG.trace("Columns ......: {}", implode(cols));
-    LOG.trace("Properties ...: {}", implode(props));
+    LOG.trace("Components ...: {}", implode(props));
   }
 
   private static Map<String, RecordComponent> getComponents(Class cls) {

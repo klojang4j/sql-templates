@@ -90,9 +90,9 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public T bind(Record record) {
-<span class="fc" id="L93">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
-<span class="fc" id="L94">    Check.notNull(record, RECORD).then(bindings::add);</span>
-<span class="fc" id="L95">    return (T) this;</span>
+<span class="nc" id="L93">    Check.that(fresh).is(yes(), DIRTY_INSTANCE);</span>
+<span class="nc" id="L94">    Check.notNull(record, RECORD).then(bindings::add);</span>
+<span class="nc" id="L95">    return (T) this;</span>
   }
 
   /**

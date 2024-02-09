@@ -86,7 +86,7 @@ final class PropertyBinder<FIELD_TYPE, PARAM_TYPE> {
     if (beanValue == paramValue) {
       // Reference equality indicates that the bean value was bound as-is
       // into the PreparedStatement - using its setXXX() methods. Otherwise
-      // the value was first transformed using a Adapter.
+      // the value was first transformed using an Adapter.
       LOG.trace("-> Parameter \"{}\": {}", getter.getProperty(), paramValue);
     } else {
       String fmt = "-> Parameter \"{}\": {} (bean value: {})";
