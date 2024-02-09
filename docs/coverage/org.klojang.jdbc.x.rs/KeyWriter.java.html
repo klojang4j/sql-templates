@@ -2,6 +2,8 @@
 
 import org.klojang.jdbc.DatabaseException;
 import org.klojang.templates.NameMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -15,35 +17,38 @@ import java.util.Map;
  * @param &lt;COLUMN_TYPE&gt;
  */
 @SuppressWarnings(&quot;rawtypes&quot;)
-public class KeyWriter&lt;COLUMN_TYPE&gt; {
+public final class KeyWriter&lt;COLUMN_TYPE&gt; {
+
+<span class="nc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(KeyWriter.class);</span>
+
 
   public static Map&lt;String, Object&gt; toMap(ResultSet resultset, KeyWriter[] writers)
         throws Throwable {
     // Allow for some extra data to be inserted into the map by the user
-<span class="nc" id="L23">    Map&lt;String, Object&gt; map = HashMap.newHashMap(writers.length + 4);</span>
-<span class="nc bnc" id="L24" title="All 2 branches missed.">    for (KeyWriter channel : writers) {</span>
-<span class="nc" id="L25">      channel.write(resultset, map);</span>
+<span class="nc" id="L28">    Map&lt;String, Object&gt; map = HashMap.newHashMap(writers.length + 4);</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">    for (KeyWriter channel : writers) {</span>
+<span class="nc" id="L30">      channel.write(resultset, map);</span>
     }
-<span class="nc" id="L27">    return map;</span>
+<span class="nc" id="L32">    return map;</span>
   }
 
   public static KeyWriter[] createWriters(ResultSet resultset, NameMapper mapper) {
-<span class="nc" id="L31">    ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();</span>
+<span class="nc" id="L36">    ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();</span>
     try {
-<span class="nc" id="L33">      ResultSetMetaData rsmd = resultset.getMetaData();</span>
-<span class="nc" id="L34">      int sz = rsmd.getColumnCount();</span>
-<span class="nc" id="L35">      KeyWriter[] writers = new KeyWriter[sz];</span>
-<span class="nc bnc" id="L36" title="All 2 branches missed.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
-<span class="nc" id="L37">        int columnIndex = idx + 1; // JDBC is one-based</span>
-<span class="nc" id="L38">        int sqlType = rsmd.getColumnType(columnIndex);</span>
-<span class="nc" id="L39">        ResultSetMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
-<span class="nc" id="L40">        String label = rsmd.getColumnLabel(columnIndex);</span>
-<span class="nc" id="L41">        String key = mapper.map(label);</span>
-<span class="nc" id="L42">        writers[idx] = new KeyWriter&lt;&gt;(method, columnIndex, key);</span>
+<span class="nc" id="L38">      ResultSetMetaData rsmd = resultset.getMetaData();</span>
+<span class="nc" id="L39">      int sz = rsmd.getColumnCount();</span>
+<span class="nc" id="L40">      KeyWriter[] writers = new KeyWriter[sz];</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
+<span class="nc" id="L42">        int columnIndex = idx + 1; // JDBC is one-based</span>
+<span class="nc" id="L43">        int sqlType = rsmd.getColumnType(columnIndex);</span>
+<span class="nc" id="L44">        ResultSetMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
+<span class="nc" id="L45">        String label = rsmd.getColumnLabel(columnIndex);</span>
+<span class="nc" id="L46">        String key = mapper.map(label);</span>
+<span class="nc" id="L47">        writers[idx] = new KeyWriter&lt;&gt;(method, columnIndex, key);</span>
       }
-<span class="nc" id="L44">      return writers;</span>
-<span class="nc" id="L45">    } catch (SQLException e) {</span>
-<span class="nc" id="L46">      throw new DatabaseException(e);</span>
+<span class="nc" id="L49">      return writers;</span>
+<span class="nc" id="L50">    } catch (SQLException e) {</span>
+<span class="nc" id="L51">      throw new DatabaseException(e);</span>
     }
   }
 
@@ -51,15 +56,17 @@ public class KeyWriter&lt;COLUMN_TYPE&gt; {
   private final int columnIndex;
   private final String key;
 
-<span class="nc" id="L54">  private KeyWriter(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int columnIndex, String key) {</span>
-<span class="nc" id="L55">    this.method = method;</span>
-<span class="nc" id="L56">    this.columnIndex = columnIndex;</span>
-<span class="nc" id="L57">    this.key = key;</span>
-<span class="nc" id="L58">  }</span>
+<span class="nc" id="L59">  private KeyWriter(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int columnIndex, String key) {</span>
+<span class="nc" id="L60">    this.method = method;</span>
+<span class="nc" id="L61">    this.columnIndex = columnIndex;</span>
+<span class="nc" id="L62">    this.key = key;</span>
+<span class="nc" id="L63">  }</span>
 
   public void write(ResultSet resultset, Map&lt;String, Object&gt; map) throws Throwable {
-<span class="nc" id="L61">    map.put(key, method.invoke(resultset, columnIndex));</span>
-<span class="nc" id="L62">  }</span>
+<span class="nc" id="L66">    Object val = method.invoke(resultset, columnIndex);</span>
+<span class="nc" id="L67">    LOG.trace(&quot;==&gt; {}: {}&quot;, key, val);</span>
+<span class="nc" id="L68">    map.put(key, val);</span>
+<span class="nc" id="L69">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

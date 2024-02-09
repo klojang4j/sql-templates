@@ -18,8 +18,13 @@ import static org.klojang.util.ObjectMethods.ifNotNull;
 public final class ColumnWriter<FIELD_TYPE, PARAM_TYPE> {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static final ColumnWriter<?, String> ANY_TO_STRING
+  public static final ColumnWriter ANY_TO_STRING
         = new ColumnWriter(SET_STRING, x -> ifNotNull(x, Object::toString));
+
+  @SuppressWarnings("unchecked")
+  public static <T> ColumnWriter<T, String> anyToString() {
+    return (ColumnWriter<T, String>) ANY_TO_STRING;
+  }
 
   private final PreparedStatementMethod<PARAM_TYPE> setter;
   private final Adapter<FIELD_TYPE, PARAM_TYPE> adapter;

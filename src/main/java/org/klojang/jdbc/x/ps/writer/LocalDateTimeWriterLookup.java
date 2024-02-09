@@ -12,11 +12,14 @@ import static org.klojang.util.ObjectMethods.ifNotNull;
 
 public final class LocalDateTimeWriterLookup extends ColumnWriterLookup<LocalDateTime> {
 
-  public static final ColumnWriter<LocalDateTime, Timestamp> DEFAULT =
-        new ColumnWriter<>(SET_TIMESTAMP, d -> ifNotNull(d, Timestamp::valueOf));
+  public static final ColumnWriter DEFAULT = localDateTimeToTimestamp();
 
   public LocalDateTimeWriterLookup() {
     put(TIMESTAMP, DEFAULT);
+  }
+
+  private static ColumnWriter<LocalDateTime, Timestamp> localDateTimeToTimestamp() {
+    return new ColumnWriter<>(SET_TIMESTAMP, d -> ifNotNull(d, Timestamp::valueOf));
   }
 
 

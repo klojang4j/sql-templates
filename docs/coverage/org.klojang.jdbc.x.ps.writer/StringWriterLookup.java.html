@@ -2,9 +2,8 @@
 
 import org.klojang.convert.Bool;
 import org.klojang.convert.NumberMethods;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
-import org.klojang.jdbc.x.ps.PreparedStatementMethod;
 import org.klojang.jdbc.x.ps.ColumnWriter;
+import org.klojang.jdbc.x.ps.ColumnWriterLookup;
 
 import java.math.BigDecimal;
 
@@ -13,23 +12,53 @@ import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
 public final class StringWriterLookup extends ColumnWriterLookup&lt;String&gt; {
 
-<span class="fc" id="L16">  public static final ColumnWriter&lt;String, String&gt; DEFAULT = new ColumnWriter&lt;&gt;(PreparedStatementMethod.SET_STRING);</span>
+  @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
+<span class="fc" id="L16">  public static final ColumnWriter DEFAULT = new ColumnWriter(SET_STRING);</span>
 
-<span class="fc" id="L18">  public StringWriterLookup() {</span>
-<span class="fc" id="L19">    put(VARCHAR, DEFAULT);</span>
-<span class="fc" id="L20">    put(CHAR, DEFAULT);</span>
-<span class="fc" id="L21">    put(INTEGER, new ColumnWriter&lt;String, Integer&gt;(SET_INT, NumberMethods::parse));</span>
-<span class="fc" id="L22">    put(SMALLINT, new ColumnWriter&lt;String, Short&gt;(SET_SHORT, NumberMethods::parse));</span>
-<span class="fc" id="L23">    put(TINYINT, new ColumnWriter&lt;String, Byte&gt;(SET_BYTE, NumberMethods::parse));</span>
-<span class="fc" id="L24">    put(BIGINT, new ColumnWriter&lt;String, Long&gt;(SET_LONG, NumberMethods::parse));</span>
-<span class="fc" id="L25">    put(NUMERIC,</span>
-          new ColumnWriter&lt;String, BigDecimal&gt;(SET_BIG_DECIMAL, NumberMethods::parse));
-<span class="fc" id="L27">    put(REAL, new ColumnWriter&lt;String, Float&gt;(SET_FLOAT, NumberMethods::parse));</span>
-<span class="fc" id="L28">    put(FLOAT, new ColumnWriter&lt;String, Double&gt;(SET_DOUBLE, NumberMethods::parse));</span>
-<span class="fc" id="L29">    put(DOUBLE, new ColumnWriter&lt;String, Double&gt;(SET_DOUBLE, NumberMethods::parse));</span>
-<span class="fc" id="L30">    put(BOOLEAN, new ColumnWriter&lt;String, Boolean&gt;(SET_BOOLEAN, Bool::from));</span>
-<span class="fc" id="L31">    put(BIT, new ColumnWriter&lt;Integer, Boolean&gt;(SET_BOOLEAN, Bool::from));</span>
-<span class="fc" id="L32">  }</span>
+  @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L19">  public StringWriterLookup() {</span>
+<span class="fc" id="L20">    put(BOOLEAN, stringToBool());</span>
+<span class="fc" id="L21">    put(INTEGER, stringToInt());</span>
+<span class="fc" id="L22">    put(SMALLINT, stringToShort());</span>
+<span class="fc" id="L23">    put(TINYINT, stringToByte());</span>
+<span class="fc" id="L24">    put(REAL, stringToFloat());</span>
+<span class="fc" id="L25">    put(BIGINT, stringToLong());</span>
+<span class="fc" id="L26">    addMultiple(stringToDouble(), DOUBLE, FLOAT);</span>
+<span class="fc" id="L27">    addMultiple(stringToBigDecimal(), NUMERIC, DECIMAL);</span>
+<span class="fc" id="L28">    addMultiple(DEFAULT, VARCHAR, CHAR);</span>
+<span class="fc" id="L29">  }</span>
+
+  private static ColumnWriter&lt;String, Boolean&gt; stringToBool() {
+<span class="fc" id="L32">    return new ColumnWriter&lt;&gt;(SET_BOOLEAN, Bool::from);</span>
+  }
+
+  private static ColumnWriter&lt;String, Byte&gt; stringToByte() {
+<span class="fc" id="L36">    return new ColumnWriter&lt;&gt;(SET_BYTE, NumberMethods::parse);</span>
+  }
+
+  private static ColumnWriter&lt;String, Short&gt; stringToShort() {
+<span class="fc" id="L40">    return new ColumnWriter&lt;&gt;(SET_SHORT, NumberMethods::parse);</span>
+  }
+
+  private static ColumnWriter&lt;String, Integer&gt; stringToInt() {
+<span class="fc" id="L44">    return new ColumnWriter&lt;&gt;(SET_INT, NumberMethods::parse);</span>
+  }
+
+  private static ColumnWriter&lt;String, Long&gt; stringToLong() {
+<span class="fc" id="L48">    return new ColumnWriter&lt;&gt;(SET_LONG, NumberMethods::parse);</span>
+  }
+
+  private static ColumnWriter&lt;String, Float&gt; stringToFloat() {
+<span class="fc" id="L52">    return new ColumnWriter&lt;&gt;(SET_FLOAT, NumberMethods::parse);</span>
+  }
+
+  private static ColumnWriter&lt;String, Double&gt; stringToDouble() {
+<span class="fc" id="L56">    return new ColumnWriter&lt;&gt;(SET_DOUBLE, NumberMethods::parse);</span>
+  }
+
+  private static ColumnWriter&lt;String, BigDecimal&gt; stringToBigDecimal() {
+<span class="fc" id="L60">    return new ColumnWriter&lt;&gt;(SET_BIG_DECIMAL, NumberMethods::parse);</span>
+  }
 
 
 }

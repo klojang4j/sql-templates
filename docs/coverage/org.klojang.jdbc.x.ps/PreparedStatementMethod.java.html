@@ -100,26 +100,25 @@ public final class PreparedStatementMethod&lt;PARAM_TYPE&gt; {
 
   void bindValue(PreparedStatement ps, int paramIndex, PARAM_TYPE paramValue)
         throws Throwable {
-<span class="fc" id="L103">    LOG.trace(&quot;-----&gt; Parameter {}: {}&quot;, paramIndex, paramValue);</span>
-<span class="pc bpc" id="L104" title="1 of 2 branches missed.">    if (paramValue == null) {</span>
-<span class="nc" id="L105">      SET_STRING.method.invoke(ps, paramIndex, (String) null);</span>
-<span class="pc bpc" id="L106" title="1 of 2 branches missed.">    } else if (sqlType == null) {</span>
-<span class="fc" id="L107">      method.invoke(ps, paramIndex, paramValue);</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">    if (paramValue == null) {</span>
+<span class="nc" id="L104">      SET_STRING.method.invoke(ps, paramIndex, (String) null);</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">    } else if (sqlType == null) {</span>
+<span class="fc" id="L106">      method.invoke(ps, paramIndex, paramValue);</span>
     } else {
-<span class="nc" id="L109">      method.invoke(ps, paramIndex, paramValue, sqlType);</span>
+<span class="nc" id="L108">      method.invoke(ps, paramIndex, paramValue, sqlType);</span>
     }
-<span class="fc" id="L111">  }</span>
+<span class="fc" id="L110">  }</span>
 
   private static &lt;X&gt; PreparedStatementMethod&lt;X&gt; setter(String methodName,
         Class&lt;X&gt; paramType) {
-<span class="fc" id="L115">    MethodType mt = methodType(void.class, int.class, paramType);</span>
+<span class="fc" id="L114">    MethodType mt = methodType(void.class, int.class, paramType);</span>
     MethodHandle mh;
     try {
-<span class="fc" id="L118">      mh = lookup().findVirtual(PreparedStatement.class, methodName, mt);</span>
-<span class="nc" id="L119">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
-<span class="nc" id="L120">      throw ExceptionMethods.uncheck(e);</span>
-<span class="fc" id="L121">    }</span>
-<span class="fc" id="L122">    return new PreparedStatementMethod&lt;&gt;(methodName, mh, paramType);</span>
+<span class="fc" id="L117">      mh = lookup().findVirtual(PreparedStatement.class, methodName, mt);</span>
+<span class="nc" id="L118">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
+<span class="nc" id="L119">      throw ExceptionMethods.uncheck(e);</span>
+<span class="fc" id="L120">    }</span>
+<span class="fc" id="L121">    return new PreparedStatementMethod&lt;&gt;(methodName, mh, paramType);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

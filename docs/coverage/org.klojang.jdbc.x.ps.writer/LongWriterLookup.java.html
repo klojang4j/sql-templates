@@ -6,22 +6,37 @@ import org.klojang.jdbc.x.ps.ColumnWriter;
 import org.klojang.jdbc.x.ps.ColumnWriterLookup;
 
 import static java.sql.Types.*;
+import static org.klojang.jdbc.x.ps.ColumnWriter.ANY_TO_STRING;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
 public final class LongWriterLookup extends ColumnWriterLookup&lt;Long&gt; {
 
-<span class="fc" id="L13">  public static final ColumnWriter&lt;Long, Long&gt; DEFAULT = new ColumnWriter&lt;&gt;(SET_LONG);</span>
+<span class="fc" id="L14">  public static final ColumnWriter&lt;Long, Long&gt; DEFAULT = new ColumnWriter&lt;&gt;(SET_LONG);</span>
 
-<span class="fc" id="L15">  public LongWriterLookup() {</span>
-<span class="fc" id="L16">    put(BIGINT, DEFAULT);</span>
-<span class="fc" id="L17">    put(INTEGER, new ColumnWriter&lt;Long, Integer&gt;(SET_INT, NumberMethods::convert));</span>
-<span class="fc" id="L18">    put(SMALLINT, new ColumnWriter&lt;Long, Short&gt;(SET_SHORT, NumberMethods::convert));</span>
-<span class="fc" id="L19">    put(TINYINT, new ColumnWriter&lt;Long, Byte&gt;(SET_BYTE, NumberMethods::convert));</span>
-<span class="fc" id="L20">    put(BOOLEAN, new ColumnWriter&lt;Long, Boolean&gt;(SET_BOOLEAN, Bool::from));</span>
-<span class="fc" id="L21">    put(BIT, new ColumnWriter&lt;Long, Boolean&gt;(SET_BOOLEAN, Bool::from));</span>
-<span class="fc" id="L22">    put(VARCHAR, ColumnWriter.ANY_TO_STRING);</span>
-<span class="fc" id="L23">    put(CHAR, ColumnWriter.ANY_TO_STRING);</span>
-<span class="fc" id="L24">  }</span>
+<span class="fc" id="L16">  public LongWriterLookup() {</span>
+<span class="fc" id="L17">    put(BOOLEAN, longToBoolean());</span>
+<span class="fc" id="L18">    put(TINYINT, longToByte());</span>
+<span class="fc" id="L19">    put(SMALLINT, longToShort());</span>
+<span class="fc" id="L20">    put(INTEGER, longToInt());</span>
+<span class="fc" id="L21">    put(BIGINT, DEFAULT);</span>
+<span class="fc" id="L22">    addMultiple(ANY_TO_STRING, VARCHAR, CHAR);</span>
+<span class="fc" id="L23">  }</span>
+
+  private static ColumnWriter&lt;Long, Boolean&gt; longToBoolean() {
+<span class="fc" id="L26">    return new ColumnWriter&lt;&gt;(SET_BOOLEAN, Bool::from);</span>
+  }
+
+  private static ColumnWriter&lt;Long, Byte&gt; longToByte() {
+<span class="fc" id="L30">    return new ColumnWriter&lt;&gt;(SET_BYTE, NumberMethods::convert);</span>
+  }
+
+  private static ColumnWriter&lt;Long, Short&gt; longToShort() {
+<span class="fc" id="L34">    return new ColumnWriter&lt;&gt;(SET_SHORT, NumberMethods::convert);</span>
+  }
+
+  private static ColumnWriter&lt;Long, Integer&gt; longToInt() {
+<span class="fc" id="L38">    return new ColumnWriter&lt;&gt;(SET_INT, NumberMethods::convert);</span>
+  }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

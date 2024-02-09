@@ -8,22 +8,24 @@ import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
 public final class EnumWriterLookup extends ColumnWriterLookup<Enum<?>> {
 
-  public static final ColumnWriter<Enum<?>, Integer> DEFAULT = ordinalToInt();
-  public static final ColumnWriter<Enum<?>, String> ENUM_TO_STRING = enumToString();
+  @SuppressWarnings("rawtypes")
+  public static final ColumnWriter DEFAULT = ordinalToInt();
+  @SuppressWarnings("rawtypes")
+  public static final ColumnWriter ENUM_TO_STRING = enumToString();
 
   public EnumWriterLookup() {
+    put(TINYINT, ordinalToByte());
+    put(SMALLINT, ordinalToShort());
     put(INTEGER, DEFAULT);
     put(BIGINT, ordinalToLong());
-    put(SMALLINT, ordinalToShort());
-    put(TINYINT, ordinalToByte());
     addMultiple(enumToString(), VARCHAR, CHAR);
   }
 
-  public static ColumnWriter<Enum<?>, Byte> ordinalToByte() {
+  private static ColumnWriter<Enum<?>, Byte> ordinalToByte() {
     return new ColumnWriter<>(SET_BYTE, e -> (byte) e.ordinal());
   }
 
-  public static ColumnWriter<Enum<?>, Short> ordinalToShort() {
+  private static ColumnWriter<Enum<?>, Short> ordinalToShort() {
     return new ColumnWriter<>(SET_SHORT, e -> (short) e.ordinal());
   }
 
@@ -31,7 +33,7 @@ public final class EnumWriterLookup extends ColumnWriterLookup<Enum<?>> {
     return new ColumnWriter<>(SET_INT, Enum::ordinal);
   }
 
-  public static ColumnWriter<Enum<?>, Long> ordinalToLong() {
+  private static ColumnWriter<Enum<?>, Long> ordinalToLong() {
     return new ColumnWriter<>(SET_LONG, e -> (long) e.ordinal());
   }
 

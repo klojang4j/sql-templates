@@ -50,9 +50,9 @@ public final class MapBinder {
 <span class="fc" id="L50">        Object output = writer.getParamValue(value);</span>
 <span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (LOG.isDebugEnabled()) {</span>
 <span class="pc bpc" id="L52" title="1 of 2 branches missed.">          if (value == output) {</span>
-<span class="fc" id="L53">            LOG.trace(&quot;-&gt; Parameter \&quot;{}\&quot;: {}&quot;, key, output);</span>
+<span class="fc" id="L53">            LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {}&quot;, key, output);</span>
           } else {
-<span class="nc" id="L55">            LOG.trace(&quot;-&gt; Parameter \&quot;{}\&quot;: {} (map value: {})&quot;, key, output, value);</span>
+<span class="nc" id="L55">            LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (map value: {})&quot;, key, output, value);</span>
           }
         }
 <span class="fc" id="L58">        param.positions().forEachThrowing(i -&gt; writer.bind(ps, i, output));</span>

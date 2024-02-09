@@ -6,25 +6,34 @@ import org.klojang.jdbc.x.ps.ColumnWriter;
 import org.klojang.jdbc.x.ps.ColumnWriterLookup;
 
 import static java.sql.Types.*;
+import static org.klojang.jdbc.x.ps.ColumnWriter.ANY_TO_STRING;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
 public final class ShortWriterLookup extends ColumnWriterLookup&lt;Short&gt; {
 
-<span class="fc" id="L13">  public static final ColumnWriter&lt;Short, Short&gt; DEFAULT = new ColumnWriter&lt;&gt;(SET_SHORT);</span>
+  @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
+<span class="fc" id="L15">  public static final ColumnWriter DEFAULT = new ColumnWriter(SET_SHORT);</span>
 
-<span class="fc" id="L15">  public ShortWriterLookup() {</span>
-<span class="fc" id="L16">    put(SMALLINT, DEFAULT);</span>
-<span class="fc" id="L17">    put(INTEGER, IntWriterLookup.DEFAULT);</span>
-<span class="fc" id="L18">    put(BIGINT, new ColumnWriter&lt;&gt;(SET_LONG));</span>
-<span class="fc" id="L19">    put(REAL, new ColumnWriter&lt;&gt;(SET_FLOAT));</span>
-<span class="fc" id="L20">    put(FLOAT, DoubleWriterLookup.DEFAULT);</span>
-<span class="fc" id="L21">    put(DOUBLE, DoubleWriterLookup.DEFAULT);</span>
-<span class="fc" id="L22">    addMultiple(new ColumnWriter&lt;&gt;(SET_BIG_DECIMAL), NUMERIC, DECIMAL);</span>
-<span class="fc" id="L23">    put(TINYINT, new ColumnWriter&lt;Short, Byte&gt;(SET_BYTE, NumberMethods::convert));</span>
-<span class="fc" id="L24">    addMultiple(new ColumnWriter&lt;&gt;(SET_BOOLEAN, Bool::from), BOOLEAN, BIT);</span>
-<span class="fc" id="L25">    put(VARCHAR, ColumnWriter.ANY_TO_STRING);</span>
-<span class="fc" id="L26">    put(CHAR, ColumnWriter.ANY_TO_STRING);</span>
-<span class="fc" id="L27">  }</span>
+  @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L18">  public ShortWriterLookup() {</span>
+<span class="fc" id="L19">    put(BOOLEAN, shortToBoolean());</span>
+<span class="fc" id="L20">    put(TINYINT, shortToByte());</span>
+<span class="fc" id="L21">    put(SMALLINT, DEFAULT);</span>
+<span class="fc" id="L22">    put(INTEGER, IntWriterLookup.DEFAULT);</span>
+<span class="fc" id="L23">    put(BIGINT, LongWriterLookup.DEFAULT);</span>
+<span class="fc" id="L24">    put(REAL, FloatWriterLookup.DEFAULT);</span>
+<span class="fc" id="L25">    addMultiple(DoubleWriterLookup.DEFAULT, DOUBLE, FLOAT);</span>
+<span class="fc" id="L26">    addMultiple(BigDecimalWriterLookup.DEFAULT, NUMERIC, DECIMAL);</span>
+<span class="fc" id="L27">    addMultiple(ANY_TO_STRING, VARCHAR, CHAR);</span>
+<span class="fc" id="L28">  }</span>
+
+  private static ColumnWriter&lt;Object, Boolean&gt; shortToBoolean() {
+<span class="fc" id="L31">    return new ColumnWriter&lt;&gt;(SET_BOOLEAN, Bool::from);</span>
+  }
+
+  private static ColumnWriter&lt;Short, Byte&gt; shortToByte() {
+<span class="fc" id="L35">    return new ColumnWriter&lt;&gt;(SET_BYTE, NumberMethods::convert);</span>
+  }
 
 
 }

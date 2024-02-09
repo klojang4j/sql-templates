@@ -2,40 +2,58 @@
 
 import org.klojang.convert.Bool;
 import org.klojang.convert.NumberMethods;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
-import org.klojang.jdbc.x.ps.PreparedStatementMethod;
 import org.klojang.jdbc.x.ps.ColumnWriter;
+import org.klojang.jdbc.x.ps.ColumnWriterLookup;
 
 import static java.sql.Types.*;
+import static org.klojang.jdbc.x.ps.ColumnWriter.ANY_TO_STRING;
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
 public final class DoubleWriterLookup extends ColumnWriterLookup&lt;Double&gt; {
 
-<span class="fc" id="L13">  public static final ColumnWriter&lt;Double, ?&gt; DEFAULT = new ColumnWriter&lt;&gt;(PreparedStatementMethod.SET_DOUBLE);</span>
+  @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
+<span class="fc" id="L15">  public static final ColumnWriter DEFAULT = new ColumnWriter(SET_DOUBLE);</span>
 
-<span class="fc" id="L15">  public DoubleWriterLookup() {</span>
-<span class="fc" id="L16">    put(FLOAT, DEFAULT);</span>
-<span class="fc" id="L17">    put(DOUBLE, DEFAULT);</span>
-<span class="fc" id="L18">    put(BIGINT,</span>
-          new ColumnWriter&lt;Double, Long&gt;(PreparedStatementMethod.SET_LONG,
-                NumberMethods::convert));
-<span class="fc" id="L21">    put(REAL,</span>
-          new ColumnWriter&lt;Double, Float&gt;(PreparedStatementMethod.SET_FLOAT,
-                NumberMethods::convert));
-<span class="fc" id="L24">    put(INTEGER,</span>
-          new ColumnWriter&lt;Double, Integer&gt;(PreparedStatementMethod.SET_INT,
-                NumberMethods::convert));
-<span class="fc" id="L27">    put(SMALLINT,</span>
-          new ColumnWriter&lt;Double, Short&gt;(PreparedStatementMethod.SET_SHORT,
-                NumberMethods::convert));
-<span class="fc" id="L30">    put(TINYINT,</span>
-          new ColumnWriter&lt;Double, Byte&gt;(PreparedStatementMethod.SET_BYTE,
-                NumberMethods::convert));
-<span class="fc" id="L33">    addMultiple(new ColumnWriter&lt;&gt;(PreparedStatementMethod.SET_BOOLEAN, Bool::from),</span>
-          BOOLEAN,
-          BIT);
-<span class="fc" id="L36">    put(VARCHAR, ColumnWriter.ANY_TO_STRING);</span>
-<span class="fc" id="L37">    put(CHAR, ColumnWriter.ANY_TO_STRING);</span>
-<span class="fc" id="L38">  }</span>
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;T&gt; ColumnWriter&lt;Double, T&gt; defaultDoubleWriter() {
+<span class="fc" id="L19">    return (ColumnWriter&lt;Double, T&gt;) DEFAULT;</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L23">  public DoubleWriterLookup() {</span>
+<span class="fc" id="L24">    put(BOOLEAN, doubleToBoolean());</span>
+<span class="fc" id="L25">    put(TINYINT, doubleToByte());</span>
+<span class="fc" id="L26">    put(SMALLINT, doubleToShort());</span>
+<span class="fc" id="L27">    put(INTEGER, doubleToInt());</span>
+<span class="fc" id="L28">    put(BIGINT, doubleToLong());</span>
+<span class="fc" id="L29">    put(REAL, doubleToFloat());</span>
+<span class="fc" id="L30">    addMultiple(defaultDoubleWriter(), DOUBLE, FLOAT);</span>
+<span class="fc" id="L31">    addMultiple(ANY_TO_STRING, VARCHAR, CHAR);</span>
+<span class="fc" id="L32">  }</span>
+
+  private static ColumnWriter&lt;Object, Boolean&gt; doubleToBoolean() {
+<span class="fc" id="L35">    return new ColumnWriter&lt;&gt;(SET_BOOLEAN, Bool::from);</span>
+  }
+
+  private static ColumnWriter&lt;Double, Byte&gt; doubleToByte() {
+<span class="fc" id="L39">    return new ColumnWriter&lt;&gt;(SET_BYTE, NumberMethods::convert);</span>
+  }
+
+  private static ColumnWriter&lt;Double, Short&gt; doubleToShort() {
+<span class="fc" id="L43">    return new ColumnWriter&lt;&gt;(SET_SHORT, NumberMethods::convert);</span>
+  }
+
+  private static ColumnWriter&lt;Double, Integer&gt; doubleToInt() {
+<span class="fc" id="L47">    return new ColumnWriter&lt;&gt;(SET_INT, NumberMethods::convert);</span>
+  }
+
+  private static ColumnWriter&lt;Double, Long&gt; doubleToLong() {
+<span class="fc" id="L51">    return new ColumnWriter&lt;&gt;(SET_LONG, NumberMethods::convert);</span>
+  }
+
+  private static ColumnWriter&lt;Double, Float&gt; doubleToFloat() {
+<span class="fc" id="L55">    return new ColumnWriter&lt;&gt;(SET_FLOAT, NumberMethods::convert);</span>
+  }
 
 
 }

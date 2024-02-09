@@ -2,25 +2,36 @@
 
 import org.klojang.convert.Bool;
 import org.klojang.convert.NumberMethods;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
-import org.klojang.jdbc.x.ps.PreparedStatementMethod;
 import org.klojang.jdbc.x.ps.ColumnWriter;
+import org.klojang.jdbc.x.ps.ColumnWriterLookup;
 
 import static java.sql.Types.*;
+import static org.klojang.jdbc.x.ps.ColumnWriter.ANY_TO_STRING;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
 public final class IntWriterLookup extends ColumnWriterLookup&lt;Integer&gt; {
 
-<span class="fc" id="L14">  public static final ColumnWriter&lt;Integer, Integer&gt; DEFAULT = new ColumnWriter&lt;&gt;(PreparedStatementMethod.SET_INT);</span>
+<span class="fc" id="L14">  public static final ColumnWriter DEFAULT = new ColumnWriter(SET_INT);</span>
 
 <span class="fc" id="L16">  public IntWriterLookup() {</span>
-<span class="fc" id="L17">    put(INTEGER, DEFAULT);</span>
-<span class="fc" id="L18">    put(SMALLINT, new ColumnWriter&lt;Integer, Short&gt;(SET_SHORT, NumberMethods::convert));</span>
-<span class="fc" id="L19">    put(TINYINT, new ColumnWriter&lt;Integer, Byte&gt;(SET_BYTE, NumberMethods::convert));</span>
-<span class="fc" id="L20">    addMultiple(new ColumnWriter&lt;&gt;(SET_BOOLEAN, Bool::from), BOOLEAN, BIT);</span>
-<span class="fc" id="L21">    put(VARCHAR, ColumnWriter.ANY_TO_STRING);</span>
-<span class="fc" id="L22">    put(CHAR, ColumnWriter.ANY_TO_STRING);</span>
-<span class="fc" id="L23">  }</span>
+<span class="fc" id="L17">    put(BOOLEAN, intToBool());</span>
+<span class="fc" id="L18">    put(TINYINT, intToByte());</span>
+<span class="fc" id="L19">    put(SMALLINT, intToShort());</span>
+<span class="fc" id="L20">    put(INTEGER, DEFAULT);</span>
+<span class="fc" id="L21">    addMultiple(ANY_TO_STRING, VARCHAR, CHAR);</span>
+<span class="fc" id="L22">  }</span>
+
+  private static ColumnWriter&lt;Object, Boolean&gt; intToBool() {
+<span class="fc" id="L25">    return new ColumnWriter&lt;&gt;(SET_BOOLEAN, Bool::from);</span>
+  }
+
+  private static ColumnWriter&lt;Integer, Short&gt; intToShort() {
+<span class="fc" id="L29">    return new ColumnWriter&lt;&gt;(SET_SHORT, NumberMethods::convert);</span>
+  }
+
+  private static ColumnWriter&lt;Integer, Byte&gt; intToByte() {
+<span class="fc" id="L33">    return new ColumnWriter&lt;&gt;(SET_BYTE, NumberMethods::convert);</span>
+  }
 
 
 }

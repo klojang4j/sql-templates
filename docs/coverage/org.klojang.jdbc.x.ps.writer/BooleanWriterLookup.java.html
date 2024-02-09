@@ -9,16 +9,16 @@ import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
 
 public final class BooleanWriterLookup extends ColumnWriterLookup&lt;Boolean&gt; {
 
-<span class="fc" id="L12">  public static final ColumnWriter&lt;Boolean, ?&gt; DEFAULT = new ColumnWriter&lt;&gt;(SET_BOOLEAN);</span>
+  @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
+<span class="fc" id="L13">  public static final ColumnWriter DEFAULT = new ColumnWriter(SET_BOOLEAN);</span>
 
-<span class="fc" id="L14">  public BooleanWriterLookup() {</span>
-<span class="fc" id="L15">    put(BOOLEAN, DEFAULT);</span>
-<span class="fc" id="L16">    put(BIT, DEFAULT);</span>
-<span class="fc" id="L17">    addMultiple(new ColumnWriter&lt;&gt;(SET_STRING, this::asNumberString), VARCHAR, CHAR);</span>
+<span class="fc" id="L15">  public BooleanWriterLookup() {</span>
+<span class="fc" id="L16">    put(BOOLEAN, DEFAULT);</span>
+<span class="fc" id="L17">    addMultiple(new ColumnWriter&lt;&gt;(SET_STRING, this::asNumericString), VARCHAR, CHAR);</span>
 <span class="fc" id="L18">  }</span>
 
-  private String asNumberString(Boolean b) {
-<span class="nc bnc" id="L21" title="All 4 branches missed.">    return b == null || b.equals(Boolean.FALSE) ? &quot;0&quot; : &quot;1&quot;;</span>
+  private String asNumericString(Boolean b) {
+<span class="nc bnc" id="L21" title="All 4 branches missed.">    return b == null || !b ? &quot;0&quot; : &quot;1&quot;;</span>
   }
 
 }

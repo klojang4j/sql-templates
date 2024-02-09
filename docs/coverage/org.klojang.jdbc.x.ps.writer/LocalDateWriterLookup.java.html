@@ -14,13 +14,21 @@ import static org.klojang.util.ObjectMethods.ifNotNull;
 
 public final class LocalDateWriterLookup extends ColumnWriterLookup&lt;LocalDate&gt; {
 
-<span class="fc" id="L17">  public static final ColumnWriter&lt;LocalDate, Date&gt; DEFAULT =</span>
-<span class="nc" id="L18">        new ColumnWriter&lt;&gt;(SET_DATE, d -&gt; ifNotNull(d, Date::valueOf));</span>
+  @SuppressWarnings(&quot;rawtypes&quot;)
+<span class="fc" id="L18">  public static final ColumnWriter DEFAULT = localDateToSqlDate();</span>
 
 <span class="fc" id="L20">  public LocalDateWriterLookup() {</span>
 <span class="fc" id="L21">    put(DATE, DEFAULT);</span>
-<span class="fc" id="L22">    put(TIMESTAMP, new ColumnWriter&lt;LocalDate, Object&gt;(setObject(TIMESTAMP)));</span>
+<span class="fc" id="L22">    put(TIMESTAMP, localDateToTimeStamp());</span>
 <span class="fc" id="L23">  }</span>
+
+  private static ColumnWriter&lt;LocalDate, Date&gt; localDateToSqlDate() {
+<span class="pc" id="L26">    return new ColumnWriter&lt;&gt;(SET_DATE, d -&gt; ifNotNull(d, Date::valueOf));</span>
+  }
+
+  private static ColumnWriter&lt;LocalDate, Object&gt; localDateToTimeStamp() {
+<span class="fc" id="L30">    return new ColumnWriter&lt;&gt;(setObject(TIMESTAMP));</span>
+  }
 
 
 }
