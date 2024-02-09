@@ -22,18 +22,26 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 <span class="fc" id="L22">    entries.add(entry(GET_DATE, sqlDateToLocalDate(), DATE));</span>
 <span class="fc" id="L23">    entries.add(entry(GET_LONG, longToLocalDate(), BIGINT));</span>
 <span class="fc" id="L24">    entries.add(entry(objectGetter(LocalDate.class), TIMESTAMP));</span>
-<span class="fc" id="L25">    return entries;</span>
+<span class="fc" id="L25">    entries.addAll(entries(GET_STRING, stringToLocalDate(), VARCHAR, CHAR));</span>
+<span class="fc" id="L26">    return entries;</span>
   }
 
   private static Function&lt;Date, LocalDate&gt; sqlDateToLocalDate() {
-<span class="pc bpc" id="L29" title="1 of 2 branches missed.">    return x -&gt; x == null ? null : x.toLocalDate();</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">    return x -&gt; x == null ? null : x.toLocalDate();</span>
   }
 
   private static Function&lt;Long, LocalDate&gt; longToLocalDate() {
-<span class="pc bnc" id="L33" title="All 2 branches missed.">    return x -&gt; x == null</span>
-<span class="nc" id="L34">          ? null</span>
-<span class="nc" id="L35">          : Instant.ofEpochSecond(x).atZone(systemDefault()).toLocalDate();</span>
+<span class="pc bnc" id="L34" title="All 2 branches missed.">    return x -&gt; x == null ? null : asEpochMillis(x);</span>
   }
+
+  private static Function&lt;String, LocalDate&gt; stringToLocalDate() {
+<span class="pc bnc" id="L38" title="All 2 branches missed.">    return x -&gt; x == null ? null : LocalDate.parse(x);</span>
+  }
+
+  private static LocalDate asEpochMillis(Long x) {
+<span class="nc" id="L42">    return Instant.ofEpochSecond(x).atZone(systemDefault()).toLocalDate();</span>
+  }
+
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

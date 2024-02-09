@@ -22,6 +22,7 @@ public final class LocalDateReaderLookup extends AbstractColumnReaderLookup<Loca
     entries.add(entry(GET_DATE, sqlDateToLocalDate(), DATE));
     entries.add(entry(GET_LONG, longToLocalDate(), BIGINT));
     entries.add(entry(objectGetter(LocalDate.class), TIMESTAMP));
+    entries.addAll(entries(GET_STRING, stringToLocalDate(), VARCHAR, CHAR));
     return entries;
   }
 
@@ -30,9 +31,16 @@ public final class LocalDateReaderLookup extends AbstractColumnReaderLookup<Loca
   }
 
   private static Function<Long, LocalDate> longToLocalDate() {
-    return x -> x == null
-          ? null
-          : Instant.ofEpochSecond(x).atZone(systemDefault()).toLocalDate();
+    return x -> x == null ? null : asEpochMillis(x);
   }
+
+  private static Function<String, LocalDate> stringToLocalDate() {
+    return x -> x == null ? null : LocalDate.parse(x);
+  }
+
+  private static LocalDate asEpochMillis(Long x) {
+    return Instant.ofEpochSecond(x).atZone(systemDefault()).toLocalDate();
+  }
+
 
 }

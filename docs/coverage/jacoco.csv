@@ -62,9 +62,9 @@ Klojang JDBC,org.klojang.jdbc.x.ps.writer,ByteWriterLookup,0,88,0,0,0,12,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,DoubleWriterLookup,0,109,0,0,0,18,0,9,0,9
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,EnumWriterLookup,15,75,0,0,0,14,3,7,3,7
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,ShortWriterLookup,0,96,0,0,0,14,0,4,0,4
-Klojang JDBC,org.klojang.jdbc.x.ps.writer,LocalDateWriterLookup,5,30,0,0,0,7,1,4,1,4
+Klojang JDBC,org.klojang.jdbc.x.ps.writer,LocalDateWriterLookup,18,57,2,0,1,11,4,6,3,6
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,FloatWriterLookup,0,99,0,0,0,15,0,7,0,7
-Klojang JDBC,org.klojang.jdbc.x.ps.writer,LocalDateTimeWriterLookup,5,18,0,0,0,5,1,3,1,3
+Klojang JDBC,org.klojang.jdbc.x.ps.writer,LocalDateTimeWriterLookup,37,55,4,0,6,10,7,5,5,5
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,StringWriterLookup,0,132,0,0,0,20,0,10,0,10
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,IntWriterLookup,0,64,0,0,0,11,0,5,0,5
 Klojang JDBC,org.klojang.jdbc.x,JDBC,33,122,3,8,9,26,5,10,2,6
@@ -84,5 +84,5 @@ Klojang JDBC,org.klojang.jdbc.x.rs.reader,AbstractColumnReaderLookup,0,96,0,0,0,
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,ShortReaderLookup,39,124,2,0,0,18,8,9,7,9
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,LocalDateTimeReaderLookup,26,40,6,0,2,9,6,5,3,5
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,BigDecimalReaderLookup,46,109,10,0,1,13,11,6,6,6
-Klojang JDBC,org.klojang.jdbc.x.rs.reader,LocalDateReaderLookup,13,43,3,1,2,8,3,5,1,5
+Klojang JDBC,org.klojang.jdbc.x.rs.reader,LocalDateReaderLookup,23,62,5,1,1,10,6,6,3,6
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,EnumReaderLookup,127,63,16,0,23,10,13,4,5,4

@@ -3,25 +3,54 @@
 import org.klojang.jdbc.x.ps.ColumnWriter;
 import org.klojang.jdbc.x.ps.ColumnWriterLookup;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
-import static java.sql.Types.TIMESTAMP;
-import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_TIMESTAMP;
+import static java.sql.Types.*;
+import static java.time.ZoneId.systemDefault;
+import static org.klojang.jdbc.x.ps.ColumnWriter.ANY_TO_STRING;
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 import static org.klojang.util.ObjectMethods.ifNotNull;
 
 public final class LocalDateTimeWriterLookup extends ColumnWriterLookup&lt;LocalDateTime&gt; {
 
-<span class="fc" id="L15">  public static final ColumnWriter DEFAULT = localDateTimeToTimestamp();</span>
+  @SuppressWarnings(&quot;rawtypes&quot;)
+<span class="fc" id="L20">  public static final ColumnWriter DEFAULT = localDateTimeToTimestamp();</span>
 
-<span class="fc" id="L17">  public LocalDateTimeWriterLookup() {</span>
-<span class="fc" id="L18">    put(TIMESTAMP, DEFAULT);</span>
-<span class="fc" id="L19">  }</span>
+  @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L23">  public LocalDateTimeWriterLookup() {</span>
+<span class="fc" id="L24">    put(TIMESTAMP, DEFAULT);</span>
+<span class="fc" id="L25">    put(DATE, localDateTimeToSqlDate());</span>
+<span class="fc" id="L26">    put(BIGINT, localDateTimeToLong());</span>
+<span class="fc" id="L27">    addMultiple(ANY_TO_STRING, VARCHAR, CHAR);</span>
+<span class="fc" id="L28">  }</span>
 
   private static ColumnWriter&lt;LocalDateTime, Timestamp&gt; localDateTimeToTimestamp() {
-<span class="pc" id="L22">    return new ColumnWriter&lt;&gt;(SET_TIMESTAMP, d -&gt; ifNotNull(d, Timestamp::valueOf));</span>
+<span class="pc" id="L31">    return new ColumnWriter&lt;&gt;(SET_TIMESTAMP, x -&gt; ifNotNull(x, Timestamp::valueOf));</span>
   }
 
+  private static ColumnWriter&lt;LocalDateTime, java.sql.Date&gt; localDateTimeToSqlDate() {
+<span class="pc" id="L35">    return new ColumnWriter&lt;&gt;(SET_DATE, x -&gt; new Date(getEpochSeconds(x)));</span>
+  }
+
+  private static ColumnWriter&lt;LocalDateTime, Long&gt; localDateTimeToLong() {
+<span class="pc" id="L39">    return new ColumnWriter&lt;&gt;(SET_LONG, x -&gt; getEpochMilli(x));</span>
+  }
+
+
+  private static Long getEpochMilli(LocalDateTime x) {
+<span class="nc bnc" id="L44" title="All 2 branches missed.">    return x == null</span>
+<span class="nc" id="L45">          ? null</span>
+<span class="nc" id="L46">          : x.toInstant((ZoneOffset) systemDefault()).toEpochMilli();</span>
+  }
+
+  private static Long getEpochSeconds(LocalDateTime x) {
+<span class="nc bnc" id="L50" title="All 2 branches missed.">    return x == null</span>
+<span class="nc" id="L51">          ? null</span>
+<span class="nc" id="L52">          : x.toLocalDate().atStartOfDay(systemDefault()).toEpochSecond();</span>
+  }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
