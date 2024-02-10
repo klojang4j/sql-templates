@@ -15,58 +15,53 @@ import static org.klojang.util.ClassMethods.className;
 @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
 final class ColumnWriterFactory {
 
-  private static ColumnWriterFactory INSTANCE;
+<span class="fc" id="L18">  private static final ColumnWriterFactory INSTANCE = new ColumnWriterFactory();</span>
 
-  static ColumnWriterFactory getInstance() {
-<span class="fc bfc" id="L21" title="All 2 branches covered.">    if (INSTANCE == null) {</span>
-<span class="fc" id="L22">      INSTANCE = new ColumnWriterFactory();</span>
-    }
-<span class="fc" id="L24">    return INSTANCE;</span>
+<span class="fc" id="L20">  static ColumnWriterFactory getInstance() { return INSTANCE; }</span>
+
+  private final Map&lt;Class&lt;?&gt;, Map&lt;Integer, ValueBinder&gt;&gt; all;
+
+<span class="fc" id="L24">  private ColumnWriterFactory() {</span>
+<span class="fc" id="L25">    all = (Map&lt;Class&lt;?&gt;, Map&lt;Integer, ValueBinder&gt;&gt;) createColumnWriters();</span>
+<span class="fc" id="L26">  }</span>
+
+  &lt;T, U&gt; ValueBinder&lt;T, U&gt; getDefaultWriter(Class&lt;T&gt; fieldType) {
+<span class="fc" id="L29">    return DefaultWriters.INSTANCE.getDefaultWriter(fieldType);</span>
   }
 
-  private final Map&lt;Class&lt;?&gt;, Map&lt;Integer, ColumnWriter&gt;&gt; all;
-
-<span class="fc" id="L29">  private ColumnWriterFactory() {</span>
-<span class="fc" id="L30">    all = (Map&lt;Class&lt;?&gt;, Map&lt;Integer, ColumnWriter&gt;&gt;) createColumnWriters();</span>
-<span class="fc" id="L31">  }</span>
-
-  &lt;T, U&gt; ColumnWriter&lt;T, U&gt; getDefaultWriter(Class&lt;T&gt; fieldType) {
-<span class="fc" id="L34">    return DefaultWriters.INSTANCE.getDefaultWriter(fieldType);</span>
-  }
-
-  &lt;T, U&gt; ColumnWriter&lt;T, U&gt; getWriter(Class&lt;T&gt; fieldType, int sqlType) {
+  &lt;T, U&gt; ValueBinder&lt;T, U&gt; getWriter(Class&lt;T&gt; fieldType, int sqlType) {
     // This implicitly checks that the specified int is one of the
     // static final int constants in the java.sql.Types class
-<span class="nc" id="L40">    String sqlTypeName = getTypeName(sqlType);</span>
-<span class="nc" id="L41">    Map&lt;Integer, ColumnWriter&gt; writers = all.get(fieldType);</span>
-<span class="nc" id="L42">    Check.that(writers).is(notNull(), &quot;Type not supported: ${0}&quot;, className(fieldType));</span>
-<span class="nc" id="L43">    ColumnWriter&lt;T, U&gt; writer = writers.get(sqlType);</span>
-<span class="nc" id="L44">    Check.that(writer).is(notNull(),</span>
+<span class="nc" id="L35">    String sqlTypeName = getTypeName(sqlType);</span>
+<span class="nc" id="L36">    Map&lt;Integer, ValueBinder&gt; writers = all.get(fieldType);</span>
+<span class="nc" id="L37">    Check.that(writers).is(notNull(), &quot;Type not supported: ${0}&quot;, className(fieldType));</span>
+<span class="nc" id="L38">    ValueBinder&lt;T, U&gt; writer = writers.get(sqlType);</span>
+<span class="nc" id="L39">    Check.that(writer).is(notNull(),</span>
           &quot;Cannot convert ${0} to ${1}&quot;,
           sqlTypeName,
-<span class="nc" id="L47">          className(fieldType));</span>
-<span class="nc" id="L48">    return writer;</span>
+<span class="nc" id="L42">          className(fieldType));</span>
+<span class="nc" id="L43">    return writer;</span>
   }
 
   private static Map createColumnWriters() {
-<span class="fc" id="L52">    return TypeMap.nativeTypeMapBuilder()</span>
-<span class="fc" id="L53">          .autobox(true)</span>
-<span class="fc" id="L54">          .add(String.class, immutable(new StringWriterLookup()))</span>
-<span class="fc" id="L55">          .add(Integer.class, immutable(new IntWriterLookup()))</span>
-<span class="fc" id="L56">          .add(Long.class, immutable(new LongWriterLookup()))</span>
-<span class="fc" id="L57">          .add(Double.class, immutable(new DoubleWriterLookup()))</span>
-<span class="fc" id="L58">          .add(Float.class, immutable(new FloatWriterLookup()))</span>
-<span class="fc" id="L59">          .add(Short.class, immutable(new ShortWriterLookup()))</span>
-<span class="fc" id="L60">          .add(Byte.class, immutable(new ByteWriterLookup()))</span>
-<span class="fc" id="L61">          .add(Boolean.class, immutable(new BooleanWriterLookup()))</span>
-<span class="fc" id="L62">          .add(LocalDate.class, immutable(new LocalDateWriterLookup()))</span>
-<span class="fc" id="L63">          .add(LocalDateTime.class, immutable(new LocalDateTimeWriterLookup()))</span>
-<span class="fc" id="L64">          .add(Enum.class, immutable(new EnumWriterLookup()))</span>
-<span class="fc" id="L65">          .freeze();</span>
+<span class="fc" id="L47">    return TypeMap.nativeTypeMapBuilder()</span>
+<span class="fc" id="L48">          .autobox(true)</span>
+<span class="fc" id="L49">          .add(String.class, immutable(new StringBinderLookup()))</span>
+<span class="fc" id="L50">          .add(Integer.class, immutable(new IntBinderLookup()))</span>
+<span class="fc" id="L51">          .add(Long.class, immutable(new LongBinderLookup()))</span>
+<span class="fc" id="L52">          .add(Double.class, immutable(new DoubleBinderLookup()))</span>
+<span class="fc" id="L53">          .add(Float.class, immutable(new FloatBinderLookup()))</span>
+<span class="fc" id="L54">          .add(Short.class, immutable(new ShortBinderLookup()))</span>
+<span class="fc" id="L55">          .add(Byte.class, immutable(new ByteBinderLookup()))</span>
+<span class="fc" id="L56">          .add(Boolean.class, immutable(new BooleanBinderLookup()))</span>
+<span class="fc" id="L57">          .add(LocalDate.class, immutable(new LocalDateBinderLookup()))</span>
+<span class="fc" id="L58">          .add(LocalDateTime.class, immutable(new LocalDateTimeBinderLookup()))</span>
+<span class="fc" id="L59">          .add(Enum.class, immutable(new EnumBinderLookup()))</span>
+<span class="fc" id="L60">          .freeze();</span>
   }
 
-  private static Map&lt;Integer, ColumnWriter&gt; immutable(ColumnWriterLookup src) {
-<span class="fc" id="L69">    return Map.copyOf(src);</span>
+  private static Map&lt;Integer, ValueBinder&gt; immutable(ColumnWriterLookup src) {
+<span class="fc" id="L64">    return Map.copyOf(src);</span>
   }
 
 }

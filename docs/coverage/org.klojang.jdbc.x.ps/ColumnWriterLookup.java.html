@@ -6,23 +6,23 @@ import java.util.HashMap;
 import java.util.stream.IntStream;
 
 public abstract sealed class ColumnWriterLookup&lt;T&gt;
-      extends HashMap&lt;Integer, ColumnWriter&lt;?, ?&gt;&gt;
-      permits BigDecimalWriterLookup,
-      BooleanWriterLookup,
-      ByteWriterLookup,
-      DoubleWriterLookup,
-      EnumWriterLookup,
-      FloatWriterLookup,
-      IntWriterLookup,
-      LocalDateTimeWriterLookup,
-      LocalDateWriterLookup,
-      LongWriterLookup,
-      ShortWriterLookup,
-      StringWriterLookup {
+      extends HashMap&lt;Integer, ValueBinder&lt;?, ?&gt;&gt;
+      permits BigDecimalBinderLookup,
+      BooleanBinderLookup,
+      ByteBinderLookup,
+      DoubleBinderLookup,
+      EnumBinderLookup,
+      FloatBinderLookup,
+      IntBinderLookup,
+      LocalDateTimeBinderLookup,
+      LocalDateBinderLookup,
+      LongBinderLookup,
+      ShortBinderLookup,
+      StringBinderLookup {
 
 <span class="fc" id="L23">  public ColumnWriterLookup() { }</span>
 
-  public &lt;U&gt; void addMultiple(ColumnWriter&lt;T, U&gt; writer, int... sqlTypes) {
+  public &lt;U&gt; void addMultiple(ValueBinder&lt;T, U&gt; writer, int... sqlTypes) {
 <span class="fc" id="L26">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, writer));</span>
 <span class="fc" id="L27">  }</span>
 

@@ -13,30 +13,30 @@ final class DefaultWriters {
 
 <span class="fc" id="L14">  static final DefaultWriters INSTANCE = new DefaultWriters();</span>
 
-  private Map&lt;Class&lt;?&gt;, ColumnWriter&gt; defaults;
+  private Map&lt;Class&lt;?&gt;, ValueBinder&gt; defaults;
 
 <span class="fc" id="L18">  private DefaultWriters() {</span>
-<span class="fc" id="L19">    defaults = TypeMap.&lt;ColumnWriter&gt;fixedTypeMapBuilder()</span>
+<span class="fc" id="L19">    defaults = TypeMap.&lt;ValueBinder&gt;fixedTypeMapBuilder()</span>
 <span class="fc" id="L20">          .autobox(true)</span>
-<span class="fc" id="L21">          .add(BigDecimal.class, BigDecimalWriterLookup.DEFAULT)</span>
-<span class="fc" id="L22">          .add(Boolean.class, BooleanWriterLookup.DEFAULT)</span>
-<span class="fc" id="L23">          .add(Byte.class, ByteWriterLookup.DEFAULT)</span>
-<span class="fc" id="L24">          .add(Double.class, DoubleWriterLookup.DEFAULT)</span>
-<span class="fc" id="L25">          .add(Enum.class, EnumWriterLookup.DEFAULT)</span>
-<span class="fc" id="L26">          .add(Float.class, FloatWriterLookup.DEFAULT)</span>
-<span class="fc" id="L27">          .add(Integer.class, IntWriterLookup.DEFAULT)</span>
-<span class="fc" id="L28">          .add(LocalDate.class, LocalDateWriterLookup.DEFAULT)</span>
-<span class="fc" id="L29">          .add(LocalDateTime.class, LocalDateTimeWriterLookup.DEFAULT)</span>
-<span class="fc" id="L30">          .add(Long.class, LongWriterLookup.DEFAULT)</span>
-<span class="fc" id="L31">          .add(Short.class, ShortWriterLookup.DEFAULT)</span>
-<span class="fc" id="L32">          .add(String.class, StringWriterLookup.DEFAULT)</span>
+<span class="fc" id="L21">          .add(BigDecimal.class, BigDecimalBinderLookup.DEFAULT)</span>
+<span class="fc" id="L22">          .add(Boolean.class, BooleanBinderLookup.DEFAULT)</span>
+<span class="fc" id="L23">          .add(Byte.class, ByteBinderLookup.DEFAULT)</span>
+<span class="fc" id="L24">          .add(Double.class, DoubleBinderLookup.DEFAULT)</span>
+<span class="fc" id="L25">          .add(Enum.class, EnumBinderLookup.DEFAULT)</span>
+<span class="fc" id="L26">          .add(Float.class, FloatBinderLookup.DEFAULT)</span>
+<span class="fc" id="L27">          .add(Integer.class, IntBinderLookup.DEFAULT)</span>
+<span class="fc" id="L28">          .add(LocalDate.class, LocalDateBinderLookup.DEFAULT)</span>
+<span class="fc" id="L29">          .add(LocalDateTime.class, LocalDateTimeBinderLookup.DEFAULT)</span>
+<span class="fc" id="L30">          .add(Long.class, LongBinderLookup.DEFAULT)</span>
+<span class="fc" id="L31">          .add(Short.class, ShortBinderLookup.DEFAULT)</span>
+<span class="fc" id="L32">          .add(String.class, StringBinderLookup.DEFAULT)</span>
 <span class="fc" id="L33">          .freeze();</span>
 <span class="fc" id="L34">  }</span>
 
-  ColumnWriter getDefaultWriter(Class&lt;?&gt; forType) {
-<span class="fc" id="L37">    ColumnWriter writer = defaults.get(forType);</span>
+  ValueBinder getDefaultWriter(Class&lt;?&gt; forType) {
+<span class="fc" id="L37">    ValueBinder writer = defaults.get(forType);</span>
 <span class="pc bpc" id="L38" title="1 of 2 branches missed.">    if (writer == null) {</span>
-<span class="nc" id="L39">      return ColumnWriter.ANY_TO_STRING;</span>
+<span class="nc" id="L39">      return ValueBinder.ANY_TO_STRING;</span>
     }
 <span class="fc" id="L41">    return writer;</span>
   }

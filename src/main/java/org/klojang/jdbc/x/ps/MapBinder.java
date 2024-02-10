@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.ps;
 
 import org.klojang.jdbc.BindInfo;
-import org.klojang.jdbc.x.ps.writer.EnumWriterLookup;
+import org.klojang.jdbc.x.ps.writer.EnumBinderLookup;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,24 +39,33 @@ public final class MapBinder {
       bound.add(param);
       Object value = map.getOrDefault(key, ABSENT);
       if (value == null) {
+        // Don't try to refactor away this case. Not worth it.
         param.positions().forEachThrowing(i -> ps.setString(i, null));
       } else if (value != ABSENT) {
-        ColumnWriter writer;
+        ValueBinder binder;
         if (value instanceof Enum && bindInfo.saveEnumAsString(Map.class, key)) {
-          writer = EnumWriterLookup.ENUM_TO_STRING;
+          binder = EnumBinderLookup.ENUM_TO_STRING;
         } else {
-          writer = factory.getDefaultWriter(value.getClass());
+          binder = factory.getDefaultWriter(value.getClass());
         }
-        Object output = writer.getParamValue(value);
-        if (LOG.isDebugEnabled()) {
-          if (value == output) {
-            LOG.trace("==> Parameter \"{}\": {}", key, output);
-          } else {
+        Object output = binder.getParamValue(value);
+        if (LOG.isTraceEnabled()) {
+          if (binder.isAdaptive() && output != value) {
             LOG.trace("==> Parameter \"{}\": {} (map value: {})", key, output, value);
+          } else {
+            LOG.trace("==> Parameter \"{}\": {}", key, output);
           }
         }
-        param.positions().forEachThrowing(i -> writer.bind(ps, i, output));
+        param.positions().forEachThrowing(i -> binder.bind(ps, i, output));
       }
+    }
+  }
+
+  ValueBinder findBinder(String key, Object val) {
+    if (val instanceof Enum && bindInfo.saveEnumAsString(Map.class, key)) {
+      return EnumBinderLookup.ENUM_TO_STRING;
+    } else {
+      return ColumnWriterFactory.getInstance().getDefaultWriter(val.getClass());
     }
   }
 }
