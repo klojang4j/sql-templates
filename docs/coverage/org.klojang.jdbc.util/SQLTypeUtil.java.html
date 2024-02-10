@@ -9,8 +9,6 @@ import java.sql.Types;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.klojang.check.CommonChecks.keyIn;
-
 /**
  * Utility class for translating between the names and values of the constants in the
  * {@link Types java.sql.Types} class. The {@code Types} class screams out to be an
@@ -20,32 +18,57 @@ import static org.klojang.check.CommonChecks.keyIn;
  * by, say, {@code int} value {@code 12} (for the curious: that is the value of
  * {@link Types#VARCHAR VARCHAR} constant).
  */
-public final class SQLTypeUtil {
+<span class="nc" id="L21">public final class SQLTypeUtil {</span>
 
   private static final String NO_SUCH_TYPE = &quot;no such constant in java.sql.Types: ${arg}&quot;;
 
-<span class="fc" id="L27">  private static final SQLTypeUtil instance = new SQLTypeUtil();</span>
-
   /**
-   * Returns the name of the constant with the specified value.
+   * Returns the name of the constant with the specified value. Throws an
+   * {@link IllegalArgumentException} if there is no constant with the specified value in
+   * the {@link Types} class.
    *
    * @param sqlType the value of the constant whose name you want to retrieve
    * @return the name of the constant with the specified value
    */
   public static String getTypeName(int sqlType) {
-<span class="fc" id="L36">    Check.that((Integer) sqlType).is(keyIn(), instance.cache, NO_SUCH_TYPE);</span>
-<span class="fc" id="L37">    return instance.cache.get(sqlType);</span>
+<span class="fc" id="L34">    Check.that(sqlType).is(SQLTypeUtil::isValidType, NO_SUCH_TYPE);</span>
+<span class="fc" id="L35">    return cache.get(sqlType);</span>
   }
 
   /**
-   * Returns the value of the constant with the specified name.
+   * Returns {@code true} if the specified integer is the value of one of the constants in
+   * the {@link Types} class, {@code false} otherwise.
+   *
+   * @param sqlType the integer value to check
+   * @return {@code true} if the integer is the value of one of the constants in the
+   *       {@code Types} class, {@code false} otherwise
+   */
+  public static boolean isValidType(int sqlType) {
+<span class="fc" id="L47">    return cache.containsKey(sqlType);</span>
+  }
+
+  /**
+   * Returns the value of the constant with the specified name. Throws an
+   * {@link IllegalArgumentException} if there is no constant with the specified name in
+   * the {@link Types} class.
    *
    * @param name the name of the constant (e&amp;#46;g&amp;#46; &quot;VARCHAR&quot; or &quot;TIMESTAMP&quot;)
    * @return the value of the constant with the specified name
    */
   public static int forName(String name) {
-<span class="nc" id="L47">    Check.that(name).is(keyIn(), instance.reverse, NO_SUCH_TYPE);</span>
-<span class="nc" id="L48">    return instance.reverse.get(name);</span>
+<span class="nc" id="L59">    return Check.that(name).is(SQLTypeUtil::isValidName, NO_SUCH_TYPE).ok(reverse::get);</span>
+  }
+
+  /**
+   * Returns {@code true} if the specified string is the name of one of the constants in
+   * the {@link Types} class, {@code false} otherwise.
+   *
+   * @param name the string value to check
+   * @return {@code true} if the specified string is the name of one of the constants in
+   *       the {@code Types} class, {@code false} otherwise
+   */
+  public static boolean isValidName(String name) {
+<span class="nc" id="L71">    return reverse.containsKey(name);</span>
   }
 
   /**
@@ -54,7 +77,7 @@ public final class SQLTypeUtil {
    * @return the values of all constants in ascending order
    */
   public static int[] getAllTypes() {
-<span class="nc" id="L57">    return instance.cache.keySet().stream().mapToInt(Integer::intValue).toArray();</span>
+<span class="nc" id="L80">    return cache.keySet().stream().mapToInt(Integer::intValue).toArray();</span>
   }
 
   /**
@@ -63,7 +86,7 @@ public final class SQLTypeUtil {
    * @return the names of all constants, sorted alphabetically
    */
   public static String[] getAllTypeName() {
-<span class="nc" id="L66">    return instance.reverse.keySet().toArray(String[]::new);</span>
+<span class="nc" id="L89">    return reverse.keySet().toArray(String[]::new);</span>
   }
 
   /**
@@ -72,27 +95,27 @@ public final class SQLTypeUtil {
    * @param out the {@code PrintStream} to write to
    */
   public static void printAll(PrintStream out) {
-<span class="fc" id="L75">    Check.notNull(out);</span>
-<span class="fc" id="L76">    instance.cache.forEach((k, v) -&gt; out.printf(&quot;%5d : %s%n&quot;, k, v));</span>
-<span class="fc" id="L77">  }</span>
+<span class="fc" id="L98">    Check.notNull(out);</span>
+<span class="fc" id="L99">    cache.forEach((k, v) -&gt; out.printf(&quot;%5d : %s%n&quot;, k, v));</span>
+<span class="fc" id="L100">  }</span>
 
-  private final Map&lt;Integer, String&gt; cache;
-  private final Map&lt;String, Integer&gt; reverse;
+  private static final Map&lt;Integer, String&gt; cache;
+  private static final Map&lt;String, Integer&gt; reverse;
 
-<span class="fc" id="L82">  private SQLTypeUtil() {</span>
-<span class="fc" id="L83">    Class&lt;Types&gt; clazz = Types.class;</span>
-<span class="fc" id="L84">    Field[] fields = clazz.getDeclaredFields();</span>
-<span class="fc" id="L85">    cache = new TreeMap&lt;&gt;();</span>
-<span class="fc" id="L86">    reverse = new TreeMap&lt;&gt;();</span>
+  static {
+<span class="fc" id="L106">    Class&lt;Types&gt; clazz = Types.class;</span>
+<span class="fc" id="L107">    Field[] fields = clazz.getDeclaredFields();</span>
+<span class="fc" id="L108">    cache = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L109">    reverse = new TreeMap&lt;&gt;();</span>
     try {
-<span class="fc bfc" id="L88" title="All 2 branches covered.">      for (Field f : fields) {</span>
-<span class="fc" id="L89">        int type = f.getInt(null);</span>
-<span class="fc" id="L90">        cache.put(type, f.getName());</span>
-<span class="fc" id="L91">        reverse.put(f.getName(), type);</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">      for (Field f : fields) {</span>
+<span class="fc" id="L112">        int type = f.getInt(null);</span>
+<span class="fc" id="L113">        cache.put(type, f.getName());</span>
+<span class="fc" id="L114">        reverse.put(f.getName(), type);</span>
       }
-<span class="nc" id="L93">    } catch (Throwable t) {</span>
-<span class="nc" id="L94">      throw Utils.wrap(t);</span>
-<span class="fc" id="L95">    }</span>
-<span class="fc" id="L96">  }</span>
+<span class="nc" id="L116">    } catch (Throwable t) {</span>
+<span class="nc" id="L117">      throw Utils.wrap(t);</span>
+<span class="fc" id="L118">    }</span>
+<span class="fc" id="L119">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

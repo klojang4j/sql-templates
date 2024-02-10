@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PreparedStatementMethod.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.ps</a> &gt; <span class="el_source">PreparedStatementMethod.java</span></div><h1>PreparedStatementMethod.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.ps;
 
-import org.klojang.jdbc.DatabaseException;
-import org.klojang.util.ExceptionMethods;
+import org.klojang.jdbc.x.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +26,7 @@ import static java.lang.invoke.MethodType.methodType;
  */
 public final class PreparedStatementMethod&lt;PARAM_TYPE&gt; {
 
+  @SuppressWarnings({&quot;unused&quot;})
 <span class="fc" id="L30">  private static final Logger LOG = LoggerFactory.getLogger(PreparedStatementMethod.class);</span>
 
 <span class="fc" id="L32">  public static final PreparedStatementMethod&lt;String&gt; SET_STRING</span>
@@ -61,50 +61,50 @@ public final class PreparedStatementMethod&lt;PARAM_TYPE&gt; {
   private final Class&lt;PARAM_TYPE&gt; paramType;
   private final Integer sqlType;
 
+  // Used for all PreparedStatement.setXXX() methods except setObject()
   private PreparedStatementMethod(String name,
         MethodHandle method,
         Class&lt;PARAM_TYPE&gt; paramType) {
-<span class="fc" id="L67">    this(name, method, paramType, null);</span>
-<span class="fc" id="L68">  }</span>
+<span class="fc" id="L68">    this(name, method, paramType, null);</span>
+<span class="fc" id="L69">  }</span>
 
+  // Used for PreparedStatement.setObject()
   private PreparedStatementMethod(
         String name,
         MethodHandle method,
         Class&lt;PARAM_TYPE&gt; paramType,
-<span class="fc" id="L74">        Integer sqlType) {</span>
-<span class="fc" id="L75">    this.name = name;</span>
-<span class="fc" id="L76">    this.method = method;</span>
-<span class="fc" id="L77">    this.paramType = paramType;</span>
-<span class="fc" id="L78">    this.sqlType = sqlType;</span>
-<span class="fc" id="L79">  }</span>
+<span class="fc" id="L76">        Integer sqlType) {</span>
+<span class="fc" id="L77">    this.name = name;</span>
+<span class="fc" id="L78">    this.method = method;</span>
+<span class="fc" id="L79">    this.paramType = paramType;</span>
+<span class="fc" id="L80">    this.sqlType = sqlType;</span>
+<span class="fc" id="L81">  }</span>
 
   Class&lt;PARAM_TYPE&gt; getParamType() {
-<span class="nc" id="L82">    return paramType;</span>
+<span class="nc" id="L84">    return paramType;</span>
   }
 
   public static PreparedStatementMethod&lt;Object&gt; setObject(int targetSqlType) {
-<span class="fc" id="L86">    PreparedStatementMethod&lt;Object&gt; psm = setObjectMethods.get(targetSqlType);</span>
-<span class="pc bpc" id="L87" title="1 of 2 branches missed.">    if (psm == null) {</span>
-<span class="fc" id="L88">      MethodType mt = methodType(void.class, int.class, Object.class, int.class);</span>
+<span class="fc" id="L88">    PreparedStatementMethod&lt;Object&gt; m = setObjectMethods.get(targetSqlType);</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">    if (m == null) {</span>
+<span class="fc" id="L90">      MethodType mt = methodType(void.class, int.class, Object.class, int.class);</span>
       MethodHandle mh;
       try {
-<span class="fc" id="L91">        mh = publicLookup().findVirtual(PreparedStatement.class, &quot;setObject&quot;, mt);</span>
-<span class="nc" id="L92">      } catch (Exception e) {</span>
-<span class="nc" id="L93">        throw new DatabaseException(e);</span>
-<span class="fc" id="L94">      }</span>
-<span class="fc" id="L95">      psm = new PreparedStatementMethod&lt;&gt;(&quot;setObject&quot;, mh, Object.class, targetSqlType);</span>
-<span class="fc" id="L96">      setObjectMethods.put(targetSqlType, psm);</span>
+<span class="fc" id="L93">        mh = publicLookup().findVirtual(PreparedStatement.class, &quot;setObject&quot;, mt);</span>
+<span class="nc" id="L94">      } catch (NoSuchMethodException | IllegalAccessException e) {</span>
+<span class="nc" id="L95">        throw Utils.wrap(e);</span>
+<span class="fc" id="L96">      }</span>
+<span class="fc" id="L97">      m = new PreparedStatementMethod&lt;&gt;(&quot;setObject&quot;, mh, Object.class, targetSqlType);</span>
+<span class="fc" id="L98">      setObjectMethods.put(targetSqlType, m);</span>
     }
-<span class="fc" id="L98">    return psm;</span>
+<span class="fc" id="L100">    return m;</span>
   }
 
   void bindValue(PreparedStatement ps, int paramIndex, PARAM_TYPE paramValue)
         throws Throwable {
-<span class="pc bpc" id="L103" title="1 of 2 branches missed.">    if (paramValue == null) {</span>
-<span class="nc" id="L104">      SET_STRING.method.invoke(ps, paramIndex, (String) null);</span>
-<span class="pc bpc" id="L105" title="1 of 2 branches missed.">    } else if (sqlType == null) {</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">    if (sqlType == null) {</span>
 <span class="fc" id="L106">      method.invoke(ps, paramIndex, paramValue);</span>
-    } else {
+    } else /* setObject() */ {
 <span class="nc" id="L108">      method.invoke(ps, paramIndex, paramValue, sqlType);</span>
     }
 <span class="fc" id="L110">  }</span>
@@ -116,7 +116,7 @@ public final class PreparedStatementMethod&lt;PARAM_TYPE&gt; {
     try {
 <span class="fc" id="L117">      mh = lookup().findVirtual(PreparedStatement.class, methodName, mt);</span>
 <span class="nc" id="L118">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
-<span class="nc" id="L119">      throw ExceptionMethods.uncheck(e);</span>
+<span class="nc" id="L119">      throw Utils.wrap(e);</span>
 <span class="fc" id="L120">    }</span>
 <span class="fc" id="L121">    return new PreparedStatementMethod&lt;&gt;(methodName, mh, paramType);</span>
   }

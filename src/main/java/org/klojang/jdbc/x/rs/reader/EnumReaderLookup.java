@@ -17,7 +17,7 @@ public final class EnumReaderLookup extends AbstractColumnReaderLookup<Enum<?>> 
 
   @Override
   List<Entry<Integer, ColumnReader<?, Enum<?>>>> getColumnReaders() {
-    List<Entry<Integer, ColumnReader<?, Enum<?>>>> entries = new ArrayList<>(16);
+    List<Entry<Integer, ColumnReader<?, Enum<?>>>> entries = new ArrayList<>();
     entries.add(entry(GET_LONG, numberToEnum(), BIGINT));
     entries.add(entry(GET_INT, numberToEnum(), INTEGER));
     entries.add(entry(GET_SHORT, numberToEnum(), SMALLINT));
@@ -36,9 +36,6 @@ public final class EnumReaderLookup extends AbstractColumnReaderLookup<Enum<?>> 
 
   private static <T extends Number> Enum<?> asOrdinal(T n,
         Class<Enum<?>> enumClass) {
-    if (n == null) {
-      return null;
-    }
     int i = n.intValue();
     if (i < 0 || i >= enumClass.getEnumConstants().length) {
       String fmt = "invalid ordinal number for enum type %s: %d";
@@ -49,9 +46,6 @@ public final class EnumReaderLookup extends AbstractColumnReaderLookup<Enum<?>> 
   }
 
   private static Enum<?> stringToEnum(String s, Class<Enum<?>> enumClass) {
-    if (s == null) {
-      return null;
-    }
     int i;
     try {
       i = NumberMethods.parse(s, Integer.class);
@@ -63,9 +57,6 @@ public final class EnumReaderLookup extends AbstractColumnReaderLookup<Enum<?>> 
 
 
   private static Enum<?> asName(String s, Class<Enum<?>> enumClass) {
-    if (s == null) {
-      return null;
-    }
     for (Enum<?> c : enumClass.getEnumConstants()) {
       if (s.equals(c.name()) || s.equals(c.toString())) {
         return c;

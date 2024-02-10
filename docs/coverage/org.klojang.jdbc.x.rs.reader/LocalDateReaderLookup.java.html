@@ -18,7 +18,7 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
   @Override
   List&lt;Entry&lt;Integer, ColumnReader&lt;?, LocalDate&gt;&gt;&gt; getColumnReaders() {
-<span class="fc" id="L21">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, LocalDate&gt;&gt;&gt; entries = new ArrayList&lt;&gt;(16);</span>
+<span class="fc" id="L21">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, LocalDate&gt;&gt;&gt; entries = new ArrayList&lt;&gt;();</span>
 <span class="fc" id="L22">    entries.add(entry(GET_DATE, sqlDateToLocalDate(), DATE));</span>
 <span class="fc" id="L23">    entries.add(entry(GET_LONG, longToLocalDate(), BIGINT));</span>
 <span class="fc" id="L24">    entries.add(entry(objectGetter(LocalDate.class), TIMESTAMP));</span>

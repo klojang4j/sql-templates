@@ -9,8 +9,6 @@ import java.sql.Types;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.klojang.check.CommonChecks.keyIn;
-
 /**
  * Utility class for translating between the names and values of the constants in the
  * {@link Types java.sql.Types} class. The {@code Types} class screams out to be an
@@ -24,28 +22,53 @@ public final class SQLTypeUtil {
 
   private static final String NO_SUCH_TYPE = "no such constant in java.sql.Types: ${arg}";
 
-  private static final SQLTypeUtil instance = new SQLTypeUtil();
-
   /**
-   * Returns the name of the constant with the specified value.
+   * Returns the name of the constant with the specified value. Throws an
+   * {@link IllegalArgumentException} if there is no constant with the specified value in
+   * the {@link Types} class.
    *
    * @param sqlType the value of the constant whose name you want to retrieve
    * @return the name of the constant with the specified value
    */
   public static String getTypeName(int sqlType) {
-    Check.that((Integer) sqlType).is(keyIn(), instance.cache, NO_SUCH_TYPE);
-    return instance.cache.get(sqlType);
+    Check.that(sqlType).is(SQLTypeUtil::isValidType, NO_SUCH_TYPE);
+    return cache.get(sqlType);
   }
 
   /**
-   * Returns the value of the constant with the specified name.
+   * Returns {@code true} if the specified integer is the value of one of the constants in
+   * the {@link Types} class, {@code false} otherwise.
+   *
+   * @param sqlType the integer value to check
+   * @return {@code true} if the integer is the value of one of the constants in the
+   *       {@code Types} class, {@code false} otherwise
+   */
+  public static boolean isValidType(int sqlType) {
+    return cache.containsKey(sqlType);
+  }
+
+  /**
+   * Returns the value of the constant with the specified name. Throws an
+   * {@link IllegalArgumentException} if there is no constant with the specified name in
+   * the {@link Types} class.
    *
    * @param name the name of the constant (e&#46;g&#46; "VARCHAR" or "TIMESTAMP")
    * @return the value of the constant with the specified name
    */
   public static int forName(String name) {
-    Check.that(name).is(keyIn(), instance.reverse, NO_SUCH_TYPE);
-    return instance.reverse.get(name);
+    return Check.that(name).is(SQLTypeUtil::isValidName, NO_SUCH_TYPE).ok(reverse::get);
+  }
+
+  /**
+   * Returns {@code true} if the specified string is the name of one of the constants in
+   * the {@link Types} class, {@code false} otherwise.
+   *
+   * @param name the string value to check
+   * @return {@code true} if the specified string is the name of one of the constants in
+   *       the {@code Types} class, {@code false} otherwise
+   */
+  public static boolean isValidName(String name) {
+    return reverse.containsKey(name);
   }
 
   /**
@@ -54,7 +77,7 @@ public final class SQLTypeUtil {
    * @return the values of all constants in ascending order
    */
   public static int[] getAllTypes() {
-    return instance.cache.keySet().stream().mapToInt(Integer::intValue).toArray();
+    return cache.keySet().stream().mapToInt(Integer::intValue).toArray();
   }
 
   /**
@@ -63,7 +86,7 @@ public final class SQLTypeUtil {
    * @return the names of all constants, sorted alphabetically
    */
   public static String[] getAllTypeName() {
-    return instance.reverse.keySet().toArray(String[]::new);
+    return reverse.keySet().toArray(String[]::new);
   }
 
   /**
@@ -73,13 +96,13 @@ public final class SQLTypeUtil {
    */
   public static void printAll(PrintStream out) {
     Check.notNull(out);
-    instance.cache.forEach((k, v) -> out.printf("%5d : %s%n", k, v));
+    cache.forEach((k, v) -> out.printf("%5d : %s%n", k, v));
   }
 
-  private final Map<Integer, String> cache;
-  private final Map<String, Integer> reverse;
+  private static final Map<Integer, String> cache;
+  private static final Map<String, Integer> reverse;
 
-  private SQLTypeUtil() {
+  static {
     Class<Types> clazz = Types.class;
     Field[] fields = clazz.getDeclaredFields();
     cache = new TreeMap<>();

@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import java.sql.PreparedStatement;
+import java.util.Map;
 
 /**
  * {@code BindInfo} objects allow you to determine how values are bound into a
@@ -27,28 +28,27 @@ public interface BindInfo {
   BindInfo DEFAULT = new BindInfo() { };
 
   /**
-   * Specifies the SQL datatype of the column corresponding to a bean property. The return
-   * value must either be one of the constants in the
-   * {@link java.sql.Types java.sql.Types} class (like
-   * {@link java.sql.Types#VARCHAR Types.VARCHAR}) or {@code null}. Returning {@code null}
-   * means you leave it to <i>Klojang JDBC</i> to figure out the SQL datatype. The default
-   * implementation returns {@code null}. You may ignore any argument that you don't need
-   * in order to determine the SQL datatype. For example, in many cases the type of the
-   * property is all you need in order to determine the corresponding SQL datatype &#8212;
-   * you don't need to know the name of the property or the type of the bean containing
-   * the property.
+   * Specifies the storage type (the SQL datatype) for a value. The return value must
+   * either be one of the constants in the {@link java.sql.Types java.sql.Types} class
+   * (like {@link java.sql.Types#VARCHAR Types.VARCHAR}) or {@code null}. Returning
+   * {@code null} means you leave it to <i>Klojang JDBC</i> to figure out the SQL
+   * datatype. The default implementation returns {@code null}. You may ignore any
+   * argument that you don't need in order to determine the SQL datatype. For example, in
+   * many cases the type of the value is all you need to know in order to determine the
+   * corresponding SQL datatype.
    *
-   * @param beanType the class containing the property whose SQL datatype to
-   *       determine (may be a {@code record} type)
-   * @param propertyName the name of the property or record component whose SQL
-   *       datatype to determine
-   * @param propertyType the type of the property whose SQL datatype to determine
+   * @param javaType the type of the value whose SQL datatype to determine
+   * @param containerType the class containing the value. May be a JavaBean
+   *       type, a {@code record} type, or the type of the {@code Map} being bound using
+   *       {@link SQLStatement#bind(Map)}. In the latter case, it will always be the
+   *       concrete type of the {@code Map} (e.g. {@code HashMap.class}) &#8212; never
+   *       {@code Map.class} itself.
+   * @param name the name of the bean property, record component, or map key for
+   *       which to specify the SQL datatype.
    * @return one of the class constants of the {@link java.sql.Types java.sql.Types} class
    *       or {@code null}
    */
-  default Integer getSqlType(Class<?> beanType,
-        String propertyName,
-        Class<?> propertyType) {
+  default Integer getSqlType(Class<?> javaType, Class<?> containerType, String name) {
     return null;
   }
 
@@ -61,12 +61,16 @@ public interface BindInfo {
    * you don't need in order to determine the storage type. To save <i>all</i> enums in
    * your application as strings, simply return {@code true} straight away.
    *
-   * @param beanType the class containing the enum property (may be a {@code record}
-   *       type)
-   * @param enumProperty the enum property for which to specify the storage type.
+   * @param containerType the class containing the enum value. May be a JavaBean
+   *       type, a {@code record} type, or the type of the {@code Map} being bound using
+   *       {@link SQLStatement#bind(Map)}. In the latter case, it will always be the
+   *       concrete type of the {@code Map} (e.g. {@code HashMap.class}) &#8212; never
+   *       {@code Map.class} itself.
+   * @param name the name of the bean property, record component, or map key for
+   *       which to specify the SQL datatype.
    * @return whether to bind enums as strings ({@code true}) or as ints ({@code false})
    */
-  default boolean saveEnumAsString(Class<?> beanType, String enumProperty) {
+  default boolean saveEnumAsString(Class<?> containerType, String name) {
     return false;
   }
 

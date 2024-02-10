@@ -19,9 +19,9 @@ import static org.klojang.util.ClassMethods.isSubtype;
 /**
  * Binds a single bean property or record component to a PreparedStatement.
  *
- * @param &lt;INPUT_TYPE&gt; the type of the bean property
- * @param &lt;PARAM_TYPE&gt; the type of the value passed to
- *       PreparedStatement.setXXX(parameterIndex, value)
+ * @param &lt;INPUT_TYPE&gt; the type of the value to be bound
+ * @param &lt;PARAM_TYPE&gt; the type of the value passed to the particular
+ *       {@code setXXX()} method of {@code PreparedStatement} that we want to use
  * @author Ayco Holleman
  */
 final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
@@ -42,7 +42,7 @@ final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
         List&lt;NamedParameter&gt; params,
         BindInfo bindInfo,
         List&lt;NamedParameter&gt; bound) {
-<span class="fc" id="L45">    ColumnWriterFactory factory = ColumnWriterFactory.getInstance();</span>
+<span class="fc" id="L45">    ValueBinderFactory factory = ValueBinderFactory.getInstance();</span>
 <span class="fc" id="L46">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
 <span class="fc" id="L47">    List&lt;PropertyBinder&gt; readers = new ArrayList&lt;&gt;(params.size());</span>
 <span class="fc bfc" id="L48" title="All 2 branches covered.">    for (NamedParameter param : params) {</span>
@@ -55,13 +55,13 @@ final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
 <span class="fc" id="L55">      Class type = getter.getReturnType();</span>
       ValueBinder writer;
 <span class="pc bpc" id="L57" title="3 of 4 branches missed.">      if (isSubtype(type, Enum.class) &amp;&amp; bindInfo.saveEnumAsString(beanClass, property)) {</span>
-<span class="nc" id="L58">        writer = EnumBinderLookup.ENUM_TO_STRING;</span>
+<span class="nc" id="L58">        writer = ValueBinder.ANY_TO_STRING;</span>
       } else {
-<span class="fc" id="L60">        Integer sqlType = bindInfo.getSqlType(beanClass, property, type);</span>
+<span class="fc" id="L60">        Integer sqlType = bindInfo.getSqlType(type, beanClass, property);</span>
 <span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (sqlType == null) {</span>
-<span class="fc" id="L62">          writer = factory.getDefaultWriter(type);</span>
+<span class="fc" id="L62">          writer = factory.getDefaultBinder(type);</span>
         } else {
-<span class="nc" id="L64">          writer = factory.getWriter(type, sqlType);</span>
+<span class="nc" id="L64">          writer = factory.getBinder(type, sqlType);</span>
         }
       }
 <span class="fc" id="L67">      readers.add(new PropertyBinder(getter, writer, param));</span>

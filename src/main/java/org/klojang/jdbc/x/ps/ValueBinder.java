@@ -4,7 +4,6 @@ import java.sql.PreparedStatement;
 import java.util.function.Function;
 
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
-import static org.klojang.util.ObjectMethods.ifNotNull;
 
 /**
  * Binds a single value to a PreparedStatement, possibly after first converting it to the
@@ -19,7 +18,8 @@ import static org.klojang.util.ObjectMethods.ifNotNull;
 public final class ValueBinder<INPUT_TYPE, PARAM_TYPE> {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static final ValueBinder ANY_TO_STRING  = new ValueBinder(SET_STRING, Object::toString);
+  public static final ValueBinder ANY_TO_STRING
+        = new ValueBinder(SET_STRING, Object::toString);
 
   private final PreparedStatementMethod<PARAM_TYPE> setter;
   private final Adapter<INPUT_TYPE, PARAM_TYPE> adapter;
@@ -51,6 +51,10 @@ public final class ValueBinder<INPUT_TYPE, PARAM_TYPE> {
   }
 
   void bind(PreparedStatement ps, int paramIndex, PARAM_TYPE value) throws Throwable {
-    setter.bindValue(ps, paramIndex, value);
+    if (value == null) {
+      ps.setString(paramIndex, null);
+    } else {
+      setter.bindValue(ps, paramIndex, value);
+    }
   }
 }

@@ -1,24 +1,23 @@
 package org.klojang.jdbc.x.ps.writer;
 
 import org.klojang.jdbc.x.ps.ValueBinder;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
+import org.klojang.jdbc.x.ps.ValueBinderLookup;
 
 import static java.sql.Types.*;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
+import static org.klojang.jdbc.x.ps.ValueBinder.ANY_TO_STRING;
 
-public final class EnumBinderLookup extends ColumnWriterLookup<Enum<?>> {
+public final class EnumBinderLookup extends ValueBinderLookup<Enum<?>> {
 
   @SuppressWarnings("rawtypes")
   public static final ValueBinder DEFAULT = ordinalToInt();
-  @SuppressWarnings("rawtypes")
-  public static final ValueBinder ENUM_TO_STRING = enumToString();
 
   public EnumBinderLookup() {
     put(TINYINT, ordinalToByte());
     put(SMALLINT, ordinalToShort());
     put(INTEGER, DEFAULT);
     put(BIGINT, ordinalToLong());
-    addMultiple(enumToString(), VARCHAR, CHAR);
+    addMultiple(ANY_TO_STRING, VARCHAR, CHAR);
   }
 
   private static ValueBinder<Enum<?>, Byte> ordinalToByte() {
@@ -36,10 +35,5 @@ public final class EnumBinderLookup extends ColumnWriterLookup<Enum<?>> {
   private static ValueBinder<Enum<?>, Long> ordinalToLong() {
     return new ValueBinder<>(SET_LONG, e -> (long) e.ordinal());
   }
-
-  private static ValueBinder<Enum<?>, String> enumToString() {
-    return new ValueBinder<>(SET_STRING, Object::toString);
-  }
-
 
 }

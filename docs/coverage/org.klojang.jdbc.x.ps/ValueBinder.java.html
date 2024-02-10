@@ -4,7 +4,6 @@ import java.sql.PreparedStatement;
 import java.util.function.Function;
 
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
-import static org.klojang.util.ObjectMethods.ifNotNull;
 
 /**
  * Binds a single value to a PreparedStatement, possibly after first converting it to the
@@ -19,7 +18,8 @@ import static org.klojang.util.ObjectMethods.ifNotNull;
 public final class ValueBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
-<span class="fc" id="L22">  public static final ValueBinder ANY_TO_STRING  = new ValueBinder(SET_STRING, Object::toString);</span>
+<span class="fc" id="L21">  public static final ValueBinder ANY_TO_STRING</span>
+        = new ValueBinder(SET_STRING, Object::toString);
 
   private final PreparedStatementMethod&lt;PARAM_TYPE&gt; setter;
   private final Adapter&lt;INPUT_TYPE, PARAM_TYPE&gt; adapter;
@@ -51,7 +51,11 @@ public final class ValueBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
   }
 
   void bind(PreparedStatement ps, int paramIndex, PARAM_TYPE value) throws Throwable {
-<span class="fc" id="L54">    setter.bindValue(ps, paramIndex, value);</span>
-<span class="fc" id="L55">  }</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">    if (value == null) {</span>
+<span class="nc" id="L55">      ps.setString(paramIndex, null);</span>
+    } else {
+<span class="fc" id="L57">      setter.bindValue(ps, paramIndex, value);</span>
+    }
+<span class="fc" id="L59">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -3,13 +3,13 @@ package org.klojang.jdbc.x.ps.writer;
 import org.klojang.convert.Bool;
 import org.klojang.convert.NumberMethods;
 import org.klojang.jdbc.x.ps.ValueBinder;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
+import org.klojang.jdbc.x.ps.ValueBinderLookup;
 
 import static java.sql.Types.*;
 import static org.klojang.jdbc.x.ps.ValueBinder.ANY_TO_STRING;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
-public final class FloatBinderLookup extends ColumnWriterLookup<Float> {
+public final class FloatBinderLookup extends ValueBinderLookup<Float> {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static final ValueBinder DEFAULT = new ValueBinder(SET_FLOAT);

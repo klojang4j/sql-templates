@@ -9,13 +9,13 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @SuppressWarnings("rawtypes")
-final class DefaultWriters {
+final class DefaultBinders {
 
-  static final DefaultWriters INSTANCE = new DefaultWriters();
+  static final DefaultBinders INSTANCE = new DefaultBinders();
 
   private Map<Class<?>, ValueBinder> defaults;
 
-  private DefaultWriters() {
+  private DefaultBinders() {
     defaults = TypeMap.<ValueBinder>fixedTypeMapBuilder()
           .autobox(true)
           .add(BigDecimal.class, BigDecimalBinderLookup.DEFAULT)
@@ -33,7 +33,7 @@ final class DefaultWriters {
           .freeze();
   }
 
-  ValueBinder getDefaultWriter(Class<?> forType) {
+  ValueBinder getDefaultBinder(Class<?> forType) {
     ValueBinder writer = defaults.get(forType);
     if (writer == null) {
       return ValueBinder.ANY_TO_STRING;

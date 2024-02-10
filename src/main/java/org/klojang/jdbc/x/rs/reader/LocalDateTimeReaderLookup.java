@@ -15,7 +15,8 @@ import static java.util.Map.Entry;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
 
-public final class LocalDateTimeReaderLookup extends AbstractColumnReaderLookup<LocalDateTime> {
+public final class LocalDateTimeReaderLookup
+      extends AbstractColumnReaderLookup<LocalDateTime> {
 
   @Override
   List<Entry<Integer, ColumnReader<?, LocalDateTime>>> getColumnReaders() {
@@ -23,6 +24,7 @@ public final class LocalDateTimeReaderLookup extends AbstractColumnReaderLookup<
     entries.add(entry(GET_DATE, sqlDateToLocalDateTime(), DATE));
     entries.add(entry(GET_TIMESTAMP, sqlTimestampToLocalDateTime(), TIMESTAMP));
     entries.add(entry(GET_LONG, longToLocalDateTime(), BIGINT));
+    entries.addAll(entries(GET_STRING, stringToLocalDateTime(), VARCHAR, CHAR));
     return entries;
   }
 
@@ -35,9 +37,16 @@ public final class LocalDateTimeReaderLookup extends AbstractColumnReaderLookup<
   }
 
   private static Function<Long, LocalDateTime> longToLocalDateTime() {
-    return x -> x == null
-          ? null
-          : Instant.ofEpochMilli(x).atZone(systemDefault()).toLocalDateTime();
+    return x -> x == null ? null : longToLocalDateTime(x);
   }
+
+  private static Function<String, LocalDateTime> stringToLocalDateTime() {
+    return x -> x == null ? null : LocalDateTime.parse(x);
+  }
+
+  private static LocalDateTime longToLocalDateTime(Long x) {
+    return Instant.ofEpochMilli(x).atZone(systemDefault()).toLocalDateTime();
+  }
+
 
 }

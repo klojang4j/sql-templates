@@ -18,7 +18,7 @@ public final class LocalDateReaderLookup extends AbstractColumnReaderLookup<Loca
 
   @Override
   List<Entry<Integer, ColumnReader<?, LocalDate>>> getColumnReaders() {
-    List<Entry<Integer, ColumnReader<?, LocalDate>>> entries = new ArrayList<>(16);
+    List<Entry<Integer, ColumnReader<?, LocalDate>>> entries = new ArrayList<>();
     entries.add(entry(GET_DATE, sqlDateToLocalDate(), DATE));
     entries.add(entry(GET_LONG, longToLocalDate(), BIGINT));
     entries.add(entry(objectGetter(LocalDate.class), TIMESTAMP));

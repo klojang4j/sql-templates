@@ -5,7 +5,7 @@ import org.klojang.jdbc.x.ps.writer.*;
 import java.util.HashMap;
 import java.util.stream.IntStream;
 
-public abstract sealed class ColumnWriterLookup<T>
+public abstract sealed class ValueBinderLookup<T>
       extends HashMap<Integer, ValueBinder<?, ?>>
       permits BigDecimalBinderLookup,
       BooleanBinderLookup,
@@ -20,7 +20,7 @@ public abstract sealed class ColumnWriterLookup<T>
       ShortBinderLookup,
       StringBinderLookup {
 
-  public ColumnWriterLookup() { }
+  public ValueBinderLookup() { }
 
   public <U> void addMultiple(ValueBinder<T, U> writer, int... sqlTypes) {
     IntStream.of(sqlTypes).forEach(i -> put(i, writer));

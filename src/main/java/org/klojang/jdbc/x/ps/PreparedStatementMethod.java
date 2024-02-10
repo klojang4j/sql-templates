@@ -1,7 +1,6 @@
 package org.klojang.jdbc.x.ps;
 
-import org.klojang.jdbc.DatabaseException;
-import org.klojang.util.ExceptionMethods;
+import org.klojang.jdbc.x.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +26,7 @@ import static java.lang.invoke.MethodType.methodType;
  */
 public final class PreparedStatementMethod<PARAM_TYPE> {
 
+  @SuppressWarnings({"unused"})
   private static final Logger LOG = LoggerFactory.getLogger(PreparedStatementMethod.class);
 
   public static final PreparedStatementMethod<String> SET_STRING
@@ -61,12 +61,14 @@ public final class PreparedStatementMethod<PARAM_TYPE> {
   private final Class<PARAM_TYPE> paramType;
   private final Integer sqlType;
 
+  // Used for all PreparedStatement.setXXX() methods except setObject()
   private PreparedStatementMethod(String name,
         MethodHandle method,
         Class<PARAM_TYPE> paramType) {
     this(name, method, paramType, null);
   }
 
+  // Used for PreparedStatement.setObject()
   private PreparedStatementMethod(
         String name,
         MethodHandle method,
@@ -83,28 +85,26 @@ public final class PreparedStatementMethod<PARAM_TYPE> {
   }
 
   public static PreparedStatementMethod<Object> setObject(int targetSqlType) {
-    PreparedStatementMethod<Object> psm = setObjectMethods.get(targetSqlType);
-    if (psm == null) {
+    PreparedStatementMethod<Object> m = setObjectMethods.get(targetSqlType);
+    if (m == null) {
       MethodType mt = methodType(void.class, int.class, Object.class, int.class);
       MethodHandle mh;
       try {
         mh = publicLookup().findVirtual(PreparedStatement.class, "setObject", mt);
-      } catch (Exception e) {
-        throw new DatabaseException(e);
+      } catch (NoSuchMethodException | IllegalAccessException e) {
+        throw Utils.wrap(e);
       }
-      psm = new PreparedStatementMethod<>("setObject", mh, Object.class, targetSqlType);
-      setObjectMethods.put(targetSqlType, psm);
+      m = new PreparedStatementMethod<>("setObject", mh, Object.class, targetSqlType);
+      setObjectMethods.put(targetSqlType, m);
     }
-    return psm;
+    return m;
   }
 
   void bindValue(PreparedStatement ps, int paramIndex, PARAM_TYPE paramValue)
         throws Throwable {
-    if (paramValue == null) {
-      SET_STRING.method.invoke(ps, paramIndex, (String) null);
-    } else if (sqlType == null) {
+    if (sqlType == null) {
       method.invoke(ps, paramIndex, paramValue);
-    } else {
+    } else /* setObject() */ {
       method.invoke(ps, paramIndex, paramValue, sqlType);
     }
   }
@@ -116,7 +116,7 @@ public final class PreparedStatementMethod<PARAM_TYPE> {
     try {
       mh = lookup().findVirtual(PreparedStatement.class, methodName, mt);
     } catch (NoSuchMethodException | IllegalAccessException e) {
-      throw ExceptionMethods.uncheck(e);
+      throw Utils.wrap(e);
     }
     return new PreparedStatementMethod<>(methodName, mh, paramType);
   }

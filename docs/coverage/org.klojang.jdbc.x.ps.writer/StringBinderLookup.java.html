@@ -3,61 +3,66 @@
 import org.klojang.convert.Bool;
 import org.klojang.convert.NumberMethods;
 import org.klojang.jdbc.x.ps.ValueBinder;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
+import org.klojang.jdbc.x.ps.ValueBinderLookup;
 
 import java.math.BigDecimal;
 
 import static java.sql.Types.*;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
-public final class StringBinderLookup extends ColumnWriterLookup&lt;String&gt; {
+public final class StringBinderLookup extends ValueBinderLookup&lt;String&gt; {
 
   @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
 <span class="fc" id="L16">  public static final ValueBinder DEFAULT = new ValueBinder(SET_STRING);</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
 <span class="fc" id="L19">  public StringBinderLookup() {</span>
-<span class="fc" id="L20">    put(BOOLEAN, stringToBool());</span>
-<span class="fc" id="L21">    put(INTEGER, stringToInt());</span>
-<span class="fc" id="L22">    put(SMALLINT, stringToShort());</span>
-<span class="fc" id="L23">    put(TINYINT, stringToByte());</span>
-<span class="fc" id="L24">    put(REAL, stringToFloat());</span>
-<span class="fc" id="L25">    put(BIGINT, stringToLong());</span>
-<span class="fc" id="L26">    addMultiple(stringToDouble(), DOUBLE, FLOAT);</span>
-<span class="fc" id="L27">    addMultiple(stringToBigDecimal(), NUMERIC, DECIMAL);</span>
-<span class="fc" id="L28">    addMultiple(DEFAULT, VARCHAR, CHAR);</span>
-<span class="fc" id="L29">  }</span>
+    // Friendly reminder on how to read this:
+    // * if we are dealing with a String value
+    // * and the database type is Types.BOOLEAN
+    // * then we are going to call PreparedStatement.setBoolean() and we will call
+    //   Bool.from(String) to convert the input value to a boolean
+<span class="fc" id="L25">    put(BOOLEAN, stringToBool());</span>
+<span class="fc" id="L26">    put(INTEGER, stringToInt());</span>
+<span class="fc" id="L27">    put(SMALLINT, stringToShort());</span>
+<span class="fc" id="L28">    put(TINYINT, stringToByte());</span>
+<span class="fc" id="L29">    put(REAL, stringToFloat());</span>
+<span class="fc" id="L30">    put(BIGINT, stringToLong());</span>
+<span class="fc" id="L31">    addMultiple(stringToDouble(), DOUBLE, FLOAT);</span>
+<span class="fc" id="L32">    addMultiple(stringToBigDecimal(), NUMERIC, DECIMAL);</span>
+<span class="fc" id="L33">    addMultiple(DEFAULT, VARCHAR, CHAR);</span>
+<span class="fc" id="L34">  }</span>
 
   private static ValueBinder&lt;String, Boolean&gt; stringToBool() {
-<span class="fc" id="L32">    return new ValueBinder&lt;&gt;(SET_BOOLEAN, Bool::from);</span>
+<span class="fc" id="L37">    return new ValueBinder&lt;&gt;(SET_BOOLEAN, Bool::from);</span>
   }
 
   private static ValueBinder&lt;String, Byte&gt; stringToByte() {
-<span class="fc" id="L36">    return new ValueBinder&lt;&gt;(SET_BYTE, NumberMethods::parse);</span>
+<span class="fc" id="L41">    return new ValueBinder&lt;&gt;(SET_BYTE, NumberMethods::parse);</span>
   }
 
   private static ValueBinder&lt;String, Short&gt; stringToShort() {
-<span class="fc" id="L40">    return new ValueBinder&lt;&gt;(SET_SHORT, NumberMethods::parse);</span>
+<span class="fc" id="L45">    return new ValueBinder&lt;&gt;(SET_SHORT, NumberMethods::parse);</span>
   }
 
   private static ValueBinder&lt;String, Integer&gt; stringToInt() {
-<span class="fc" id="L44">    return new ValueBinder&lt;&gt;(SET_INT, NumberMethods::parse);</span>
+<span class="fc" id="L49">    return new ValueBinder&lt;&gt;(SET_INT, NumberMethods::parse);</span>
   }
 
   private static ValueBinder&lt;String, Long&gt; stringToLong() {
-<span class="fc" id="L48">    return new ValueBinder&lt;&gt;(SET_LONG, NumberMethods::parse);</span>
+<span class="fc" id="L53">    return new ValueBinder&lt;&gt;(SET_LONG, NumberMethods::parse);</span>
   }
 
   private static ValueBinder&lt;String, Float&gt; stringToFloat() {
-<span class="fc" id="L52">    return new ValueBinder&lt;&gt;(SET_FLOAT, NumberMethods::parse);</span>
+<span class="fc" id="L57">    return new ValueBinder&lt;&gt;(SET_FLOAT, NumberMethods::parse);</span>
   }
 
   private static ValueBinder&lt;String, Double&gt; stringToDouble() {
-<span class="fc" id="L56">    return new ValueBinder&lt;&gt;(SET_DOUBLE, NumberMethods::parse);</span>
+<span class="fc" id="L61">    return new ValueBinder&lt;&gt;(SET_DOUBLE, NumberMethods::parse);</span>
   }
 
   private static ValueBinder&lt;String, BigDecimal&gt; stringToBigDecimal() {
-<span class="fc" id="L60">    return new ValueBinder&lt;&gt;(SET_BIG_DECIMAL, NumberMethods::parse);</span>
+<span class="fc" id="L65">    return new ValueBinder&lt;&gt;(SET_BIG_DECIMAL, NumberMethods::parse);</span>
   }
 
 

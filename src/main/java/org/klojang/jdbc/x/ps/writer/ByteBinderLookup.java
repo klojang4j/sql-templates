@@ -2,14 +2,14 @@ package org.klojang.jdbc.x.ps.writer;
 
 import org.klojang.convert.Bool;
 import org.klojang.jdbc.x.ps.ValueBinder;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
+import org.klojang.jdbc.x.ps.ValueBinderLookup;
 
 import static java.sql.Types.*;
 import static org.klojang.jdbc.x.ps.ValueBinder.ANY_TO_STRING;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_BOOLEAN;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_BYTE;
 
-public final class ByteBinderLookup extends ColumnWriterLookup<Byte> {
+public final class ByteBinderLookup extends ValueBinderLookup<Byte> {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static final ValueBinder DEFAULT = new ValueBinder(SET_BYTE);

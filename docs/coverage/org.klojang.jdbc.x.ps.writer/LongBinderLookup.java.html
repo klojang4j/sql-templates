@@ -3,13 +3,13 @@
 import org.klojang.convert.Bool;
 import org.klojang.convert.NumberMethods;
 import org.klojang.jdbc.x.ps.ValueBinder;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
+import org.klojang.jdbc.x.ps.ValueBinderLookup;
 
 import static java.sql.Types.*;
 import static org.klojang.jdbc.x.ps.ValueBinder.ANY_TO_STRING;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
-public final class LongBinderLookup extends ColumnWriterLookup&lt;Long&gt; {
+public final class LongBinderLookup extends ValueBinderLookup&lt;Long&gt; {
 
 <span class="fc" id="L14">  public static final ValueBinder&lt;Long, Long&gt; DEFAULT = new ValueBinder&lt;&gt;(SET_LONG);</span>
 

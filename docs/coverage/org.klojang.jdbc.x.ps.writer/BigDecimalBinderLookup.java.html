@@ -3,7 +3,7 @@
 import org.klojang.convert.Bool;
 import org.klojang.convert.NumberMethods;
 import org.klojang.jdbc.x.ps.ValueBinder;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
+import org.klojang.jdbc.x.ps.ValueBinderLookup;
 
 import java.math.BigDecimal;
 
@@ -11,50 +11,60 @@ import static java.sql.Types.*;
 import static org.klojang.jdbc.x.ps.ValueBinder.ANY_TO_STRING;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
-public final class BigDecimalBinderLookup extends ColumnWriterLookup&lt;BigDecimal&gt; {
+public final class BigDecimalBinderLookup extends ValueBinderLookup&lt;BigDecimal&gt; {
 
   @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
 <span class="fc" id="L17">  public static final ValueBinder DEFAULT = new ValueBinder(SET_BIG_DECIMAL);</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
-<span class="nc" id="L20">  public BigDecimalBinderLookup() {</span>
-<span class="nc" id="L21">    put(BOOLEAN, bdToBool());</span>
-<span class="nc" id="L22">    put(TINYINT, bdToByte());</span>
-<span class="nc" id="L23">    put(SMALLINT, bdToShort());</span>
-<span class="nc" id="L24">    put(INTEGER, bdToInt());</span>
-<span class="nc" id="L25">    put(BIGINT, bdToLong());</span>
-<span class="nc" id="L26">    put(REAL, bdToFloat());</span>
-<span class="nc" id="L27">    addMultiple(bdToDouble(), DOUBLE, FLOAT);</span>
-<span class="nc" id="L28">    addMultiple(ANY_TO_STRING, VARCHAR, CHAR);</span>
-<span class="nc" id="L29">  }</span>
+<span class="fc" id="L20">  public BigDecimalBinderLookup() {</span>
+<span class="fc" id="L21">    put(BOOLEAN, bdToBool());</span>
+<span class="fc" id="L22">    put(TINYINT, bdToByte());</span>
+<span class="fc" id="L23">    put(SMALLINT, bdToShort());</span>
+<span class="fc" id="L24">    put(INTEGER, bdToInt());</span>
+<span class="fc" id="L25">    put(BIGINT, bdToLong());</span>
+<span class="fc" id="L26">    put(REAL, bdToFloat());</span>
+    // Friendly reminder on how to read this:
+    // * if we are dealing with a BigDecimal value
+    // * and the database type is either Types.DOUBLE or Types.FLOAT
+    // * then we are going to call PreparedStatement.setBigDecimal() and we will call
+    //   NumberMethods.convert the BigDecimal to a double
+<span class="fc" id="L32">    addMultiple(bdToDouble(), DOUBLE, FLOAT);</span>
+<span class="fc" id="L33">    addMultiple(bdToString(), VARCHAR, CHAR);</span>
+<span class="fc" id="L34">  }</span>
 
   private static ValueBinder&lt;BigDecimal, Boolean&gt; bdToBool() {
-<span class="nc" id="L32">    return new ValueBinder&lt;&gt;(SET_BOOLEAN, Bool::from);</span>
+<span class="fc" id="L37">    return new ValueBinder&lt;&gt;(SET_BOOLEAN, Bool::from);</span>
   }
 
   private static ValueBinder&lt;BigDecimal, Byte&gt; bdToByte() {
-<span class="nc" id="L36">    return new ValueBinder&lt;&gt;(SET_BYTE, NumberMethods::convert);</span>
+<span class="fc" id="L41">    return new ValueBinder&lt;&gt;(SET_BYTE, NumberMethods::convert);</span>
   }
 
   private static ValueBinder&lt;BigDecimal, Short&gt; bdToShort() {
-<span class="nc" id="L40">    return new ValueBinder&lt;&gt;(SET_SHORT, NumberMethods::convert);</span>
+<span class="fc" id="L45">    return new ValueBinder&lt;&gt;(SET_SHORT, NumberMethods::convert);</span>
   }
 
   private static ValueBinder&lt;BigDecimal, Integer&gt; bdToInt() {
-<span class="nc" id="L44">    return new ValueBinder&lt;&gt;(SET_INT, NumberMethods::convert);</span>
+<span class="fc" id="L49">    return new ValueBinder&lt;&gt;(SET_INT, NumberMethods::convert);</span>
   }
 
   private static ValueBinder&lt;BigDecimal, Long&gt; bdToLong() {
-<span class="nc" id="L48">    return new ValueBinder&lt;&gt;(SET_LONG, NumberMethods::convert);</span>
+<span class="fc" id="L53">    return new ValueBinder&lt;&gt;(SET_LONG, NumberMethods::convert);</span>
   }
 
   private static ValueBinder&lt;BigDecimal, Float&gt; bdToFloat() {
-<span class="nc" id="L52">    return new ValueBinder&lt;&gt;(SET_FLOAT, NumberMethods::convert);</span>
+<span class="fc" id="L57">    return new ValueBinder&lt;&gt;(SET_FLOAT, NumberMethods::convert);</span>
   }
 
   private static ValueBinder&lt;BigDecimal, Double&gt; bdToDouble() {
-<span class="nc" id="L56">    return new ValueBinder&lt;&gt;(SET_DOUBLE, NumberMethods::convert);</span>
+<span class="fc" id="L61">    return new ValueBinder&lt;&gt;(SET_DOUBLE, NumberMethods::convert);</span>
   }
+
+  private static ValueBinder&lt;BigDecimal, String&gt; bdToString() {
+<span class="fc" id="L65">    return new ValueBinder&lt;&gt;(SET_STRING, BigDecimal::toPlainString);</span>
+  }
+
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

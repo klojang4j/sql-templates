@@ -15,30 +15,39 @@ import static java.util.Map.Entry;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
 
-<span class="fc" id="L18">public final class LocalDateTimeReaderLookup extends AbstractColumnReaderLookup&lt;LocalDateTime&gt; {</span>
+<span class="fc" id="L18">public final class LocalDateTimeReaderLookup</span>
+      extends AbstractColumnReaderLookup&lt;LocalDateTime&gt; {
 
   @Override
   List&lt;Entry&lt;Integer, ColumnReader&lt;?, LocalDateTime&gt;&gt;&gt; getColumnReaders() {
-<span class="fc" id="L22">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, LocalDateTime&gt;&gt;&gt; entries = new ArrayList&lt;&gt;(16);</span>
-<span class="fc" id="L23">    entries.add(entry(GET_DATE, sqlDateToLocalDateTime(), DATE));</span>
-<span class="fc" id="L24">    entries.add(entry(GET_TIMESTAMP, sqlTimestampToLocalDateTime(), TIMESTAMP));</span>
-<span class="fc" id="L25">    entries.add(entry(GET_LONG, longToLocalDateTime(), BIGINT));</span>
-<span class="fc" id="L26">    return entries;</span>
+<span class="fc" id="L23">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, LocalDateTime&gt;&gt;&gt; entries = new ArrayList&lt;&gt;(16);</span>
+<span class="fc" id="L24">    entries.add(entry(GET_DATE, sqlDateToLocalDateTime(), DATE));</span>
+<span class="fc" id="L25">    entries.add(entry(GET_TIMESTAMP, sqlTimestampToLocalDateTime(), TIMESTAMP));</span>
+<span class="fc" id="L26">    entries.add(entry(GET_LONG, longToLocalDateTime(), BIGINT));</span>
+<span class="fc" id="L27">    entries.addAll(entries(GET_STRING, stringToLocalDateTime(), VARCHAR, CHAR));</span>
+<span class="fc" id="L28">    return entries;</span>
   }
 
   private static Function&lt;java.sql.Date, LocalDateTime&gt; sqlDateToLocalDateTime() {
-<span class="pc bnc" id="L30" title="All 2 branches missed.">    return x -&gt; x == null ? null : x.toLocalDate().atStartOfDay();</span>
+<span class="pc bnc" id="L32" title="All 2 branches missed.">    return x -&gt; x == null ? null : x.toLocalDate().atStartOfDay();</span>
   }
 
   private static Function&lt;Timestamp, LocalDateTime&gt; sqlTimestampToLocalDateTime() {
-<span class="pc bnc" id="L34" title="All 2 branches missed.">    return d -&gt; d == null ? null : d.toLocalDateTime();</span>
+<span class="pc bnc" id="L36" title="All 2 branches missed.">    return d -&gt; d == null ? null : d.toLocalDateTime();</span>
   }
 
   private static Function&lt;Long, LocalDateTime&gt; longToLocalDateTime() {
-<span class="pc bnc" id="L38" title="All 2 branches missed.">    return x -&gt; x == null</span>
-<span class="nc" id="L39">          ? null</span>
-<span class="nc" id="L40">          : Instant.ofEpochMilli(x).atZone(systemDefault()).toLocalDateTime();</span>
+<span class="pc bnc" id="L40" title="All 2 branches missed.">    return x -&gt; x == null ? null : longToLocalDateTime(x);</span>
   }
+
+  private static Function&lt;String, LocalDateTime&gt; stringToLocalDateTime() {
+<span class="pc bnc" id="L44" title="All 2 branches missed.">    return x -&gt; x == null ? null : LocalDateTime.parse(x);</span>
+  }
+
+  private static LocalDateTime longToLocalDateTime(Long x) {
+<span class="nc" id="L48">    return Instant.ofEpochMilli(x).atZone(systemDefault()).toLocalDateTime();</span>
+  }
+
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

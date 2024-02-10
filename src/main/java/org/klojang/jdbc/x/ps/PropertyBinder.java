@@ -19,9 +19,9 @@ import static org.klojang.util.ClassMethods.isSubtype;
 /**
  * Binds a single bean property or record component to a PreparedStatement.
  *
- * @param <INPUT_TYPE> the type of the bean property
- * @param <PARAM_TYPE> the type of the value passed to
- *       PreparedStatement.setXXX(parameterIndex, value)
+ * @param <INPUT_TYPE> the type of the value to be bound
+ * @param <PARAM_TYPE> the type of the value passed to the particular
+ *       {@code setXXX()} method of {@code PreparedStatement} that we want to use
  * @author Ayco Holleman
  */
 final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
@@ -42,7 +42,7 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
         List<NamedParameter> params,
         BindInfo bindInfo,
         List<NamedParameter> bound) {
-    ColumnWriterFactory factory = ColumnWriterFactory.getInstance();
+    ValueBinderFactory factory = ValueBinderFactory.getInstance();
     Map<String, Getter> getters = GetterFactory.INSTANCE.getGetters(beanClass, true);
     List<PropertyBinder> readers = new ArrayList<>(params.size());
     for (NamedParameter param : params) {
@@ -55,13 +55,13 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
       Class type = getter.getReturnType();
       ValueBinder writer;
       if (isSubtype(type, Enum.class) && bindInfo.saveEnumAsString(beanClass, property)) {
-        writer = EnumBinderLookup.ENUM_TO_STRING;
+        writer = ValueBinder.ANY_TO_STRING;
       } else {
-        Integer sqlType = bindInfo.getSqlType(beanClass, property, type);
+        Integer sqlType = bindInfo.getSqlType(type, beanClass, property);
         if (sqlType == null) {
-          writer = factory.getDefaultWriter(type);
+          writer = factory.getDefaultBinder(type);
         } else {
-          writer = factory.getWriter(type, sqlType);
+          writer = factory.getBinder(type, sqlType);
         }
       }
       readers.add(new PropertyBinder(getter, writer, param));

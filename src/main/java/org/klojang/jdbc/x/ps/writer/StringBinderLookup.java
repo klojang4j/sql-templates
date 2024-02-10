@@ -3,20 +3,25 @@ package org.klojang.jdbc.x.ps.writer;
 import org.klojang.convert.Bool;
 import org.klojang.convert.NumberMethods;
 import org.klojang.jdbc.x.ps.ValueBinder;
-import org.klojang.jdbc.x.ps.ColumnWriterLookup;
+import org.klojang.jdbc.x.ps.ValueBinderLookup;
 
 import java.math.BigDecimal;
 
 import static java.sql.Types.*;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.*;
 
-public final class StringBinderLookup extends ColumnWriterLookup<String> {
+public final class StringBinderLookup extends ValueBinderLookup<String> {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static final ValueBinder DEFAULT = new ValueBinder(SET_STRING);
 
   @SuppressWarnings("unchecked")
   public StringBinderLookup() {
+    // Friendly reminder on how to read this:
+    // * if we are dealing with a String value
+    // * and the database type is Types.BOOLEAN
+    // * then we are going to call PreparedStatement.setBoolean() and we will call
+    //   Bool.from(String) to convert the input value to a boolean
     put(BOOLEAN, stringToBool());
     put(INTEGER, stringToInt());
     put(SMALLINT, stringToShort());
