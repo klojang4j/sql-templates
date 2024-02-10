@@ -33,8 +33,11 @@ import static org.klojang.util.ClassMethods.simpleClassName;
 public class ColumnReaderFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(ColumnReaderFactory.class);
+
   private static final String TYPE_NOT_SUPPORTED = "type not supported: ${0}";
   private static final String NOT_CONVERTIBLE = "cannot convert ${0} to ${1}";
+  private static final String NO_PREDEFINED_COLUMN_READER
+        = "No predefined ColumnReader exists for {}. Searching for factory method on {}";
 
   private static ColumnReaderFactory INSTANCE;
 
@@ -101,9 +104,7 @@ public class ColumnReaderFactory {
     if (reader != null) {
       return reader;
     }
-    LOG.trace("No predefined ColumnReader {}. Searching for factory method on {}",
-          className(cls),
-          className(cls));
+    LOG.trace(NO_PREDEFINED_COLUMN_READER, className(cls), simpleClassName(cls));
     MethodHandle mh = findFactoryMethod(cls);
     if (mh == null) {
       mh = findConstructor(cls);
@@ -139,7 +140,7 @@ public class ColumnReaderFactory {
     MethodHandles.Lookup lookup = MethodHandles.publicLookup();
     try {
       MethodHandle mh = lookup.findConstructor(cls, methodType(void.class, String.class));
-      LOG.trace("Will use constructor {}(String)", simpleClassName(cls));
+      LOG.trace("Will use constructor new {}(String)", simpleClassName(cls));
       return mh;
     } catch (Exception e) { }
     return null;

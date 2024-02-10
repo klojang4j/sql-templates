@@ -1,97 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResultSetMethod.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">ResultSetMethod.java</span></div><h1>ResultSetMethod.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.Time;
-import java.sql.Timestamp;
-
-import org.klojang.jdbc.DatabaseException;
-import org.klojang.util.ExceptionMethods;
-
-import static java.lang.invoke.MethodHandles.lookup;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  * Represents one of the get methods of ResultSet, like ResultSet.getString(columnIndex)
  */
-public final class ResultSetMethod&lt;COLUMN_TYPE&gt; {
+<span class="fc" id="L11">public abstract class ResultSetMethod&lt;COLUMN_TYPE&gt; {</span>
 
-<span class="fc" id="L21">  public static final ResultSetMethod&lt;String&gt; GET_STRING</span>
-<span class="fc" id="L22">        = getter(&quot;getString&quot;, String.class);</span>
-<span class="fc" id="L23">  public static final ResultSetMethod&lt;Integer&gt; GET_INT</span>
-<span class="fc" id="L24">        = getter(&quot;getInt&quot;, int.class);</span>
-<span class="fc" id="L25">  public static final ResultSetMethod&lt;Float&gt; GET_FLOAT</span>
-<span class="fc" id="L26">        = getter(&quot;getFloat&quot;, float.class);</span>
-<span class="fc" id="L27">  public static final ResultSetMethod&lt;Double&gt; GET_DOUBLE</span>
-<span class="fc" id="L28">        = getter(&quot;getDouble&quot;, double.class);</span>
-<span class="fc" id="L29">  public static final ResultSetMethod&lt;Long&gt; GET_LONG</span>
-<span class="fc" id="L30">        = getter(&quot;getLong&quot;, long.class);</span>
-<span class="fc" id="L31">  public static final ResultSetMethod&lt;Short&gt; GET_SHORT</span>
-<span class="fc" id="L32">        = getter(&quot;getShort&quot;, short.class);</span>
-<span class="fc" id="L33">  public static final ResultSetMethod&lt;Byte&gt; GET_BYTE</span>
-<span class="fc" id="L34">        = getter(&quot;getByte&quot;, byte.class);</span>
-<span class="fc" id="L35">  public static final ResultSetMethod&lt;Boolean&gt; GET_BOOLEAN</span>
-<span class="fc" id="L36">        = getter(&quot;getBoolean&quot;, boolean.class);</span>
-<span class="fc" id="L37">  public static final ResultSetMethod&lt;Date&gt; GET_DATE</span>
-<span class="fc" id="L38">        = getter(&quot;getDate&quot;, Date.class);</span>
-<span class="fc" id="L39">  public static final ResultSetMethod&lt;Time&gt; GET_TIME</span>
-<span class="fc" id="L40">        = getter(&quot;getTime&quot;, Time.class);</span>
-<span class="fc" id="L41">  public static final ResultSetMethod&lt;Timestamp&gt; GET_TIMESTAMP</span>
-<span class="fc" id="L42">        = getter(&quot;getTimestamp&quot;, Timestamp.class);</span>
-<span class="fc" id="L43">  public static final ResultSetMethod&lt;BigDecimal&gt; GET_BIG_DECIMAL</span>
-<span class="fc" id="L44">        = getter(&quot;getBigDecimal&quot;, BigDecimal.class);</span>
-<span class="fc" id="L45">  public static final ResultSetMethod&lt;byte[]&gt; GET_BYTES</span>
-<span class="fc" id="L46">        = getter(&quot;getBytes&quot;, byte[].class);</span>
+  //@formatter:off
+  private static final class GetString extends ResultSetMethod&lt;String&gt; {
+<span class="fc" id="L15">    String invoke(ResultSet rs, int idx)throws SQLException {  return rs.getString(idx); }</span>
+  }
+  private static final class GetInt extends ResultSetMethod&lt;Integer&gt; {
+<span class="fc" id="L18">    Integer invoke(ResultSet rs, int idx)throws SQLException {  return rs.getInt(idx); }</span>
+  }
+  private static final class GetFloat extends ResultSetMethod&lt;Float&gt; {
+<span class="nc" id="L21">    Float invoke(ResultSet rs, int idx)throws SQLException {  return rs.getFloat(idx); }</span>
+  }
+  private static final class GetDouble extends ResultSetMethod&lt;Double&gt; {
+<span class="nc" id="L24">    Double invoke(ResultSet rs, int idx)throws SQLException {  return rs.getDouble(idx); }</span>
+  }
+  private static final class GetLong extends ResultSetMethod&lt;Long&gt; {
+<span class="fc" id="L27">    Long invoke(ResultSet rs, int idx)throws SQLException {  return rs.getLong(idx); }</span>
+  }
+  private static final class GetShort extends ResultSetMethod&lt;Short&gt; {
+<span class="nc" id="L30">    Short invoke(ResultSet rs, int idx)throws SQLException {  return rs.getShort(idx); }</span>
+  }
+  private static final class GetByte extends ResultSetMethod&lt;Byte&gt; {
+<span class="nc" id="L33">    Byte invoke(ResultSet rs, int idx)throws SQLException {  return rs.getByte(idx); }</span>
+  }
+  private static final class GetBoolean extends ResultSetMethod&lt;Boolean&gt; {
+<span class="fc" id="L36">    Boolean invoke(ResultSet rs, int idx)throws SQLException {  return rs.getBoolean(idx); }</span>
+  }
+  private static final class GetDate extends ResultSetMethod&lt;Date&gt; {
+<span class="fc" id="L39">    Date invoke(ResultSet rs, int idx)throws SQLException {  return rs.getDate(idx); }</span>
+  }
+  private static final class GetTime extends ResultSetMethod&lt;Time&gt; {
+<span class="nc" id="L42">    Time invoke(ResultSet rs, int idx)throws SQLException {  return rs.getTime(idx); }</span>
+  }
+  private static final class GetTimestamp extends ResultSetMethod&lt;Timestamp&gt; {
+<span class="nc" id="L45">    Timestamp invoke(ResultSet rs, int idx)throws SQLException {  return rs.getTimestamp(idx); }</span>
+  }
+  private static final class GetBD extends ResultSetMethod&lt;BigDecimal&gt; {
+<span class="nc" id="L48">    BigDecimal invoke(ResultSet rs, int idx)throws SQLException {  return rs.getBigDecimal(idx); }</span>
+  }
+  private static final class GetBytes extends ResultSetMethod&lt;byte[]&gt; {
+<span class="nc" id="L51">    byte[] invoke(ResultSet rs, int idx)throws SQLException {  return rs.getBytes(idx); }</span>
+  }
+  //@formatter:on
 
-  // Invokes &lt;T&gt; ResultSet.getObject(columnIndex, Class&lt;T&gt;)
+<span class="fc" id="L55">  public static final ResultSetMethod&lt;String&gt; GET_STRING = new GetString();</span>
+<span class="fc" id="L56">  public static final ResultSetMethod&lt;Integer&gt; GET_INT = new GetInt();</span>
+<span class="fc" id="L57">  public static final ResultSetMethod&lt;Float&gt; GET_FLOAT = new GetFloat();</span>
+<span class="fc" id="L58">  public static final ResultSetMethod&lt;Double&gt; GET_DOUBLE = new GetDouble();</span>
+<span class="fc" id="L59">  public static final ResultSetMethod&lt;Long&gt; GET_LONG = new GetLong();</span>
+<span class="fc" id="L60">  public static final ResultSetMethod&lt;Short&gt; GET_SHORT = new GetShort();</span>
+<span class="fc" id="L61">  public static final ResultSetMethod&lt;Byte&gt; GET_BYTE = new GetByte();</span>
+<span class="fc" id="L62">  public static final ResultSetMethod&lt;Boolean&gt; GET_BOOLEAN = new GetBoolean();</span>
+<span class="fc" id="L63">  public static final ResultSetMethod&lt;Date&gt; GET_DATE = new GetDate();</span>
+<span class="fc" id="L64">  public static final ResultSetMethod&lt;Time&gt; GET_TIME = new GetTime();</span>
+<span class="fc" id="L65">  public static final ResultSetMethod&lt;Timestamp&gt; GET_TIMESTAMP = new GetTimestamp();</span>
+<span class="fc" id="L66">  public static final ResultSetMethod&lt;BigDecimal&gt; GET_BIG_DECIMAL = new GetBD();</span>
+<span class="fc" id="L67">  public static final ResultSetMethod&lt;byte[]&gt; GET_BYTES = new GetBytes();</span>
+
+  @SuppressWarnings(&quot;rawtypes&quot;)
+<span class="fc" id="L70">  private static final Map&lt;Class, ResultSetMethod&gt; objectGetters = new HashMap&lt;&gt;();</span>
+
+  @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   public static &lt;T&gt; ResultSetMethod&lt;T&gt; objectGetter(Class&lt;T&gt; returnType) {
-<span class="fc" id="L50">    MethodType mt = MethodType.methodType(Object.class, int.class, Class.class);</span>
-    MethodHandle mh;
-    try {
-<span class="fc" id="L53">      mh = lookup().findVirtual(ResultSet.class, &quot;getObject&quot;, mt);</span>
-<span class="nc" id="L54">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
-<span class="nc" id="L55">      throw ExceptionMethods.uncheck(e);</span>
-<span class="fc" id="L56">    }</span>
-<span class="fc" id="L57">    return new ResultSetMethod&lt;&gt;(mh, returnType);</span>
-  }
-
-  private final MethodHandle method;
-
-  // If this is ResultSetMethod invokes ResultSet.getObject(int, Class), then
-  // classArg will be the Class object passed in as the second argument to the
-  // getObject() method. In any other case classArg will be null.
-  private final Class&lt;?&gt; classArg;
-
-  private ResultSetMethod(MethodHandle method) {
-<span class="fc" id="L68">    this(method, null);</span>
-<span class="fc" id="L69">  }</span>
-
-<span class="fc" id="L71">  private ResultSetMethod(MethodHandle method, Class&lt;?&gt; classArg) {</span>
-<span class="fc" id="L72">    this.method = method;</span>
-<span class="fc" id="L73">    this.classArg = classArg;</span>
-<span class="fc" id="L74">  }</span>
-
-  public COLUMN_TYPE invoke(ResultSet rs, int columnIndex) throws Throwable {
-    COLUMN_TYPE val;
-<span class="pc bpc" id="L78" title="1 of 2 branches missed.">    if (classArg == null) {</span>
-<span class="fc" id="L79">      val = (COLUMN_TYPE) method.invoke(rs, columnIndex);</span>
-    } else {
-<span class="nc" id="L81">      val = (COLUMN_TYPE) method.invoke(rs, columnIndex, classArg);</span>
+<span class="fc" id="L74">    ResultSetMethod&lt;T&gt; m = objectGetters.get(returnType);</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">    if (m == null) {</span>
+<span class="fc" id="L76">      m = new ResultSetMethod() {</span>
+        @Override
+        Object invoke(ResultSet rs, int columnIndex) throws SQLException {
+<span class="nc" id="L79">          return rs.getObject(columnIndex, returnType);</span>
+        }
+      };
+<span class="fc" id="L82">      objectGetters.put(returnType, m);</span>
     }
-<span class="pc bpc" id="L83" title="1 of 2 branches missed.">    return rs.wasNull() ? null : val;</span>
+<span class="fc" id="L84">    return m;</span>
   }
 
-  private static &lt;T&gt; ResultSetMethod&lt;T&gt; getter(String methodName, Class&lt;T&gt; returnType) {
-<span class="fc" id="L87">    MethodType mt = MethodType.methodType(returnType, int.class);</span>
-    MethodHandle mh;
-    try {
-<span class="fc" id="L90">      mh = lookup().findVirtual(ResultSet.class, methodName, mt);</span>
-<span class="nc" id="L91">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
-<span class="nc" id="L92">      throw new DatabaseException(e);</span>
-<span class="fc" id="L93">    }</span>
-<span class="fc" id="L94">    return new ResultSetMethod&lt;&gt;(mh);</span>
-  }
+  abstract COLUMN_TYPE invoke(ResultSet rs, int columnIndex) throws SQLException;
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

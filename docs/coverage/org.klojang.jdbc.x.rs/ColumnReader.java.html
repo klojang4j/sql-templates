@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColumnReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">ColumnReader.java</span></div><h1>ColumnReader.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.function.Function;
 
 /**
@@ -19,32 +20,32 @@ public final class ColumnReader&lt;COLUMN_TYPE, TARGET_TYPE&gt; {
   private final ResultSetMethod&lt;COLUMN_TYPE&gt; method;
   private final Adapter&lt;? super COLUMN_TYPE, TARGET_TYPE&gt; adapter;
 
-<span class="fc" id="L22">  public ColumnReader(ResultSetMethod&lt;COLUMN_TYPE&gt; method) {</span>
-<span class="fc" id="L23">    this.method = method;</span>
-<span class="fc" id="L24">    this.adapter = null;</span>
-<span class="fc" id="L25">  }</span>
+<span class="fc" id="L23">  public ColumnReader(ResultSetMethod&lt;COLUMN_TYPE&gt; method) {</span>
+<span class="fc" id="L24">    this.method = method;</span>
+<span class="fc" id="L25">    this.adapter = null;</span>
+<span class="fc" id="L26">  }</span>
 
   public ColumnReader(
         ResultSetMethod&lt;COLUMN_TYPE&gt; method,
         Function&lt;? super COLUMN_TYPE, TARGET_TYPE&gt; adapter) {
-<span class="fc" id="L30">    this(method, (x, y) -&gt; adapter.apply(x));</span>
-<span class="fc" id="L31">  }</span>
+<span class="fc" id="L31">    this(method, (x, y) -&gt; adapter.apply(x));</span>
+<span class="fc" id="L32">  }</span>
 
   public ColumnReader(
         ResultSetMethod&lt;COLUMN_TYPE&gt; method,
-<span class="fc" id="L35">        Adapter&lt;? super COLUMN_TYPE, TARGET_TYPE&gt; adapter) {</span>
-<span class="fc" id="L36">    this.method = method;</span>
-<span class="fc" id="L37">    this.adapter = adapter;</span>
-<span class="fc" id="L38">  }</span>
+<span class="fc" id="L36">        Adapter&lt;? super COLUMN_TYPE, TARGET_TYPE&gt; adapter) {</span>
+<span class="fc" id="L37">    this.method = method;</span>
+<span class="fc" id="L38">    this.adapter = adapter;</span>
+<span class="fc" id="L39">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
   public TARGET_TYPE getValue(ResultSet rs, int columnIndex, Class&lt;TARGET_TYPE&gt; toType)
-        throws Throwable {
-<span class="fc" id="L43">    COLUMN_TYPE val = method.invoke(rs, columnIndex);</span>
-<span class="fc bfc" id="L44" title="All 2 branches covered.">    if (adapter == null) {</span>
-<span class="fc" id="L45">      return (TARGET_TYPE) val;</span>
+        throws SQLException {
+<span class="fc" id="L44">    COLUMN_TYPE val = method.invoke(rs, columnIndex);</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">    if (adapter == null) {</span>
+<span class="fc" id="L46">      return (TARGET_TYPE) val;</span>
     }
-<span class="fc" id="L47">    return adapter.adapt(val, toType);</span>
+<span class="fc" id="L48">    return adapter.adapt(val, toType);</span>
   }
 
 }

@@ -17,7 +17,7 @@ public final class EnumReaderLookup extends AbstractColumnReaderLookup<Enum<?>> 
 
   @Override
   List<Entry<Integer, ColumnReader<?, Enum<?>>>> getColumnReaders() {
-    List<Entry<Integer, ColumnReader<?, Enum<?>>>> entries = new ArrayList<>();
+    List<Entry<Integer, ColumnReader<?, Enum<?>>>> entries = new ArrayList<>(16);
     entries.add(entry(GET_LONG, numberToEnum(), BIGINT));
     entries.add(entry(GET_INT, numberToEnum(), INTEGER));
     entries.add(entry(GET_SHORT, numberToEnum(), SMALLINT));

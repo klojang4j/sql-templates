@@ -25,7 +25,7 @@ public final class BigDecimalReaderLookup extends AbstractColumnReaderLookup<Big
     entries.addAll(entries(GET_FLOAT, floatToBigDecimal(), REAL));
     entries.addAll(entries(GET_DOUBLE, doubleToBigDecimal(), DOUBLE, FLOAT));
     entries.addAll(entries(GET_BIG_DECIMAL, NUMERIC, DECIMAL));
-    entries.addAll(entries(GET_STRING, VARCHAR, CHAR));
+    entries.addAll(entries(GET_STRING, stringToBigDecimal(), VARCHAR, CHAR));
     return entries;
   }
 

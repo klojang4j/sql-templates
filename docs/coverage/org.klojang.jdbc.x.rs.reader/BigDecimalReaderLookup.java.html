@@ -25,7 +25,7 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 <span class="fc" id="L25">    entries.addAll(entries(GET_FLOAT, floatToBigDecimal(), REAL));</span>
 <span class="fc" id="L26">    entries.addAll(entries(GET_DOUBLE, doubleToBigDecimal(), DOUBLE, FLOAT));</span>
 <span class="fc" id="L27">    entries.addAll(entries(GET_BIG_DECIMAL, NUMERIC, DECIMAL));</span>
-<span class="fc" id="L28">    entries.addAll(entries(GET_STRING, VARCHAR, CHAR));</span>
+<span class="fc" id="L28">    entries.addAll(entries(GET_STRING, stringToBigDecimal(), VARCHAR, CHAR));</span>
 <span class="fc" id="L29">    return entries;</span>
   }
 
@@ -46,7 +46,7 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
   }
 
   private static Function&lt;String, BigDecimal&gt; stringToBigDecimal() {
-<span class="nc bnc" id="L49" title="All 2 branches missed.">    return x -&gt; x == null ? null : new BigDecimal(x);</span>
+<span class="pc bnc" id="L49" title="All 2 branches missed.">    return x -&gt; x == null ? null : new BigDecimal(x);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

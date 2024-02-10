@@ -129,4 +129,6 @@ public final class SQLTypeUtil {
       throw Utils.wrap(t);
     }
   }
+
+  private SQLTypeUtil() { throw new UnsupportedOperationException(); }
 }

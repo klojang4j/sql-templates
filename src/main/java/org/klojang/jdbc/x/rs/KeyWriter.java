@@ -62,7 +62,7 @@ public final class KeyWriter<COLUMN_TYPE> {
     this.key = key;
   }
 
-  public void write(ResultSet resultset, Map<String, Object> map) throws Throwable {
+  public void write(ResultSet resultset, Map<String, Object> map) throws SQLException {
     Object val = method.invoke(resultset, columnIndex);
     LOG.trace("==> {}: {}", key, val);
     map.put(key, val);

@@ -1,96 +1,89 @@
 package org.klojang.jdbc.x.rs;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.Time;
-import java.sql.Timestamp;
-
-import org.klojang.jdbc.DatabaseException;
-import org.klojang.util.ExceptionMethods;
-
-import static java.lang.invoke.MethodHandles.lookup;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  * Represents one of the get methods of ResultSet, like ResultSet.getString(columnIndex)
  */
-public final class ResultSetMethod<COLUMN_TYPE> {
+public abstract class ResultSetMethod<COLUMN_TYPE> {
 
-  public static final ResultSetMethod<String> GET_STRING
-        = getter("getString", String.class);
-  public static final ResultSetMethod<Integer> GET_INT
-        = getter("getInt", int.class);
-  public static final ResultSetMethod<Float> GET_FLOAT
-        = getter("getFloat", float.class);
-  public static final ResultSetMethod<Double> GET_DOUBLE
-        = getter("getDouble", double.class);
-  public static final ResultSetMethod<Long> GET_LONG
-        = getter("getLong", long.class);
-  public static final ResultSetMethod<Short> GET_SHORT
-        = getter("getShort", short.class);
-  public static final ResultSetMethod<Byte> GET_BYTE
-        = getter("getByte", byte.class);
-  public static final ResultSetMethod<Boolean> GET_BOOLEAN
-        = getter("getBoolean", boolean.class);
-  public static final ResultSetMethod<Date> GET_DATE
-        = getter("getDate", Date.class);
-  public static final ResultSetMethod<Time> GET_TIME
-        = getter("getTime", Time.class);
-  public static final ResultSetMethod<Timestamp> GET_TIMESTAMP
-        = getter("getTimestamp", Timestamp.class);
-  public static final ResultSetMethod<BigDecimal> GET_BIG_DECIMAL
-        = getter("getBigDecimal", BigDecimal.class);
-  public static final ResultSetMethod<byte[]> GET_BYTES
-        = getter("getBytes", byte[].class);
+  //@formatter:off
+  private static final class GetString extends ResultSetMethod<String> {
+    String invoke(ResultSet rs, int idx)throws SQLException {  return rs.getString(idx); }
+  }
+  private static final class GetInt extends ResultSetMethod<Integer> {
+    Integer invoke(ResultSet rs, int idx)throws SQLException {  return rs.getInt(idx); }
+  }
+  private static final class GetFloat extends ResultSetMethod<Float> {
+    Float invoke(ResultSet rs, int idx)throws SQLException {  return rs.getFloat(idx); }
+  }
+  private static final class GetDouble extends ResultSetMethod<Double> {
+    Double invoke(ResultSet rs, int idx)throws SQLException {  return rs.getDouble(idx); }
+  }
+  private static final class GetLong extends ResultSetMethod<Long> {
+    Long invoke(ResultSet rs, int idx)throws SQLException {  return rs.getLong(idx); }
+  }
+  private static final class GetShort extends ResultSetMethod<Short> {
+    Short invoke(ResultSet rs, int idx)throws SQLException {  return rs.getShort(idx); }
+  }
+  private static final class GetByte extends ResultSetMethod<Byte> {
+    Byte invoke(ResultSet rs, int idx)throws SQLException {  return rs.getByte(idx); }
+  }
+  private static final class GetBoolean extends ResultSetMethod<Boolean> {
+    Boolean invoke(ResultSet rs, int idx)throws SQLException {  return rs.getBoolean(idx); }
+  }
+  private static final class GetDate extends ResultSetMethod<Date> {
+    Date invoke(ResultSet rs, int idx)throws SQLException {  return rs.getDate(idx); }
+  }
+  private static final class GetTime extends ResultSetMethod<Time> {
+    Time invoke(ResultSet rs, int idx)throws SQLException {  return rs.getTime(idx); }
+  }
+  private static final class GetTimestamp extends ResultSetMethod<Timestamp> {
+    Timestamp invoke(ResultSet rs, int idx)throws SQLException {  return rs.getTimestamp(idx); }
+  }
+  private static final class GetBD extends ResultSetMethod<BigDecimal> {
+    BigDecimal invoke(ResultSet rs, int idx)throws SQLException {  return rs.getBigDecimal(idx); }
+  }
+  private static final class GetBytes extends ResultSetMethod<byte[]> {
+    byte[] invoke(ResultSet rs, int idx)throws SQLException {  return rs.getBytes(idx); }
+  }
+  //@formatter:on
 
-  // Invokes <T> ResultSet.getObject(columnIndex, Class<T>)
+  public static final ResultSetMethod<String> GET_STRING = new GetString();
+  public static final ResultSetMethod<Integer> GET_INT = new GetInt();
+  public static final ResultSetMethod<Float> GET_FLOAT = new GetFloat();
+  public static final ResultSetMethod<Double> GET_DOUBLE = new GetDouble();
+  public static final ResultSetMethod<Long> GET_LONG = new GetLong();
+  public static final ResultSetMethod<Short> GET_SHORT = new GetShort();
+  public static final ResultSetMethod<Byte> GET_BYTE = new GetByte();
+  public static final ResultSetMethod<Boolean> GET_BOOLEAN = new GetBoolean();
+  public static final ResultSetMethod<Date> GET_DATE = new GetDate();
+  public static final ResultSetMethod<Time> GET_TIME = new GetTime();
+  public static final ResultSetMethod<Timestamp> GET_TIMESTAMP = new GetTimestamp();
+  public static final ResultSetMethod<BigDecimal> GET_BIG_DECIMAL = new GetBD();
+  public static final ResultSetMethod<byte[]> GET_BYTES = new GetBytes();
+
+  @SuppressWarnings("rawtypes")
+  private static final Map<Class, ResultSetMethod> objectGetters = new HashMap<>();
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static <T> ResultSetMethod<T> objectGetter(Class<T> returnType) {
-    MethodType mt = MethodType.methodType(Object.class, int.class, Class.class);
-    MethodHandle mh;
-    try {
-      mh = lookup().findVirtual(ResultSet.class, "getObject", mt);
-    } catch (NoSuchMethodException | IllegalAccessException e) {
-      throw ExceptionMethods.uncheck(e);
+    ResultSetMethod<T> m = objectGetters.get(returnType);
+    if (m == null) {
+      m = new ResultSetMethod() {
+        @Override
+        Object invoke(ResultSet rs, int columnIndex) throws SQLException {
+          return rs.getObject(columnIndex, returnType);
+        }
+      };
+      objectGetters.put(returnType, m);
     }
-    return new ResultSetMethod<>(mh, returnType);
+    return m;
   }
 
-  private final MethodHandle method;
+  abstract COLUMN_TYPE invoke(ResultSet rs, int columnIndex) throws SQLException;
 
-  // If this is ResultSetMethod invokes ResultSet.getObject(int, Class), then
-  // classArg will be the Class object passed in as the second argument to the
-  // getObject() method. In any other case classArg will be null.
-  private final Class<?> classArg;
-
-  private ResultSetMethod(MethodHandle method) {
-    this(method, null);
-  }
-
-  private ResultSetMethod(MethodHandle method, Class<?> classArg) {
-    this.method = method;
-    this.classArg = classArg;
-  }
-
-  public COLUMN_TYPE invoke(ResultSet rs, int columnIndex) throws Throwable {
-    COLUMN_TYPE val;
-    if (classArg == null) {
-      val = (COLUMN_TYPE) method.invoke(rs, columnIndex);
-    } else {
-      val = (COLUMN_TYPE) method.invoke(rs, columnIndex, classArg);
-    }
-    return rs.wasNull() ? null : val;
-  }
-
-  private static <T> ResultSetMethod<T> getter(String methodName, Class<T> returnType) {
-    MethodType mt = MethodType.methodType(returnType, int.class);
-    MethodHandle mh;
-    try {
-      mh = lookup().findVirtual(ResultSet.class, methodName, mt);
-    } catch (NoSuchMethodException | IllegalAccessException e) {
-      throw new DatabaseException(e);
-    }
-    return new ResultSetMethod<>(mh);
-  }
 }

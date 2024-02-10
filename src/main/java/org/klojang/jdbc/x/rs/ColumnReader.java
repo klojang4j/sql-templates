@@ -1,6 +1,7 @@
 package org.klojang.jdbc.x.rs;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.function.Function;
 
 /**
@@ -39,7 +40,7 @@ public final class ColumnReader<COLUMN_TYPE, TARGET_TYPE> {
 
   @SuppressWarnings("unchecked")
   public TARGET_TYPE getValue(ResultSet rs, int columnIndex, Class<TARGET_TYPE> toType)
-        throws Throwable {
+        throws SQLException {
     COLUMN_TYPE val = method.invoke(rs, columnIndex);
     if (adapter == null) {
       return (TARGET_TYPE) val;

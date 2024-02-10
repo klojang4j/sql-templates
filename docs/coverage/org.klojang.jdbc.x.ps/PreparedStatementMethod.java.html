@@ -83,7 +83,7 @@ public abstract class PreparedStatementMethod&lt;PARAM_TYPE&gt; {
 <span class="fc" id="L83">  public static final PreparedStatementMethod&lt;Time&gt; SET_TIME = new SetTime();</span>
 <span class="fc" id="L84">  public static final PreparedStatementMethod&lt;Timestamp&gt; SET_TIMESTAMP = new SetTimestamp();</span>
 
-<span class="fc" id="L86">  private static final Map&lt;Integer, PreparedStatementMethod&lt;Object&gt;&gt; setObjectMethods = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L86">  private static final Map&lt;Integer, PreparedStatementMethod&lt;Object&gt;&gt; objectSetters = new HashMap&lt;&gt;();</span>
 
   private final Class&lt;PARAM_TYPE&gt; paramType;
 
@@ -96,7 +96,7 @@ public abstract class PreparedStatementMethod&lt;PARAM_TYPE&gt; {
   }
 
   public static PreparedStatementMethod&lt;Object&gt; setObject(int targetSqlType) {
-<span class="fc" id="L99">    PreparedStatementMethod&lt;Object&gt; m = setObjectMethods.get(targetSqlType);</span>
+<span class="fc" id="L99">    PreparedStatementMethod&lt;Object&gt; m = objectSetters.get(targetSqlType);</span>
 <span class="pc bpc" id="L100" title="1 of 2 branches missed.">    if (m == null) {</span>
 <span class="fc" id="L101">      m = new PreparedStatementMethod&lt;&gt;(Object.class) {</span>
 
@@ -106,7 +106,7 @@ public abstract class PreparedStatementMethod&lt;PARAM_TYPE&gt; {
 <span class="nc" id="L106">          ps.setObject(paramIndex, paramValue, targetSqlType);</span>
 <span class="nc" id="L107">        }</span>
       };
-<span class="fc" id="L109">      setObjectMethods.put(targetSqlType, m);</span>
+<span class="fc" id="L109">      objectSetters.put(targetSqlType, m);</span>
     }
 <span class="fc" id="L111">    return m;</span>
   }

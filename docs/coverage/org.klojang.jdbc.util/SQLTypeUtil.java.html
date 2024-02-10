@@ -18,7 +18,7 @@ import java.util.TreeMap;
  * by, say, {@code int} value {@code 12} (for the curious: that is the value of
  * {@link Types#VARCHAR VARCHAR} constant).
  */
-<span class="nc" id="L21">public final class SQLTypeUtil {</span>
+public final class SQLTypeUtil {
 
   private static final String NO_SUCH_TYPE = &quot;no such constant in java.sql.Types: ${arg}&quot;;
 
@@ -129,5 +129,7 @@ import java.util.TreeMap;
 <span class="nc" id="L129">      throw Utils.wrap(t);</span>
 <span class="fc" id="L130">    }</span>
 <span class="fc" id="L131">  }</span>
+
+<span class="nc" id="L133">  private SQLTypeUtil() { throw new UnsupportedOperationException(); }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -56,8 +56,11 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
         String property = nameMapper.map(label);
         Setter setter = setters.get(property);
         if (setter == null) {
-          String fmt = "Column {} cannot be mapped to a property of {}";
-          LOG.warn(fmt, label, beanClass.getSimpleName());
+          if (LOG.isTraceEnabled()) {
+            String s = beanClass.isRecord() ? "component" : "property";
+            String fmt = "Ignoring column \"{}\" (cannot be mapped to {} of {})";
+            LOG.trace(fmt, label, s, beanClass.getSimpleName());
+          }
           continue;
         }
         Class<?> javaType = setter.getParamType();
@@ -101,8 +104,14 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
     cols.addAll(Arrays.asList(JDBC.getColumnNames(resultset)));
     Set<String> props = new TreeSet<>(cmp);
     props.addAll(setters.keySet());
-    LOG.trace("Columns ......: {}", implode(cols));
-    LOG.trace("Properties ...: {}", implode(props));
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Columns ......: {}", implode(cols));
+      if (beanClass.isRecord()) {
+        LOG.trace("Components ...: {}", implode(props));
+      } else {
+        LOG.trace("Properties ...: {}", implode(props));
+      }
+    }
   }
 
 

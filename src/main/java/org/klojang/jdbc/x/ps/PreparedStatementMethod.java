@@ -83,7 +83,7 @@ public abstract class PreparedStatementMethod<PARAM_TYPE> {
   public static final PreparedStatementMethod<Time> SET_TIME = new SetTime();
   public static final PreparedStatementMethod<Timestamp> SET_TIMESTAMP = new SetTimestamp();
 
-  private static final Map<Integer, PreparedStatementMethod<Object>> setObjectMethods = new HashMap<>();
+  private static final Map<Integer, PreparedStatementMethod<Object>> objectSetters = new HashMap<>();
 
   private final Class<PARAM_TYPE> paramType;
 
@@ -96,7 +96,7 @@ public abstract class PreparedStatementMethod<PARAM_TYPE> {
   }
 
   public static PreparedStatementMethod<Object> setObject(int targetSqlType) {
-    PreparedStatementMethod<Object> m = setObjectMethods.get(targetSqlType);
+    PreparedStatementMethod<Object> m = objectSetters.get(targetSqlType);
     if (m == null) {
       m = new PreparedStatementMethod<>(Object.class) {
 
@@ -106,7 +106,7 @@ public abstract class PreparedStatementMethod<PARAM_TYPE> {
           ps.setObject(paramIndex, paramValue, targetSqlType);
         }
       };
-      setObjectMethods.put(targetSqlType, m);
+      objectSetters.put(targetSqlType, m);
     }
     return m;
   }

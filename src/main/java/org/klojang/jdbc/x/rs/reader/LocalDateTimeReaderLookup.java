@@ -20,7 +20,7 @@ public final class LocalDateTimeReaderLookup
 
   @Override
   List<Entry<Integer, ColumnReader<?, LocalDateTime>>> getColumnReaders() {
-    List<Entry<Integer, ColumnReader<?, LocalDateTime>>> entries = new ArrayList<>(16);
+    List<Entry<Integer, ColumnReader<?, LocalDateTime>>> entries = new ArrayList<>();
     entries.add(entry(GET_DATE, sqlDateToLocalDateTime(), DATE));
     entries.add(entry(GET_TIMESTAMP, sqlTimestampToLocalDateTime(), TIMESTAMP));
     entries.add(entry(GET_LONG, longToLocalDateTime(), BIGINT));
