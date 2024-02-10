@@ -1,22 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PreparedStatementMethod.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.ps</a> &gt; <span class="el_source">PreparedStatementMethod.java</span></div><h1>PreparedStatementMethod.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.ps;
 
-import org.klojang.jdbc.x.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.lang.invoke.MethodHandles.lookup;
-import static java.lang.invoke.MethodHandles.publicLookup;
-import static java.lang.invoke.MethodType.methodType;
 
 /**
  * Represents one of the setXXX() methods of PreparedStatement.
@@ -24,101 +14,105 @@ import static java.lang.invoke.MethodType.methodType;
  * @param &lt;PARAM_TYPE&gt; the type of the value passed to
  *       PreparedStatement.setXXX(parameterIndex, value)
  */
-public final class PreparedStatementMethod&lt;PARAM_TYPE&gt; {
+public abstract class PreparedStatementMethod&lt;PARAM_TYPE&gt; {
 
   @SuppressWarnings({&quot;unused&quot;})
-<span class="fc" id="L30">  private static final Logger LOG = LoggerFactory.getLogger(PreparedStatementMethod.class);</span>
+<span class="fc" id="L20">  private static final Logger LOG = LoggerFactory.getLogger(PreparedStatementMethod.class);</span>
 
-<span class="fc" id="L32">  public static final PreparedStatementMethod&lt;String&gt; SET_STRING</span>
-<span class="fc" id="L33">        = setter(&quot;setString&quot;, String.class);</span>
-<span class="fc" id="L34">  public static final PreparedStatementMethod&lt;Integer&gt; SET_INT</span>
-<span class="fc" id="L35">        = setter(&quot;setInt&quot;, int.class);</span>
-<span class="fc" id="L36">  public static final PreparedStatementMethod&lt;Double&gt; SET_DOUBLE</span>
-<span class="fc" id="L37">        = setter(&quot;setDouble&quot;, double.class);</span>
-<span class="fc" id="L38">  public static final PreparedStatementMethod&lt;Long&gt; SET_LONG</span>
-<span class="fc" id="L39">        = setter(&quot;setLong&quot;, long.class);</span>
-<span class="fc" id="L40">  public static final PreparedStatementMethod&lt;Float&gt; SET_FLOAT</span>
-<span class="fc" id="L41">        = setter(&quot;setFloat&quot;, float.class);</span>
-<span class="fc" id="L42">  public static final PreparedStatementMethod&lt;Short&gt; SET_SHORT</span>
-<span class="fc" id="L43">        = setter(&quot;setShort&quot;, short.class);</span>
-<span class="fc" id="L44">  public static final PreparedStatementMethod&lt;Byte&gt; SET_BYTE</span>
-<span class="fc" id="L45">        = setter(&quot;setByte&quot;, byte.class);</span>
-<span class="fc" id="L46">  public static final PreparedStatementMethod&lt;Boolean&gt; SET_BOOLEAN</span>
-<span class="fc" id="L47">        = setter(&quot;setBoolean&quot;, boolean.class);</span>
-<span class="fc" id="L48">  public static final PreparedStatementMethod&lt;BigDecimal&gt; SET_BIG_DECIMAL</span>
-<span class="fc" id="L49">        = setter(&quot;setBigDecimal&quot;, BigDecimal.class);</span>
-<span class="fc" id="L50">  public static final PreparedStatementMethod&lt;Date&gt; SET_DATE</span>
-<span class="fc" id="L51">        = setter(&quot;setDate&quot;, Date.class);</span>
-<span class="fc" id="L52">  public static final PreparedStatementMethod&lt;Time&gt; SET_TIME</span>
-<span class="fc" id="L53">        = setter(&quot;setTime&quot;, Time.class);</span>
-<span class="fc" id="L54">  public static final PreparedStatementMethod&lt;Timestamp&gt; SET_TIMESTAMP</span>
-<span class="fc" id="L55">        = setter(&quot;setTimestamp&quot;, Timestamp.class);</span>
+  //@formatter:off
+  private static final class SetString extends PreparedStatementMethod&lt;String&gt; {
+<span class="fc" id="L24">    SetString() { super(String.class); }</span>
+<span class="fc" id="L25">    void bindValue(PreparedStatement ps, int idx, String val) throws SQLException { ps.setString(idx, val); }</span>
+  }
+  private static final class SetInt extends PreparedStatementMethod&lt;Integer&gt; {
+<span class="fc" id="L28">    SetInt() { super(int.class); }</span>
+<span class="fc" id="L29">    void bindValue(PreparedStatement ps, int idx, Integer val) throws SQLException { ps.setInt(idx, val); }</span>
+  }
+  private static final class SetDouble extends PreparedStatementMethod&lt;Double&gt; {
+<span class="fc" id="L32">    SetDouble() { super(double.class); }</span>
+<span class="nc" id="L33">    void bindValue(PreparedStatement ps, int idx, Double val) throws SQLException { ps.setDouble(idx, val); }</span>
+  }
+  private static final class SetLong extends PreparedStatementMethod&lt;Long&gt; {
+<span class="fc" id="L36">    SetLong() { super(long.class); }</span>
+<span class="nc" id="L37">    void bindValue(PreparedStatement ps, int idx, Long val) throws SQLException { ps.setLong(idx, val); }</span>
+  }
+  private static final class SetFloat extends PreparedStatementMethod&lt;Float&gt; {
+<span class="fc" id="L40">    SetFloat() { super(float.class); }</span>
+<span class="nc" id="L41">    void bindValue(PreparedStatement ps, int idx, Float val) throws SQLException { ps.setFloat(idx, val); }</span>
+  }
+  private static final class SetShort extends PreparedStatementMethod&lt;Short&gt; {
+<span class="fc" id="L44">    SetShort() { super(short.class); }</span>
+<span class="nc" id="L45">    void bindValue(PreparedStatement ps, int idx, Short val) throws SQLException { ps.setShort(idx, val); }</span>
+  }
+  private static final class SetByte extends PreparedStatementMethod&lt;Byte&gt; {
+<span class="fc" id="L48">    SetByte() { super(byte.class); }</span>
+<span class="nc" id="L49">    void bindValue(PreparedStatement ps, int idx, Byte val) throws SQLException { ps.setByte(idx, val); }</span>
+  }
+  private static final class SetBoolean extends PreparedStatementMethod&lt;Boolean&gt; {
+<span class="fc" id="L52">    SetBoolean() { super(boolean.class); }</span>
+<span class="nc" id="L53">    void bindValue(PreparedStatement ps, int idx, Boolean val) throws SQLException { ps.setBoolean(idx, val); }</span>
+  }
+  private static final class SetBD extends PreparedStatementMethod&lt;BigDecimal&gt; {
+<span class="fc" id="L56">    SetBD() { super(BigDecimal.class); }</span>
+<span class="nc" id="L57">    void bindValue(PreparedStatement ps, int idx, BigDecimal val) throws SQLException { ps.setBigDecimal(idx, val); }</span>
+  }
+  private static final class SetDate extends PreparedStatementMethod&lt;Date&gt; {
+<span class="fc" id="L60">    SetDate() { super(Date.class); }</span>
+<span class="nc" id="L61">    void bindValue(PreparedStatement ps, int idx, Date val) throws SQLException { ps.setDate(idx, val); }</span>
+  }
+  private static final class SetTime extends PreparedStatementMethod&lt;Time&gt; {
+<span class="fc" id="L64">    SetTime() { super(Time.class); }</span>
+<span class="nc" id="L65">    void bindValue(PreparedStatement ps, int idx, Time val) throws SQLException { ps.setTime(idx, val); }</span>
+  }
+  private static final class SetTimestamp extends PreparedStatementMethod&lt;Timestamp&gt; {
+<span class="fc" id="L68">    SetTimestamp() { super(Timestamp.class); }</span>
+<span class="nc" id="L69">    void bindValue(PreparedStatement ps, int idx, Timestamp val) throws SQLException { ps.setTimestamp(idx, val); }</span>
+  }
+  //@formatter:on
 
-<span class="fc" id="L57">  private static final Map&lt;Integer, PreparedStatementMethod&lt;Object&gt;&gt; setObjectMethods = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L73">  public static final PreparedStatementMethod&lt;String&gt; SET_STRING = new SetString();</span>
+<span class="fc" id="L74">  public static final PreparedStatementMethod&lt;Integer&gt; SET_INT = new SetInt();</span>
+<span class="fc" id="L75">  public static final PreparedStatementMethod&lt;Double&gt; SET_DOUBLE = new SetDouble();</span>
+<span class="fc" id="L76">  public static final PreparedStatementMethod&lt;Long&gt; SET_LONG = new SetLong();</span>
+<span class="fc" id="L77">  public static final PreparedStatementMethod&lt;Float&gt; SET_FLOAT = new SetFloat();</span>
+<span class="fc" id="L78">  public static final PreparedStatementMethod&lt;Short&gt; SET_SHORT = new SetShort();</span>
+<span class="fc" id="L79">  public static final PreparedStatementMethod&lt;Byte&gt; SET_BYTE = new SetByte();</span>
+<span class="fc" id="L80">  public static final PreparedStatementMethod&lt;Boolean&gt; SET_BOOLEAN = new SetBoolean();</span>
+<span class="fc" id="L81">  public static final PreparedStatementMethod&lt;BigDecimal&gt; SET_BIG_DECIMAL = new SetBD();</span>
+<span class="fc" id="L82">  public static final PreparedStatementMethod&lt;Date&gt; SET_DATE = new SetDate();</span>
+<span class="fc" id="L83">  public static final PreparedStatementMethod&lt;Time&gt; SET_TIME = new SetTime();</span>
+<span class="fc" id="L84">  public static final PreparedStatementMethod&lt;Timestamp&gt; SET_TIMESTAMP = new SetTimestamp();</span>
 
-  private final String name;
-  private final MethodHandle method;
+<span class="fc" id="L86">  private static final Map&lt;Integer, PreparedStatementMethod&lt;Object&gt;&gt; setObjectMethods = new HashMap&lt;&gt;();</span>
+
   private final Class&lt;PARAM_TYPE&gt; paramType;
-  private final Integer sqlType;
 
-  // Used for all PreparedStatement.setXXX() methods except setObject()
-  private PreparedStatementMethod(String name,
-        MethodHandle method,
-        Class&lt;PARAM_TYPE&gt; paramType) {
-<span class="fc" id="L68">    this(name, method, paramType, null);</span>
-<span class="fc" id="L69">  }</span>
-
-  // Used for PreparedStatement.setObject()
-  private PreparedStatementMethod(
-        String name,
-        MethodHandle method,
-        Class&lt;PARAM_TYPE&gt; paramType,
-<span class="fc" id="L76">        Integer sqlType) {</span>
-<span class="fc" id="L77">    this.name = name;</span>
-<span class="fc" id="L78">    this.method = method;</span>
-<span class="fc" id="L79">    this.paramType = paramType;</span>
-<span class="fc" id="L80">    this.sqlType = sqlType;</span>
-<span class="fc" id="L81">  }</span>
+<span class="fc" id="L90">  private PreparedStatementMethod(Class&lt;PARAM_TYPE&gt; paramType) {</span>
+<span class="fc" id="L91">    this.paramType = paramType;</span>
+<span class="fc" id="L92">  }</span>
 
   Class&lt;PARAM_TYPE&gt; getParamType() {
-<span class="nc" id="L84">    return paramType;</span>
+<span class="nc" id="L95">    return paramType;</span>
   }
 
   public static PreparedStatementMethod&lt;Object&gt; setObject(int targetSqlType) {
-<span class="fc" id="L88">    PreparedStatementMethod&lt;Object&gt; m = setObjectMethods.get(targetSqlType);</span>
-<span class="pc bpc" id="L89" title="1 of 2 branches missed.">    if (m == null) {</span>
-<span class="fc" id="L90">      MethodType mt = methodType(void.class, int.class, Object.class, int.class);</span>
-      MethodHandle mh;
-      try {
-<span class="fc" id="L93">        mh = publicLookup().findVirtual(PreparedStatement.class, &quot;setObject&quot;, mt);</span>
-<span class="nc" id="L94">      } catch (NoSuchMethodException | IllegalAccessException e) {</span>
-<span class="nc" id="L95">        throw Utils.wrap(e);</span>
-<span class="fc" id="L96">      }</span>
-<span class="fc" id="L97">      m = new PreparedStatementMethod&lt;&gt;(&quot;setObject&quot;, mh, Object.class, targetSqlType);</span>
-<span class="fc" id="L98">      setObjectMethods.put(targetSqlType, m);</span>
+<span class="fc" id="L99">    PreparedStatementMethod&lt;Object&gt; m = setObjectMethods.get(targetSqlType);</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">    if (m == null) {</span>
+<span class="fc" id="L101">      m = new PreparedStatementMethod&lt;&gt;(Object.class) {</span>
+
+        @Override
+        void bindValue(PreparedStatement ps, int paramIndex, Object paramValue)
+              throws SQLException {
+<span class="nc" id="L106">          ps.setObject(paramIndex, paramValue, targetSqlType);</span>
+<span class="nc" id="L107">        }</span>
+      };
+<span class="fc" id="L109">      setObjectMethods.put(targetSqlType, m);</span>
     }
-<span class="fc" id="L100">    return m;</span>
+<span class="fc" id="L111">    return m;</span>
   }
 
-  void bindValue(PreparedStatement ps, int paramIndex, PARAM_TYPE paramValue)
-        throws Throwable {
-<span class="pc bpc" id="L105" title="1 of 2 branches missed.">    if (sqlType == null) {</span>
-<span class="fc" id="L106">      method.invoke(ps, paramIndex, paramValue);</span>
-    } else /* setObject() */ {
-<span class="nc" id="L108">      method.invoke(ps, paramIndex, paramValue, sqlType);</span>
-    }
-<span class="fc" id="L110">  }</span>
+  abstract void bindValue(PreparedStatement ps, int paramIndex, PARAM_TYPE paramValue)
+        throws SQLException;
 
-  private static &lt;X&gt; PreparedStatementMethod&lt;X&gt; setter(String methodName,
-        Class&lt;X&gt; paramType) {
-<span class="fc" id="L114">    MethodType mt = methodType(void.class, int.class, paramType);</span>
-    MethodHandle mh;
-    try {
-<span class="fc" id="L117">      mh = lookup().findVirtual(PreparedStatement.class, methodName, mt);</span>
-<span class="nc" id="L118">    } catch (NoSuchMethodException | IllegalAccessException e) {</span>
-<span class="nc" id="L119">      throw Utils.wrap(e);</span>
-<span class="fc" id="L120">    }</span>
-<span class="fc" id="L121">    return new PreparedStatementMethod&lt;&gt;(methodName, mh, paramType);</span>
-  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
