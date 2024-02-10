@@ -71,7 +71,7 @@ Klojang JDBC,org.klojang.jdbc.x,JDBC,33,122,3,8,9,26,5,10,2,6
 Klojang JDBC,org.klojang.jdbc.x,Strings,6,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x,SQLCache,33,33,0,0,8,6,3,3,3,3
 Klojang JDBC,org.klojang.jdbc.x,Utils,92,4,6,0,14,1,12,1,8,1
-Klojang JDBC,org.klojang.jdbc.util,SQLTypeUtil,43,91,0,2,7,16,6,6,6,5
+Klojang JDBC,org.klojang.jdbc.util,SQLTypeUtil,7,150,0,2,3,23,1,13,1,12
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,BooleanReaderLookup,0,110,0,0,0,10,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,DoubleReaderLookup,18,95,2,0,0,10,4,5,3,5
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,ByteReaderLookup,39,124,2,0,0,18,8,9,7,9

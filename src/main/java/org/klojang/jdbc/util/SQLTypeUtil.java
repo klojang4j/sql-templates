@@ -85,18 +85,30 @@ public final class SQLTypeUtil {
    *
    * @return the names of all constants, sorted alphabetically
    */
-  public static String[] getAllTypeName() {
+  public static String[] getAllTypeNames() {
     return reverse.keySet().toArray(String[]::new);
   }
 
   /**
-   * Prints the values and names of all constants.
+   * Prints the values and names of all constants in ascending order of the values of the
+   * constants.
    *
    * @param out the {@code PrintStream} to write to
    */
   public static void printAll(PrintStream out) {
     Check.notNull(out);
     cache.forEach((k, v) -> out.printf("%5d : %s%n", k, v));
+  }
+
+  /**
+   * Prints the names and values of all constants, sorted alphabetically on the names of
+   * the constants.
+   *
+   * @param out the {@code PrintStream} to write to
+   */
+  public static void printAllNames(PrintStream out) {
+    Check.notNull(out);
+    reverse.forEach((k, v) -> out.printf("%23s : %d%n", k, v));
   }
 
   private static final Map<Integer, String> cache;
