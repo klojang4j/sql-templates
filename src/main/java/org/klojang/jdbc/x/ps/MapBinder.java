@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.klojang.jdbc.BindInfo.ManualBinder;
+import static org.klojang.jdbc.BindInfo.CustomBinder;
 
 /**
  * Binds the values within in a Map to a PreparedStatement.
@@ -39,17 +39,14 @@ public final class MapBinder {
       }
       bound.add(param);
       Object val = map.get(key);
-      final ManualBinder manual;
-      if (val != null) {
-        manual = bindInfo.getManualBinder(val.getClass(), map.getClass(), key);
-      } else {
-        manual = null;
-      }
-      if (manual != null) {
+      CustomBinder cb = val == null
+            ? null
+            : bindInfo.getCustomBinder(val.getClass(), map.getClass(), key);
+      if (cb != null) {
         if (LOG.isTraceEnabled()) {
-          LOG.trace("==> Parameter \"{}\": {} (manually bound)", key, val);
+          LOG.trace("==> Parameter \"{}\": {} (using custom binder)", key, val);
         }
-        param.positions().forEachThrowing(i -> manual.bind(ps, i, val));
+        param.positions().forEachThrowing(i -> cb.bind(ps, i, val));
       } else {
         ValueBinder vb = findBinder(map, key, val);
         Object output = vb.getParamValue(val);

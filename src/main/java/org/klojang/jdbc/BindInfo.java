@@ -24,14 +24,21 @@ import java.util.Map;
 public interface BindInfo {
 
   /**
-   * A {@code ManualBinder} gives you full control over how values are bound to a
-   * {@link PreparedStatement}. They essentially bypass all <i>Klojang JDBC</i> logic and
-   * give you direct access to the {@link PreparedStatement}, the parameter index and the
-   * value to be bound. If you find yourself creating a lot of them, <i>Klojang JDBC</i>
-   * may not be for you.
+   * A {@code CustomBinder} gives you full control over how values are bound to a
+   * {@link PreparedStatement}. It essentially just hands you the underlying
+   * {@link PreparedStatement} so you can bind the values yourself. Of course, since you
+   * are now in control of the {@code PreparedStatement}, you can do anything you like
+   * with it, including closing it. <i>Klojang JDBC</i> will not be resistant against such
+   * behaviour. A {@code CustomBinder} can be used, for example, to apply last-minute
+   * transformations to the value that is about to be bound, or to serialize it in a
+   * bespoke way, or to map it to a non-standard SQL datatype. When binding values in a
+   * {@code Map} (using {@link SQLStatement#bind(Map)}), custom binders will only kick in
+   * for non-{@code null} map values, because Java's type erase feature prevents the type
+   * of the values from being established beforehand. When binding values in a JavaBean or
+   * {@code record}, custom binders will kick in even for {@code null} values.
    */
   @FunctionalInterface
-  interface ManualBinder {
+  interface CustomBinder {
     /**
      * Sets the value of the designated parameter using the given value.
      *
@@ -46,12 +53,12 @@ public interface BindInfo {
   }
 
   /**
-   * A {@code BindInfo} that does not override the default binding behaviour.
+   * A {@code BindInfo} object which does not override the default binding behaviour.
    */
   BindInfo DEFAULT = new BindInfo() { };
 
   /**
-   * Allows you to specify a {@code ManualBinder} for a given Java type. The default
+   * Allows you to specify a {@code CustomBinder} for a given Java type. The default
    * implementation returns {@code null}, meaning you leave it to <i>Klojang JDBC</i> to
    * bind values to the underlying {@link PreparedStatement}, whatever the type of the
    * values, whatever the property, record component or map key that the values are
@@ -59,18 +66,18 @@ public interface BindInfo {
    * values. You may ignore any argument that you don't need in order to determine whether
    * to use a {@code ManualBinder}.
    *
-   * @param javaType the type of the values for which you want to override the
-   *       normal binding behaviour.
+   * @param javaType the type of the values for which you want to do the binding
+   *       yourself
    * @param containerType the class containing the values. May be a JavaBean type, a
    *       {@code record} type, or the type of the {@code Map} being bound using
    *       {@link SQLStatement#bind(Map)}. In the latter case, it will always be the
    *       concrete type of the {@code Map} (e.g. {@code HashMap.class}) &#8212; never
    *       {@code Map.class} itself.
    * @param name the name of the bean property, record component, or map key for
-   *       which to override the normal binding behaviour
-   * @return a {@code ManualBinder} for any or all of the provided arguments
+   *       which you want to do the binding yourself
+   * @return a {@code CustomBinder} for any or all of the provided arguments
    */
-  default ManualBinder getManualBinder(Class<?> javaType,
+  default CustomBinder getCustomBinder(Class<?> javaType,
         Class<?> containerType,
         String name) {
     return null;

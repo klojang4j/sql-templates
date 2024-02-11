@@ -37,7 +37,7 @@ Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetObjectWithTargetTy
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod,8,62,0,0,2,17,2,2,2,2
 Klojang JDBC,org.klojang.jdbc.x.ps,ValueBinder,18,55,3,3,2,19,4,7,1,7
 Klojang JDBC,org.klojang.jdbc.x.ps,PropertyBinder,96,173,13,11,20,37,12,9,2,7
-Klojang JDBC,org.klojang.jdbc.x.ps,MapBinder,64,110,14,10,9,26,12,6,1,5
+Klojang JDBC,org.klojang.jdbc.x.ps,MapBinder,64,109,14,10,9,26,12,6,1,5
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetString,0,9,0,0,0,2,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetByte,6,4,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetTime,5,4,0,0,1,1,1,1,1,1

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.klojang.jdbc.BindInfo.ManualBinder;
+import static org.klojang.jdbc.BindInfo.CustomBinder;
 import static org.klojang.util.ClassMethods.isSubtype;
 
 
@@ -54,9 +54,9 @@ final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
 <span class="fc" id="L54">      bound.add(param);</span>
 <span class="fc" id="L55">      String property = param.name();</span>
 <span class="fc" id="L56">      Class type = getter.getReturnType();</span>
-<span class="fc" id="L57">      ManualBinder manual = bindInfo.getManualBinder(type, beanClass, property);</span>
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">      if (manual != null) {</span>
-<span class="nc" id="L59">        PropertyBinder pb = new PropertyBinder(getter, param, manual);</span>
+<span class="fc" id="L57">      CustomBinder custom = bindInfo.getCustomBinder(type, beanClass, property);</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">      if (custom != null) {</span>
+<span class="nc" id="L59">        PropertyBinder pb = new PropertyBinder(getter, param, custom);</span>
 <span class="nc" id="L60">        readers.add(pb);</span>
 <span class="nc" id="L61">      } else {</span>
         final ValueBinder vb;
@@ -83,31 +83,31 @@ final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
   private final Getter getter;
   private final ValueBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; binder;
   private final NamedParameter param;
-  private final ManualBinder manual;
+  private final CustomBinder custom;
 
   private PropertyBinder(Getter getter,
 <span class="fc" id="L89">        NamedParameter param, ValueBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; binder) {</span>
 <span class="fc" id="L90">    this.getter = getter;</span>
 <span class="fc" id="L91">    this.param = param;</span>
 <span class="fc" id="L92">    this.binder = binder;</span>
-<span class="fc" id="L93">    this.manual = null;</span>
+<span class="fc" id="L93">    this.custom = null;</span>
 <span class="fc" id="L94">  }</span>
 
-<span class="nc" id="L96">  private PropertyBinder(Getter getter, NamedParameter param, ManualBinder manual) {</span>
+<span class="nc" id="L96">  private PropertyBinder(Getter getter, NamedParameter param, CustomBinder custom) {</span>
 <span class="nc" id="L97">    this.getter = getter;</span>
 <span class="nc" id="L98">    this.param = param;</span>
-<span class="nc" id="L99">    this.manual = manual;</span>
+<span class="nc" id="L99">    this.custom = custom;</span>
 <span class="nc" id="L100">    this.binder = null;</span>
 <span class="nc" id="L101">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
   private &lt;T&gt; void bindProperty(PreparedStatement ps, T bean) throws Throwable {
 <span class="fc" id="L105">    INPUT_TYPE beanValue = (INPUT_TYPE) getter.read(bean);</span>
-<span class="pc bpc" id="L106" title="1 of 2 branches missed.">    if (manual != null) {</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">    if (custom != null) {</span>
 <span class="nc bnc" id="L107" title="All 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
-<span class="nc" id="L108">        LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (manually bound)&quot;, param.name(), beanValue);</span>
+<span class="nc" id="L108">        LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (using custom binder)&quot;, param.name(), beanValue);</span>
       }
-<span class="nc" id="L110">      param.positions().forEachThrowing(i -&gt; manual.bind(ps, i, beanValue));</span>
+<span class="nc" id="L110">      param.positions().forEachThrowing(i -&gt; custom.bind(ps, i, beanValue));</span>
     } else {
 <span class="fc" id="L112">      PARAM_TYPE paramValue = binder.getParamValue(beanValue);</span>
 <span class="pc bpc" id="L113" title="1 of 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>

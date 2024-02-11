@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.klojang.jdbc.BindInfo.ManualBinder;
+import static org.klojang.jdbc.BindInfo.CustomBinder;
 import static org.klojang.util.ClassMethods.isSubtype;
 
 
@@ -54,9 +54,9 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
       bound.add(param);
       String property = param.name();
       Class type = getter.getReturnType();
-      ManualBinder manual = bindInfo.getManualBinder(type, beanClass, property);
-      if (manual != null) {
-        PropertyBinder pb = new PropertyBinder(getter, param, manual);
+      CustomBinder custom = bindInfo.getCustomBinder(type, beanClass, property);
+      if (custom != null) {
+        PropertyBinder pb = new PropertyBinder(getter, param, custom);
         readers.add(pb);
       } else {
         final ValueBinder vb;
@@ -83,31 +83,31 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
   private final Getter getter;
   private final ValueBinder<INPUT_TYPE, PARAM_TYPE> binder;
   private final NamedParameter param;
-  private final ManualBinder manual;
+  private final CustomBinder custom;
 
   private PropertyBinder(Getter getter,
         NamedParameter param, ValueBinder<INPUT_TYPE, PARAM_TYPE> binder) {
     this.getter = getter;
     this.param = param;
     this.binder = binder;
-    this.manual = null;
+    this.custom = null;
   }
 
-  private PropertyBinder(Getter getter, NamedParameter param, ManualBinder manual) {
+  private PropertyBinder(Getter getter, NamedParameter param, CustomBinder custom) {
     this.getter = getter;
     this.param = param;
-    this.manual = manual;
+    this.custom = custom;
     this.binder = null;
   }
 
   @SuppressWarnings("unchecked")
   private <T> void bindProperty(PreparedStatement ps, T bean) throws Throwable {
     INPUT_TYPE beanValue = (INPUT_TYPE) getter.read(bean);
-    if (manual != null) {
+    if (custom != null) {
       if (LOG.isTraceEnabled()) {
-        LOG.trace("==> Parameter \"{}\": {} (manually bound)", param.name(), beanValue);
+        LOG.trace("==> Parameter \"{}\": {} (using custom binder)", param.name(), beanValue);
       }
-      param.positions().forEachThrowing(i -> manual.bind(ps, i, beanValue));
+      param.positions().forEachThrowing(i -> custom.bind(ps, i, beanValue));
     } else {
       PARAM_TYPE paramValue = binder.getParamValue(beanValue);
       if (LOG.isTraceEnabled()) {
