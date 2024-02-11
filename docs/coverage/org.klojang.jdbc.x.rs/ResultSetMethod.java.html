@@ -84,7 +84,7 @@ import java.util.Map;
 <span class="fc" id="L84">  private static final Map&lt;Class, ResultSetMethod&gt; objectGetters = new HashMap&lt;&gt;();</span>
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
-  public static &lt;T&gt; ResultSetMethod&lt;T&gt; objectGetter(Class&lt;T&gt; returnType) {
+  public static &lt;T&gt; ResultSetMethod&lt;T&gt; getObjectGetter(Class&lt;T&gt; returnType) {
 <span class="fc" id="L88">    return objectGetters.computeIfAbsent(returnType, GetObject::new);</span>
   }
 

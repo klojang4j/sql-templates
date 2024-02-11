@@ -16,7 +16,7 @@ public final class UUIDReaderLookup extends AbstractColumnReaderLookup<UUID> {
   @Override
   List<Entry<Integer, ColumnReader<?, UUID>>> getColumnReaders() {
     List<Entry<Integer, ColumnReader<?, UUID>>> entries = new ArrayList<>();
-    entries.add(entry(objectGetter(UUID.class), OTHER));
+    entries.add(entry(getObjectGetter(UUID.class), OTHER));
     entries.addAll(entries(GET_STRING, stringToUUID(), VARCHAR, CHAR, BINARY));
     return entries;
   }

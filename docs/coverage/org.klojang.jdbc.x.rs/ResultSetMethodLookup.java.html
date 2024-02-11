@@ -68,15 +68,15 @@ final class ResultSetMethodLookup {
 <span class="nc" id="L68">    tmp.put(DATE, ResultSetMethod.GET_DATE);</span>
 <span class="nc" id="L69">    tmp.put(TIME, ResultSetMethod.GET_TIME);</span>
 
-<span class="nc" id="L71">    tmp.put(TIMESTAMP, ResultSetMethod.objectGetter(LocalDateTime.class));</span>
-<span class="nc" id="L72">    tmp.put(TIMESTAMP_WITH_TIMEZONE, ResultSetMethod.objectGetter(OffsetDateTime.class));</span>
+<span class="nc" id="L71">    tmp.put(TIMESTAMP, ResultSetMethod.getObjectGetter(LocalDateTime.class));</span>
+<span class="nc" id="L72">    tmp.put(TIMESTAMP_WITH_TIMEZONE, ResultSetMethod.getObjectGetter(OffsetDateTime.class));</span>
 
 <span class="nc" id="L74">    tmp.put(NUMERIC, ResultSetMethod.GET_BIG_DECIMAL);</span>
 <span class="nc" id="L75">    tmp.put(DECIMAL, ResultSetMethod.GET_BIG_DECIMAL);</span>
 
 <span class="nc" id="L77">    tmp.put(BINARY, ResultSetMethod.GET_BYTES);</span>
 
-<span class="nc" id="L79">    tmp.put(ARRAY, ResultSetMethod.objectGetter(Object[].class));</span>
+<span class="nc" id="L79">    tmp.put(ARRAY, ResultSetMethod.getObjectGetter(Object[].class));</span>
 
 <span class="nc" id="L81">    return Map.copyOf(tmp);</span>
   }

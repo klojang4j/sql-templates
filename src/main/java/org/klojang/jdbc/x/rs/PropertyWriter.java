@@ -44,7 +44,7 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
     if (LOG.isTraceEnabled()) {
       log(beanClass, rs, setters);
     }
-    ColumnReaderFactory negotiator = ColumnReaderFactory.getInstance();
+    ColumnReaderFactory factory = ColumnReaderFactory.getInstance();
     try {
       ResultSetMetaData rsmd = rs.getMetaData();
       int sz = rsmd.getColumnCount();
@@ -64,7 +64,7 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
           continue;
         }
         Class<?> javaType = setter.getParamType();
-        ColumnReader<?, ?> columnReader = negotiator.getReader(javaType, sqlType);
+        ColumnReader<?, ?> columnReader = factory.getReader(javaType, sqlType);
         writers.add(new PropertyWriter<>(columnReader, columnIndex, setter));
       }
       return writers.toArray(PropertyWriter[]::new);

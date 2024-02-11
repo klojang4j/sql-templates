@@ -44,7 +44,7 @@ public class PropertyWriter&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
 <span class="pc bpc" id="L44" title="1 of 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
 <span class="fc" id="L45">      log(beanClass, rs, setters);</span>
     }
-<span class="fc" id="L47">    ColumnReaderFactory negotiator = ColumnReaderFactory.getInstance();</span>
+<span class="fc" id="L47">    ColumnReaderFactory factory = ColumnReaderFactory.getInstance();</span>
     try {
 <span class="fc" id="L49">      ResultSetMetaData rsmd = rs.getMetaData();</span>
 <span class="fc" id="L50">      int sz = rsmd.getColumnCount();</span>
@@ -64,7 +64,7 @@ public class PropertyWriter&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
           continue;
         }
 <span class="fc" id="L66">        Class&lt;?&gt; javaType = setter.getParamType();</span>
-<span class="fc" id="L67">        ColumnReader&lt;?, ?&gt; columnReader = negotiator.getReader(javaType, sqlType);</span>
+<span class="fc" id="L67">        ColumnReader&lt;?, ?&gt; columnReader = factory.getReader(javaType, sqlType);</span>
 <span class="fc" id="L68">        writers.add(new PropertyWriter&lt;&gt;(columnReader, columnIndex, setter));</span>
       }
 <span class="fc" id="L70">      return writers.toArray(PropertyWriter[]::new);</span>

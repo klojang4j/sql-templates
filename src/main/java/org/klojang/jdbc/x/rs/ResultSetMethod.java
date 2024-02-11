@@ -84,7 +84,7 @@ public abstract sealed class ResultSetMethod<COLUMN_TYPE> {
   private static final Map<Class, ResultSetMethod> objectGetters = new HashMap<>();
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public static <T> ResultSetMethod<T> objectGetter(Class<T> returnType) {
+  public static <T> ResultSetMethod<T> getObjectGetter(Class<T> returnType) {
     return objectGetters.computeIfAbsent(returnType, GetObject::new);
   }
 

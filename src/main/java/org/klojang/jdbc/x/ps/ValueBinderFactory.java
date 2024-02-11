@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.ps;
 
 import org.klojang.collections.TypeMap;
-import org.klojang.jdbc.x.Err;
+import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.ps.writer.*;
 import org.klojang.util.Tuple2;
 import org.slf4j.Logger;
@@ -25,12 +25,11 @@ final class ValueBinderFactory {
 
   static ValueBinderFactory getInstance() { return INSTANCE; }
 
-
-  private final Map<Class<?>, Map<Integer, ValueBinder>> allBinders;
-  private final Map<Tuple2<Class<?>, Integer>, ValueBinder> customBinders = new HashMap();
+  private final Map<Class, Map<Integer, ValueBinder>> predefinedBinders;
+  private final Map<Tuple2<Class, Integer>, ValueBinder> customBinders = new HashMap();
 
   private ValueBinderFactory() {
-    allBinders = (Map<Class<?>, Map<Integer, ValueBinder>>) createBinders();
+    predefinedBinders = (Map<Class, Map<Integer, ValueBinder>>) createBinders();
   }
 
   <T, U> ValueBinder<T, U> getDefaultBinder(Class<T> fieldType) {
@@ -38,23 +37,23 @@ final class ValueBinderFactory {
   }
 
   <T, U> ValueBinder<T, U> getBinder(Class<T> inputType, int targetSqlType) {
-    Map<Integer, ValueBinder> binders = allBinders.get(inputType);
+    Map<Integer, ValueBinder> binders = predefinedBinders.get(inputType);
     ValueBinder binder;
     if (binders == null) {
-      Tuple2<Class<?>, Integer> key = Tuple2.of(inputType, targetSqlType);
+      Tuple2<Class, Integer> key = Tuple2.of(inputType, targetSqlType);
       binder = customBinders.get(key);
       if (binder == null) {
-        LOG.trace(Err.NO_PREDEFINED_BINDER, inputType.getName());
+        LOG.trace(Msg.NO_PREDEFINED_BINDER, inputType.getName());
         binder = new ValueBinder<>(getObjectSetter(targetSqlType));
         customBinders.put(key, binder);
       }
     } else {
       binder = binders.get(targetSqlType);
       if (binder == null) {
-        Tuple2<Class<?>, Integer> key = Tuple2.of(inputType, targetSqlType);
+        Tuple2<Class, Integer> key = Tuple2.of(inputType, targetSqlType);
         binder = customBinders.get(key);
         if (binder == null) {
-          LOG.trace(Err.NO_PREDEFINED_TYPE_MAPPING,
+          LOG.trace(Msg.NO_PREDEFINED_TYPE_MAPPING,
                 inputType.getName(),
                 getTypeName(targetSqlType));
           binder = new ValueBinder<>(getObjectSetter(targetSqlType));

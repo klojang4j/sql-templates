@@ -99,6 +99,7 @@ Klojang JDBC,org.klojang.jdbc.x,Err,6,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x,Strings,6,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x,JDBC,33,122,3,8,9,26,5,10,2,6
 Klojang JDBC,org.klojang.jdbc.x,SQLCache,33,33,0,0,8,6,3,3,3,3
+Klojang JDBC,org.klojang.jdbc.x,Msg,6,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x,Utils,92,4,6,0,14,1,12,1,8,1
 Klojang JDBC,org.klojang.jdbc.util,SQLTypeUtil,19,150,2,2,6,23,3,13,2,12
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,BooleanReaderLookup,0,110,0,0,0,10,0,2,0,2
@@ -113,5 +114,5 @@ Klojang JDBC,org.klojang.jdbc.x.rs.reader,DoubleReaderLookup,18,95,2,0,0,10,4,5,
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,LongReaderLookup,48,132,6,0,6,18,10,9,7,9
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,ShortReaderLookup,39,124,2,0,0,18,8,9,7,9
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,BigDecimalReaderLookup,44,112,10,0,0,14,10,7,5,7
-Klojang JDBC,org.klojang.jdbc.x.rs.reader,LocalDateReaderLookup,23,61,5,1,1,10,6,6,3,6
+Klojang JDBC,org.klojang.jdbc.x.rs.reader,LocalDateReaderLookup,31,63,7,1,1,11,8,7,4,7
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,EnumReaderLookup,115,63,10,0,17,10,10,4,5,4

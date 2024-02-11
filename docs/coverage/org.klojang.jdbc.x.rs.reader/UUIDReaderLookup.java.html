@@ -16,7 +16,7 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
   @Override
   List&lt;Entry&lt;Integer, ColumnReader&lt;?, UUID&gt;&gt;&gt; getColumnReaders() {
 <span class="fc" id="L18">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, UUID&gt;&gt;&gt; entries = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L19">    entries.add(entry(objectGetter(UUID.class), OTHER));</span>
+<span class="fc" id="L19">    entries.add(entry(getObjectGetter(UUID.class), OTHER));</span>
 <span class="fc" id="L20">    entries.addAll(entries(GET_STRING, stringToUUID(), VARCHAR, CHAR, BINARY));</span>
 <span class="fc" id="L21">    return entries;</span>
   }

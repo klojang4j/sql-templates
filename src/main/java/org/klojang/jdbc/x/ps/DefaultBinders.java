@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.ps;
 
 import org.klojang.collections.TypeMap;
-import org.klojang.jdbc.x.Err;
+import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.ps.writer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ final class DefaultBinders {
   ValueBinder getDefaultBinder(Class forType) {
     ValueBinder binder = defaults.get(forType);
     if (binder == null) {
-      LOG.trace(Err.NO_PREDEFINED_BINDER, forType.getName());
+      LOG.trace(Msg.NO_PREDEFINED_BINDER, forType.getName());
       return LAST_RESORT;
     }
     return binder;

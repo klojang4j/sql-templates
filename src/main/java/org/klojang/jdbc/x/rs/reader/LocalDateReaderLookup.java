@@ -3,6 +3,7 @@ package org.klojang.jdbc.x.rs.reader;
 import org.klojang.jdbc.x.rs.ColumnReader;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,14 +21,18 @@ public final class LocalDateReaderLookup extends AbstractColumnReaderLookup<Loca
   List<Entry<Integer, ColumnReader<?, LocalDate>>> getColumnReaders() {
     List<Entry<Integer, ColumnReader<?, LocalDate>>> entries = new ArrayList<>();
     entries.add(entry(GET_DATE, sqlDateToLocalDate(), DATE));
+    entries.add(entry(GET_TIMESTAMP, timestampToLocalDate(), TIMESTAMP));
     entries.add(entry(GET_LONG, longToLocalDate(), BIGINT));
-    entries.add(entry(objectGetter(LocalDate.class), TIMESTAMP));
     entries.addAll(entries(GET_STRING, stringToLocalDate(), VARCHAR, CHAR));
     return entries;
   }
 
   private static Function<Date, LocalDate> sqlDateToLocalDate() {
     return x -> x == null ? null : x.toLocalDate();
+  }
+
+  private static Function<Timestamp, LocalDate> timestampToLocalDate() {
+    return x -> x == null ? null : x.toLocalDateTime().toLocalDate();
   }
 
   private static Function<Long, LocalDate> longToLocalDate() {

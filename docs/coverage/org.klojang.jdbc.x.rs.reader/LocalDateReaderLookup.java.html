@@ -3,6 +3,7 @@
 import org.klojang.jdbc.x.rs.ColumnReader;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,32 +15,36 @@ import static java.time.ZoneId.systemDefault;
 import static java.util.Map.Entry;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 
-<span class="fc" id="L17">public final class LocalDateReaderLookup extends AbstractColumnReaderLookup&lt;LocalDate&gt; {</span>
+<span class="fc" id="L18">public final class LocalDateReaderLookup extends AbstractColumnReaderLookup&lt;LocalDate&gt; {</span>
 
   @Override
   List&lt;Entry&lt;Integer, ColumnReader&lt;?, LocalDate&gt;&gt;&gt; getColumnReaders() {
-<span class="fc" id="L21">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, LocalDate&gt;&gt;&gt; entries = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L22">    entries.add(entry(GET_DATE, sqlDateToLocalDate(), DATE));</span>
-<span class="fc" id="L23">    entries.add(entry(GET_LONG, longToLocalDate(), BIGINT));</span>
-<span class="fc" id="L24">    entries.add(entry(objectGetter(LocalDate.class), TIMESTAMP));</span>
-<span class="fc" id="L25">    entries.addAll(entries(GET_STRING, stringToLocalDate(), VARCHAR, CHAR));</span>
-<span class="fc" id="L26">    return entries;</span>
+<span class="fc" id="L22">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, LocalDate&gt;&gt;&gt; entries = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L23">    entries.add(entry(GET_DATE, sqlDateToLocalDate(), DATE));</span>
+<span class="fc" id="L24">    entries.add(entry(GET_TIMESTAMP, timestampToLocalDate(), TIMESTAMP));</span>
+<span class="fc" id="L25">    entries.add(entry(GET_LONG, longToLocalDate(), BIGINT));</span>
+<span class="fc" id="L26">    entries.addAll(entries(GET_STRING, stringToLocalDate(), VARCHAR, CHAR));</span>
+<span class="fc" id="L27">    return entries;</span>
   }
 
   private static Function&lt;Date, LocalDate&gt; sqlDateToLocalDate() {
-<span class="pc bpc" id="L30" title="1 of 2 branches missed.">    return x -&gt; x == null ? null : x.toLocalDate();</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">    return x -&gt; x == null ? null : x.toLocalDate();</span>
+  }
+
+  private static Function&lt;Timestamp, LocalDate&gt; timestampToLocalDate() {
+<span class="pc bnc" id="L35" title="All 2 branches missed.">    return x -&gt; x == null ? null : x.toLocalDateTime().toLocalDate();</span>
   }
 
   private static Function&lt;Long, LocalDate&gt; longToLocalDate() {
-<span class="pc bnc" id="L34" title="All 2 branches missed.">    return x -&gt; x == null ? null : asEpochMillis(x);</span>
+<span class="pc bnc" id="L39" title="All 2 branches missed.">    return x -&gt; x == null ? null : asEpochMillis(x);</span>
   }
 
   private static Function&lt;String, LocalDate&gt; stringToLocalDate() {
-<span class="pc bnc" id="L38" title="All 2 branches missed.">    return x -&gt; x == null ? null : LocalDate.parse(x);</span>
+<span class="pc bnc" id="L43" title="All 2 branches missed.">    return x -&gt; x == null ? null : LocalDate.parse(x);</span>
   }
 
   private static LocalDate asEpochMillis(Long x) {
-<span class="nc" id="L42">    return Instant.ofEpochSecond(x).atZone(systemDefault()).toLocalDate();</span>
+<span class="nc" id="L47">    return Instant.ofEpochSecond(x).atZone(systemDefault()).toLocalDate();</span>
   }
 
 

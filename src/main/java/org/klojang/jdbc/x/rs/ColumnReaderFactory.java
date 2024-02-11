@@ -2,6 +2,7 @@ package org.klojang.jdbc.x.rs;
 
 import org.klojang.collections.TypeMap;
 import org.klojang.jdbc.DatabaseException;
+import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.reader.*;
 import org.slf4j.Logger;
@@ -36,8 +37,6 @@ public class ColumnReaderFactory {
 
   private static final String TYPE_NOT_SUPPORTED = "type not supported: ${0}";
   private static final String NOT_CONVERTIBLE = "cannot convert ${0} to ${1}";
-  private static final String NO_PREDEFINED_COLUMN_READER
-        = "No predefined ColumnReader exists for {}. Searching for factory method on {}";
 
   private static ColumnReaderFactory INSTANCE;
 
@@ -104,7 +103,7 @@ public class ColumnReaderFactory {
     if (reader != null) {
       return reader;
     }
-    LOG.trace(NO_PREDEFINED_COLUMN_READER, className(cls), simpleClassName(cls));
+    LOG.trace(Msg.NO_PREDEFINED_COLUMN_READER, className(cls), simpleClassName(cls));
     MethodHandle mh = findFactoryMethod(cls);
     if (mh == null) {
       mh = findConstructor(cls);
