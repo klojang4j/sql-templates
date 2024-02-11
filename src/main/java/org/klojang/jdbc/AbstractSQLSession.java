@@ -8,7 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
+import static org.klojang.jdbc.x.Msg.EXECUTING_SQL;
 
 abstract sealed class AbstractSQLSession implements SQLSession
       permits SimpleSQLSession, DynamicSQLSession {

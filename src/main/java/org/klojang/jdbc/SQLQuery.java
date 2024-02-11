@@ -2,6 +2,7 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.check.aux.Result;
+import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderFactory;
@@ -17,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
-
-import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
 
 /**
  * <p>Facilitates the execution of SQL SELECT statements. {@code SQLQuery} instances are
@@ -339,7 +338,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   private void executeSQL() throws Throwable {
     if (resultSet == null) {
-      LOG.trace(EXECUTING_SQL, sqlInfo.sql());
+      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
       applyBindings(ps);
       resultSet = ps.executeQuery();
     }

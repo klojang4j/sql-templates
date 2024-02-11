@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.klojang.jdbc.BindInfo.ManualBinder;
+
 /**
  * Binds the values within in a Map to a PreparedStatement.
  */
 public final class MapBinder {
 
   private static final Logger LOG = LoggerFactory.getLogger(MapBinder.class);
-
-  private static final Object ABSENT = new Object();
 
   private final List<NamedParameter> params;
   private final BindInfo bindInfo;
@@ -38,22 +38,34 @@ public final class MapBinder {
         continue;
       }
       bound.add(param);
-      Object val = map.getOrDefault(key, ABSENT);
-      if (val != ABSENT) {
-        ValueBinder binder = findBinder(map, key, val);
-        Object output = binder.getParamValue(val);
+      Object val = map.get(key);
+      final ManualBinder manual;
+      if (val != null) {
+        manual = bindInfo.getManualBinder(val.getClass(), map.getClass(), key);
+      } else {
+        manual = null;
+      }
+      if (manual != null) {
         if (LOG.isTraceEnabled()) {
-          if (binder.isAdaptive() && output != val) {
-            LOG.trace("==> Parameter \"{}\": {} (map value: {})", key, output, val);
+          LOG.trace("==> Parameter \"{}\": {} (manually bound)", key, val);
+        }
+        param.positions().forEachThrowing(i -> manual.bind(ps, i, val));
+      } else {
+        ValueBinder vb = findBinder(map, key, val);
+        Object output = vb.getParamValue(val);
+        if (LOG.isTraceEnabled()) {
+          if (vb.isAdaptive() && output != val) {
+            LOG.trace("==> Parameter \"{}\": {} (original value: {})", key, output, val);
           } else {
             LOG.trace("==> Parameter \"{}\": {}", key, output);
           }
         }
-        param.positions().forEachThrowing(i -> binder.bind(ps, i, output));
+        param.positions().forEachThrowing(i -> vb.bind(ps, i, output));
       }
     }
   }
 
+  @SuppressWarnings("rawtypes")
   ValueBinder findBinder(Map<String, Object> map, String key, Object val) {
     if (val == null) {
       // Return any ValueBinder. For null values *all* binders will just call

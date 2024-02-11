@@ -53,9 +53,11 @@ final class ValueBinderFactory {
         Tuple2<Class, Integer> key = Tuple2.of(inputType, targetSqlType);
         binder = custom.get(key);
         if (binder == null) {
-          LOG.trace(Msg.NO_PREDEFINED_TYPE_MAPPING,
-                inputType.getName(),
-                getTypeName(targetSqlType));
+          if (LOG.isTraceEnabled()) {
+            LOG.trace(Msg.NO_PREDEFINED_TYPE_MAPPING,
+                  inputType.getName(),
+                  getTypeName(targetSqlType));
+          }
           binder = new ValueBinder<>(getObjectSetter(targetSqlType));
           custom.put(key, binder);
         }

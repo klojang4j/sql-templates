@@ -6,7 +6,13 @@ public final class Err {
         = "no such constant in java.sql.Types: ${arg}";
 
   public static final String CANNOT_CONVERT_SQL_TYPE_TO_JAVA_TYPE
-        = "Cannot convert SQL datatype ${0} to Java type ${1}";
+        = "cannot convert SQL datatype ${0} to Java type ${1}";
+
+  public static final String NO_MORE_ROWS
+        = "no more rows in result set";
+
+  public static final String NOT_MUTABLE
+        = "method not supported for immutable types ({})";
 
   private Err() { throw new UnsupportedOperationException(); }
 }

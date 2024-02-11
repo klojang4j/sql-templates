@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.klojang.jdbc.BindInfo.ManualBinder;
+
 /**
  * Binds the values within in a Map to a PreparedStatement.
  */
 public final class MapBinder {
 
-<span class="fc" id="L19">  private static final Logger LOG = LoggerFactory.getLogger(MapBinder.class);</span>
-
-<span class="fc" id="L21">  private static final Object ABSENT = new Object();</span>
+<span class="fc" id="L21">  private static final Logger LOG = LoggerFactory.getLogger(MapBinder.class);</span>
 
   private final List&lt;NamedParameter&gt; params;
   private final BindInfo bindInfo;
@@ -38,35 +38,47 @@ public final class MapBinder {
 <span class="nc" id="L38">        continue;</span>
       }
 <span class="fc" id="L40">      bound.add(param);</span>
-<span class="fc" id="L41">      Object val = map.getOrDefault(key, ABSENT);</span>
-<span class="pc bpc" id="L42" title="1 of 2 branches missed.">      if (val != ABSENT) {</span>
-<span class="fc" id="L43">        ValueBinder binder = findBinder(map, key, val);</span>
-<span class="fc" id="L44">        Object output = binder.getParamValue(val);</span>
-<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if (LOG.isTraceEnabled()) {</span>
-<span class="pc bpc" id="L46" title="3 of 4 branches missed.">          if (binder.isAdaptive() &amp;&amp; output != val) {</span>
-<span class="nc" id="L47">            LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (map value: {})&quot;, key, output, val);</span>
+<span class="fc" id="L41">      Object val = map.get(key);</span>
+      final ManualBinder manual;
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">      if (val != null) {</span>
+<span class="fc" id="L44">        manual = bindInfo.getManualBinder(val.getClass(), map.getClass(), key);</span>
+      } else {
+<span class="nc" id="L46">        manual = null;</span>
+      }
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">      if (manual != null) {</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (LOG.isTraceEnabled()) {</span>
+<span class="nc" id="L50">          LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (manually bound)&quot;, key, val);</span>
+        }
+<span class="nc" id="L52">        param.positions().forEachThrowing(i -&gt; manual.bind(ps, i, val));</span>
+      } else {
+<span class="fc" id="L54">        ValueBinder vb = findBinder(map, key, val);</span>
+<span class="fc" id="L55">        Object output = vb.getParamValue(val);</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if (LOG.isTraceEnabled()) {</span>
+<span class="pc bpc" id="L57" title="3 of 4 branches missed.">          if (vb.isAdaptive() &amp;&amp; output != val) {</span>
+<span class="nc" id="L58">            LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (original value: {})&quot;, key, output, val);</span>
           } else {
-<span class="fc" id="L49">            LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {}&quot;, key, output);</span>
+<span class="fc" id="L60">            LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {}&quot;, key, output);</span>
           }
         }
-<span class="fc" id="L52">        param.positions().forEachThrowing(i -&gt; binder.bind(ps, i, output));</span>
+<span class="fc" id="L63">        param.positions().forEachThrowing(i -&gt; vb.bind(ps, i, output));</span>
       }
-<span class="fc" id="L54">    }</span>
-<span class="fc" id="L55">  }</span>
+<span class="fc" id="L65">    }</span>
+<span class="fc" id="L66">  }</span>
 
+  @SuppressWarnings(&quot;rawtypes&quot;)
   ValueBinder findBinder(Map&lt;String, Object&gt; map, String key, Object val) {
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">    if (val == null) {</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">    if (val == null) {</span>
       // Return any ValueBinder. For null values *all* binders will just call
       // PreparedStatement.setString(paramIndex, null);
-<span class="nc" id="L61">      return StringBinderLookup.DEFAULT;</span>
-<span class="pc bpc" id="L62" title="3 of 4 branches missed.">    } else if (val instanceof Enum &amp;&amp; bindInfo.saveEnumAsString(map.getClass(), key)) {</span>
-<span class="nc" id="L63">      return ValueBinder.ANY_TO_STRING;</span>
+<span class="nc" id="L73">      return StringBinderLookup.DEFAULT;</span>
+<span class="pc bpc" id="L74" title="3 of 4 branches missed.">    } else if (val instanceof Enum &amp;&amp; bindInfo.saveEnumAsString(map.getClass(), key)) {</span>
+<span class="nc" id="L75">      return ValueBinder.ANY_TO_STRING;</span>
     } else {
-<span class="fc" id="L65">      Integer sqlType = bindInfo.getSqlType(val.getClass(), map.getClass(), key);</span>
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">      if (sqlType == null) {</span>
-<span class="fc" id="L67">        return ValueBinderFactory.getInstance().getDefaultBinder(val.getClass());</span>
+<span class="fc" id="L77">      Integer sqlType = bindInfo.getSqlType(val.getClass(), map.getClass(), key);</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">      if (sqlType == null) {</span>
+<span class="fc" id="L79">        return ValueBinderFactory.getInstance().getDefaultBinder(val.getClass());</span>
       }
-<span class="nc" id="L69">      return ValueBinderFactory.getInstance().getBinder(val.getClass(), sqlType);</span>
+<span class="nc" id="L81">      return ValueBinderFactory.getInstance().getBinder(val.getClass(), sqlType);</span>
     }
   }
 }

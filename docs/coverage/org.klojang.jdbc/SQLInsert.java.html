@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLInsert.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLInsert.java</span></div><h1>SQLInsert.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.JDBC;
+import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.slf4j.Logger;
@@ -29,15 +31,14 @@ import static org.klojang.util.ClassMethods.className;
 public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 
   @SuppressWarnings(&quot;unused&quot;)
-<span class="fc" id="L32">  private static final Logger LOG = LoggerFactory.getLogger(SQLInsert.class);</span>
+<span class="fc" id="L34">  private static final Logger LOG = LoggerFactory.getLogger(SQLInsert.class);</span>
 
   private static final String DIRTY_INSTANCE = &quot;insertAll() not allowed on dirty instance; call reset() first&quot;;
   private static final String ID_PROPERTY_NOT_ALLOWED = &quot;specifying an ID property only allowed when key retrieval is enabled&quot;;
   private static final String ID_KEY_NOT_ALLOWED = &quot;specifying an ID key only allowed when key retrieval is enabled&quot;;
-  private static final String NOT_MUTABLE = &quot;method not supported for immutable types ({})&quot;;
   private static final String KEY_RETRIEVAL_DISABLED = &quot;key retrieval disabled&quot;;
 
-<span class="fc" id="L40">  private final List&lt;String&gt; idProperties = new ArrayList&lt;&gt;(5);</span>
+<span class="fc" id="L41">  private final List&lt;String&gt; idProperties = new ArrayList&lt;&gt;(5);</span>
 
   private final boolean retrieveKeys;
 
@@ -45,9 +46,9 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
         AbstractSQLSession sql,
         SQLInfo sqlInfo,
         boolean retrieveKeys) {
-<span class="fc" id="L48">    super(ps, sql, sqlInfo);</span>
-<span class="fc" id="L49">    this.retrieveKeys = retrieveKeys;</span>
-<span class="fc" id="L50">  }</span>
+<span class="fc" id="L49">    super(ps, sql, sqlInfo);</span>
+<span class="fc" id="L50">    this.retrieveKeys = retrieveKeys;</span>
+<span class="fc" id="L51">  }</span>
 
   /**
    * Binds the values in the specified JavaBean to the named parameters within the SQL
@@ -61,9 +62,9 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    */
   @Override
   public SQLInsert bind(Object bean) {
-<span class="fc" id="L64">    super.bind(bean);</span>
-<span class="fc" id="L65">    idProperties.add(null);</span>
-<span class="fc" id="L66">    return this;</span>
+<span class="fc" id="L65">    super.bind(bean);</span>
+<span class="fc" id="L66">    idProperties.add(null);</span>
+<span class="fc" id="L67">    return this;</span>
   }
 
   /**
@@ -77,9 +78,9 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    */
   @Override
   public SQLInsert bind(Record record) {
-<span class="nc" id="L80">    super.bind(record);</span>
-<span class="nc" id="L81">    idProperties.add(null);</span>
-<span class="nc" id="L82">    return this;</span>
+<span class="nc" id="L81">    super.bind(record);</span>
+<span class="nc" id="L82">    idProperties.add(null);</span>
+<span class="nc" id="L83">    return this;</span>
   }
 
   /**
@@ -102,11 +103,11 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    * @return this {@code SQLInsert} instance
    */
   public SQLInsert bind(Object bean, String idProperty) {
-<span class="fc" id="L105">    super.bind(bean);</span>
-<span class="fc" id="L106">    Check.that(bean).isNot(instanceOf(), Record.class, NOT_MUTABLE, className(bean));</span>
-<span class="fc" id="L107">    Check.that(retrieveKeys).is(yes(), ID_PROPERTY_NOT_ALLOWED);</span>
-<span class="fc" id="L108">    Check.notNull(idProperty, ID_PROPERTY).then(idProperties::add);</span>
-<span class="fc" id="L109">    return this;</span>
+<span class="fc" id="L106">    super.bind(bean);</span>
+<span class="fc" id="L107">    Check.that(bean).isNot(instanceOf(), Record.class, Err.NOT_MUTABLE, className(bean));</span>
+<span class="fc" id="L108">    Check.that(retrieveKeys).is(yes(), ID_PROPERTY_NOT_ALLOWED);</span>
+<span class="fc" id="L109">    Check.notNull(idProperty, ID_PROPERTY).then(idProperties::add);</span>
+<span class="fc" id="L110">    return this;</span>
   }
 
   /**
@@ -120,9 +121,9 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    */
   @Override
   public SQLInsert bind(Map&lt;String, Object&gt; map) {
-<span class="fc" id="L123">    super.bind(map);</span>
-<span class="fc" id="L124">    idProperties.add(null);</span>
-<span class="fc" id="L125">    return this;</span>
+<span class="fc" id="L124">    super.bind(map);</span>
+<span class="fc" id="L125">    idProperties.add(null);</span>
+<span class="fc" id="L126">    return this;</span>
   }
 
   /**
@@ -142,10 +143,10 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    * @return this {@code SQLInsert} instance
    */
   public SQLInsert bind(Map&lt;String, ?&gt; map, String idKey) {
-<span class="fc" id="L145">    super.bind(map);</span>
-<span class="fc" id="L146">    Check.that(retrieveKeys).is(yes(), ID_KEY_NOT_ALLOWED);</span>
-<span class="fc" id="L147">    Check.notNull(idKey, ID_KEY).then(idProperties::add);</span>
-<span class="fc" id="L148">    return this;</span>
+<span class="fc" id="L146">    super.bind(map);</span>
+<span class="fc" id="L147">    Check.that(retrieveKeys).is(yes(), ID_KEY_NOT_ALLOWED);</span>
+<span class="fc" id="L148">    Check.notNull(idKey, ID_KEY).then(idProperties::add);</span>
+<span class="fc" id="L149">    return this;</span>
   }
 
   /**
@@ -158,12 +159,12 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    */
   public long execute() {
     try {
-<span class="fc" id="L161">      executeSQL();</span>
-<span class="pc bpc" id="L162" title="1 of 2 branches missed.">      return retrieveKeys ? JDBC.getGeneratedKeys(ps, 1)[0] : -1;</span>
-<span class="nc" id="L163">    } catch (Throwable t) {</span>
-<span class="nc" id="L164">      throw Utils.wrap(t, sqlInfo);</span>
+<span class="fc" id="L162">      executeSQL();</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">      return retrieveKeys ? JDBC.getGeneratedKeys(ps, 1)[0] : -1;</span>
+<span class="nc" id="L164">    } catch (Throwable t) {</span>
+<span class="nc" id="L165">      throw Utils.wrap(t, sqlInfo);</span>
     } finally {
-<span class="fc" id="L166">      reset();</span>
+<span class="fc" id="L167">      reset();</span>
     }
   }
 
@@ -181,26 +182,26 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    */
   @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
   public long executeAndSetID() {
-<span class="fc" id="L184">    Check.that(retrieveKeys).is(yes(), illegalState(KEY_RETRIEVAL_DISABLED));</span>
+<span class="fc" id="L185">    Check.that(retrieveKeys).is(yes(), illegalState(KEY_RETRIEVAL_DISABLED));</span>
     try {
-<span class="fc" id="L186">      executeSQL();</span>
-<span class="fc" id="L187">      long dbKey = JDBC.getGeneratedKeys(ps, 1)[0];</span>
-<span class="fc bfc" id="L188" title="All 2 branches covered.">      for (int i = 0; i &lt; idProperties.size(); ++i) {</span>
-<span class="fc" id="L189">        String idProperty = idProperties.get(i);</span>
-<span class="pc bpc" id="L190" title="1 of 2 branches missed.">        if (idProperty != null) {</span>
-<span class="fc" id="L191">          Object obj = bindings.get(i);</span>
-<span class="fc bfc" id="L192" title="All 2 branches covered.">          if (obj instanceof Map map) {</span>
-<span class="fc" id="L193">            map.put(idProperty, dbKey);</span>
-<span class="pc bpc" id="L194" title="1 of 2 branches missed.">          } else if (!(obj instanceof Record)) {</span>
-<span class="fc" id="L195">            JDBC.setID(obj, idProperty, dbKey);</span>
+<span class="fc" id="L187">      executeSQL();</span>
+<span class="fc" id="L188">      long dbKey = JDBC.getGeneratedKeys(ps, 1)[0];</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">      for (int i = 0; i &lt; idProperties.size(); ++i) {</span>
+<span class="fc" id="L190">        String idProperty = idProperties.get(i);</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">        if (idProperty != null) {</span>
+<span class="fc" id="L192">          Object obj = bindings.get(i);</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">          if (obj instanceof Map map) {</span>
+<span class="fc" id="L194">            map.put(idProperty, dbKey);</span>
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">          } else if (!(obj instanceof Record)) {</span>
+<span class="fc" id="L196">            JDBC.setID(obj, idProperty, dbKey);</span>
           }
         }
       }
-<span class="fc" id="L199">      return dbKey;</span>
-<span class="nc" id="L200">    } catch (Throwable t) {</span>
-<span class="nc" id="L201">      throw Utils.wrap(t, sqlInfo);</span>
+<span class="fc" id="L200">      return dbKey;</span>
+<span class="nc" id="L201">    } catch (Throwable t) {</span>
+<span class="nc" id="L202">      throw Utils.wrap(t, sqlInfo);</span>
     } finally {
-<span class="fc" id="L203">      reset();</span>
+<span class="fc" id="L204">      reset();</span>
     }
   }
 
@@ -218,17 +219,17 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    * @param &lt;U&gt; the type of the beans or records
    */
   public &lt;U&gt; void insertBatch(List&lt;U&gt; beans) {
-<span class="fc" id="L221">    Check.notNull(beans, BEANS);</span>
-<span class="fc" id="L222">    Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
+<span class="fc" id="L222">    Check.notNull(beans, BEANS);</span>
+<span class="fc" id="L223">    Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
     try {
-<span class="fc bfc" id="L224" title="All 2 branches covered.">      for (U bean : beans) {</span>
-<span class="fc" id="L225">        bind(bean).executeSQL();</span>
-<span class="fc" id="L226">        reset();</span>
-<span class="fc" id="L227">      }</span>
-<span class="nc" id="L228">    } catch (Throwable t) {</span>
-<span class="nc" id="L229">      throw Utils.wrap(t, sqlInfo);</span>
-<span class="fc" id="L230">    }</span>
-<span class="fc" id="L231">  }</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">      for (U bean : beans) {</span>
+<span class="fc" id="L226">        bind(bean).executeSQL();</span>
+<span class="fc" id="L227">        reset();</span>
+<span class="fc" id="L228">      }</span>
+<span class="nc" id="L229">    } catch (Throwable t) {</span>
+<span class="nc" id="L230">      throw Utils.wrap(t, sqlInfo);</span>
+<span class="fc" id="L231">    }</span>
+<span class="fc" id="L232">  }</span>
 
   /**
    * Saves the specified JavaBeans to the database and returns the keys generated by the
@@ -247,21 +248,21 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    * @return the keys generated by the database
    */
   public &lt;U&gt; long[] insertBatchAndGetIDs(List&lt;U&gt; beans) {
-<span class="fc" id="L250">    Check.notNull(beans, BEANS);</span>
-<span class="fc" id="L251">    Check.that(retrieveKeys).is(yes(), illegalState(KEY_RETRIEVAL_DISABLED));</span>
-<span class="fc" id="L252">    Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
-<span class="fc" id="L253">    long[] keys = new long[beans.size()];</span>
+<span class="fc" id="L251">    Check.notNull(beans, BEANS);</span>
+<span class="fc" id="L252">    Check.that(retrieveKeys).is(yes(), illegalState(KEY_RETRIEVAL_DISABLED));</span>
+<span class="fc" id="L253">    Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
+<span class="fc" id="L254">    long[] keys = new long[beans.size()];</span>
     try {
-<span class="fc" id="L255">      int i = 0;</span>
-<span class="fc bfc" id="L256" title="All 2 branches covered.">      for (U bean : beans) {</span>
-<span class="fc" id="L257">        bind(bean).executeSQL();</span>
-<span class="fc" id="L258">        keys[i++] = JDBC.getGeneratedKeys(ps, 1)[0];</span>
-<span class="fc" id="L259">        reset();</span>
-<span class="fc" id="L260">      }</span>
-<span class="nc" id="L261">    } catch (Throwable t) {</span>
-<span class="nc" id="L262">      throw Utils.wrap(t, sqlInfo);</span>
-<span class="fc" id="L263">    }</span>
-<span class="fc" id="L264">    return keys;</span>
+<span class="fc" id="L256">      int i = 0;</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">      for (U bean : beans) {</span>
+<span class="fc" id="L258">        bind(bean).executeSQL();</span>
+<span class="fc" id="L259">        keys[i++] = JDBC.getGeneratedKeys(ps, 1)[0];</span>
+<span class="fc" id="L260">        reset();</span>
+<span class="fc" id="L261">      }</span>
+<span class="nc" id="L262">    } catch (Throwable t) {</span>
+<span class="nc" id="L263">      throw Utils.wrap(t, sqlInfo);</span>
+<span class="fc" id="L264">    }</span>
+<span class="fc" id="L265">    return keys;</span>
   }
 
   /**
@@ -277,37 +278,37 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    * @param beans the beans or records to save
    */
   public &lt;U&gt; void insertBatchAndSetIDs(String idProperty, List&lt;U&gt; beans) {
-<span class="fc" id="L280">    Check.notNull(idProperty, ID_PROPERTY);</span>
-<span class="fc" id="L281">    Check.notNull(beans, BEANS);</span>
-<span class="fc" id="L282">    Check.that(retrieveKeys).is(yes(), illegalState(KEY_RETRIEVAL_DISABLED));</span>
-<span class="fc" id="L283">    Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
+<span class="fc" id="L281">    Check.notNull(idProperty, ID_PROPERTY);</span>
+<span class="fc" id="L282">    Check.notNull(beans, BEANS);</span>
+<span class="fc" id="L283">    Check.that(retrieveKeys).is(yes(), illegalState(KEY_RETRIEVAL_DISABLED));</span>
+<span class="fc" id="L284">    Check.that(bindings).is(empty(), illegalState(DIRTY_INSTANCE));</span>
     try {
-<span class="fc bfc" id="L285" title="All 2 branches covered.">      for (U bean : beans) {</span>
-<span class="fc" id="L286">        bind(bean, idProperty).executeSQL();</span>
-<span class="fc" id="L287">        long key = JDBC.getGeneratedKeys(ps, 1)[0];</span>
-<span class="fc" id="L288">        JDBC.setID(bean, idProperty, key);</span>
-<span class="fc" id="L289">        reset();</span>
-<span class="fc" id="L290">      }</span>
-<span class="nc" id="L291">    } catch (Throwable t) {</span>
-<span class="nc" id="L292">      throw Utils.wrap(t, sqlInfo);</span>
-<span class="fc" id="L293">    }</span>
-<span class="fc" id="L294">  }</span>
+<span class="fc bfc" id="L286" title="All 2 branches covered.">      for (U bean : beans) {</span>
+<span class="fc" id="L287">        bind(bean, idProperty).executeSQL();</span>
+<span class="fc" id="L288">        long key = JDBC.getGeneratedKeys(ps, 1)[0];</span>
+<span class="fc" id="L289">        JDBC.setID(bean, idProperty, key);</span>
+<span class="fc" id="L290">        reset();</span>
+<span class="fc" id="L291">      }</span>
+<span class="nc" id="L292">    } catch (Throwable t) {</span>
+<span class="nc" id="L293">      throw Utils.wrap(t, sqlInfo);</span>
+<span class="fc" id="L294">    }</span>
+<span class="fc" id="L295">  }</span>
 
   @Override
   void initialize() {
-<span class="fc" id="L298">    idProperties.clear();</span>
+<span class="fc" id="L299">    idProperties.clear();</span>
     try {
-<span class="fc" id="L300">      ps.clearParameters();</span>
-<span class="nc" id="L301">    } catch (SQLException e) {</span>
-<span class="nc" id="L302">      throw Utils.wrap(e, sqlInfo);</span>
-<span class="fc" id="L303">    }</span>
-<span class="fc" id="L304">  }</span>
+<span class="fc" id="L301">      ps.clearParameters();</span>
+<span class="nc" id="L302">    } catch (SQLException e) {</span>
+<span class="nc" id="L303">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="fc" id="L304">    }</span>
+<span class="fc" id="L305">  }</span>
 
   private void executeSQL() throws Throwable {
-<span class="fc" id="L307">    LOG.trace(EXECUTING_SQL, sqlInfo.sql());</span>
-<span class="fc" id="L308">    applyBindings(ps);</span>
-<span class="fc" id="L309">    ps.executeUpdate();</span>
-<span class="fc" id="L310">  }</span>
+<span class="fc" id="L308">    LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L309">    applyBindings(ps);</span>
+<span class="fc" id="L310">    ps.executeUpdate();</span>
+<span class="fc" id="L311">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

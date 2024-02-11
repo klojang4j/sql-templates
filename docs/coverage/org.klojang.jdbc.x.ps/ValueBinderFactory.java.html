@@ -53,37 +53,39 @@ final class ValueBinderFactory {
 <span class="nc" id="L53">        Tuple2&lt;Class, Integer&gt; key = Tuple2.of(inputType, targetSqlType);</span>
 <span class="nc" id="L54">        binder = custom.get(key);</span>
 <span class="nc bnc" id="L55" title="All 2 branches missed.">        if (binder == null) {</span>
-<span class="nc" id="L56">          LOG.trace(Msg.NO_PREDEFINED_TYPE_MAPPING,</span>
-<span class="nc" id="L57">                inputType.getName(),</span>
-<span class="nc" id="L58">                getTypeName(targetSqlType));</span>
-<span class="nc" id="L59">          binder = new ValueBinder&lt;&gt;(getObjectSetter(targetSqlType));</span>
-<span class="nc" id="L60">          custom.put(key, binder);</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">          if (LOG.isTraceEnabled()) {</span>
+<span class="nc" id="L57">            LOG.trace(Msg.NO_PREDEFINED_TYPE_MAPPING,</span>
+<span class="nc" id="L58">                  inputType.getName(),</span>
+<span class="nc" id="L59">                  getTypeName(targetSqlType));</span>
+          }
+<span class="nc" id="L61">          binder = new ValueBinder&lt;&gt;(getObjectSetter(targetSqlType));</span>
+<span class="nc" id="L62">          custom.put(key, binder);</span>
         }
       }
     }
-<span class="nc" id="L64">    return binder;</span>
+<span class="nc" id="L66">    return binder;</span>
   }
 
   private static Map getPredefinedBinders() {
-<span class="fc" id="L68">    return TypeMap.nativeTypeMapBuilder()</span>
-<span class="fc" id="L69">          .autobox(true)</span>
-<span class="fc" id="L70">          .add(String.class, immutable(new StringBinderLookup()))</span>
-<span class="fc" id="L71">          .add(Integer.class, immutable(new IntBinderLookup()))</span>
-<span class="fc" id="L72">          .add(Double.class, immutable(new DoubleBinderLookup()))</span>
-<span class="fc" id="L73">          .add(Long.class, immutable(new LongBinderLookup()))</span>
-<span class="fc" id="L74">          .add(Boolean.class, immutable(new BooleanBinderLookup()))</span>
-<span class="fc" id="L75">          .add(Enum.class, immutable(new EnumBinderLookup()))</span>
-<span class="fc" id="L76">          .add(BigDecimal.class, immutable(new BigDecimalBinderLookup()))</span>
-<span class="fc" id="L77">          .add(LocalDate.class, immutable(new LocalDateBinderLookup()))</span>
-<span class="fc" id="L78">          .add(LocalDateTime.class, immutable(new LocalDateTimeBinderLookup()))</span>
-<span class="fc" id="L79">          .add(Float.class, immutable(new FloatBinderLookup()))</span>
-<span class="fc" id="L80">          .add(Byte.class, immutable(new ByteBinderLookup()))</span>
-<span class="fc" id="L81">          .add(Short.class, immutable(new ShortBinderLookup()))</span>
-<span class="fc" id="L82">          .freeze();</span>
+<span class="fc" id="L70">    return TypeMap.nativeTypeMapBuilder()</span>
+<span class="fc" id="L71">          .autobox(true)</span>
+<span class="fc" id="L72">          .add(String.class, immutable(new StringBinderLookup()))</span>
+<span class="fc" id="L73">          .add(Integer.class, immutable(new IntBinderLookup()))</span>
+<span class="fc" id="L74">          .add(Double.class, immutable(new DoubleBinderLookup()))</span>
+<span class="fc" id="L75">          .add(Long.class, immutable(new LongBinderLookup()))</span>
+<span class="fc" id="L76">          .add(Boolean.class, immutable(new BooleanBinderLookup()))</span>
+<span class="fc" id="L77">          .add(Enum.class, immutable(new EnumBinderLookup()))</span>
+<span class="fc" id="L78">          .add(BigDecimal.class, immutable(new BigDecimalBinderLookup()))</span>
+<span class="fc" id="L79">          .add(LocalDate.class, immutable(new LocalDateBinderLookup()))</span>
+<span class="fc" id="L80">          .add(LocalDateTime.class, immutable(new LocalDateTimeBinderLookup()))</span>
+<span class="fc" id="L81">          .add(Float.class, immutable(new FloatBinderLookup()))</span>
+<span class="fc" id="L82">          .add(Byte.class, immutable(new ByteBinderLookup()))</span>
+<span class="fc" id="L83">          .add(Short.class, immutable(new ShortBinderLookup()))</span>
+<span class="fc" id="L84">          .freeze();</span>
   }
 
   private static Map&lt;Integer, ValueBinder&gt; immutable(ValueBinderLookup src) {
-<span class="fc" id="L86">    return Map.copyOf(src);</span>
+<span class="fc" id="L88">    return Map.copyOf(src);</span>
   }
 
 }

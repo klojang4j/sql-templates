@@ -3,6 +3,7 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
+import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.ParamExtractor;
 import org.klojang.jdbc.x.sql.SQLInfo;
@@ -66,7 +67,7 @@ final class SQLSkeletonSession extends DynamicSQLSession {
       setValues(beans, processor);
       Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());
       executable = session.render();
-      LOG.trace(EXECUTING_SQL, executable);
+      LOG.trace(Msg.EXECUTING_SQL, executable);
       stmt.executeUpdate(executable, RETURN_GENERATED_KEYS);
       return JDBC.getGeneratedKeys(stmt, beans.size());
     } catch (SQLException e) {

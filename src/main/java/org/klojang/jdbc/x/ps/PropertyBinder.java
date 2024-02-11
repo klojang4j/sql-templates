@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.klojang.jdbc.BindInfo.ManualBinder;
 import static org.klojang.util.ClassMethods.isSubtype;
 
 
@@ -53,18 +54,28 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
       bound.add(param);
       String property = param.name();
       Class type = getter.getReturnType();
-      ValueBinder writer;
-      if (isSubtype(type, Enum.class) && bindInfo.saveEnumAsString(beanClass, property)) {
-        writer = ValueBinder.ANY_TO_STRING;
+      ManualBinder manual = bindInfo.getManualBinder(type, beanClass, property);
+      if (manual != null) {
+        PropertyBinder pb = new PropertyBinder(getter, param, manual);
+        readers.add(pb);
       } else {
+        final ValueBinder vb;
         Integer sqlType = bindInfo.getSqlType(type, beanClass, property);
         if (sqlType == null) {
-          writer = factory.getDefaultBinder(type);
+          if (isSubtype(type, Enum.class)) {
+            if (bindInfo.saveEnumAsString(beanClass, property)) {
+              vb = ValueBinder.ANY_TO_STRING;
+            } else {
+              vb = EnumBinderLookup.DEFAULT;
+            }
+          } else {
+            vb = factory.getDefaultBinder(type);
+          }
         } else {
-          writer = factory.getBinder(type, sqlType);
+          vb = factory.getBinder(type, sqlType);
         }
+        readers.add(new PropertyBinder(getter, param, vb));
       }
-      readers.add(new PropertyBinder(getter, writer, param));
     }
     return readers.toArray(PropertyBinder[]::new);
   }
@@ -72,28 +83,43 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
   private final Getter getter;
   private final ValueBinder<INPUT_TYPE, PARAM_TYPE> binder;
   private final NamedParameter param;
+  private final ManualBinder manual;
 
   private PropertyBinder(Getter getter,
-        ValueBinder<INPUT_TYPE, PARAM_TYPE> binder,
-        NamedParameter param) {
+        NamedParameter param, ValueBinder<INPUT_TYPE, PARAM_TYPE> binder) {
     this.getter = getter;
-    this.binder = binder;
     this.param = param;
+    this.binder = binder;
+    this.manual = null;
+  }
+
+  private PropertyBinder(Getter getter, NamedParameter param, ManualBinder manual) {
+    this.getter = getter;
+    this.param = param;
+    this.manual = manual;
+    this.binder = null;
   }
 
   @SuppressWarnings("unchecked")
   private <T> void bindProperty(PreparedStatement ps, T bean) throws Throwable {
     INPUT_TYPE beanValue = (INPUT_TYPE) getter.read(bean);
-    PARAM_TYPE paramValue = binder.getParamValue(beanValue);
-    if (LOG.isTraceEnabled()) {
-      if (binder.isAdaptive() && beanValue != paramValue) {
-        String fmt = "==> Parameter \"{}\": {} (bean value: {})";
-        LOG.trace(fmt, param.name(), paramValue, beanValue);
-      } else {
-        LOG.trace("==> Parameter \"{}\": {}", getter.getProperty(), paramValue);
+    if (manual != null) {
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("==> Parameter \"{}\": {} (manually bound)", param.name(), beanValue);
       }
+      param.positions().forEachThrowing(i -> manual.bind(ps, i, beanValue));
+    } else {
+      PARAM_TYPE paramValue = binder.getParamValue(beanValue);
+      if (LOG.isTraceEnabled()) {
+        if (binder.isAdaptive() && beanValue != paramValue) {
+          String fmt = "==> Parameter \"{}\": {} (original value: {})";
+          LOG.trace(fmt, param.name(), paramValue, beanValue);
+        } else {
+          LOG.trace("==> Parameter \"{}\": {}", getter.getProperty(), paramValue);
+        }
+      }
+      param.positions().forEachThrowing(i -> binder.bind(ps, i, paramValue));
     }
-    param.positions().forEachThrowing(i -> binder.bind(ps, i, paramValue));
   }
 
 }

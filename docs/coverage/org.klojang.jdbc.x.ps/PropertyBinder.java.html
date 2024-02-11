@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.klojang.jdbc.BindInfo.ManualBinder;
 import static org.klojang.util.ClassMethods.isSubtype;
 
 
@@ -26,75 +27,100 @@ import static org.klojang.util.ClassMethods.isSubtype;
  */
 final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
 
-<span class="fc" id="L29">  private static final Logger LOG = LoggerFactory.getLogger(PropertyBinder.class);</span>
+<span class="fc" id="L30">  private static final Logger LOG = LoggerFactory.getLogger(PropertyBinder.class);</span>
 
   @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
   static &lt;T&gt; void readAll(PreparedStatement ps, T bean, PropertyBinder[] readers)
         throws Throwable {
-<span class="fc" id="L34">    LOG.debug(&quot;Binding {} to PreparedStatement&quot;, bean.getClass().getSimpleName());</span>
-<span class="fc bfc" id="L35" title="All 2 branches covered.">    for (PropertyBinder reader : readers) {</span>
-<span class="fc" id="L36">      reader.bindProperty(ps, bean);</span>
+<span class="fc" id="L35">    LOG.debug(&quot;Binding {} to PreparedStatement&quot;, bean.getClass().getSimpleName());</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">    for (PropertyBinder reader : readers) {</span>
+<span class="fc" id="L37">      reader.bindProperty(ps, bean);</span>
     }
-<span class="fc" id="L38">  }</span>
+<span class="fc" id="L39">  }</span>
 
   @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
   static PropertyBinder[] createReaders(Class beanClass,
         List&lt;NamedParameter&gt; params,
         BindInfo bindInfo,
         List&lt;NamedParameter&gt; bound) {
-<span class="fc" id="L45">    ValueBinderFactory factory = ValueBinderFactory.getInstance();</span>
-<span class="fc" id="L46">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
-<span class="fc" id="L47">    List&lt;PropertyBinder&gt; readers = new ArrayList&lt;&gt;(params.size());</span>
-<span class="fc bfc" id="L48" title="All 2 branches covered.">    for (NamedParameter param : params) {</span>
-<span class="fc" id="L49">      Getter getter = getters.get(param.name());</span>
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">      if (getter == null) {</span>
-<span class="nc" id="L51">        continue;</span>
+<span class="fc" id="L46">    ValueBinderFactory factory = ValueBinderFactory.getInstance();</span>
+<span class="fc" id="L47">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
+<span class="fc" id="L48">    List&lt;PropertyBinder&gt; readers = new ArrayList&lt;&gt;(params.size());</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">    for (NamedParameter param : params) {</span>
+<span class="fc" id="L50">      Getter getter = getters.get(param.name());</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">      if (getter == null) {</span>
+<span class="nc" id="L52">        continue;</span>
       }
-<span class="fc" id="L53">      bound.add(param);</span>
-<span class="fc" id="L54">      String property = param.name();</span>
-<span class="fc" id="L55">      Class type = getter.getReturnType();</span>
-      ValueBinder writer;
-<span class="pc bpc" id="L57" title="3 of 4 branches missed.">      if (isSubtype(type, Enum.class) &amp;&amp; bindInfo.saveEnumAsString(beanClass, property)) {</span>
-<span class="nc" id="L58">        writer = ValueBinder.ANY_TO_STRING;</span>
-      } else {
-<span class="fc" id="L60">        Integer sqlType = bindInfo.getSqlType(type, beanClass, property);</span>
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (sqlType == null) {</span>
-<span class="fc" id="L62">          writer = factory.getDefaultBinder(type);</span>
+<span class="fc" id="L54">      bound.add(param);</span>
+<span class="fc" id="L55">      String property = param.name();</span>
+<span class="fc" id="L56">      Class type = getter.getReturnType();</span>
+<span class="fc" id="L57">      ManualBinder manual = bindInfo.getManualBinder(type, beanClass, property);</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">      if (manual != null) {</span>
+<span class="nc" id="L59">        PropertyBinder pb = new PropertyBinder(getter, param, manual);</span>
+<span class="nc" id="L60">        readers.add(pb);</span>
+<span class="nc" id="L61">      } else {</span>
+        final ValueBinder vb;
+<span class="fc" id="L63">        Integer sqlType = bindInfo.getSqlType(type, beanClass, property);</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (sqlType == null) {</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">          if (isSubtype(type, Enum.class)) {</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">            if (bindInfo.saveEnumAsString(beanClass, property)) {</span>
+<span class="nc" id="L67">              vb = ValueBinder.ANY_TO_STRING;</span>
+            } else {
+<span class="nc" id="L69">              vb = EnumBinderLookup.DEFAULT;</span>
+            }
+          } else {
+<span class="fc" id="L72">            vb = factory.getDefaultBinder(type);</span>
+          }
         } else {
-<span class="nc" id="L64">          writer = factory.getBinder(type, sqlType);</span>
+<span class="nc" id="L75">          vb = factory.getBinder(type, sqlType);</span>
         }
+<span class="fc" id="L77">        readers.add(new PropertyBinder(getter, param, vb));</span>
       }
-<span class="fc" id="L67">      readers.add(new PropertyBinder(getter, writer, param));</span>
-<span class="fc" id="L68">    }</span>
-<span class="fc" id="L69">    return readers.toArray(PropertyBinder[]::new);</span>
+<span class="fc" id="L79">    }</span>
+<span class="fc" id="L80">    return readers.toArray(PropertyBinder[]::new);</span>
   }
 
   private final Getter getter;
   private final ValueBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; binder;
   private final NamedParameter param;
+  private final ManualBinder manual;
 
   private PropertyBinder(Getter getter,
-        ValueBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; binder,
-<span class="fc" id="L78">        NamedParameter param) {</span>
-<span class="fc" id="L79">    this.getter = getter;</span>
-<span class="fc" id="L80">    this.binder = binder;</span>
-<span class="fc" id="L81">    this.param = param;</span>
-<span class="fc" id="L82">  }</span>
+<span class="fc" id="L89">        NamedParameter param, ValueBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; binder) {</span>
+<span class="fc" id="L90">    this.getter = getter;</span>
+<span class="fc" id="L91">    this.param = param;</span>
+<span class="fc" id="L92">    this.binder = binder;</span>
+<span class="fc" id="L93">    this.manual = null;</span>
+<span class="fc" id="L94">  }</span>
+
+<span class="nc" id="L96">  private PropertyBinder(Getter getter, NamedParameter param, ManualBinder manual) {</span>
+<span class="nc" id="L97">    this.getter = getter;</span>
+<span class="nc" id="L98">    this.param = param;</span>
+<span class="nc" id="L99">    this.manual = manual;</span>
+<span class="nc" id="L100">    this.binder = null;</span>
+<span class="nc" id="L101">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
   private &lt;T&gt; void bindProperty(PreparedStatement ps, T bean) throws Throwable {
-<span class="fc" id="L86">    INPUT_TYPE beanValue = (INPUT_TYPE) getter.read(bean);</span>
-<span class="fc" id="L87">    PARAM_TYPE paramValue = binder.getParamValue(beanValue);</span>
-<span class="pc bpc" id="L88" title="1 of 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
-<span class="pc bpc" id="L89" title="3 of 4 branches missed.">      if (binder.isAdaptive() &amp;&amp; beanValue != paramValue) {</span>
-<span class="nc" id="L90">        String fmt = &quot;==&gt; Parameter \&quot;{}\&quot;: {} (bean value: {})&quot;;</span>
-<span class="nc" id="L91">        LOG.trace(fmt, param.name(), paramValue, beanValue);</span>
-<span class="nc" id="L92">      } else {</span>
-<span class="fc" id="L93">        LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {}&quot;, getter.getProperty(), paramValue);</span>
+<span class="fc" id="L105">    INPUT_TYPE beanValue = (INPUT_TYPE) getter.read(bean);</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">    if (manual != null) {</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
+<span class="nc" id="L108">        LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (manually bound)&quot;, param.name(), beanValue);</span>
       }
+<span class="nc" id="L110">      param.positions().forEachThrowing(i -&gt; manual.bind(ps, i, beanValue));</span>
+    } else {
+<span class="fc" id="L112">      PARAM_TYPE paramValue = binder.getParamValue(beanValue);</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
+<span class="pc bpc" id="L114" title="3 of 4 branches missed.">        if (binder.isAdaptive() &amp;&amp; beanValue != paramValue) {</span>
+<span class="nc" id="L115">          String fmt = &quot;==&gt; Parameter \&quot;{}\&quot;: {} (original value: {})&quot;;</span>
+<span class="nc" id="L116">          LOG.trace(fmt, param.name(), paramValue, beanValue);</span>
+<span class="nc" id="L117">        } else {</span>
+<span class="fc" id="L118">          LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {}&quot;, getter.getProperty(), paramValue);</span>
+        }
+      }
+<span class="fc" id="L121">      param.positions().forEachThrowing(i -&gt; binder.bind(ps, i, paramValue));</span>
     }
-<span class="fc" id="L96">    param.positions().forEachThrowing(i -&gt; binder.bind(ps, i, paramValue));</span>
-<span class="fc" id="L97">  }</span>
+<span class="fc" id="L123">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

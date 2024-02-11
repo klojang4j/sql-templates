@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -23,9 +24,57 @@ import java.util.Map;
 public interface BindInfo {
 
   /**
+   * A {@code ManualBinder} gives you full control over how values are bound to a
+   * {@link PreparedStatement}. They essentially bypass all <i>Klojang JDBC</i> logic and
+   * give you direct access to the {@link PreparedStatement}, the parameter index and the
+   * value to be bound. If you find yourself creating a lot of them, <i>Klojang JDBC</i>
+   * may not be for you.
+   */
+  @FunctionalInterface
+  interface ManualBinder {
+    /**
+     * Sets the value of the designated parameter using the given value.
+     *
+     * @param preparedStatement the {@code PreparedStatement} to bind the value to
+     * @param paramIndex the first parameter is 1, the second is 2, ...
+     * @param value the value to be bound
+     * @throws SQLException if parameterIndex does not correspond to a parameter
+     *       marker in the SQL statement, or if a database access error occurs
+     */
+    void bind(PreparedStatement preparedStatement, int paramIndex, Object value) throws
+          SQLException;
+  }
+
+  /**
    * A {@code BindInfo} that does not override the default binding behaviour.
    */
   BindInfo DEFAULT = new BindInfo() { };
+
+  /**
+   * Allows you to specify a {@code ManualBinder} for a given Java type. The default
+   * implementation returns {@code null}, meaning you leave it to <i>Klojang JDBC</i> to
+   * bind values to the underlying {@link PreparedStatement}, whatever the type of the
+   * values, whatever the property, record component or map key that the values are
+   * associated with, and whatever the bean, {@code record}, or {@code Map} containing the
+   * values. You may ignore any argument that you don't need in order to determine whether
+   * to use a {@code ManualBinder}.
+   *
+   * @param javaType the type of the values for which you want to override the
+   *       normal binding behaviour.
+   * @param containerType the class containing the values. May be a JavaBean type, a
+   *       {@code record} type, or the type of the {@code Map} being bound using
+   *       {@link SQLStatement#bind(Map)}. In the latter case, it will always be the
+   *       concrete type of the {@code Map} (e.g. {@code HashMap.class}) &#8212; never
+   *       {@code Map.class} itself.
+   * @param name the name of the bean property, record component, or map key for
+   *       which to override the normal binding behaviour
+   * @return a {@code ManualBinder} for any or all of the provided arguments
+   */
+  default ManualBinder getManualBinder(Class<?> javaType,
+        Class<?> containerType,
+        String name) {
+    return null;
+  }
 
   /**
    * Specifies the storage type (the SQL datatype) for a value. The return value must
@@ -38,8 +87,8 @@ public interface BindInfo {
    * corresponding SQL datatype.
    *
    * @param javaType the type of the value whose SQL datatype to determine
-   * @param containerType the class containing the value. May be a JavaBean
-   *       type, a {@code record} type, or the type of the {@code Map} being bound using
+   * @param containerType the class containing the value. May be a JavaBean type, a
+   *       {@code record} type, or the type of the {@code Map} being bound using
    *       {@link SQLStatement#bind(Map)}. In the latter case, it will always be the
    *       concrete type of the {@code Map} (e.g. {@code HashMap.class}) &#8212; never
    *       {@code Map.class} itself.

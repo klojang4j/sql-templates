@@ -1,7 +1,9 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.JDBC;
+import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.slf4j.Logger;
@@ -34,7 +36,6 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
   private static final String DIRTY_INSTANCE = "insertAll() not allowed on dirty instance; call reset() first";
   private static final String ID_PROPERTY_NOT_ALLOWED = "specifying an ID property only allowed when key retrieval is enabled";
   private static final String ID_KEY_NOT_ALLOWED = "specifying an ID key only allowed when key retrieval is enabled";
-  private static final String NOT_MUTABLE = "method not supported for immutable types ({})";
   private static final String KEY_RETRIEVAL_DISABLED = "key retrieval disabled";
 
   private final List<String> idProperties = new ArrayList<>(5);
@@ -103,7 +104,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
    */
   public SQLInsert bind(Object bean, String idProperty) {
     super.bind(bean);
-    Check.that(bean).isNot(instanceOf(), Record.class, NOT_MUTABLE, className(bean));
+    Check.that(bean).isNot(instanceOf(), Record.class, Err.NOT_MUTABLE, className(bean));
     Check.that(retrieveKeys).is(yes(), ID_PROPERTY_NOT_ALLOWED);
     Check.notNull(idProperty, ID_PROPERTY).then(idProperties::add);
     return this;
@@ -304,7 +305,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
   }
 
   private void executeSQL() throws Throwable {
-    LOG.trace(EXECUTING_SQL, sqlInfo.sql());
+    LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
     applyBindings(ps);
     ps.executeUpdate();
   }

@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.PropertyWriter;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
     @Override
     public T next() {
-      Check.on(STATE, beanifier.empty).is(yes(), NO_MORE_ROWS);
+      Check.on(STATE, beanifier.empty).is(yes(), Err.NO_MORE_ROWS);
       return beanifier.beanify().get();
     }
   }

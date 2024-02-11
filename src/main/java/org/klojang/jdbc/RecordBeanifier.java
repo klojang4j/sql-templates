@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.RecordFactory;
 import org.slf4j.Logger;
@@ -13,7 +14,6 @@ import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
-import static org.klojang.jdbc.x.Strings.NO_MORE_ROWS;
 
 final class RecordBeanifier<T extends Record> implements ResultSetBeanifier<T> {
 
@@ -35,7 +35,7 @@ final class RecordBeanifier<T extends Record> implements ResultSetBeanifier<T> {
 
     @Override
     public T next() {
-      Check.on(STATE, beanifier.empty).is(yes(), NO_MORE_ROWS);
+      Check.on(STATE, beanifier.empty).is(yes(), Err.NO_MORE_ROWS);
       return beanifier.beanify().get();
     }
   }

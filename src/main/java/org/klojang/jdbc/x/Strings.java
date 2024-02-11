@@ -10,8 +10,6 @@ public final class Strings {
   public static final String BEANS = "beans";
   public static final String PROCESSOR = "processor";
   public static final String RECORD = "record";
-  public static final String EXECUTING_SQL = "Executing SQL: {}";
-  public static final String NO_MORE_ROWS = "no more rows in result set";
   public static final String LIMIT = "limit";
   public static final String SIZE_ESTIMATE = "sizeEstimate";
   public static final String BEAN_CLASS = "beanClass";

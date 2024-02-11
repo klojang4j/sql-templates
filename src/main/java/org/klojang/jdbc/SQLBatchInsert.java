@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.BatchInsertConfig;
@@ -14,10 +15,11 @@ import java.util.List;
 import static java.sql.Statement.NO_GENERATED_KEYS;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static org.klojang.check.CommonExceptions.STATE;
-import static org.klojang.jdbc.x.Strings.EXECUTING_SQL;
+import static org.klojang.jdbc.x.Msg.EXECUTING_SQL;
 import static org.klojang.jdbc.x.Strings.ID_PROPERTY;
 import static org.klojang.util.ArrayMethods.EMPTY_LONG_ARRAY;
 import static org.klojang.util.ArrayMethods.implode;
+import static org.klojang.util.ClassMethods.className;
 import static org.klojang.util.StringMethods.append;
 
 /**
@@ -111,7 +113,7 @@ public final class SQLBatchInsert<T> {
     Check.notNull(idProperty, ID_PROPERTY);
     Check.notNull(beans);
     Class<T> clazz = cfg.reader().getBeanClass();
-    Check.on(STATE, clazz).isNot(Class::isRecord, RECORDS_DONT_HAVE_SETTERS);
+    Check.on(STATE, clazz).isNot(Class::isRecord, Err.NOT_MUTABLE, className(clazz));
     if (!beans.isEmpty()) {
       int chunkSize = cfg.chunkSize() == -1 ? beans.size() : cfg.chunkSize();
       insertBatchAndSetIDs(beans, idProperty, chunkSize);

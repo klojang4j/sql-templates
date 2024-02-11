@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.KeyWriter;
 import org.slf4j.Logger;
@@ -13,7 +14,6 @@ import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.no;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
-import static org.klojang.jdbc.x.Strings.NO_MORE_ROWS;
 import static org.klojang.jdbc.x.rs.KeyWriter.toMap;
 
 final class DefaultMappifier implements ResultSetMappifier {
@@ -36,7 +36,7 @@ final class DefaultMappifier implements ResultSetMappifier {
 
     @Override
     public Map<String, Object> next() {
-      Check.on(STATE, m.isEmpty()).is(no(), NO_MORE_ROWS);
+      Check.on(STATE, m.isEmpty()).is(no(), Err.NO_MORE_ROWS);
       return m.mappify().get();
     }
   }
