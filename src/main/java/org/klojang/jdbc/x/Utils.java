@@ -1,6 +1,7 @@
 package org.klojang.jdbc.x;
 
 import org.klojang.check.Check;
+import org.klojang.check.IntCheck;
 import org.klojang.check.ObjectCheck;
 import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.x.sql.SQLInfo;
@@ -11,6 +12,10 @@ public final class Utils {
   private Utils() { throw new UnsupportedOperationException(); }
 
   public static <T> ObjectCheck<T, DatabaseException> check(T arg) {
+    return Check.on(DatabaseException::new, arg);
+  }
+
+  public static IntCheck<DatabaseException> check(int arg) {
     return Check.on(DatabaseException::new, arg);
   }
 

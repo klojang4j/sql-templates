@@ -56,8 +56,8 @@ public final class MapBinder {
 
   ValueBinder findBinder(Map&lt;String, Object&gt; map, String key, Object val) {
 <span class="pc bpc" id="L58" title="1 of 2 branches missed.">    if (val == null) {</span>
-      // Return whatever. For null values *all* binders will ditch their internals and
-      // just call PreparedStatement.setString(paramIndex, null);
+      // Return any ValueBinder. For null values *all* binders will just call
+      // PreparedStatement.setString(paramIndex, null);
 <span class="nc" id="L61">      return StringBinderLookup.DEFAULT;</span>
 <span class="pc bpc" id="L62" title="3 of 4 branches missed.">    } else if (val instanceof Enum &amp;&amp; bindInfo.saveEnumAsString(map.getClass(), key)) {</span>
 <span class="nc" id="L63">      return ValueBinder.ANY_TO_STRING;</span>

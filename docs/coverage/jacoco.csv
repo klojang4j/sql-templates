@@ -1,7 +1,7 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-Klojang JDBC,org.klojang.jdbc.x.rs,ColumnReaderFactory,204,262,42,18,43,67,25,18,0,13
+Klojang JDBC,org.klojang.jdbc.x.rs,ColumnReaderFactory,191,279,43,19,42,74,26,19,0,14
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetShort,5,0,0,0,1,0,1,0,1,0
-Klojang JDBC,org.klojang.jdbc.x.rs,KeyWriter,120,0,4,0,28,0,7,0,5,0
+Klojang JDBC,org.klojang.jdbc.x.rs,KeyWriter,119,0,4,0,28,0,7,0,5,0
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetBD,4,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetString,0,4,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod,0,66,0,0,0,16,0,3,0,3
@@ -20,7 +20,7 @@ Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetBytes,4,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetTime,4,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.rs,PropertyWriter,14,220,5,11,3,49,5,10,0,7
 Klojang JDBC,org.klojang.jdbc.x.rs,RecordFactory.WriteConfig,0,9,0,0,0,1,0,1,0,1
-Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethodLookup,180,0,2,0,33,0,5,0,4,0
+Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethodLookup,180,0,2,0,34,0,6,0,5,0
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetFloat,5,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.sql,BatchInsertConfig,0,24,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc.x.sql,SQLInfo,0,29,0,0,0,7,0,3,0,3
@@ -100,7 +100,7 @@ Klojang JDBC,org.klojang.jdbc.x,Strings,6,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x,JDBC,33,122,3,8,9,26,5,10,2,6
 Klojang JDBC,org.klojang.jdbc.x,SQLCache,33,33,0,0,8,6,3,3,3,3
 Klojang JDBC,org.klojang.jdbc.x,Msg,6,0,0,0,1,0,1,0,1,0
-Klojang JDBC,org.klojang.jdbc.x,Utils,92,4,6,0,14,1,12,1,8,1
+Klojang JDBC,org.klojang.jdbc.x,Utils,96,4,6,0,15,1,13,1,9,1
 Klojang JDBC,org.klojang.jdbc.util,SQLTypeUtil,19,150,2,2,6,23,3,13,2,12
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,BooleanReaderLookup,0,110,0,0,0,10,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.rs.reader,ByteReaderLookup,39,124,2,0,0,18,8,9,7,9

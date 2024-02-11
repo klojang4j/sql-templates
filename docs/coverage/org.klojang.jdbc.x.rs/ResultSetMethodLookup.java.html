@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResultSetMethodLookup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">ResultSetMethodLookup.java</span></div><h1>ResultSetMethodLookup.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.util.SQLTypeUtil;
+import org.klojang.jdbc.DatabaseException;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -10,6 +10,8 @@ import java.util.Map;
 
 import static java.sql.Types.*;
 import static org.klojang.check.CommonChecks.keyIn;
+import static org.klojang.check.CommonProperties.box;
+import static org.klojang.jdbc.util.SQLTypeUtil.getTypeName;
 
 /**
  * Maps SQL types (the static final int constants of java.sql.SQLType) to ResultSetMethod
@@ -21,24 +23,22 @@ final class ResultSetMethodLookup {
   private static ResultSetMethodLookup INSTANCE;
 
   static ResultSetMethodLookup getInstance() {
-<span class="nc bnc" id="L24" title="All 2 branches missed.">    if (INSTANCE == null) {</span>
-<span class="nc" id="L25">      INSTANCE = new ResultSetMethodLookup();</span>
+<span class="nc bnc" id="L26" title="All 2 branches missed.">    if (INSTANCE == null) {</span>
+<span class="nc" id="L27">      INSTANCE = new ResultSetMethodLookup();</span>
     }
-<span class="nc" id="L27">    return INSTANCE;</span>
+<span class="nc" id="L29">    return INSTANCE;</span>
   }
 
   private final Map&lt;Integer, ResultSetMethod&lt;?&gt;&gt; cache;
 
-<span class="nc" id="L32">  private ResultSetMethodLookup() {</span>
-<span class="nc" id="L33">    cache = createCache();</span>
-<span class="nc" id="L34">  }</span>
+<span class="nc" id="L34">  private ResultSetMethodLookup() {</span>
+<span class="nc" id="L35">    cache = createCache();</span>
+<span class="nc" id="L36">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
-  &lt;T&gt; ResultSetMethod&lt;T&gt; getMethod(Integer sqlType) {
-    // This implicitly checks that the specified int is one of the
-    // static final int constants in the java.sql.Types class
-<span class="nc" id="L40">    String typeName = SQLTypeUtil.getTypeName(sqlType);</span>
-<span class="nc" id="L41">    Check.that(sqlType).is(keyIn(), cache, &quot;Unsupported SQL type: %s&quot;, typeName);</span>
+  &lt;T&gt; ResultSetMethod&lt;T&gt; getMethod(int sqlType) {
+<span class="nc" id="L40">    Check.that(sqlType).has(box(), keyIn(), cache,</span>
+<span class="nc" id="L41">          () -&gt; new DatabaseException(&quot;unsupported SQL type: &quot; + getTypeName(sqlType)));</span>
 <span class="nc" id="L42">    return (ResultSetMethod&lt;T&gt;) cache.get(sqlType);</span>
   }
 
@@ -69,16 +69,17 @@ final class ResultSetMethodLookup {
 <span class="nc" id="L69">    tmp.put(TIME, ResultSetMethod.GET_TIME);</span>
 
 <span class="nc" id="L71">    tmp.put(TIMESTAMP, ResultSetMethod.getObjectGetter(LocalDateTime.class));</span>
-<span class="nc" id="L72">    tmp.put(TIMESTAMP_WITH_TIMEZONE, ResultSetMethod.getObjectGetter(OffsetDateTime.class));</span>
+<span class="nc" id="L72">    tmp.put(TIMESTAMP_WITH_TIMEZONE,</span>
+<span class="nc" id="L73">          ResultSetMethod.getObjectGetter(OffsetDateTime.class));</span>
 
-<span class="nc" id="L74">    tmp.put(NUMERIC, ResultSetMethod.GET_BIG_DECIMAL);</span>
-<span class="nc" id="L75">    tmp.put(DECIMAL, ResultSetMethod.GET_BIG_DECIMAL);</span>
+<span class="nc" id="L75">    tmp.put(NUMERIC, ResultSetMethod.GET_BIG_DECIMAL);</span>
+<span class="nc" id="L76">    tmp.put(DECIMAL, ResultSetMethod.GET_BIG_DECIMAL);</span>
 
-<span class="nc" id="L77">    tmp.put(BINARY, ResultSetMethod.GET_BYTES);</span>
+<span class="nc" id="L78">    tmp.put(BINARY, ResultSetMethod.GET_BYTES);</span>
 
-<span class="nc" id="L79">    tmp.put(ARRAY, ResultSetMethod.getObjectGetter(Object[].class));</span>
+<span class="nc" id="L80">    tmp.put(ARRAY, ResultSetMethod.getObjectGetter(Object[].class));</span>
 
-<span class="nc" id="L81">    return Map.copyOf(tmp);</span>
+<span class="nc" id="L82">    return Map.copyOf(tmp);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

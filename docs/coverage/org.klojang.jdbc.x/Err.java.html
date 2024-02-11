@@ -2,10 +2,12 @@
 
 public final class Err {
 
-  public static final String NO_SUCH_SQL_TYPE = &quot;no such constant in java.sql.Types: ${arg}&quot;;
-  public static final String TYPE_NOT_SUPPORTED = &quot;type not supported: ${0}&quot;;
-  public static final String NOT_CONVERTIBLE = &quot;cannot convert ${0} to ${1}&quot;;
+  public static final String NO_SUCH_SQL_TYPE
+        = &quot;no such constant in java.sql.Types: ${arg}&quot;;
 
-<span class="nc" id="L9">  private Err() { throw new UnsupportedOperationException(); }</span>
+  public static final String CANNOT_CONVERT_SQL_TYPE_TO_JAVA_TYPE
+        = &quot;Cannot convert SQL datatype ${0} to Java type ${1}&quot;;
+
+<span class="nc" id="L11">  private Err() { throw new UnsupportedOperationException(); }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

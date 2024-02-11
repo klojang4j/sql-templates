@@ -25,11 +25,11 @@ final class ValueBinderFactory {
 
 <span class="fc" id="L26">  static ValueBinderFactory getInstance() { return INSTANCE; }</span>
 
-  private final Map&lt;Class, Map&lt;Integer, ValueBinder&gt;&gt; predefinedBinders;
-<span class="fc" id="L29">  private final Map&lt;Tuple2&lt;Class, Integer&gt;, ValueBinder&gt; customBinders = new HashMap();</span>
+  private final Map&lt;Class, Map&lt;Integer, ValueBinder&gt;&gt; predefined;
+<span class="fc" id="L29">  private final Map&lt;Tuple2&lt;Class, Integer&gt;, ValueBinder&gt; custom = new HashMap();</span>
 
 <span class="fc" id="L31">  private ValueBinderFactory() {</span>
-<span class="fc" id="L32">    predefinedBinders = (Map&lt;Class, Map&lt;Integer, ValueBinder&gt;&gt;) createBinders();</span>
+<span class="fc" id="L32">    predefined = (Map&lt;Class, Map&lt;Integer, ValueBinder&gt;&gt;) getPredefinedBinders();</span>
 <span class="fc" id="L33">  }</span>
 
   &lt;T, U&gt; ValueBinder&lt;T, U&gt; getDefaultBinder(Class&lt;T&gt; fieldType) {
@@ -37,34 +37,34 @@ final class ValueBinderFactory {
   }
 
   &lt;T, U&gt; ValueBinder&lt;T, U&gt; getBinder(Class&lt;T&gt; inputType, int targetSqlType) {
-<span class="nc" id="L40">    Map&lt;Integer, ValueBinder&gt; binders = predefinedBinders.get(inputType);</span>
+<span class="nc" id="L40">    Map&lt;Integer, ValueBinder&gt; binders = predefined.get(inputType);</span>
     ValueBinder binder;
 <span class="nc bnc" id="L42" title="All 2 branches missed.">    if (binders == null) {</span>
 <span class="nc" id="L43">      Tuple2&lt;Class, Integer&gt; key = Tuple2.of(inputType, targetSqlType);</span>
-<span class="nc" id="L44">      binder = customBinders.get(key);</span>
+<span class="nc" id="L44">      binder = custom.get(key);</span>
 <span class="nc bnc" id="L45" title="All 2 branches missed.">      if (binder == null) {</span>
 <span class="nc" id="L46">        LOG.trace(Msg.NO_PREDEFINED_BINDER, inputType.getName());</span>
 <span class="nc" id="L47">        binder = new ValueBinder&lt;&gt;(getObjectSetter(targetSqlType));</span>
-<span class="nc" id="L48">        customBinders.put(key, binder);</span>
+<span class="nc" id="L48">        custom.put(key, binder);</span>
       }
 <span class="nc" id="L50">    } else {</span>
 <span class="nc" id="L51">      binder = binders.get(targetSqlType);</span>
 <span class="nc bnc" id="L52" title="All 2 branches missed.">      if (binder == null) {</span>
 <span class="nc" id="L53">        Tuple2&lt;Class, Integer&gt; key = Tuple2.of(inputType, targetSqlType);</span>
-<span class="nc" id="L54">        binder = customBinders.get(key);</span>
+<span class="nc" id="L54">        binder = custom.get(key);</span>
 <span class="nc bnc" id="L55" title="All 2 branches missed.">        if (binder == null) {</span>
 <span class="nc" id="L56">          LOG.trace(Msg.NO_PREDEFINED_TYPE_MAPPING,</span>
 <span class="nc" id="L57">                inputType.getName(),</span>
 <span class="nc" id="L58">                getTypeName(targetSqlType));</span>
 <span class="nc" id="L59">          binder = new ValueBinder&lt;&gt;(getObjectSetter(targetSqlType));</span>
-<span class="nc" id="L60">          customBinders.put(key, binder);</span>
+<span class="nc" id="L60">          custom.put(key, binder);</span>
         }
       }
     }
 <span class="nc" id="L64">    return binder;</span>
   }
 
-  private static Map createBinders() {
+  private static Map getPredefinedBinders() {
 <span class="fc" id="L68">    return TypeMap.nativeTypeMapBuilder()</span>
 <span class="fc" id="L69">          .autobox(true)</span>
 <span class="fc" id="L70">          .add(String.class, immutable(new StringBinderLookup()))</span>

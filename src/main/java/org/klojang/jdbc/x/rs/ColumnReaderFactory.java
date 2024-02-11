@@ -5,6 +5,7 @@ import org.klojang.collections.TypeMap;
 import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.util.SQLTypeUtil;
 import org.klojang.jdbc.x.Err;
+import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.reader.*;
 import org.klojang.util.Tuple2;
@@ -27,8 +28,7 @@ import static java.lang.invoke.MethodType.methodType;
 import static java.sql.Types.*;
 import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.util.SQLTypeUtil.getTypeName;
-import static org.klojang.jdbc.x.Err.NOT_CONVERTIBLE;
-import static org.klojang.jdbc.x.Err.TYPE_NOT_SUPPORTED;
+import static org.klojang.jdbc.x.Err.CANNOT_CONVERT_SQL_TYPE_TO_JAVA_TYPE;
 import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 import static org.klojang.util.ClassMethods.className;
 import static org.klojang.util.ClassMethods.simpleClassName;
@@ -57,7 +57,7 @@ public class ColumnReaderFactory {
 
   @SuppressWarnings("unchecked")
   private ColumnReaderFactory() {
-    predefined = configure();
+    predefined = getPredefinedColumnReaders();
   }
 
   @SuppressWarnings({"unchecked"})
@@ -66,21 +66,19 @@ public class ColumnReaderFactory {
     ColumnReader reader;
     if (lookup == null) {
       reader = createCustomReader(targetType, columnType);
-      Utils.check(reader).is(notNull(), TYPE_NOT_SUPPORTED, className(targetType));
+      checkReaderNotNull(targetType, columnType, reader);
     } else {
       Check.that(columnType).is(SQLTypeUtil::isValidValue, Err.NO_SUCH_SQL_TYPE);
-      String typeName = getTypeName(columnType);
       reader = lookup.getColumnReader(columnType);
       if (reader == null) {
         reader = createCustomReader(targetType, columnType);
-        Utils.check(reader)
-              .is(notNull(), NOT_CONVERTIBLE, typeName, className(targetType));
+        checkReaderNotNull(targetType, columnType, reader);
       }
     }
     return reader;
   }
 
-  private static Map configure() {
+  private static Map getPredefinedColumnReaders() {
     return TypeMap.nativeTypeMapBuilder()
           .autobox(true)
           .add(String.class, new StringReaderLookup())
@@ -105,6 +103,11 @@ public class ColumnReaderFactory {
     ColumnReader reader = custom.get(key);
     if (reader != null) {
       return reader;
+    }
+    if (LOG.isTraceEnabled()) {
+      LOG.trace(Msg.NO_PREDEFINED_COLUMN_READER,
+            className(targetType),
+            getTypeName(columnType));
     }
     if (columnType == VARCHAR || columnType == CHAR) {
       MethodHandle mh = findFactoryMethod(targetType, String.class);
@@ -215,4 +218,15 @@ public class ColumnReaderFactory {
       }
     };
   }
+
+  private static <U> void checkReaderNotNull(Class<U> targetType,
+        int columnType,
+        ColumnReader reader) {
+    Utils.check(reader).is(notNull(),
+          CANNOT_CONVERT_SQL_TYPE_TO_JAVA_TYPE,
+          getTypeName(columnType),
+          className(targetType));
+  }
+
+
 }

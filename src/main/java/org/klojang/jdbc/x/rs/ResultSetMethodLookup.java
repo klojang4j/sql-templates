@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.rs;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.util.SQLTypeUtil;
+import org.klojang.jdbc.DatabaseException;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -10,6 +10,8 @@ import java.util.Map;
 
 import static java.sql.Types.*;
 import static org.klojang.check.CommonChecks.keyIn;
+import static org.klojang.check.CommonProperties.box;
+import static org.klojang.jdbc.util.SQLTypeUtil.getTypeName;
 
 /**
  * Maps SQL types (the static final int constants of java.sql.SQLType) to ResultSetMethod
@@ -34,11 +36,9 @@ final class ResultSetMethodLookup {
   }
 
   @SuppressWarnings("unchecked")
-  <T> ResultSetMethod<T> getMethod(Integer sqlType) {
-    // This implicitly checks that the specified int is one of the
-    // static final int constants in the java.sql.Types class
-    String typeName = SQLTypeUtil.getTypeName(sqlType);
-    Check.that(sqlType).is(keyIn(), cache, "Unsupported SQL type: %s", typeName);
+  <T> ResultSetMethod<T> getMethod(int sqlType) {
+    Check.that(sqlType).has(box(), keyIn(), cache,
+          () -> new DatabaseException("unsupported SQL type: " + getTypeName(sqlType)));
     return (ResultSetMethod<T>) cache.get(sqlType);
   }
 
@@ -69,7 +69,8 @@ final class ResultSetMethodLookup {
     tmp.put(TIME, ResultSetMethod.GET_TIME);
 
     tmp.put(TIMESTAMP, ResultSetMethod.getObjectGetter(LocalDateTime.class));
-    tmp.put(TIMESTAMP_WITH_TIMEZONE, ResultSetMethod.getObjectGetter(OffsetDateTime.class));
+    tmp.put(TIMESTAMP_WITH_TIMEZONE,
+          ResultSetMethod.getObjectGetter(OffsetDateTime.class));
 
     tmp.put(NUMERIC, ResultSetMethod.GET_BIG_DECIMAL);
     tmp.put(DECIMAL, ResultSetMethod.GET_BIG_DECIMAL);

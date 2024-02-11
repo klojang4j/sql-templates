@@ -56,8 +56,8 @@ public final class MapBinder {
 
   ValueBinder findBinder(Map<String, Object> map, String key, Object val) {
     if (val == null) {
-      // Return whatever. For null values *all* binders will ditch their internals and
-      // just call PreparedStatement.setString(paramIndex, null);
+      // Return any ValueBinder. For null values *all* binders will just call
+      // PreparedStatement.setString(paramIndex, null);
       return StringBinderLookup.DEFAULT;
     } else if (val instanceof Enum && bindInfo.saveEnumAsString(map.getClass(), key)) {
       return ValueBinder.ANY_TO_STRING;
