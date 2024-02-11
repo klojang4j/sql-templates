@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-Klojang JDBC,org.klojang.jdbc.x.rs,ColumnReaderFactory,51,250,9,15,14,58,7,17,0,12
+Klojang JDBC,org.klojang.jdbc.x.rs,ColumnReaderFactory,204,262,42,18,43,67,25,18,0,13
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetShort,5,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.rs,KeyWriter,120,0,4,0,28,0,7,0,5,0
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetBD,4,0,0,0,1,0,1,0,1,0

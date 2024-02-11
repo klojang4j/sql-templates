@@ -7,9 +7,10 @@ public final class Msg {
 
   public static final String NO_PREDEFINED_TYPE_MAPPING
         = &quot;No predefined mapping exists between {} and {}. Will call PreparedStatement.setObject()&quot;;
-  public static final String NO_PREDEFINED_COLUMN_READER
-              = &quot;No predefined ColumnReader exists for {}. Searching for factory method on {}&quot;;
 
-<span class="nc" id="L13">  private Msg() { throw new UnsupportedOperationException(); }</span>
+  public static final String NO_PREDEFINED_COLUMN_READER
+        = &quot;No predefined column reader exists for {}. Will attempt to create a custom reader for column type {}&quot;;
+
+<span class="nc" id="L14">  private Msg() { throw new UnsupportedOperationException(); }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

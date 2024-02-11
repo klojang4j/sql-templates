@@ -1,10 +1,13 @@
 package org.klojang.jdbc.x.rs;
 
+import org.klojang.check.Check;
 import org.klojang.collections.TypeMap;
 import org.klojang.jdbc.DatabaseException;
-import org.klojang.jdbc.x.Msg;
+import org.klojang.jdbc.util.SQLTypeUtil;
+import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.reader.*;
+import org.klojang.util.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +24,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.lang.invoke.MethodType.methodType;
+import static java.sql.Types.*;
 import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.util.SQLTypeUtil.getTypeName;
-import static org.klojang.jdbc.x.rs.ResultSetMethod.GET_STRING;
+import static org.klojang.jdbc.x.Err.NOT_CONVERTIBLE;
+import static org.klojang.jdbc.x.Err.TYPE_NOT_SUPPORTED;
+import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
 import static org.klojang.util.ClassMethods.className;
 import static org.klojang.util.ClassMethods.simpleClassName;
 
@@ -35,9 +41,6 @@ public class ColumnReaderFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(ColumnReaderFactory.class);
 
-  private static final String TYPE_NOT_SUPPORTED = "type not supported: ${0}";
-  private static final String NOT_CONVERTIBLE = "cannot convert ${0} to ${1}";
-
   private static ColumnReaderFactory INSTANCE;
 
   public static ColumnReaderFactory getInstance() {
@@ -48,9 +51,9 @@ public class ColumnReaderFactory {
   }
 
   // Predefined ColumnReaders for common types
-  private final Map<Class<?>, ColumnReaderLookup<?>> predefined;
+  private final Map<Class, ColumnReaderLookup<?>> predefined;
   // ColumnReaders that are created on demand
-  private final Map<Class<?>, ColumnReader> onDemand = new HashMap<>();
+  private final Map<Tuple2<Class, Integer>, ColumnReader> custom = new HashMap<>();
 
   @SuppressWarnings("unchecked")
   private ColumnReaderFactory() {
@@ -62,18 +65,17 @@ public class ColumnReaderFactory {
     ColumnReaderLookup<?> lookup = predefined.get(targetType);
     ColumnReader reader;
     if (lookup == null) {
-      // Then we'll call ResultSet.getString() and pass the string to a static factory
-      // method or constructor on the provided class, one that takes a single string and
-      // returns an instance of fieldType. Provided such a method or constructor exists
-      // of course. If not, we give up and throw an exception.
-      reader = createOnDemand(targetType);
+      reader = createCustomReader(targetType, columnType);
       Utils.check(reader).is(notNull(), TYPE_NOT_SUPPORTED, className(targetType));
     } else {
-      // Implicitly checks that the specified int is one of the static final int
-      // constants in java.sql.Types
+      Check.that(columnType).is(SQLTypeUtil::isValidValue, Err.NO_SUCH_SQL_TYPE);
       String typeName = getTypeName(columnType);
       reader = lookup.getColumnReader(columnType);
-      Utils.check(reader).is(notNull(), NOT_CONVERTIBLE, typeName, className(targetType));
+      if (reader == null) {
+        reader = createCustomReader(targetType, columnType);
+        Utils.check(reader)
+              .is(notNull(), NOT_CONVERTIBLE, typeName, className(targetType));
+      }
     }
     return reader;
   }
@@ -98,60 +100,110 @@ public class ColumnReaderFactory {
   }
 
   @SuppressWarnings("unchecked")
-  private ColumnReader createOnDemand(Class cls) {
-    ColumnReader reader = onDemand.get(cls);
+  private ColumnReader createCustomReader(Class targetType, int columnType) {
+    Tuple2<Class, Integer> key = Tuple2.of(targetType, columnType);
+    ColumnReader reader = custom.get(key);
     if (reader != null) {
       return reader;
     }
-    LOG.trace(Msg.NO_PREDEFINED_COLUMN_READER, className(cls), simpleClassName(cls));
-    MethodHandle mh = findFactoryMethod(cls);
-    if (mh == null) {
-      mh = findConstructor(cls);
+    if (columnType == VARCHAR || columnType == CHAR) {
+      MethodHandle mh = findFactoryMethod(targetType, String.class);
+      if (mh == null) {
+        mh = findConstructor(targetType, String.class);
+      }
+      if (mh != null) {
+        reader = new ColumnReader(GET_STRING, createAdapter(mh));
+      }
+    } else if (columnType == INTEGER) {
+      MethodHandle mh = findFactoryMethod(targetType, int.class);
+      if (mh == null) {
+        mh = findFactoryMethod(targetType, Integer.class);
+      }
+      if (mh != null) {
+        reader = new ColumnReader(GET_STRING, createAdapter(mh));
+      }
+    } else if (columnType == BIGINT) {
+      MethodHandle mh = findFactoryMethod(targetType, long.class);
+      if (mh == null) {
+        mh = findFactoryMethod(targetType, Long.class);
+      }
+      if (mh != null) {
+        reader = new ColumnReader(GET_LONG, createAdapter(mh));
+      }
+    } else if (columnType == NUMERIC || columnType == DECIMAL) {
+      MethodHandle mh = findFactoryMethod(targetType, double.class);
+      if (mh == null) {
+        mh = findFactoryMethod(targetType, Double.class);
+      }
+      if (mh != null) {
+        reader = new ColumnReader(GET_DOUBLE, createAdapter(mh));
+      }
+    } else if (columnType == VARBINARY || columnType == BINARY || columnType == LONGVARBINARY) {
+      MethodHandle mh = findFactoryMethod(targetType, byte[].class);
+      if (mh != null) {
+        reader = new ColumnReader(GET_BYTES, createAdapter(mh));
+      }
     }
-    if (mh != null) {
-      onDemand.put(cls, reader = new ColumnReader<>(GET_STRING, createAdapter(mh)));
-      return reader;
+    if (reader != null) {
+      custom.put(key, reader);
     }
-    return null;
+    return reader;
   }
 
-  private MethodHandle findFactoryMethod(Class cls) {
-    Method[] candidates = Arrays.stream(cls.getDeclaredMethods())
-          .filter(this::isFactoryMethod)
+  private MethodHandle findFactoryMethod(Class forType, Class fromType) {
+    Method[] candidates = Arrays.stream(forType.getDeclaredMethods())
+          .filter(method -> isFactoryMethod(method, fromType))
           .toArray(Method[]::new);
     if (candidates.length == 0) {
-      LOG.trace("No factory method found. Searching for constructor");
+      LOG.trace("Unable to find a factory method that returns a {} from a {}",
+            simpleClassName(forType),
+            simpleClassName(fromType));
       return null;
     } else if (candidates.length > 1) {
-      LOG.trace("Too many factory methods. Searching for constructor");
+      LOG.trace("Too many factory methods ({}) that return a {} from a {}",
+            candidates.length,
+            simpleClassName(forType),
+            simpleClassName(fromType));
       return null;
     }
+    Method method = candidates[0];
+    LOG.trace("Will use {}.{}({})",
+          simpleClassName(forType),
+          method.getName(),
+          simpleClassName(fromType));
     try {
-      Method m = candidates[0];
-      LOG.trace("Will use {}.{}(String)", simpleClassName(cls), m.getName());
-      return MethodHandles.publicLookup().unreflect(candidates[0]);
+      return MethodHandles.publicLookup().unreflect(method);
     } catch (IllegalAccessException e) {
       throw Utils.wrap(e);
     }
   }
 
-  private static MethodHandle findConstructor(Class cls) {
+  /*
+   * This method will currently only be used to find a constructor that takes a single
+   * String argument (fromType will always be String.class). It seems a bit outlandish to
+   * assume that, just because we have a value from an int column in our hands, and we
+   * have a constructor that happens to take a single int argument, we can use the int
+   * value to resurrect the entire target type. But we might change our minds.
+   */
+  private static MethodHandle findConstructor(Class forType, Class fromType) {
     MethodHandles.Lookup lookup = MethodHandles.publicLookup();
     try {
-      MethodHandle mh = lookup.findConstructor(cls, methodType(void.class, String.class));
-      LOG.trace("Will use constructor new {}(String)", simpleClassName(cls));
+      MethodHandle mh = lookup.findConstructor(forType, methodType(void.class, fromType));
+      LOG.trace("Will use constructor new {}({})",
+            simpleClassName(forType),
+            simpleClassName(fromType));
       return mh;
     } catch (Exception e) { }
     return null;
   }
 
 
-  private boolean isFactoryMethod(Method m) {
+  private boolean isFactoryMethod(Method m, Class fromType) {
     return Modifier.isPublic(m.getModifiers())
           && Modifier.isStatic(m.getModifiers())
           && m.getReturnType() == m.getDeclaringClass()
           && m.getParameterTypes().length == 1
-          && m.getParameterTypes()[0] == String.class;
+          && m.getParameterTypes()[0] == fromType;
   }
 
   private static Adapter createAdapter(MethodHandle mh) {
