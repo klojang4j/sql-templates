@@ -13,10 +13,11 @@ import java.util.TreeMap;
  * Utility class for translating between the names and values of the constants in the
  * {@link Types java.sql.Types} class. The {@code Types} class screams out to be an
  * {@code enum} type, but this class predates the introduction of enums into the Java
- * language. There are quite a lot of {@code int} constants in the {@code Types}, so it is
- * hard to remember what type you are dealing with when all you know is that is symbolized
- * by, say, {@code int} value {@code 12} (for the curious: that is the value of
- * {@link Types#VARCHAR VARCHAR} constant).
+ * language. The constants represent SQL datatypes like VARCHAR and TIMESTAMP, and there
+ * are a lot of them in the {@code Types} class. Therefore, knowing that you are dealing,
+ * say, with type {@code 12} will likely not be very helpful. This class lets you look up
+ * the name of the corresponding constant. (For the curious: {@code 12} is the value of
+ * the {@link Types#VARCHAR VARCHAR} constant.)
  */
 public final class SQLTypeUtil {
 
@@ -31,26 +32,26 @@ public final class SQLTypeUtil {
    * @return the name of the constant with the specified value
    */
   public static String getTypeName(int sqlType) {
-    Check.that(sqlType).is(SQLTypeUtil::isValidType, NO_SUCH_TYPE);
+    Check.that(sqlType).is(SQLTypeUtil::isValidValue, NO_SUCH_TYPE);
     return cache.get(sqlType);
   }
 
   /**
    * Returns {@code true} if the specified integer is the value of one of the constants in
-   * the {@link Types} class, {@code false} otherwise.
+   * {@code java.sql.Types}, {@code false} otherwise.
    *
    * @param sqlType the integer value to check
    * @return {@code true} if the integer is the value of one of the constants in the
    *       {@code Types} class, {@code false} otherwise
    */
-  public static boolean isValidType(int sqlType) {
+  public static boolean isValidValue(int sqlType) {
     return cache.containsKey(sqlType);
   }
 
   /**
    * Returns the value of the constant with the specified name. Throws an
    * {@link IllegalArgumentException} if there is no constant with the specified name in
-   * the {@link Types} class.
+   * the {@code Types} class.
    *
    * @param name the name of the constant (e&#46;g&#46; "VARCHAR" or "TIMESTAMP")
    * @return the value of the constant with the specified name
@@ -76,7 +77,7 @@ public final class SQLTypeUtil {
    *
    * @return the values of all constants in ascending order
    */
-  public static int[] getAllTypes() {
+  public static int[] getAllValues() {
     return cache.keySet().stream().mapToInt(Integer::intValue).toArray();
   }
 
@@ -85,30 +86,46 @@ public final class SQLTypeUtil {
    *
    * @return the names of all constants, sorted alphabetically
    */
-  public static String[] getAllTypeNames() {
+  public static String[] getAllNames() {
     return reverse.keySet().toArray(String[]::new);
   }
 
   /**
-   * Prints the values and names of all constants in ascending order of the values of the
-   * constants.
+   * Prints the values of all constants in ascending order of the values of the constants.
+   * For each value, the name of the constant is printed next to it.
    *
    * @param out the {@code PrintStream} to write to
    */
-  public static void printAll(PrintStream out) {
+  public static void printAllValues(PrintStream out) {
     Check.notNull(out);
     cache.forEach((k, v) -> out.printf("%5d : %s%n", k, v));
   }
 
   /**
-   * Prints the names and values of all constants, sorted alphabetically on the names of
-   * the constants.
+   * Prints the names all constants, sorted alphabetically. For each name, the value of
+   * the constant is printed next to it.
    *
    * @param out the {@code PrintStream} to write to
    */
   public static void printAllNames(PrintStream out) {
     Check.notNull(out);
     reverse.forEach((k, v) -> out.printf("%23s : %d%n", k, v));
+  }
+
+  /**
+   * Returns an {@code int} value that is guaranteed <i>not</i> to be the value of any of
+   * the constants in the {@link Types java.sql.Types} class. Could be used as an
+   * initialization value or as a pseudo-null value.
+   *
+   * @return an {@code int} value that is guaranteed <i>not</i> to be the value of any of
+   *       the constants in the {@code Types java.sql.Types} class
+   */
+  public static int getNonValue() {
+    for (int i = Integer.MAX_VALUE; ; --i) {
+      if (!isValidValue(i)) {
+        return i;
+      }
+    }
   }
 
   private static final Map<Integer, String> cache;

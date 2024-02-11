@@ -54,7 +54,7 @@ public final class ValueBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
 <span class="pc bpc" id="L54" title="1 of 2 branches missed.">    if (value == null) {</span>
 <span class="nc" id="L55">      ps.setString(paramIndex, null);</span>
     } else {
-<span class="fc" id="L57">      setter.bindValue(ps, paramIndex, value);</span>
+<span class="fc" id="L57">      setter.invoke(ps, paramIndex, value);</span>
     }
 <span class="fc" id="L59">  }</span>
 }

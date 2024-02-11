@@ -5,8 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Represents one of the setXXX() methods of PreparedStatement.
@@ -14,7 +12,7 @@ import java.util.Map;
  * @param <PARAM_TYPE> the type of the value passed to
  *       PreparedStatement.setXXX(parameterIndex, value)
  */
-public abstract class PreparedStatementMethod<PARAM_TYPE> {
+public abstract sealed class PreparedStatementMethod<PARAM_TYPE> {
 
   @SuppressWarnings({"unused"})
   private static final Logger LOG = LoggerFactory.getLogger(PreparedStatementMethod.class);
@@ -22,53 +20,75 @@ public abstract class PreparedStatementMethod<PARAM_TYPE> {
   //@formatter:off
   private static final class SetString extends PreparedStatementMethod<String> {
     SetString() { super(String.class); }
-    void bindValue(PreparedStatement ps, int idx, String val) throws SQLException { ps.setString(idx, val); }
+    void invoke(PreparedStatement ps, int idx, String val) throws SQLException { ps.setString(idx, val); }
   }
   private static final class SetInt extends PreparedStatementMethod<Integer> {
     SetInt() { super(int.class); }
-    void bindValue(PreparedStatement ps, int idx, Integer val) throws SQLException { ps.setInt(idx, val); }
+    void invoke(PreparedStatement ps, int idx, Integer val) throws SQLException { ps.setInt(idx, val); }
   }
   private static final class SetDouble extends PreparedStatementMethod<Double> {
     SetDouble() { super(double.class); }
-    void bindValue(PreparedStatement ps, int idx, Double val) throws SQLException { ps.setDouble(idx, val); }
+    void invoke(PreparedStatement ps, int idx, Double val) throws SQLException { ps.setDouble(idx, val); }
   }
   private static final class SetLong extends PreparedStatementMethod<Long> {
     SetLong() { super(long.class); }
-    void bindValue(PreparedStatement ps, int idx, Long val) throws SQLException { ps.setLong(idx, val); }
+    void invoke(PreparedStatement ps, int idx, Long val) throws SQLException { ps.setLong(idx, val); }
   }
   private static final class SetFloat extends PreparedStatementMethod<Float> {
     SetFloat() { super(float.class); }
-    void bindValue(PreparedStatement ps, int idx, Float val) throws SQLException { ps.setFloat(idx, val); }
+    void invoke(PreparedStatement ps, int idx, Float val) throws SQLException { ps.setFloat(idx, val); }
   }
   private static final class SetShort extends PreparedStatementMethod<Short> {
     SetShort() { super(short.class); }
-    void bindValue(PreparedStatement ps, int idx, Short val) throws SQLException { ps.setShort(idx, val); }
+    void invoke(PreparedStatement ps, int idx, Short val) throws SQLException { ps.setShort(idx, val); }
   }
   private static final class SetByte extends PreparedStatementMethod<Byte> {
     SetByte() { super(byte.class); }
-    void bindValue(PreparedStatement ps, int idx, Byte val) throws SQLException { ps.setByte(idx, val); }
+    void invoke(PreparedStatement ps, int idx, Byte val) throws SQLException { ps.setByte(idx, val); }
   }
   private static final class SetBoolean extends PreparedStatementMethod<Boolean> {
     SetBoolean() { super(boolean.class); }
-    void bindValue(PreparedStatement ps, int idx, Boolean val) throws SQLException { ps.setBoolean(idx, val); }
+    void invoke(PreparedStatement ps, int idx, Boolean val) throws SQLException { ps.setBoolean(idx, val); }
   }
   private static final class SetBD extends PreparedStatementMethod<BigDecimal> {
     SetBD() { super(BigDecimal.class); }
-    void bindValue(PreparedStatement ps, int idx, BigDecimal val) throws SQLException { ps.setBigDecimal(idx, val); }
+    void invoke(PreparedStatement ps, int idx, BigDecimal val) throws SQLException { ps.setBigDecimal(idx, val); }
   }
   private static final class SetDate extends PreparedStatementMethod<Date> {
     SetDate() { super(Date.class); }
-    void bindValue(PreparedStatement ps, int idx, Date val) throws SQLException { ps.setDate(idx, val); }
+    void invoke(PreparedStatement ps, int idx, Date val) throws SQLException { ps.setDate(idx, val); }
   }
   private static final class SetTime extends PreparedStatementMethod<Time> {
     SetTime() { super(Time.class); }
-    void bindValue(PreparedStatement ps, int idx, Time val) throws SQLException { ps.setTime(idx, val); }
+    void invoke(PreparedStatement ps, int idx, Time val) throws SQLException { ps.setTime(idx, val); }
   }
   private static final class SetTimestamp extends PreparedStatementMethod<Timestamp> {
     SetTimestamp() { super(Timestamp.class); }
-    void bindValue(PreparedStatement ps, int idx, Timestamp val) throws SQLException { ps.setTimestamp(idx, val); }
+    void invoke(PreparedStatement ps, int idx, Timestamp val) throws SQLException { ps.setTimestamp(idx, val); }
+  }
+  private static final class SetObject extends PreparedStatementMethod<Object> {
+    SetObject() { super(Object.class); }
+    void invoke(PreparedStatement ps, int idx, Object val) throws SQLException { ps.setObject(idx, val); }
   }
   //@formatter:on
+
+  private static final class SetObjectWithTargetType
+        extends PreparedStatementMethod<Object> {
+    private final int targetSqlType;
+
+    SetObjectWithTargetType(int targetSqlType) {
+      super(Object.class);
+      this.targetSqlType = targetSqlType;
+    }
+
+    void invoke(PreparedStatement ps, int idx, Object val) throws SQLException {
+      ps.setObject(idx, val, targetSqlType);
+    }
+  }
+
+  public static PreparedStatementMethod<Object> getObjectSetter(int sqlType) {
+    return new SetObjectWithTargetType(sqlType);
+  }
 
   public static final PreparedStatementMethod<String> SET_STRING = new SetString();
   public static final PreparedStatementMethod<Integer> SET_INT = new SetInt();
@@ -82,8 +102,7 @@ public abstract class PreparedStatementMethod<PARAM_TYPE> {
   public static final PreparedStatementMethod<Date> SET_DATE = new SetDate();
   public static final PreparedStatementMethod<Time> SET_TIME = new SetTime();
   public static final PreparedStatementMethod<Timestamp> SET_TIMESTAMP = new SetTimestamp();
-
-  private static final Map<Integer, PreparedStatementMethod<Object>> objectSetters = new HashMap<>();
+  public static final PreparedStatementMethod<Object> SET_OBJECT = new SetObject();
 
   private final Class<PARAM_TYPE> paramType;
 
@@ -95,23 +114,7 @@ public abstract class PreparedStatementMethod<PARAM_TYPE> {
     return paramType;
   }
 
-  public static PreparedStatementMethod<Object> setObject(int targetSqlType) {
-    PreparedStatementMethod<Object> m = objectSetters.get(targetSqlType);
-    if (m == null) {
-      m = new PreparedStatementMethod<>(Object.class) {
-
-        @Override
-        void bindValue(PreparedStatement ps, int paramIndex, Object paramValue)
-              throws SQLException {
-          ps.setObject(paramIndex, paramValue, targetSqlType);
-        }
-      };
-      objectSetters.put(targetSqlType, m);
-    }
-    return m;
-  }
-
-  abstract void bindValue(PreparedStatement ps, int paramIndex, PARAM_TYPE paramValue)
+  abstract void invoke(PreparedStatement ps, int paramIndex, PARAM_TYPE paramValue)
         throws SQLException;
 
 }

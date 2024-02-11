@@ -35,8 +35,8 @@ public class SQLTypeUtilTest {
 
   @Test()
   public void isValidType00() {
-    assertTrue(SQLTypeUtil.isValidType(Types.BIGINT));
-    assertFalse(SQLTypeUtil.isValidType(-17));
+    assertTrue(SQLTypeUtil.isValidValue(Types.BIGINT));
+    assertFalse(SQLTypeUtil.isValidValue(-17));
   }
 
   @Test()
@@ -48,19 +48,19 @@ public class SQLTypeUtilTest {
   @Test
   public void getAllTypeNames00() {
     // Just call to make sure we can
-    System.out.println(implode(SQLTypeUtil.getAllTypeNames()));
+    System.out.println(implode(SQLTypeUtil.getAllNames()));
   }
 
   @Test
   public void getAllTypes00() {
     // Just call to make sure we can
-    System.out.println(implodeInts(SQLTypeUtil.getAllTypes()));
+    System.out.println(implodeInts(SQLTypeUtil.getAllValues()));
   }
 
   @Test
   public void printAll00() {
     // Just call to make sure we can
-    SQLTypeUtil.printAll(System.out);
+    SQLTypeUtil.printAllValues(System.out);
   }
 
   @Test

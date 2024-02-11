@@ -54,7 +54,7 @@ public final class ValueBinder<INPUT_TYPE, PARAM_TYPE> {
     if (value == null) {
       ps.setString(paramIndex, null);
     } else {
-      setter.bindValue(ps, paramIndex, value);
+      setter.invoke(ps, paramIndex, value);
     }
   }
 }

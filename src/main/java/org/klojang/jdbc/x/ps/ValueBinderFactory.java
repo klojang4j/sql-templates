@@ -1,26 +1,33 @@
 package org.klojang.jdbc.x.ps;
 
-import org.klojang.check.Check;
 import org.klojang.collections.TypeMap;
+import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.ps.writer.*;
+import org.klojang.util.Tuple2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
-import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.util.SQLTypeUtil.getTypeName;
-import static org.klojang.util.ClassMethods.className;
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.getObjectSetter;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class ValueBinderFactory {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ValueBinderFactory.class);
 
   private static final ValueBinderFactory INSTANCE = new ValueBinderFactory();
 
   static ValueBinderFactory getInstance() { return INSTANCE; }
 
+
   private final Map<Class<?>, Map<Integer, ValueBinder>> allBinders;
+  private final Map<Tuple2<Class<?>, Integer>, ValueBinder> customBinders = new HashMap();
 
   private ValueBinderFactory() {
     allBinders = (Map<Class<?>, Map<Integer, ValueBinder>>) createBinders();
@@ -31,16 +38,30 @@ final class ValueBinderFactory {
   }
 
   <T, U> ValueBinder<T, U> getBinder(Class<T> inputType, int targetSqlType) {
-    // This implicitly checks that the specified int is one of the
-    // static final int constants in the java.sql.Types class
-    String sqlTypeName = getTypeName(targetSqlType);
     Map<Integer, ValueBinder> binders = allBinders.get(inputType);
-    Check.that(binders).is(notNull(), "Type not supported: ${0}", className(inputType));
-    ValueBinder<T, U> binder = binders.get(targetSqlType);
-    Check.that(binder).is(notNull(),
-          "Cannot convert ${0} to ${1}",
-          sqlTypeName,
-          className(inputType));
+    ValueBinder binder;
+    if (binders == null) {
+      Tuple2<Class<?>, Integer> key = Tuple2.of(inputType, targetSqlType);
+      binder = customBinders.get(key);
+      if (binder == null) {
+        LOG.trace(Err.NO_PREDEFINED_BINDER, inputType.getName());
+        binder = new ValueBinder<>(getObjectSetter(targetSqlType));
+        customBinders.put(key, binder);
+      }
+    } else {
+      binder = binders.get(targetSqlType);
+      if (binder == null) {
+        Tuple2<Class<?>, Integer> key = Tuple2.of(inputType, targetSqlType);
+        binder = customBinders.get(key);
+        if (binder == null) {
+          LOG.trace(Err.NO_PREDEFINED_TYPE_MAPPING,
+                inputType.getName(),
+                getTypeName(targetSqlType));
+          binder = new ValueBinder<>(getObjectSetter(targetSqlType));
+          customBinders.put(key, binder);
+        }
+      }
+    }
     return binder;
   }
 

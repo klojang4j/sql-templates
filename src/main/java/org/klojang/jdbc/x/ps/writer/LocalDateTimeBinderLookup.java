@@ -26,16 +26,16 @@ public final class LocalDateTimeBinderLookup extends ValueBinderLookup<LocalDate
     put(TIMESTAMP, DEFAULT);
     put(DATE, localDateTimeToSqlDate());
     // Friendly reminder on how to read this:
-    // * if we are dealing with a LocalDateTime value
-    // * and the database type is Types.BIGINT
-    // * then we are going to call PreparedStatement.setLong() and we will extract
-    //   extract the milliseconds-since-1970 from the LocalDateTime
+    // *   IF we are dealing with a LocalDateTime value
+    // *  AND we must save it in a BIGINT column
+    // * THEN we are going to call PreparedStatement.setLong() and we will extract
+    //        extract the milliseconds-since-1970 from the LocalDateTime
     put(BIGINT, localDateTimeToLong());
     addMultiple(ANY_TO_STRING, VARCHAR, CHAR);
   }
 
   private static ValueBinder<LocalDateTime, Timestamp> localDateTimeToTimestamp() {
-    return new ValueBinder<>(SET_TIMESTAMP, x -> ifNotNull(x, Timestamp::valueOf));
+    return new ValueBinder<>(SET_TIMESTAMP, Timestamp::valueOf);
   }
 
   private static ValueBinder<LocalDateTime, Date> localDateTimeToSqlDate() {

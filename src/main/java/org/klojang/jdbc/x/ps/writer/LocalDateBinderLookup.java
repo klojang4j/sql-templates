@@ -4,6 +4,7 @@ import org.klojang.jdbc.x.ps.ValueBinder;
 import org.klojang.jdbc.x.ps.ValueBinderLookup;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.function.Function;
 
@@ -29,8 +30,8 @@ public final class LocalDateBinderLookup extends ValueBinderLookup<LocalDate> {
     return new ValueBinder<>(SET_DATE, Date::valueOf);
   }
 
-  private static ValueBinder<LocalDate, Object> localDateToTimeStamp() {
-    return new ValueBinder<>(setObject(TIMESTAMP));
+  private static ValueBinder<LocalDate, Timestamp> localDateToTimeStamp() {
+    return new ValueBinder<>(SET_TIMESTAMP, x -> localDateToTimeStamp(x));
   }
 
   private static ValueBinder<LocalDate, Long> localDateToLong() {
@@ -39,6 +40,10 @@ public final class LocalDateBinderLookup extends ValueBinderLookup<LocalDate> {
 
   private static Function<LocalDate, Long> getEpochSeconds() {
     return x -> x.atStartOfDay(systemDefault()).toEpochSecond();
+  }
+
+  private static Timestamp localDateToTimeStamp(LocalDate x) {
+    return Timestamp.valueOf(x.atStartOfDay());
   }
 
 }

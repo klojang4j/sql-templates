@@ -4,6 +4,7 @@ import org.klojang.jdbc.x.ps.ValueBinder;
 import org.klojang.jdbc.x.ps.ValueBinderLookup;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.function.Function;
 
@@ -15,30 +16,34 @@ import static org.klojang.jdbc.x.ps.ValueBinder.ANY_TO_STRING;
 public final class LocalDateBinderLookup extends ValueBinderLookup&lt;LocalDate&gt; {
 
   @SuppressWarnings(&quot;rawtypes&quot;)
-<span class="fc" id="L18">  public static final ValueBinder DEFAULT = localDateToSqlDate();</span>
+<span class="fc" id="L19">  public static final ValueBinder DEFAULT = localDateToSqlDate();</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
-<span class="fc" id="L21">  public LocalDateBinderLookup() {</span>
-<span class="fc" id="L22">    put(DATE, DEFAULT);</span>
-<span class="fc" id="L23">    put(TIMESTAMP, localDateToTimeStamp());</span>
-<span class="fc" id="L24">    put(BIGINT, localDateToLong());</span>
-<span class="fc" id="L25">    addMultiple(ANY_TO_STRING, VARCHAR, CHAR);</span>
-<span class="fc" id="L26">  }</span>
+<span class="fc" id="L22">  public LocalDateBinderLookup() {</span>
+<span class="fc" id="L23">    put(DATE, DEFAULT);</span>
+<span class="fc" id="L24">    put(TIMESTAMP, localDateToTimeStamp());</span>
+<span class="fc" id="L25">    put(BIGINT, localDateToLong());</span>
+<span class="fc" id="L26">    addMultiple(ANY_TO_STRING, VARCHAR, CHAR);</span>
+<span class="fc" id="L27">  }</span>
 
   private static ValueBinder&lt;LocalDate, Date&gt; localDateToSqlDate() {
-<span class="fc" id="L29">    return new ValueBinder&lt;&gt;(SET_DATE, Date::valueOf);</span>
+<span class="fc" id="L30">    return new ValueBinder&lt;&gt;(SET_DATE, Date::valueOf);</span>
   }
 
-  private static ValueBinder&lt;LocalDate, Object&gt; localDateToTimeStamp() {
-<span class="fc" id="L33">    return new ValueBinder&lt;&gt;(setObject(TIMESTAMP));</span>
+  private static ValueBinder&lt;LocalDate, Timestamp&gt; localDateToTimeStamp() {
+<span class="pc" id="L34">    return new ValueBinder&lt;&gt;(SET_TIMESTAMP, x -&gt; localDateToTimeStamp(x));</span>
   }
 
   private static ValueBinder&lt;LocalDate, Long&gt; localDateToLong() {
-<span class="fc" id="L37">    return new ValueBinder&lt;&gt;(SET_LONG, getEpochSeconds());</span>
+<span class="fc" id="L38">    return new ValueBinder&lt;&gt;(SET_LONG, getEpochSeconds());</span>
   }
 
   private static Function&lt;LocalDate, Long&gt; getEpochSeconds() {
-<span class="pc" id="L41">    return x -&gt; x.atStartOfDay(systemDefault()).toEpochSecond();</span>
+<span class="pc" id="L42">    return x -&gt; x.atStartOfDay(systemDefault()).toEpochSecond();</span>
+  }
+
+  private static Timestamp localDateToTimeStamp(LocalDate x) {
+<span class="nc" id="L46">    return Timestamp.valueOf(x.atStartOfDay());</span>
   }
 
 }

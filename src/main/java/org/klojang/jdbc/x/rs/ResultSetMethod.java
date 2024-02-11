@@ -8,7 +8,7 @@ import java.util.Map;
 /*
  * Represents one of the get methods of ResultSet, like ResultSet.getString(columnIndex)
  */
-public abstract class ResultSetMethod<COLUMN_TYPE> {
+public abstract sealed class ResultSetMethod<COLUMN_TYPE> {
 
   //@formatter:off
   private static final class GetString extends ResultSetMethod<String> {
@@ -52,6 +52,20 @@ public abstract class ResultSetMethod<COLUMN_TYPE> {
   }
   //@formatter:on
 
+  private static final class GetObject<T> extends ResultSetMethod<T> {
+
+    private final Class<T> returnType;
+
+    GetObject(Class<T> returnType) {
+      this.returnType = returnType;
+    }
+
+    @Override
+    T invoke(ResultSet rs, int columnIndex) throws SQLException {
+      return rs.getObject(columnIndex, returnType);
+    }
+  }
+
   public static final ResultSetMethod<String> GET_STRING = new GetString();
   public static final ResultSetMethod<Integer> GET_INT = new GetInt();
   public static final ResultSetMethod<Float> GET_FLOAT = new GetFloat();
@@ -71,17 +85,7 @@ public abstract class ResultSetMethod<COLUMN_TYPE> {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static <T> ResultSetMethod<T> objectGetter(Class<T> returnType) {
-    ResultSetMethod<T> m = objectGetters.get(returnType);
-    if (m == null) {
-      m = new ResultSetMethod() {
-        @Override
-        Object invoke(ResultSet rs, int columnIndex) throws SQLException {
-          return rs.getObject(columnIndex, returnType);
-        }
-      };
-      objectGetters.put(returnType, m);
-    }
-    return m;
+    return objectGetters.computeIfAbsent(returnType, GetObject::new);
   }
 
   abstract COLUMN_TYPE invoke(ResultSet rs, int columnIndex) throws SQLException;
