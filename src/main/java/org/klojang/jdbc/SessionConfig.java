@@ -14,9 +14,11 @@ import static org.klojang.templates.name.CamelCaseToSnakeUpperCase.camelCaseToSn
 import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCase;
 
 /**
- * {@code SessionConfig} objects allow you to fine-tune or modify <i>Klojang JDBC's</i>
- * default behaviour. You might want to implement {@code SessionConfig} through an
- * anonymous class:
+ * {@code SessionConfig} objects allow you to fine-tune or modify various aspects of how
+ * <i>Klojang JDBC</i> processes and executes SQL. {@code SessionConfig} is an interface
+ * that provides default implementations for all its methods. The default implementations
+ * specify <i>Klojang JDBC's</i> default behaviour. You might want to implement
+ * {@code SessionConfig} through an anonymous class:
  *
  * <blockquote><pre>{@code
  * SessionConfig config = new SessionConfig() {
@@ -24,6 +26,13 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
  *     return true;
  *   }
  * };
+ * }</pre></blockquote>
+ *
+ * <p>Alternatively, you could use the provided "withers" to modify how <i>Klojang
+ * JDBC</i> operates:
+ *
+ * <blockquote><pre>{@code
+ * SessionConfig config = SessionConfig.getDefaultConfig().withSaveAllEnumsAsStrings();
  * }</pre></blockquote>
  *
  * @author Ayco Holleman
@@ -76,6 +85,7 @@ public interface SessionConfig {
    * {@link #getValue(ResultSet, int)} can be assigned to the bean property or record
    * component for which it is destined, or a {@link ClassCastException} will ensue.
    */
+  @FunctionalInterface
   interface CustomReader {
     /**
      * Retrieves the value of the designated column in the current row of the specified
@@ -100,9 +110,11 @@ public interface SessionConfig {
    *       containing the values for which to specify a {@code CustomBinder}
    * @param propertyName the name of the bean property, record component, or map key
    *       for which to specify a {@code CustomBinder}
-   * @param propertyType the type of the values  for which to specify a
+   * @param propertyType the type of the values for which to specify a
    *       {@code CustomBinder}
-   * @return a {@code CustomBinder} for any combination of the provided arguments
+   * @return a {@code CustomBinder} for any combination of the provided arguments, or
+   *       {@code null} if you do not require a {@code CustomBinder} for any combination
+   *       of the provided arguments
    */
   default CustomBinder getCustomBinder(Class<?> beanType,
         String propertyName,
@@ -135,7 +147,9 @@ public interface SessionConfig {
    *       {@link java.sql.Types java.sql.Types}, like
    *       {@link java.sql.Types#VARCHAR Types.VARCHAR} or
    *       {@link java.sql.Types#TIMESTAMP Types.TIMESTAMP}}
-   * @return a {@code CustomReader} for any combination of the provided arguments
+   * @return a {@code CustomReader} for any combination of the provided arguments, or
+   *       {@code null} if you do not require a {@code CustomReader} for any combination
+   *       of the provided arguments
    */
   default CustomReader getCustomReader(Class<?> beanType,
         String propertyName,
@@ -214,9 +228,10 @@ public interface SessionConfig {
   /**
    * Specifies the {@link NameMapper} to be used for mapping column names to bean
    * properties, record components, or map keys. The default implementation returns an
-   * instance of {@link SnakeCaseToCamelCase}, which would map both
-   * {@code "snake_case_to_camel_case"} and {@code "SNAKE_CASE_TO_CAMEL_CASE}" to
-   * {@code "snakeCaseToCamelCase"}.
+   * instance of {@link SnakeCaseToCamelCase}, which would map
+   * {@code "SNAKE_CASE_TO_CAMEL_CASE}" to {@code "snakeCaseToCamelCase"}. (It would also
+   * map {@code "snake_case_to_camel_case"} to {@code "SNAKE_CASE_TO_CAMEL_CASE}" because
+   * the casing of the input string is irrelevant for this {@code NameMapper}.)
    *
    * @return the {@link NameMapper} to be used for mapping column names to bean
    *       properties, record components, or map keys
@@ -256,11 +271,11 @@ public interface SessionConfig {
   }
 
   /**
-   * Returns a new instance that is equal to this instance except that <i>all</i>
-   * {@code enum} types will be persisted by calling {@code toString()} them.
+   * Returns a new instance that is equal to this instance except that <i>all</i> enums
+   * will be persisted by calling {@code toString()} on them.
    *
-   * @return a new instance that is equal to this instance except that <i>all</i>
-   *       {@code enum} types will be persisted by calling {@code toString()} them.
+   * @return a new instance that is equal to this instance except that <i>all</i> enums
+   *       will be persisted by calling {@code toString()} on them.
    */
   default SessionConfig withSaveAllEnumsAsStrings() {
     return new SessionConfig() {

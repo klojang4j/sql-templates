@@ -14,9 +14,11 @@ import static org.klojang.templates.name.CamelCaseToSnakeUpperCase.camelCaseToSn
 import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCase;
 
 /**
- * {@code SessionConfig} objects allow you to fine-tune or modify &lt;i&gt;Klojang JDBC's&lt;/i&gt;
- * default behaviour. You might want to implement {@code SessionConfig} through an
- * anonymous class:
+ * {@code SessionConfig} objects allow you to fine-tune or modify various aspects of how
+ * &lt;i&gt;Klojang JDBC&lt;/i&gt; processes and executes SQL. {@code SessionConfig} is an interface
+ * that provides default implementations for all its methods. The default implementations
+ * specify &lt;i&gt;Klojang JDBC's&lt;/i&gt; default behaviour. You might want to implement
+ * {@code SessionConfig} through an anonymous class:
  *
  * &lt;blockquote&gt;&lt;pre&gt;{@code
  * SessionConfig config = new SessionConfig() {
@@ -24,6 +26,13 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
  *     return true;
  *   }
  * };
+ * }&lt;/pre&gt;&lt;/blockquote&gt;
+ *
+ * &lt;p&gt;Alternatively, you could use the provided &quot;withers&quot; to modify how &lt;i&gt;Klojang
+ * JDBC&lt;/i&gt; operates:
+ *
+ * &lt;blockquote&gt;&lt;pre&gt;{@code
+ * SessionConfig config = SessionConfig.getDefaultConfig().withSaveAllEnumsAsStrings();
  * }&lt;/pre&gt;&lt;/blockquote&gt;
  *
  * @author Ayco Holleman
@@ -37,7 +46,7 @@ public interface SessionConfig {
    * @return a {@code SessionConfig} instance which does not override any of the defaults
    *       provided by the {@code SessionConfig} instance
    */
-<span class="nc" id="L40">  static SessionConfig getDefaultConfig() { return Utils.DEFAULT_CONFIG; }</span>
+<span class="nc" id="L49">  static SessionConfig getDefaultConfig() { return Utils.DEFAULT_CONFIG; }</span>
 
   /**
    * A {@code CustomBinder} gives you full control over how values are bound to a
@@ -76,6 +85,7 @@ public interface SessionConfig {
    * {@link #getValue(ResultSet, int)} can be assigned to the bean property or record
    * component for which it is destined, or a {@link ClassCastException} will ensue.
    */
+  @FunctionalInterface
   interface CustomReader {
     /**
      * Retrieves the value of the designated column in the current row of the specified
@@ -100,14 +110,16 @@ public interface SessionConfig {
    *       containing the values for which to specify a {@code CustomBinder}
    * @param propertyName the name of the bean property, record component, or map key
    *       for which to specify a {@code CustomBinder}
-   * @param propertyType the type of the values  for which to specify a
+   * @param propertyType the type of the values for which to specify a
    *       {@code CustomBinder}
-   * @return a {@code CustomBinder} for any combination of the provided arguments
+   * @return a {@code CustomBinder} for any combination of the provided arguments, or
+   *       {@code null} if you do not require a {@code CustomBinder} for any combination
+   *       of the provided arguments
    */
   default CustomBinder getCustomBinder(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L110">    return null;</span>
+<span class="fc" id="L122">    return null;</span>
   }
 
   /**
@@ -135,13 +147,15 @@ public interface SessionConfig {
    *       {@link java.sql.Types java.sql.Types}, like
    *       {@link java.sql.Types#VARCHAR Types.VARCHAR} or
    *       {@link java.sql.Types#TIMESTAMP Types.TIMESTAMP}}
-   * @return a {@code CustomReader} for any combination of the provided arguments
+   * @return a {@code CustomReader} for any combination of the provided arguments, or
+   *       {@code null} if you do not require a {@code CustomReader} for any combination
+   *       of the provided arguments
    */
   default CustomReader getCustomReader(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType,
         int sqlType) {
-<span class="fc" id="L144">    return null;</span>
+<span class="fc" id="L158">    return null;</span>
   }
 
   /**
@@ -167,7 +181,7 @@ public interface SessionConfig {
   default Integer getSqlType(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L170">    return null;</span>
+<span class="fc" id="L184">    return null;</span>
   }
 
   /**
@@ -195,7 +209,7 @@ public interface SessionConfig {
   default boolean saveEnumAsString(Class&lt;?&gt; beanType,
         String enumProperty,
         Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="nc" id="L198">    return false;</span>
+<span class="nc" id="L212">    return false;</span>
   }
 
   /**
@@ -208,21 +222,22 @@ public interface SessionConfig {
    *       components, or map keys to column names
    */
   default NameMapper getPropertyToColumnMapper() {
-<span class="nc" id="L211">    return camelCaseToSnakeUpperCase();</span>
+<span class="nc" id="L225">    return camelCaseToSnakeUpperCase();</span>
   }
 
   /**
    * Specifies the {@link NameMapper} to be used for mapping column names to bean
    * properties, record components, or map keys. The default implementation returns an
-   * instance of {@link SnakeCaseToCamelCase}, which would map both
-   * {@code &quot;snake_case_to_camel_case&quot;} and {@code &quot;SNAKE_CASE_TO_CAMEL_CASE}&quot; to
-   * {@code &quot;snakeCaseToCamelCase&quot;}.
+   * instance of {@link SnakeCaseToCamelCase}, which would map
+   * {@code &quot;SNAKE_CASE_TO_CAMEL_CASE}&quot; to {@code &quot;snakeCaseToCamelCase&quot;}. (It would also
+   * map {@code &quot;snake_case_to_camel_case&quot;} to {@code &quot;SNAKE_CASE_TO_CAMEL_CASE}&quot; because
+   * the casing of the input string is irrelevant for this {@code NameMapper}.)
    *
    * @return the {@link NameMapper} to be used for mapping column names to bean
    *       properties, record components, or map keys
    */
   default NameMapper getColumnToPropertyMapper() {
-<span class="fc" id="L225">    return snakeCaseToCamelCase();</span>
+<span class="fc" id="L240">    return snakeCaseToCamelCase();</span>
   }
 
   /**
@@ -235,8 +250,8 @@ public interface SessionConfig {
    *       property-to-column mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withPropertyToColumnMapper(NameMapper mapper) {
-<span class="fc" id="L238">    return new SessionConfig() {</span>
-<span class="fc" id="L239">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
+<span class="fc" id="L253">    return new SessionConfig() {</span>
+<span class="fc" id="L254">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
     };
   }
 
@@ -250,24 +265,24 @@ public interface SessionConfig {
    *       column-to-property mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withColumnToPropertyMapper(NameMapper mapper) {
-<span class="nc" id="L253">    return new SessionConfig() {</span>
-<span class="nc" id="L254">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
+<span class="nc" id="L268">    return new SessionConfig() {</span>
+<span class="nc" id="L269">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
     };
   }
 
   /**
-   * Returns a new instance that is equal to this instance except that &lt;i&gt;all&lt;/i&gt;
-   * {@code enum} types will be persisted by calling {@code toString()} them.
+   * Returns a new instance that is equal to this instance except that &lt;i&gt;all&lt;/i&gt; enums
+   * will be persisted by calling {@code toString()} on them.
    *
-   * @return a new instance that is equal to this instance except that &lt;i&gt;all&lt;/i&gt;
-   *       {@code enum} types will be persisted by calling {@code toString()} them.
+   * @return a new instance that is equal to this instance except that &lt;i&gt;all&lt;/i&gt; enums
+   *       will be persisted by calling {@code toString()} on them.
    */
   default SessionConfig withSaveAllEnumsAsStrings() {
-<span class="fc" id="L266">    return new SessionConfig() {</span>
+<span class="fc" id="L281">    return new SessionConfig() {</span>
       public boolean saveEnumAsString(Class&lt;?&gt; beanType,
             String enumProperty,
             Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="fc" id="L270">        return true;</span>
+<span class="fc" id="L285">        return true;</span>
       }
     };
   }
