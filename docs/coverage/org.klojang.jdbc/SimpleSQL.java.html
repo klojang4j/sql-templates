@@ -9,8 +9,8 @@ final class SimpleSQL extends AbstractSQL {
 
   private final SQLInfo sqlInfo;
 
-  SimpleSQL(String sql, boolean isStatic, BindInfo bindInfo) {
-<span class="fc" id="L13">    super(sql, bindInfo);</span>
+  SimpleSQL(String sql, boolean isStatic, SessionConfig config) {
+<span class="fc" id="L13">    super(sql, config);</span>
 <span class="fc bfc" id="L14" title="All 2 branches covered.">    if (isStatic) {</span>
 <span class="fc" id="L15">      sqlInfo = new SQLInfo(new ParamExtractor(sql, 0));</span>
     } else {

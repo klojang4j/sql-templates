@@ -36,8 +36,8 @@ Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetShort,6,4,0,0,1,1,
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetObjectWithTargetType,14,0,0,0,5,0,2,0,2,0
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod,8,62,0,0,2,17,2,2,2,2
 Klojang JDBC,org.klojang.jdbc.x.ps,ValueBinder,18,55,3,3,2,19,4,7,1,7
-Klojang JDBC,org.klojang.jdbc.x.ps,PropertyBinder,96,173,13,11,20,37,12,9,2,7
-Klojang JDBC,org.klojang.jdbc.x.ps,MapBinder,64,109,14,10,9,26,12,6,1,5
+Klojang JDBC,org.klojang.jdbc.x.ps,PropertyBinder,97,173,13,11,21,37,12,9,2,7
+Klojang JDBC,org.klojang.jdbc.x.ps,MapBinder,70,109,14,10,12,26,12,6,1,5
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetString,0,9,0,0,0,2,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetByte,6,4,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetTime,5,4,0,0,1,1,1,1,1,1
@@ -62,7 +62,6 @@ Klojang JDBC,org.klojang.jdbc,MappifierFactory,60,0,6,0,15,0,6,0,3,0
 Klojang JDBC,org.klojang.jdbc,DatabaseException,15,4,0,0,5,2,3,1,3,1
 Klojang JDBC,org.klojang.jdbc,DynamicSQLSession,148,151,8,8,31,36,9,14,2,12
 Klojang JDBC,org.klojang.jdbc,RecordBeanifier,70,70,11,5,19,18,10,6,3,5
-Klojang JDBC,org.klojang.jdbc,BindInfo.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc,RecordBeanifier.BeanIterator,32,0,2,0,6,0,4,0,3,0
 Klojang JDBC,org.klojang.jdbc,SQLSkeleton,4,19,0,0,2,5,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,SQLSession,65,4,0,0,16,1,15,1,15,1
@@ -74,14 +73,15 @@ Klojang JDBC,org.klojang.jdbc,InsertBuilder,77,188,4,4,14,31,7,8,4,7
 Klojang JDBC,org.klojang.jdbc,SQLUpdate,15,24,0,0,7,6,1,3,1,3
 Klojang JDBC,org.klojang.jdbc,DefaultBeanifier.BeanIterator,31,0,2,0,6,0,4,0,3,0
 Klojang JDBC,org.klojang.jdbc,EmptyBeanifier,17,0,0,0,7,0,7,0,7,0
+Klojang JDBC,org.klojang.jdbc,SessionConfig,2,9,0,0,1,3,1,3,1,3
 Klojang JDBC,org.klojang.jdbc,SQLStatement,35,218,0,4,5,44,2,10,2,8
-Klojang JDBC,org.klojang.jdbc,BindInfo,2,9,0,0,1,3,1,3,1,3
 Klojang JDBC,org.klojang.jdbc,SQLTemplateSession,44,46,0,0,8,9,2,3,2,3
-Klojang JDBC,org.klojang.jdbc,InsertBuilder.new BindInfo() {...},0,3,0,0,0,1,0,1,0,1
+Klojang JDBC,org.klojang.jdbc,InsertBuilder.new SessionConfig() {...},0,3,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc,BeanValueProcessor,0,4,0,0,0,1,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,SQLSkeletonSession,67,227,0,6,14,43,3,13,3,10
 Klojang JDBC,org.klojang.jdbc,Quoter,18,42,0,0,6,9,1,3,1,3
 Klojang JDBC,org.klojang.jdbc,DefaultMappifier,140,0,16,0,37,0,16,0,8,0
+Klojang JDBC,org.klojang.jdbc,SessionConfig.new SessionConfig() {...},0,3,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc,SQLTemplate,4,29,0,0,2,6,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,BigDecimalBinderLookup,0,119,0,0,0,19,0,10,0,10
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,LocalDateBinderLookup,13,57,0,0,1,11,3,6,3,6

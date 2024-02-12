@@ -2,7 +2,7 @@
 
 import org.klojang.invoke.Getter;
 import org.klojang.invoke.GetterFactory;
-import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.SessionConfig;
 import org.klojang.jdbc.x.ps.writer.EnumBinderLookup;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.slf4j.Logger;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.klojang.jdbc.BindInfo.CustomBinder;
+import static org.klojang.jdbc.SessionConfig.CustomBinder;
 import static org.klojang.util.ClassMethods.isSubtype;
 
 
@@ -41,7 +41,7 @@ final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
   @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
   static PropertyBinder[] createReaders(Class beanClass,
         List&lt;NamedParameter&gt; params,
-        BindInfo bindInfo,
+        SessionConfig config,
         List&lt;NamedParameter&gt; bound) {
 <span class="fc" id="L46">    ValueBinderFactory factory = ValueBinderFactory.getInstance();</span>
 <span class="fc" id="L47">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
@@ -54,16 +54,16 @@ final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
 <span class="fc" id="L54">      bound.add(param);</span>
 <span class="fc" id="L55">      String property = param.name();</span>
 <span class="fc" id="L56">      Class type = getter.getReturnType();</span>
-<span class="fc" id="L57">      CustomBinder custom = bindInfo.getCustomBinder(type, beanClass, property);</span>
+<span class="fc" id="L57">      CustomBinder custom = config.getCustomBinder(type, beanClass, property);</span>
 <span class="pc bpc" id="L58" title="1 of 2 branches missed.">      if (custom != null) {</span>
 <span class="nc" id="L59">        PropertyBinder pb = new PropertyBinder(getter, param, custom);</span>
 <span class="nc" id="L60">        readers.add(pb);</span>
 <span class="nc" id="L61">      } else {</span>
         final ValueBinder vb;
-<span class="fc" id="L63">        Integer sqlType = bindInfo.getSqlType(type, beanClass, property);</span>
+<span class="fc" id="L63">        Integer sqlType = config.getSqlType(beanClass, property, type);</span>
 <span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (sqlType == null) {</span>
 <span class="pc bpc" id="L65" title="1 of 2 branches missed.">          if (isSubtype(type, Enum.class)) {</span>
-<span class="nc bnc" id="L66" title="All 2 branches missed.">            if (bindInfo.saveEnumAsString(beanClass, property)) {</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">            if (config.saveEnumAsString(beanClass, property, type)) {</span>
 <span class="nc" id="L67">              vb = ValueBinder.ANY_TO_STRING;</span>
             } else {
 <span class="nc" id="L69">              vb = EnumBinderLookup.DEFAULT;</span>
@@ -105,22 +105,24 @@ final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
 <span class="fc" id="L105">    INPUT_TYPE beanValue = (INPUT_TYPE) getter.read(bean);</span>
 <span class="pc bpc" id="L106" title="1 of 2 branches missed.">    if (custom != null) {</span>
 <span class="nc bnc" id="L107" title="All 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
-<span class="nc" id="L108">        LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (using custom binder)&quot;, param.name(), beanValue);</span>
+<span class="nc" id="L108">        LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (using custom binder)&quot;,</span>
+<span class="nc" id="L109">              param.name(),</span>
+              beanValue);
       }
-<span class="nc" id="L110">      param.positions().forEachThrowing(i -&gt; custom.bind(ps, i, beanValue));</span>
+<span class="nc" id="L112">      param.positions().forEachThrowing(i -&gt; custom.bind(ps, i, beanValue));</span>
     } else {
-<span class="fc" id="L112">      PARAM_TYPE paramValue = binder.getParamValue(beanValue);</span>
-<span class="pc bpc" id="L113" title="1 of 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
-<span class="pc bpc" id="L114" title="3 of 4 branches missed.">        if (binder.isAdaptive() &amp;&amp; beanValue != paramValue) {</span>
-<span class="nc" id="L115">          String fmt = &quot;==&gt; Parameter \&quot;{}\&quot;: {} (original value: {})&quot;;</span>
-<span class="nc" id="L116">          LOG.trace(fmt, param.name(), paramValue, beanValue);</span>
-<span class="nc" id="L117">        } else {</span>
-<span class="fc" id="L118">          LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {}&quot;, getter.getProperty(), paramValue);</span>
+<span class="fc" id="L114">      PARAM_TYPE paramValue = binder.getParamValue(beanValue);</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
+<span class="pc bpc" id="L116" title="3 of 4 branches missed.">        if (binder.isAdaptive() &amp;&amp; beanValue != paramValue) {</span>
+<span class="nc" id="L117">          String fmt = &quot;==&gt; Parameter \&quot;{}\&quot;: {} (original value: {})&quot;;</span>
+<span class="nc" id="L118">          LOG.trace(fmt, param.name(), paramValue, beanValue);</span>
+<span class="nc" id="L119">        } else {</span>
+<span class="fc" id="L120">          LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {}&quot;, getter.getProperty(), paramValue);</span>
         }
       }
-<span class="fc" id="L121">      param.positions().forEachThrowing(i -&gt; binder.bind(ps, i, paramValue));</span>
+<span class="fc" id="L123">      param.positions().forEachThrowing(i -&gt; binder.bind(ps, i, paramValue));</span>
     }
-<span class="fc" id="L123">  }</span>
+<span class="fc" id="L125">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

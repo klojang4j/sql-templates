@@ -36,7 +36,7 @@ public final class InsertBuilder {
   private boolean exclude;
 
   private NameMapper mapper = NameMapper.AS_IS;
-  private BindInfo bindInfo = new BindInfo() { };
+  private SessionConfig config = new SessionConfig() { };
   private boolean returnKeys = true;
 
   InsertBuilder() { }
@@ -125,14 +125,14 @@ public final class InsertBuilder {
   }
 
   /**
-   * Sets the {@link BindInfo} object to be used to fine-tune the binding process.
+   * Sets the {@link SessionConfig} object to be used to fine-tune the binding process.
    *
-   * @param bindInfo the {@code BindInfo} object to be used to fine-tune the binding
+   * @param config the {@code SessionConfig} object to be used to fine-tune the binding
    *       process
    * @return this {@code SQLInsertBuilder}
    */
-  public InsertBuilder withBindInfo(BindInfo bindInfo) {
-    this.bindInfo = Check.notNull(bindInfo).ok();
+  public InsertBuilder withSessionConfig(SessionConfig config) {
+    this.config = Check.notNull(config).ok();
     return this;
   }
 
@@ -166,7 +166,7 @@ public final class InsertBuilder {
     String table = ifNull(tableName, beanClass.getSimpleName());
     StringBuilder sb = new StringBuilder(100);
     append(sb, "INSERT INTO ", table, " (", cols, ") VALUES(", params, ")");
-    SQLSession sql = SQL.simple(sb.toString(), bindInfo).session(con);
+    SQLSession sql = SQL.simple(sb.toString(), config).session(con);
     return sql.prepareInsert(returnKeys);
   }
 

@@ -1,6 +1,6 @@
 package org.klojang.jdbc.x.ps;
 
-import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.SessionConfig;
 import org.klojang.jdbc.x.sql.NamedParameter;
 
 import java.sql.PreparedStatement;
@@ -18,8 +18,8 @@ public final class BeanBinder<T> {
 
   // Creates a BeanBinder capable binding JavaBeans of the specified type to a query
   // containing the specified named parameters.
-  public BeanBinder(Class<T> beanClass, List<NamedParameter> params, BindInfo bindInfo) {
-    readers = PropertyBinder.createReaders(beanClass, params, bindInfo, bound);
+  public BeanBinder(Class<T> beanClass, List<NamedParameter> params, SessionConfig config) {
+    readers = PropertyBinder.createReaders(beanClass, params, config, bound);
   }
 
   public void bind(T bean, PreparedStatement ps) throws Throwable {

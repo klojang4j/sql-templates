@@ -19,15 +19,15 @@ abstract sealed class AbstractSQL implements SQL
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);
 
   private final String unparsed;
-  private final BindInfo bindInfo;
+  private final SessionConfig config;
 
   private final Map<Class<?>, BeanBinder<?>> beanBinders;
   private final Map<Tuple2<Class<?>, NameMapper>, BeanifierFactory<?>> beanifiers;
   private final Map<NameMapper, MappifierFactory> mappifiers;
 
-  AbstractSQL(String sql, BindInfo bindInfo) {
+  AbstractSQL(String sql, SessionConfig config) {
     this.unparsed = sql;
-    this.bindInfo = bindInfo;
+    this.config = config;
     // These maps are unlikely to grow beyond one or two entries
     beanBinders = new HashMap<>(4);
     beanifiers = new HashMap<>(4);
@@ -42,21 +42,21 @@ abstract sealed class AbstractSQL implements SQL
     return unparsed;
   }
 
-  BindInfo bindInfo() {
-    return bindInfo;
+  SessionConfig config() {
+    return config;
   }
 
   BeanBinder<?> getBeanBinder(SQLInfo sqlInfo, Class<?> clazz) {
     BeanBinder<?> binder = beanBinders.get(clazz);
     if (binder == null) {
-      binder = new BeanBinder<>(clazz, sqlInfo.parameters(), bindInfo);
+      binder = new BeanBinder<>(clazz, sqlInfo.parameters(), config);
       beanBinders.put(clazz, binder);
     }
     return binder;
   }
 
   MapBinder getMapBinder(SQLInfo sqlInfo) {
-    return new MapBinder(sqlInfo.parameters(), bindInfo);
+    return new MapBinder(sqlInfo.parameters(), config);
   }
 
   @SuppressWarnings("unchecked")

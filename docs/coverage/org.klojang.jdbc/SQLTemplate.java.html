@@ -12,8 +12,8 @@ final class SQLTemplate extends AbstractSQL {
   private final Template template;
   private final ParamExtractor extractor;
 
-  SQLTemplate(String sql, BindInfo bindInfo) {
-<span class="fc" id="L16">    super(sql, bindInfo);</span>
+  SQLTemplate(String sql, SessionConfig config) {
+<span class="fc" id="L16">    super(sql, config);</span>
 <span class="fc" id="L17">    extractor = new ParamExtractor(sql);</span>
     try {
 <span class="fc" id="L19">      template = Template.fromString(extractor.getNormalizedSQL());</span>

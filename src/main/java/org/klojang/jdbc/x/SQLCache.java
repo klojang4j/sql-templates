@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.SessionConfig;
 import org.klojang.jdbc.SQL;
 import org.klojang.util.IOMethods;
 import org.klojang.util.Tuple2;
@@ -33,12 +33,12 @@ public final class SQLCache {
 
   public static SQL get(Class<?> clazz,
         String path,
-        BindInfo bindInfo,
-        BiFunction<String, BindInfo, SQL> factory) {
+        SessionConfig config,
+        BiFunction<String, SessionConfig, SQL> factory) {
     return cache.computeIfAbsent(Tuple2.of(clazz, path), k -> {
       try {
         String sql = IOMethods.getContents(clazz, path);
-        return factory.apply(sql, bindInfo);
+        return factory.apply(sql, config);
       } catch (Throwable t) {
         throw Utils.wrap(t);
       }

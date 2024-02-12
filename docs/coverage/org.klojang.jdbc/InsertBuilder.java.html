@@ -36,7 +36,7 @@ public final class InsertBuilder {
   private boolean exclude;
 
 <span class="fc" id="L38">  private NameMapper mapper = NameMapper.AS_IS;</span>
-<span class="fc" id="L39">  private BindInfo bindInfo = new BindInfo() { };</span>
+<span class="fc" id="L39">  private SessionConfig config = new SessionConfig() { };</span>
 <span class="fc" id="L40">  private boolean returnKeys = true;</span>
 
 <span class="fc" id="L42">  InsertBuilder() { }</span>
@@ -125,14 +125,14 @@ public final class InsertBuilder {
   }
 
   /**
-   * Sets the {@link BindInfo} object to be used to fine-tune the binding process.
+   * Sets the {@link SessionConfig} object to be used to fine-tune the binding process.
    *
-   * @param bindInfo the {@code BindInfo} object to be used to fine-tune the binding
+   * @param config the {@code SessionConfig} object to be used to fine-tune the binding
    *       process
    * @return this {@code SQLInsertBuilder}
    */
-  public InsertBuilder withBindInfo(BindInfo bindInfo) {
-<span class="nc" id="L135">    this.bindInfo = Check.notNull(bindInfo).ok();</span>
+  public InsertBuilder withSessionConfig(SessionConfig config) {
+<span class="nc" id="L135">    this.config = Check.notNull(config).ok();</span>
 <span class="nc" id="L136">    return this;</span>
   }
 
@@ -166,7 +166,7 @@ public final class InsertBuilder {
 <span class="fc" id="L166">    String table = ifNull(tableName, beanClass.getSimpleName());</span>
 <span class="fc" id="L167">    StringBuilder sb = new StringBuilder(100);</span>
 <span class="fc" id="L168">    append(sb, &quot;INSERT INTO &quot;, table, &quot; (&quot;, cols, &quot;) VALUES(&quot;, params, &quot;)&quot;);</span>
-<span class="fc" id="L169">    SQLSession sql = SQL.simple(sb.toString(), bindInfo).session(con);</span>
+<span class="fc" id="L169">    SQLSession sql = SQL.simple(sb.toString(), config).session(con);</span>
 <span class="fc" id="L170">    return sql.prepareInsert(returnKeys);</span>
   }
 

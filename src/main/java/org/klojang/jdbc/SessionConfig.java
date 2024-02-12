@@ -5,14 +5,14 @@ import java.sql.SQLException;
 import java.util.Map;
 
 /**
- * {@code BindInfo} objects allow you to determine how values are bound into a
+ * {@code SessionConfig} objects allow you to determine how values are bound into a
  * {@link PreparedStatement}. Ordinarily <i>Klojang JDBC</i> will have enough context to
  * figure this out automatically. However, if you want or need to, this interface enables
- * you to override the default behaviour. You might want to implement {@code BindInfo}
- * through an anonymous class:
+ * you to override the default behaviour. You might want to implement
+ * {@code SessionConfig} through an anonymous class:
  *
  * <blockquote><pre>{@code
- * BindInfo bindInfo = new BindInfo() {
+ * SessionConfig config = new SessionConfig() {
  *   public boolean saveEnumAsString(Class<?> beanType, String enumProperty) {
  *     return true;
  *   }
@@ -21,20 +21,20 @@ import java.util.Map;
  *
  * @author Ayco Holleman
  */
-public interface BindInfo {
+public interface SessionConfig {
 
   /**
    * A {@code CustomBinder} gives you full control over how values are bound to a
    * {@link PreparedStatement}. It essentially just hands you the underlying
-   * {@link PreparedStatement} so you can bind the values yourself. Of course, since you
+   * {@link PreparedStatement} and lets you do the binding yourself. Of course, since you
    * are now in control of the {@code PreparedStatement}, you can do anything you like
    * with it, including closing it. <i>Klojang JDBC</i> will not be resistant against such
    * behaviour. A {@code CustomBinder} can be used, for example, to apply last-minute
    * transformations to the value that is about to be bound, or to serialize it in a
-   * bespoke way, or to map it to a non-standard SQL datatype. When binding values in a
-   * {@code Map} (using {@link SQLStatement#bind(Map)}), custom binders will only kick in
-   * for non-{@code null} map values, because Java's type erase feature prevents the type
-   * of the values from being established beforehand. When binding values in a JavaBean or
+   * bespoke way, or to map it to a non-standard SQL datatype. When binding {@code Map}
+   * values using {@link SQLStatement#bind(Map)}, custom binders will only kick in for
+   * non-{@code null} values, because Java's type erase feature prevents the type of the
+   * values from being established beforehand. When binding values in a JavaBean or
    * {@code record}, custom binders will kick in even for {@code null} values.
    */
   @FunctionalInterface
@@ -52,10 +52,15 @@ public interface BindInfo {
           SQLException;
   }
 
+  interface CustomReader {
+
+  }
+
   /**
-   * A {@code BindInfo} object which does not override the default binding behaviour.
+   * A {@code SessionConfig} object which does not override the default binding
+   * behaviour.
    */
-  BindInfo DEFAULT = new BindInfo() { };
+  SessionConfig DEFAULT = new SessionConfig() { };
 
   /**
    * Allows you to specify a {@code CustomBinder} for a given Java type. The default
@@ -93,18 +98,17 @@ public interface BindInfo {
    * many cases the type of the value is all you need to know in order to determine the
    * corresponding SQL datatype.
    *
-   * @param javaType the type of the value whose SQL datatype to determine
-   * @param containerType the class containing the value. May be a JavaBean type, a
-   *       {@code record} type, or the type of the {@code Map} being bound using
-   *       {@link SQLStatement#bind(Map)}. In the latter case, it will always be the
-   *       concrete type of the {@code Map} (e.g. {@code HashMap.class}) &#8212; never
-   *       {@code Map.class} itself.
-   * @param name the name of the bean property, record component, or map key for
-   *       which to specify the SQL datatype.
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the value
+   * @param propertyName the name of the bean property, record component, or map key
+   *       for which to specify the SQL datatype.
+   * @param propertyType the type of the value whose SQL datatype to determine
    * @return one of the class constants of the {@link java.sql.Types java.sql.Types} class
    *       or {@code null}
    */
-  default Integer getSqlType(Class<?> javaType, Class<?> containerType, String name) {
+  default Integer getSqlType(Class<?> beanType,
+        String propertyName,
+        Class<?> propertyType) {
     return null;
   }
 
@@ -113,20 +117,22 @@ public interface BindInfo {
    * ints (by calling their {@code ordinal()} method). The default implementation return
    * {@code false}, meaning that by default <i>Klojang JDBC</i> will save enums as ints.
    * More precisely: <i>Klojang JDBC</i> will bind {@code enum} types using
-   * {@code preparedStatement.setInt(myEnum.ordinal())}. You can ignore any argument that
+   * {@code preparedStatement.setInt(myEnum.ordinal())}. You may ignore any argument that
    * you don't need in order to determine the storage type. To save <i>all</i> enums in
-   * your application as strings, simply return {@code true} straight away.
+   * your application as strings, ignore all arguments and simply return {@code true}
+   * straight away.
    *
-   * @param containerType the class containing the enum value. May be a JavaBean
-   *       type, a {@code record} type, or the type of the {@code Map} being bound using
-   *       {@link SQLStatement#bind(Map)}. In the latter case, it will always be the
-   *       concrete type of the {@code Map} (e.g. {@code HashMap.class}) &#8212; never
-   *       {@code Map.class} itself.
-   * @param name the name of the bean property, record component, or map key for
-   *       which to specify the SQL datatype.
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the value
+   * @param propertyName the name of the bean property, record component, or map key
+   *       for which to specify the SQL datatype.
+   * @param enumType the type of the {@code enum} value whose SQL datatype to
+   *       determine
    * @return whether to bind enums as strings ({@code true}) or as ints ({@code false})
    */
-  default boolean saveEnumAsString(Class<?> containerType, String name) {
+  default boolean saveEnumAsString(Class<?> beanType,
+        String propertyName,
+        Class<? extends Enum<?>> enumType) {
     return false;
   }
 

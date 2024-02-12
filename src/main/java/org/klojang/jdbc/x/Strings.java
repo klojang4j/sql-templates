@@ -17,7 +17,7 @@ public final class Strings {
   public static final String ID_KEY = "ID key";
   public static final String BEAN_SUPPLIER = "bean supplier";
   public static final String COLUMN_TO_PROPERTY_MAPPER = "column-to-property mapper";
-  public static final String BIND_INFO = "bindInfo";
+  public static final String BIND_INFO = "config";
   public static final String SQL_ARGUMENT = "sql";
   public static final String CONNECTION = "connection";
 

@@ -2,7 +2,7 @@ package org.klojang.jdbc.x.ps;
 
 import org.klojang.invoke.Getter;
 import org.klojang.invoke.GetterFactory;
-import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.SessionConfig;
 import org.klojang.jdbc.x.ps.writer.EnumBinderLookup;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.slf4j.Logger;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.klojang.jdbc.BindInfo.CustomBinder;
+import static org.klojang.jdbc.SessionConfig.CustomBinder;
 import static org.klojang.util.ClassMethods.isSubtype;
 
 
@@ -41,7 +41,7 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
   @SuppressWarnings({"rawtypes", "unchecked"})
   static PropertyBinder[] createReaders(Class beanClass,
         List<NamedParameter> params,
-        BindInfo bindInfo,
+        SessionConfig config,
         List<NamedParameter> bound) {
     ValueBinderFactory factory = ValueBinderFactory.getInstance();
     Map<String, Getter> getters = GetterFactory.INSTANCE.getGetters(beanClass, true);
@@ -54,16 +54,16 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
       bound.add(param);
       String property = param.name();
       Class type = getter.getReturnType();
-      CustomBinder custom = bindInfo.getCustomBinder(type, beanClass, property);
+      CustomBinder custom = config.getCustomBinder(type, beanClass, property);
       if (custom != null) {
         PropertyBinder pb = new PropertyBinder(getter, param, custom);
         readers.add(pb);
       } else {
         final ValueBinder vb;
-        Integer sqlType = bindInfo.getSqlType(type, beanClass, property);
+        Integer sqlType = config.getSqlType(beanClass, property, type);
         if (sqlType == null) {
           if (isSubtype(type, Enum.class)) {
-            if (bindInfo.saveEnumAsString(beanClass, property)) {
+            if (config.saveEnumAsString(beanClass, property, type)) {
               vb = ValueBinder.ANY_TO_STRING;
             } else {
               vb = EnumBinderLookup.DEFAULT;
@@ -105,7 +105,9 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
     INPUT_TYPE beanValue = (INPUT_TYPE) getter.read(bean);
     if (custom != null) {
       if (LOG.isTraceEnabled()) {
-        LOG.trace("==> Parameter \"{}\": {} (using custom binder)", param.name(), beanValue);
+        LOG.trace("==> Parameter \"{}\": {} (using custom binder)",
+              param.name(),
+              beanValue);
       }
       param.positions().forEachThrowing(i -> custom.bind(ps, i, beanValue));
     } else {

@@ -10,8 +10,8 @@ final class SQLSkeleton extends AbstractSQL {
 
   private final Template template;
 
-  SQLSkeleton(String sql, BindInfo bindInfo) {
-    super(sql, bindInfo);
+  SQLSkeleton(String sql, SessionConfig config) {
+    super(sql, config);
     try {
       template = Template.fromString(sql);
     } catch (ParseException e) {

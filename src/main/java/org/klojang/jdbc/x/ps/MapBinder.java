@@ -1,6 +1,7 @@
 package org.klojang.jdbc.x.ps;
 
-import org.klojang.jdbc.BindInfo;
+import org.klojang.jdbc.SessionConfig;
+import org.klojang.jdbc.x.ps.writer.EnumBinderLookup;
 import org.klojang.jdbc.x.ps.writer.StringBinderLookup;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.slf4j.Logger;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.klojang.jdbc.BindInfo.CustomBinder;
+import static org.klojang.jdbc.SessionConfig.CustomBinder;
 
 /**
  * Binds the values within in a Map to a PreparedStatement.
@@ -21,11 +22,11 @@ public final class MapBinder {
   private static final Logger LOG = LoggerFactory.getLogger(MapBinder.class);
 
   private final List<NamedParameter> params;
-  private final BindInfo bindInfo;
+  private final SessionConfig config;
 
-  public MapBinder(List<NamedParameter> params, BindInfo bindInfo) {
+  public MapBinder(List<NamedParameter> params, SessionConfig config) {
     this.params = params;
-    this.bindInfo = bindInfo;
+    this.config = config;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -41,7 +42,7 @@ public final class MapBinder {
       Object val = map.get(key);
       CustomBinder cb = val == null
             ? null
-            : bindInfo.getCustomBinder(val.getClass(), map.getClass(), key);
+            : config.getCustomBinder(val.getClass(), map.getClass(), key);
       if (cb != null) {
         if (LOG.isTraceEnabled()) {
           LOG.trace("==> Parameter \"{}\": {} (using custom binder)", key, val);
@@ -62,17 +63,22 @@ public final class MapBinder {
     }
   }
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({"rawtypes", "unchecked"})
   ValueBinder findBinder(Map<String, Object> map, String key, Object val) {
     if (val == null) {
       // Return any ValueBinder. For null values *all* binders will just call
       // PreparedStatement.setString(paramIndex, null);
       return StringBinderLookup.DEFAULT;
-    } else if (val instanceof Enum && bindInfo.saveEnumAsString(map.getClass(), key)) {
-      return ValueBinder.ANY_TO_STRING;
     } else {
-      Integer sqlType = bindInfo.getSqlType(val.getClass(), map.getClass(), key);
+      Integer sqlType = config.getSqlType(map.getClass(), key, val.getClass());
       if (sqlType == null) {
+        if (val instanceof Enum) {
+          Class<? extends Enum<?>> type = (Class<? extends Enum<?>>) val.getClass();
+          if (config.saveEnumAsString(map.getClass(), key, type)) {
+            return ValueBinder.ANY_TO_STRING;
+          }
+          return EnumBinderLookup.DEFAULT;
+        }
         return ValueBinderFactory.getInstance().getDefaultBinder(val.getClass());
       }
       return ValueBinderFactory.getInstance().getBinder(val.getClass(), sqlType);

@@ -99,7 +99,7 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL staticSQL(String sql) {
 <span class="fc" id="L101">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L102">    return new SimpleSQL(sql, true, noBindInfo());</span>
+<span class="fc" id="L102">    return new SimpleSQL(sql, true, noSessionConfig());</span>
   }
 
   /**
@@ -132,7 +132,7 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL simple(String sql) {
 <span class="fc" id="L134">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L135">    return simple(sql, noBindInfo());</span>
+<span class="fc" id="L135">    return simple(sql, noSessionConfig());</span>
   }
 
   /**
@@ -156,14 +156,14 @@ public sealed interface SQL permits AbstractSQL {
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL statement
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
-  static SQL simple(String sql, BindInfo bindInfo) {
+  static SQL simple(String sql, SessionConfig config) {
 <span class="fc" id="L164">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L165">    Check.notNull(bindInfo, BIND_INFO);</span>
-<span class="fc" id="L166">    return new SimpleSQL(sql, false, bindInfo);</span>
+<span class="fc" id="L165">    Check.notNull(config, BIND_INFO);</span>
+<span class="fc" id="L166">    return new SimpleSQL(sql, false, config);</span>
   }
 
   /**
@@ -175,12 +175,12 @@ public sealed interface SQL permits AbstractSQL {
    * @param clazz a {@code Class} object that provides access to the SQL file by
    *       calling {@code getResourceAsStream} on it
    * @param path the location of the SQL file
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return a {@code SQL} implementation that allows for named parameters, but not for
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
-  static SQL simple(Class&lt;?&gt; clazz, String path, BindInfo bindInfo) {
+  static SQL simple(Class&lt;?&gt; clazz, String path, SessionConfig config) {
 <span class="nc" id="L184">    return SQLCache.get(clazz, path, SQL::simple);</span>
   }
 
@@ -189,7 +189,7 @@ public sealed interface SQL permits AbstractSQL {
    * Templates&lt;/i&gt; variables. Equivalent to:
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
-   * SQL.simple(sql, BindInfo.DEFAULT).session(con).prepareQuery();
+   * SQL.simple(sql, SessionConfig.DEFAULT).session(con).prepareQuery();
    * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
    * @param con the JDBC connection to use
@@ -199,7 +199,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql) {
-<span class="fc" id="L202">    return simpleQuery(con, sql, noBindInfo());</span>
+<span class="fc" id="L202">    return simpleQuery(con, sql, noSessionConfig());</span>
   }
 
   /**
@@ -207,22 +207,22 @@ public sealed interface SQL permits AbstractSQL {
    * Templates&lt;/i&gt; variables. Equivalent to:
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
-   * SQL.simple(sql, bindInfo).session(con).prepareQuery();
+   * SQL.simple(sql, config).session(con).prepareQuery();
    * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
    * @param con the JDBC connection to use
    * @param sql the SQL SELECT statement
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an {@code SQLQuery} instance that allows you to bind the named parameters in
    *       the SQL (if present) and then execute it
    * @see SQLSession#prepareQuery()
    */
-  static SQLQuery simpleQuery(Connection con, String sql, BindInfo bindInfo) {
+  static SQLQuery simpleQuery(Connection con, String sql, SessionConfig config) {
 <span class="fc" id="L222">    Check.notNull(con, CONNECTION);</span>
 <span class="fc" id="L223">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L224">    Check.notNull(bindInfo, BIND_INFO);</span>
-<span class="fc" id="L225">    return simple(sql, bindInfo).session(con).prepareQuery();</span>
+<span class="fc" id="L224">    Check.notNull(config, BIND_INFO);</span>
+<span class="fc" id="L225">    return simple(sql, config).session(con).prepareQuery();</span>
   }
 
   /**
@@ -230,7 +230,7 @@ public sealed interface SQL permits AbstractSQL {
    * Templates&lt;/i&gt; variables. Equivalent to:
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
-   * SQL.simple(sql, BindInfo.DEFAULT).session(con).prepareInsert();
+   * SQL.simple(sql, SessionConfig.DEFAULT).session(con).prepareInsert();
    * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
    * @param con the JDBC connection to use
@@ -240,7 +240,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareInsert()
    */
   static SQLInsert simpleInsert(Connection con, String sql) {
-<span class="fc" id="L243">    return simple(sql, noBindInfo()).session(con).prepareInsert();</span>
+<span class="fc" id="L243">    return simple(sql, noSessionConfig()).session(con).prepareInsert();</span>
   }
 
   /**
@@ -248,14 +248,14 @@ public sealed interface SQL permits AbstractSQL {
    * Templates&lt;/i&gt; variables. Equivalent to:
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
-   * SQL.simple(sql, bindInfo).session(con).prepareInsert();
+   * SQL.simple(sql, config).session(con).prepareInsert();
    * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
    * @param con the JDBC connection to use
    * @param sql the SQL INSERT statement
    * @param retrieveKeys whether to retrieve the keys that were generated by the
    *       database
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an {@code SQLInsert} instance that allows you to bind the named parameters in
    *       the SQL (if present) and then execute it
@@ -264,11 +264,11 @@ public sealed interface SQL permits AbstractSQL {
   static SQLInsert simpleInsert(Connection con,
         String sql,
         boolean retrieveKeys,
-        BindInfo bindInfo) {
+        SessionConfig config) {
 <span class="nc" id="L268">    Check.notNull(con, CONNECTION);</span>
 <span class="nc" id="L269">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="nc" id="L270">    Check.notNull(bindInfo, BIND_INFO);</span>
-<span class="nc" id="L271">    return simple(sql, bindInfo).session(con).prepareInsert(retrieveKeys);</span>
+<span class="nc" id="L270">    Check.notNull(config, BIND_INFO);</span>
+<span class="nc" id="L271">    return simple(sql, config).session(con).prepareInsert(retrieveKeys);</span>
   }
 
   /**
@@ -276,7 +276,7 @@ public sealed interface SQL permits AbstractSQL {
    * Templates&lt;/i&gt; variables. Equivalent to:
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
-   * SQL.simple(sql, BindInfo.DEFAULT).session(con).prepareUpdate();
+   * SQL.simple(sql, SessionConfig.DEFAULT).session(con).prepareUpdate();
    * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
    * @param con the JDBC connection to use
@@ -286,7 +286,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql) {
-<span class="fc" id="L289">    return simpleUpdate(con, sql, noBindInfo());</span>
+<span class="fc" id="L289">    return simpleUpdate(con, sql, noSessionConfig());</span>
   }
 
   /**
@@ -294,22 +294,22 @@ public sealed interface SQL permits AbstractSQL {
    * Templates&lt;/i&gt; variables. Equivalent to:
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
-   * SQL.simple(sql, bindInfo).session(con).prepareUpdate();
+   * SQL.simple(sql, config).session(con).prepareUpdate();
    * }&lt;/pre&gt;&lt;/blockquote&gt;
    *
    * @param con the JDBC connection to use
    * @param sql the SQL UPDATE statement
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return an {@code SQLUpdate} instance that allows you to bind the named parameters in
    *       the SQL (if present) and then execute it
    * @see SQLSession#prepareUpdate()
    */
-  static SQLUpdate simpleUpdate(Connection con, String sql, BindInfo bindInfo) {
+  static SQLUpdate simpleUpdate(Connection con, String sql, SessionConfig config) {
 <span class="fc" id="L309">    Check.notNull(con, CONNECTION);</span>
 <span class="fc" id="L310">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L311">    Check.notNull(bindInfo, BIND_INFO);</span>
-<span class="fc" id="L312">    return simple(sql, bindInfo).session(con).prepareUpdate();</span>
+<span class="fc" id="L311">    Check.notNull(config, BIND_INFO);</span>
+<span class="fc" id="L312">    return simple(sql, config).session(con).prepareUpdate();</span>
   }
 
 
@@ -322,7 +322,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(String sql) {
-<span class="fc" id="L325">    return template(sql, noBindInfo());</span>
+<span class="fc" id="L325">    return template(sql, noSessionConfig());</span>
   }
 
   /**
@@ -347,15 +347,15 @@ public sealed interface SQL permits AbstractSQL {
    * &lt;i&gt;Klojang Templates&lt;/i&gt; variables.
    *
    * @param sql the SQL statement
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return a {@code SQL} implementation that allows for named parameters and
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
-  static SQL template(String sql, BindInfo bindInfo) {
+  static SQL template(String sql, SessionConfig config) {
 <span class="fc" id="L356">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L357">    Check.notNull(bindInfo, BIND_INFO);</span>
-<span class="fc" id="L358">    return new SQLTemplate(sql, bindInfo);</span>
+<span class="fc" id="L357">    Check.notNull(config, BIND_INFO);</span>
+<span class="fc" id="L358">    return new SQLTemplate(sql, config);</span>
   }
 
   /**
@@ -367,13 +367,13 @@ public sealed interface SQL permits AbstractSQL {
    * @param clazz a {@code Class} object that provides access to the SQL file by
    *       calling {@code getResourceAsStream} on it
    * @param path the location of the SQL file
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return a {@code SQL} implementation that allows for named parameters and
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
-  static SQL template(Class&lt;?&gt; clazz, String path, BindInfo bindInfo) {
-<span class="nc" id="L376">    return SQLCache.get(clazz, path, bindInfo, SQL::template);</span>
+  static SQL template(Class&lt;?&gt; clazz, String path, SessionConfig config) {
+<span class="nc" id="L376">    return SQLCache.get(clazz, path, config, SQL::template);</span>
   }
 
 
@@ -387,7 +387,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(String sql) {
-<span class="fc" id="L390">    return skeleton(sql, noBindInfo());</span>
+<span class="fc" id="L390">    return skeleton(sql, noSessionConfig());</span>
   }
 
 
@@ -415,15 +415,15 @@ public sealed interface SQL permits AbstractSQL {
    * fragments that again contain named parameters.
    *
    * @param sql the SQL statement
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return a {@code SQL} implementation that allows for named parameters and
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
-  static SQL skeleton(String sql, BindInfo bindInfo) {
+  static SQL skeleton(String sql, SessionConfig config) {
 <span class="fc" id="L424">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L425">    Check.notNull(bindInfo, BIND_INFO);</span>
-<span class="fc" id="L426">    return new SQLSkeleton(sql, bindInfo);</span>
+<span class="fc" id="L425">    Check.notNull(config, BIND_INFO);</span>
+<span class="fc" id="L426">    return new SQLSkeleton(sql, config);</span>
   }
 
   /**
@@ -436,13 +436,13 @@ public sealed interface SQL permits AbstractSQL {
    * @param clazz a {@code Class} object that provides access to the SQL file by
    *       calling {@code getResourceAsStream} on it
    * @param path the location of the SQL file
-   * @param bindInfo a {@code BindInfo} object that allows you to fine-tune how
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       values are bound into the underlying {@link java.sql.PreparedStatement}
    * @return a {@code SQL} implementation that allows for named parameters and
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
-  static SQL skeleton(Class&lt;?&gt; clazz, String path, BindInfo bindInfo) {
-<span class="nc" id="L445">    return SQLCache.get(clazz, path, bindInfo, SQL::skeleton);</span>
+  static SQL skeleton(Class&lt;?&gt; clazz, String path, SessionConfig config) {
+<span class="nc" id="L445">    return SQLCache.get(clazz, path, config, SQL::skeleton);</span>
   }
 
 
@@ -492,8 +492,8 @@ public sealed interface SQL permits AbstractSQL {
    */
   SQLSession session(Connection con);
 
-  private static BindInfo noBindInfo() {
-<span class="fc" id="L496">    return BindInfo.DEFAULT;</span>
+  private static SessionConfig noSessionConfig() {
+<span class="fc" id="L496">    return SessionConfig.DEFAULT;</span>
   }
 
 
