@@ -2,6 +2,7 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.SQLCache;
+import org.klojang.jdbc.x.Utils;
 
 import java.sql.Connection;
 
@@ -493,7 +494,7 @@ public sealed interface SQL permits AbstractSQL {
   SQLSession session(Connection con);
 
   private static SessionConfig noSessionConfig() {
-    return SessionConfig.DEFAULT;
+    return Utils.DEFAULT_CONFIG;
   }
 
 

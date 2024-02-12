@@ -1,8 +1,8 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.KeyWriter;
-import org.klojang.templates.NameMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,7 +28,7 @@ public final class MappifierFactory {
    * Creates a new {@code MappifierFactory}.
    */
   public MappifierFactory() {
-    this(SessionConfig.DEFAULT);
+    this(Utils.DEFAULT_CONFIG);
   }
 
   /**

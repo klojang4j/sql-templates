@@ -65,7 +65,7 @@ public final class BeanifierFactory<T> {
     Check.notNull(beanClass, BEAN_CLASS);
     this.beanClass = beanClass;
     this.beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
-    this.config = SessionConfig.DEFAULT;
+    this.config = Utils.DEFAULT_CONFIG;
   }
 
   /**
@@ -97,7 +97,7 @@ public final class BeanifierFactory<T> {
           .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))
           .ok();
     this.beanSupplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();
-    this.config = SessionConfig.DEFAULT;
+    this.config = Utils.DEFAULT_CONFIG;
   }
 
   /**

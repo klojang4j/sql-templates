@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.junit.jupiter.api.Test;
+import org.klojang.jdbc.x.Utils;
 import org.klojang.templates.NameMapper;
 
 import java.time.DayOfWeek;
@@ -14,7 +15,7 @@ public class SessionConfigTest {
   @Test
   public void withPropertyToColumnMapper00() {
     NameMapper mapper = wordCaseToCameCase();
-    SessionConfig config = SessionConfig.DEFAULT.withPropertyToColumnMapper(mapper);
+    SessionConfig config = Utils.DEFAULT_CONFIG.withPropertyToColumnMapper(mapper);
     assertSame(mapper, config.getPropertyToColumnMapper());
     assertNull(config.getCustomBinder(null, null, null));
     assertNull(config.getCustomReader(null, null, null, 0));
@@ -25,7 +26,7 @@ public class SessionConfigTest {
 
   @Test
   public void withSaveAllEnumsAsStrings00() {
-    SessionConfig config = SessionConfig.DEFAULT.withSaveAllEnumsAsStrings();
+    SessionConfig config = Utils.DEFAULT_CONFIG.withSaveAllEnumsAsStrings();
     assertTrue(config.saveEnumAsString(null, null, DayOfWeek.class));
   }
 }

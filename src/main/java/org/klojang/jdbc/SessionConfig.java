@@ -1,5 +1,6 @@
 package org.klojang.jdbc;
 
+import org.klojang.jdbc.x.Utils;
 import org.klojang.templates.NameMapper;
 import org.klojang.templates.name.CamelCaseToSnakeUpperCase;
 import org.klojang.templates.name.SnakeCaseToCamelCase;
@@ -28,6 +29,15 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
  * @author Ayco Holleman
  */
 public interface SessionConfig {
+
+  /**
+   * Returns a {@code SessionConfig} instance which does not override of the defaults
+   * provided by the {@code SessionConfig} instance.
+   *
+   * @return a {@code SessionConfig} instance which does not override of the defaults
+   *       provided by the {@code SessionConfig} instance
+   */
+  static SessionConfig getDefaultConfig() { return Utils.DEFAULT_CONFIG; }
 
   /**
    * A {@code CustomBinder} gives you full control over how values are bound to a
@@ -61,12 +71,6 @@ public interface SessionConfig {
   interface CustomReader {
     Object getValue(ResultSet resultSet, int paramIndex) throws SQLException;
   }
-
-  /**
-   * A {@code SessionConfig} object which does not override the default binding
-   * behaviour.
-   */
-  SessionConfig DEFAULT = new SessionConfig() { };
 
   /**
    * Allows you to specify a {@code CustomBinder} for a given Java type. The default

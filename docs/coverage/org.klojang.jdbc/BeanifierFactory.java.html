@@ -65,7 +65,7 @@ public final class BeanifierFactory&lt;T&gt; {
 <span class="nc" id="L65">    Check.notNull(beanClass, BEAN_CLASS);</span>
 <span class="nc" id="L66">    this.beanClass = beanClass;</span>
 <span class="nc bnc" id="L67" title="All 2 branches missed.">    this.beanSupplier = beanClass.isRecord() ? null : () -&gt; newInstance(beanClass);</span>
-<span class="nc" id="L68">    this.config = SessionConfig.DEFAULT;</span>
+<span class="nc" id="L68">    this.config = Utils.DEFAULT_CONFIG;</span>
 <span class="nc" id="L69">  }</span>
 
   /**
@@ -97,7 +97,7 @@ public final class BeanifierFactory&lt;T&gt; {
 <span class="nc" id="L97">          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))</span>
 <span class="nc" id="L98">          .ok();</span>
 <span class="nc" id="L99">    this.beanSupplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();</span>
-<span class="nc" id="L100">    this.config = SessionConfig.DEFAULT;</span>
+<span class="nc" id="L100">    this.config = Utils.DEFAULT_CONFIG;</span>
 <span class="nc" id="L101">  }</span>
 
   /**

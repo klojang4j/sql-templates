@@ -4,10 +4,13 @@ import org.klojang.check.Check;
 import org.klojang.check.IntCheck;
 import org.klojang.check.ObjectCheck;
 import org.klojang.jdbc.DatabaseException;
+import org.klojang.jdbc.SessionConfig;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.util.exception.UncheckedException;
 
 public final class Utils {
+
+  public static final SessionConfig DEFAULT_CONFIG = new SessionConfig() { };
 
   private Utils() { throw new UnsupportedOperationException(); }
 

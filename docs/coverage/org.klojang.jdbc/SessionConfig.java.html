@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SessionConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SessionConfig.java</span></div><h1>SessionConfig.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
+import org.klojang.jdbc.x.Utils;
 import org.klojang.templates.NameMapper;
 import org.klojang.templates.name.CamelCaseToSnakeUpperCase;
 import org.klojang.templates.name.SnakeCaseToCamelCase;
@@ -28,6 +29,15 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
  * @author Ayco Holleman
  */
 public interface SessionConfig {
+
+  /**
+   * Returns a {@code SessionConfig} instance which does not override of the defaults
+   * provided by the {@code SessionConfig} instance.
+   *
+   * @return a {@code SessionConfig} instance which does not override of the defaults
+   *       provided by the {@code SessionConfig} instance
+   */
+<span class="nc" id="L40">  static SessionConfig getDefaultConfig() { return Utils.DEFAULT_CONFIG; }</span>
 
   /**
    * A {@code CustomBinder} gives you full control over how values are bound to a
@@ -63,12 +73,6 @@ public interface SessionConfig {
   }
 
   /**
-   * A {@code SessionConfig} object which does not override the default binding
-   * behaviour.
-   */
-<span class="fc" id="L69">  SessionConfig DEFAULT = new SessionConfig() { };</span>
-
-  /**
    * Allows you to specify a {@code CustomBinder} for a given Java type. The default
    * implementation returns {@code null}, meaning you leave it to &lt;i&gt;Klojang JDBC&lt;/i&gt; to
    * bind values to the underlying {@link PreparedStatement}. You may ignore any argument
@@ -85,7 +89,7 @@ public interface SessionConfig {
   default CustomBinder getCustomBinder(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L88">    return null;</span>
+<span class="fc" id="L92">    return null;</span>
   }
 
   /**
@@ -111,7 +115,7 @@ public interface SessionConfig {
         String propertyName,
         Class&lt;?&gt; propertyType,
         int sqlType) {
-<span class="fc" id="L114">    return null;</span>
+<span class="fc" id="L118">    return null;</span>
   }
 
   /**
@@ -136,7 +140,7 @@ public interface SessionConfig {
   default Integer getSqlType(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L139">    return null;</span>
+<span class="fc" id="L143">    return null;</span>
   }
 
   /**
@@ -164,7 +168,7 @@ public interface SessionConfig {
   default boolean saveEnumAsString(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="nc" id="L167">    return false;</span>
+<span class="nc" id="L171">    return false;</span>
   }
 
   /**
@@ -176,7 +180,7 @@ public interface SessionConfig {
    *       components, or map keys to column names
    */
   default NameMapper getPropertyToColumnMapper() {
-<span class="nc" id="L179">    return camelCaseToSnakeUpperCase();</span>
+<span class="nc" id="L183">    return camelCaseToSnakeUpperCase();</span>
   }
 
   /**
@@ -188,7 +192,7 @@ public interface SessionConfig {
    *       properties, record components, or map keys
    */
   default NameMapper getColumnToPropertyMapper() {
-<span class="fc" id="L191">    return snakeCaseToCamelCase();</span>
+<span class="fc" id="L195">    return snakeCaseToCamelCase();</span>
   }
 
   /**
@@ -201,8 +205,8 @@ public interface SessionConfig {
    *       property-to-column mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withPropertyToColumnMapper(NameMapper mapper) {
-<span class="fc" id="L204">    return new SessionConfig() {</span>
-<span class="fc" id="L205">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
+<span class="fc" id="L208">    return new SessionConfig() {</span>
+<span class="fc" id="L209">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
     };
   }
 
@@ -216,8 +220,8 @@ public interface SessionConfig {
    *       column-to-property mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withColumnToPropertyMapper(NameMapper mapper) {
-<span class="nc" id="L219">    return new SessionConfig() {</span>
-<span class="nc" id="L220">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
+<span class="nc" id="L223">    return new SessionConfig() {</span>
+<span class="nc" id="L224">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
     };
   }
 
@@ -229,11 +233,11 @@ public interface SessionConfig {
    *       {@code enum} types will be persisted by calling {@code toString()} them.
    */
   default SessionConfig withSaveAllEnumsAsStrings() {
-<span class="fc" id="L232">    return new SessionConfig() {</span>
+<span class="fc" id="L236">    return new SessionConfig() {</span>
       public boolean saveEnumAsString(Class&lt;?&gt; beanType,
             String propertyName,
             Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="fc" id="L236">        return true;</span>
+<span class="fc" id="L240">        return true;</span>
       }
     };
   }
