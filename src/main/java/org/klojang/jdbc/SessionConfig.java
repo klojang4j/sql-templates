@@ -13,15 +13,13 @@ import static org.klojang.templates.name.CamelCaseToSnakeUpperCase.camelCaseToSn
 import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCase;
 
 /**
- * {@code SessionConfig} objects allow you to determine how values are bound into a
- * {@link PreparedStatement}. Ordinarily <i>Klojang JDBC</i> will have enough context to
- * figure this out automatically. However, if you want or need to, this interface enables
- * you to override the default behaviour. You might want to implement
- * {@code SessionConfig} through an anonymous class:
+ * {@code SessionConfig} objects allow you to fine-tune or modify <i>Klojang JDBC's</i>
+ * default behaviour. You might want to implement {@code SessionConfig} through an
+ * anonymous class:
  *
  * <blockquote><pre>{@code
  * SessionConfig config = new SessionConfig() {
- *   public boolean saveEnumAsString(Class<?> beanType, String enumProperty) {
+ *   public boolean saveEnumAsString(Class<?> beanType, String enumProperty Class<?> enumType) {
  *     return true;
  *   }
  * };
@@ -186,11 +184,58 @@ public interface SessionConfig {
    * properties, record components, or map keys. The default implementation returns an
    * instance of {@link SnakeCaseToCamelCase}.
    *
-   * @return the {@link NameMapper} to be used for mapping bean properties, record
-   *       components, or map keys to column names
+   * @return the {@link NameMapper} to be used for mapping column names to bean
+   *       properties, record components, or map keys
    */
   default NameMapper getColumnToPropertyMapper() {
     return snakeCaseToCamelCase();
+  }
+
+  /**
+   * Returns a new instance that is equal to this instance except with the
+   * property-to-column mapper set to the specified {@code NameMapper}.
+   *
+   * @param mapper the {@code NameMapper} to be used for mapping bean properties,
+   *       record components, or map keys to column names
+   * @return a new instance that is equal to this instance except with the
+   *       property-to-column mapper set to the specified {@code NameMapper}.
+   */
+  default SessionConfig withPropertyToColumnMapper(NameMapper mapper) {
+    return new SessionConfig() {
+      public NameMapper getPropertyToColumnMapper() { return mapper; }
+    };
+  }
+
+  /**
+   * Returns a new instance that is equal to this instance except with the
+   * column-to-property mapper set to the specified {@code NameMapper}.
+   *
+   * @param mapper the {@code NameMapper} to be used for mapping column names to
+   *       bean properties, record components, or map keys
+   * @return a new instance that is equal to this instance except with the
+   *       column-to-property mapper set to the specified {@code NameMapper}.
+   */
+  default SessionConfig withColumnToPropertyMapper(NameMapper mapper) {
+    return new SessionConfig() {
+      public NameMapper getColumnToPropertyMapper() { return mapper; }
+    };
+  }
+
+  /**
+   * Returns a new instance that is equal to this instance except that <i>all</i>
+   * {@code enum} types will be persisted by calling {@code toString()} them.
+   *
+   * @return a new instance that is equal to this instance except that <i>all</i>
+   *       {@code enum} types will be persisted by calling {@code toString()} them.
+   */
+  default SessionConfig withSaveAllEnumsAsStrings() {
+    return new SessionConfig() {
+      public boolean saveEnumAsString(Class<?> beanType,
+            String propertyName,
+            Class<? extends Enum<?>> enumType) {
+        return true;
+      }
+    };
   }
 
 }
