@@ -93,10 +93,11 @@ public interface SessionConfig {
   }
 
   /**
-   * Allows you to specify a {@code CustomReader} for a given Java type. The default
-   * implementation returns {@code null}, meaning you leave it to &lt;i&gt;Klojang JDBC&lt;/i&gt; to
-   * extract values to the underlying {@link ResultSet}. You may ignore any argument that
-   * you don't need in order to determine whether to use a {@code CustomReader}.
+   * Allows you to specify a {@code CustomReader} for a given Java type and/or SQL
+   * datatype. The default implementation returns {@code null}, meaning you leave it to
+   * &lt;i&gt;Klojang JDBC&lt;/i&gt; to extract values to the underlying {@link ResultSet}. You may
+   * ignore any argument that you don't need in order to determine whether to use a
+   * {@code CustomReader}.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map} that
    *       will receive the value from the {@code ResultSet}
@@ -115,7 +116,7 @@ public interface SessionConfig {
         String propertyName,
         Class&lt;?&gt; propertyType,
         int sqlType) {
-<span class="fc" id="L118">    return null;</span>
+<span class="fc" id="L119">    return null;</span>
   }
 
   /**
@@ -127,7 +128,8 @@ public interface SessionConfig {
    * means you leave it to &lt;i&gt;Klojang JDBC&lt;/i&gt; to figure out the SQL datatype. The default
    * implementation returns {@code null}. You may ignore any argument that you don't need
    * in order to determine the SQL datatype. For example, in many cases the type of the
-   * value is all you need to know in order to determine the corresponding SQL datatype.
+   * value (provided via the {@code propertyType} argument) is all you need to know in
+   * order to determine the corresponding SQL datatype.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
    *       containing the value
@@ -140,7 +142,7 @@ public interface SessionConfig {
   default Integer getSqlType(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L143">    return null;</span>
+<span class="fc" id="L145">    return null;</span>
   }
 
   /**
@@ -149,12 +151,12 @@ public interface SessionConfig {
    * if {@link #getSqlType(Class, String, Class) getSqlType()} returned {@code null}. The
    * default implementation return {@code false}, meaning that by default &lt;i&gt;Klojang
    * JDBC&lt;/i&gt; will save enums as ints. More precisely: &lt;i&gt;Klojang JDBC&lt;/i&gt; will bind
-   * {@code enum} types using {@code preparedStatement.setInt(myEnum.ordinal())} (thus the
-   * target column may still be a VARCHAR column). Whichever option you choose, the
-   * reverse process &amp;#8212; copying {@code ResultSet} values to {@code enum} properties
-   * &amp;#8212; will always work correctly, without requiring extra configuration. You may
-   * ignore any argument that you don't need in order to determine the storage type. To
-   * save &lt;i&gt;all&lt;/i&gt; enums in your application as strings, ignore all arguments and simply
+   * {@code enum} types using {@code preparedStatement.setInt(myEnum.ordinal())}. (Thus,
+   * the target column may still be a VARCHAR column.) Whichever option you choose, the
+   * reverse process &amp;#8212; converting {@code ResultSet} values to enums &amp;#8212; will
+   * always work correctly, without requiring extra configuration. You may ignore any
+   * argument that you don't need in order to determine the storage type. To save
+   * &lt;i&gt;all&lt;/i&gt; enums in your application as strings, ignore all arguments and simply
    * return {@code true} straight away.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
@@ -168,7 +170,7 @@ public interface SessionConfig {
   default boolean saveEnumAsString(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="nc" id="L171">    return false;</span>
+<span class="nc" id="L173">    return false;</span>
   }
 
   /**
@@ -180,7 +182,7 @@ public interface SessionConfig {
    *       components, or map keys to column names
    */
   default NameMapper getPropertyToColumnMapper() {
-<span class="nc" id="L183">    return camelCaseToSnakeUpperCase();</span>
+<span class="nc" id="L185">    return camelCaseToSnakeUpperCase();</span>
   }
 
   /**
@@ -192,7 +194,7 @@ public interface SessionConfig {
    *       properties, record components, or map keys
    */
   default NameMapper getColumnToPropertyMapper() {
-<span class="fc" id="L195">    return snakeCaseToCamelCase();</span>
+<span class="fc" id="L197">    return snakeCaseToCamelCase();</span>
   }
 
   /**
@@ -205,8 +207,8 @@ public interface SessionConfig {
    *       property-to-column mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withPropertyToColumnMapper(NameMapper mapper) {
-<span class="fc" id="L208">    return new SessionConfig() {</span>
-<span class="fc" id="L209">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
+<span class="fc" id="L210">    return new SessionConfig() {</span>
+<span class="fc" id="L211">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
     };
   }
 
@@ -220,8 +222,8 @@ public interface SessionConfig {
    *       column-to-property mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withColumnToPropertyMapper(NameMapper mapper) {
-<span class="nc" id="L223">    return new SessionConfig() {</span>
-<span class="nc" id="L224">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
+<span class="nc" id="L225">    return new SessionConfig() {</span>
+<span class="nc" id="L226">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
     };
   }
 
@@ -233,11 +235,11 @@ public interface SessionConfig {
    *       {@code enum} types will be persisted by calling {@code toString()} them.
    */
   default SessionConfig withSaveAllEnumsAsStrings() {
-<span class="fc" id="L236">    return new SessionConfig() {</span>
+<span class="fc" id="L238">    return new SessionConfig() {</span>
       public boolean saveEnumAsString(Class&lt;?&gt; beanType,
             String propertyName,
             Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="fc" id="L240">        return true;</span>
+<span class="fc" id="L242">        return true;</span>
       }
     };
   }

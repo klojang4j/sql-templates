@@ -93,10 +93,11 @@ public interface SessionConfig {
   }
 
   /**
-   * Allows you to specify a {@code CustomReader} for a given Java type. The default
-   * implementation returns {@code null}, meaning you leave it to <i>Klojang JDBC</i> to
-   * extract values to the underlying {@link ResultSet}. You may ignore any argument that
-   * you don't need in order to determine whether to use a {@code CustomReader}.
+   * Allows you to specify a {@code CustomReader} for a given Java type and/or SQL
+   * datatype. The default implementation returns {@code null}, meaning you leave it to
+   * <i>Klojang JDBC</i> to extract values to the underlying {@link ResultSet}. You may
+   * ignore any argument that you don't need in order to determine whether to use a
+   * {@code CustomReader}.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map} that
    *       will receive the value from the {@code ResultSet}
@@ -127,7 +128,8 @@ public interface SessionConfig {
    * means you leave it to <i>Klojang JDBC</i> to figure out the SQL datatype. The default
    * implementation returns {@code null}. You may ignore any argument that you don't need
    * in order to determine the SQL datatype. For example, in many cases the type of the
-   * value is all you need to know in order to determine the corresponding SQL datatype.
+   * value (provided via the {@code propertyType} argument) is all you need to know in
+   * order to determine the corresponding SQL datatype.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
    *       containing the value
@@ -149,12 +151,12 @@ public interface SessionConfig {
    * if {@link #getSqlType(Class, String, Class) getSqlType()} returned {@code null}. The
    * default implementation return {@code false}, meaning that by default <i>Klojang
    * JDBC</i> will save enums as ints. More precisely: <i>Klojang JDBC</i> will bind
-   * {@code enum} types using {@code preparedStatement.setInt(myEnum.ordinal())} (thus the
-   * target column may still be a VARCHAR column). Whichever option you choose, the
-   * reverse process &#8212; copying {@code ResultSet} values to {@code enum} properties
-   * &#8212; will always work correctly, without requiring extra configuration. You may
-   * ignore any argument that you don't need in order to determine the storage type. To
-   * save <i>all</i> enums in your application as strings, ignore all arguments and simply
+   * {@code enum} types using {@code preparedStatement.setInt(myEnum.ordinal())}. (Thus,
+   * the target column may still be a VARCHAR column.) Whichever option you choose, the
+   * reverse process &#8212; converting {@code ResultSet} values to enums &#8212; will
+   * always work correctly, without requiring extra configuration. You may ignore any
+   * argument that you don't need in order to determine the storage type. To save
+   * <i>all</i> enums in your application as strings, ignore all arguments and simply
    * return {@code true} straight away.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
