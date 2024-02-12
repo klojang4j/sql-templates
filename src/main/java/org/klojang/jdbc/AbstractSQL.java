@@ -3,8 +3,6 @@ package org.klojang.jdbc;
 import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.ps.MapBinder;
 import org.klojang.jdbc.x.sql.SQLInfo;
-import org.klojang.templates.NameMapper;
-import org.klojang.util.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +19,10 @@ abstract sealed class AbstractSQL implements SQL
   private final String unparsed;
   private final SessionConfig config;
 
-  private final Map<Class<?>, BeanBinder<?>> beanBinders;
-  private final Map<Tuple2<Class<?>, NameMapper>, BeanifierFactory<?>> beanifiers;
-  private final Map<NameMapper, MappifierFactory> mappifiers;
+  @SuppressWarnings("rawtypes")
+  private final Map<Class, BeanBinder> beanBinders;
+  @SuppressWarnings("rawtypes")
+  private final Map<Class, BeanifierFactory> beanifiers;
 
   AbstractSQL(String sql, SessionConfig config) {
     this.unparsed = sql;
@@ -31,7 +30,6 @@ abstract sealed class AbstractSQL implements SQL
     // These maps are unlikely to grow beyond one or two entries
     beanBinders = new HashMap<>(4);
     beanifiers = new HashMap<>(4);
-    mappifiers = new HashMap<>(4);
   }
 
   /**
@@ -46,44 +44,30 @@ abstract sealed class AbstractSQL implements SQL
     return config;
   }
 
-  BeanBinder<?> getBeanBinder(SQLInfo sqlInfo, Class<?> clazz) {
-    BeanBinder<?> binder = beanBinders.get(clazz);
-    if (binder == null) {
-      binder = new BeanBinder<>(clazz, sqlInfo.parameters(), config);
-      beanBinders.put(clazz, binder);
-    }
-    return binder;
+  <T> BeanBinder<T> getBeanBinder(SQLInfo sqlInfo, Class<T> clazz) {
+    return beanBinders.computeIfAbsent(clazz,
+          k -> new BeanBinder<>(clazz, sqlInfo.parameters(), config));
   }
 
   MapBinder getMapBinder(SQLInfo sqlInfo) {
     return new MapBinder(sqlInfo.parameters(), config);
   }
 
-  @SuppressWarnings("unchecked")
-  <T> BeanifierFactory<T> getBeanifierFactory(Class<T> clazz, NameMapper mapper) {
-    Tuple2<Class<?>, NameMapper> key = Tuple2.of(clazz, mapper);
-    BeanifierFactory<T> factory = (BeanifierFactory<T>) beanifiers.get(key);
-    if (factory == null) {
-      beanifiers.put(key, factory = new BeanifierFactory<>(clazz, mapper));
-    }
-    return factory;
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  <T> BeanifierFactory<T> getBeanifierFactory(Class<T> clazz) {
+    return beanifiers.computeIfAbsent(clazz, k -> new BeanifierFactory<>(k, config));
   }
 
   @SuppressWarnings("unchecked")
   <T> BeanifierFactory<T> getBeanifierFactory(
         Class<T> clazz,
-        Supplier<T> supplier,
-        NameMapper mapper) {
-    Tuple2<Class<?>, NameMapper> key = Tuple2.of(clazz, mapper);
-    BeanifierFactory<T> factory = (BeanifierFactory<T>) beanifiers.get(key);
-    if (factory == null) {
-      beanifiers.put(key, factory = new BeanifierFactory<>(clazz, supplier, mapper));
-    }
-    return factory;
+        Supplier<T> supplier) {
+    return beanifiers.computeIfAbsent(clazz,
+          k -> new BeanifierFactory<>(clazz, supplier, config));
   }
 
-  MappifierFactory getMappifierFactory(NameMapper mapper) {
-    return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);
+  MappifierFactory getMappifierFactory() {
+    return new MappifierFactory(config);
   }
 
 }

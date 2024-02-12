@@ -42,7 +42,7 @@ public final class MapBinder {
 <span class="fc" id="L42">      Object val = map.get(key);</span>
 <span class="pc bpc" id="L43" title="1 of 2 branches missed.">      CustomBinder cb = val == null</span>
 <span class="nc" id="L44">            ? null</span>
-<span class="fc" id="L45">            : config.getCustomBinder(val.getClass(), map.getClass(), key);</span>
+<span class="fc" id="L45">            : config.getCustomBinder(map.getClass(), key, val.getClass());</span>
 <span class="pc bpc" id="L46" title="1 of 2 branches missed.">      if (cb != null) {</span>
 <span class="nc bnc" id="L47" title="All 2 branches missed.">        if (LOG.isTraceEnabled()) {</span>
 <span class="nc" id="L48">          LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (using custom binder)&quot;, key, val);</span>
@@ -73,15 +73,14 @@ public final class MapBinder {
 <span class="fc" id="L73">      Integer sqlType = config.getSqlType(map.getClass(), key, val.getClass());</span>
 <span class="pc bpc" id="L74" title="1 of 2 branches missed.">      if (sqlType == null) {</span>
 <span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (val instanceof Enum) {</span>
-<span class="nc" id="L76">          Class&lt;? extends Enum&lt;?&gt;&gt; type = (Class&lt;? extends Enum&lt;?&gt;&gt;) val.getClass();</span>
-<span class="nc bnc" id="L77" title="All 2 branches missed.">          if (config.saveEnumAsString(map.getClass(), key, type)) {</span>
-<span class="nc" id="L78">            return ValueBinder.ANY_TO_STRING;</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">          if (config.saveEnumAsString(map.getClass(), key, (Class) val.getClass())) {</span>
+<span class="nc" id="L77">            return ValueBinder.ANY_TO_STRING;</span>
           }
-<span class="nc" id="L80">          return EnumBinderLookup.DEFAULT;</span>
+<span class="nc" id="L79">          return EnumBinderLookup.DEFAULT;</span>
         }
-<span class="fc" id="L82">        return ValueBinderFactory.getInstance().getDefaultBinder(val.getClass());</span>
+<span class="fc" id="L81">        return ValueBinderFactory.getInstance().getDefaultBinder(val.getClass());</span>
       }
-<span class="nc" id="L84">      return ValueBinderFactory.getInstance().getBinder(val.getClass(), sqlType);</span>
+<span class="nc" id="L83">      return ValueBinderFactory.getInstance().getBinder(val.getClass(), sqlType);</span>
     }
   }
 }

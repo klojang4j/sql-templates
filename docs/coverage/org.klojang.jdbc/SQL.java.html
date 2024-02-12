@@ -162,7 +162,7 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL simple(String sql, SessionConfig config) {
 <span class="fc" id="L164">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L165">    Check.notNull(config, BIND_INFO);</span>
+<span class="fc" id="L165">    Check.notNull(config, CONFIG);</span>
 <span class="fc" id="L166">    return new SimpleSQL(sql, false, config);</span>
   }
 
@@ -221,7 +221,7 @@ public sealed interface SQL permits AbstractSQL {
   static SQLQuery simpleQuery(Connection con, String sql, SessionConfig config) {
 <span class="fc" id="L222">    Check.notNull(con, CONNECTION);</span>
 <span class="fc" id="L223">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L224">    Check.notNull(config, BIND_INFO);</span>
+<span class="fc" id="L224">    Check.notNull(config, CONFIG);</span>
 <span class="fc" id="L225">    return simple(sql, config).session(con).prepareQuery();</span>
   }
 
@@ -267,7 +267,7 @@ public sealed interface SQL permits AbstractSQL {
         SessionConfig config) {
 <span class="nc" id="L268">    Check.notNull(con, CONNECTION);</span>
 <span class="nc" id="L269">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="nc" id="L270">    Check.notNull(config, BIND_INFO);</span>
+<span class="nc" id="L270">    Check.notNull(config, CONFIG);</span>
 <span class="nc" id="L271">    return simple(sql, config).session(con).prepareInsert(retrieveKeys);</span>
   }
 
@@ -308,7 +308,7 @@ public sealed interface SQL permits AbstractSQL {
   static SQLUpdate simpleUpdate(Connection con, String sql, SessionConfig config) {
 <span class="fc" id="L309">    Check.notNull(con, CONNECTION);</span>
 <span class="fc" id="L310">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L311">    Check.notNull(config, BIND_INFO);</span>
+<span class="fc" id="L311">    Check.notNull(config, CONFIG);</span>
 <span class="fc" id="L312">    return simple(sql, config).session(con).prepareUpdate();</span>
   }
 
@@ -354,7 +354,7 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL template(String sql, SessionConfig config) {
 <span class="fc" id="L356">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L357">    Check.notNull(config, BIND_INFO);</span>
+<span class="fc" id="L357">    Check.notNull(config, CONFIG);</span>
 <span class="fc" id="L358">    return new SQLTemplate(sql, config);</span>
   }
 
@@ -422,7 +422,7 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL skeleton(String sql, SessionConfig config) {
 <span class="fc" id="L424">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L425">    Check.notNull(config, BIND_INFO);</span>
+<span class="fc" id="L425">    Check.notNull(config, CONFIG);</span>
 <span class="fc" id="L426">    return new SQLSkeleton(sql, config);</span>
   }
 

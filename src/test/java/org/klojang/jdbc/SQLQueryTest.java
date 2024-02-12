@@ -131,7 +131,6 @@ public class SQLQueryTest {
     session.set("column", "LAST_NAME").set("direction", "DESC");
     try (SQLQuery query = session.prepareQuery()) {
       List<Person> persons = query
-            .withNameMapper(new SnakeCaseToCamelCase())
             .bind("lastName", "Smith")
             .getBeanifier(Person.class)
             .beanifyAll();

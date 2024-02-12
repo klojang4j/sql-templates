@@ -1,8 +1,8 @@
 package org.klojang.jdbc.x.rs;
 
 import org.klojang.jdbc.DatabaseException;
+import org.klojang.jdbc.SessionConfig;
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.templates.NameMapper;
 import org.klojang.util.CollectionMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,9 @@ import java.util.*;
 
 import static java.lang.invoke.MethodHandles.publicLookup;
 import static java.lang.invoke.MethodType.methodType;
+import static org.klojang.jdbc.SessionConfig.CustomReader;
 import static org.klojang.util.CollectionMethods.implode;
+
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class RecordFactory<T extends Record> {
@@ -27,8 +29,8 @@ public final class RecordFactory<T extends Record> {
   private final MethodHandle constructor;
   private final ComponentWriter[] writers;
 
-  public RecordFactory(Class<T> recordClass, ResultSet resultset, NameMapper mapper) {
-    WriteConfig cfg = createWriters(recordClass, resultset, mapper);
+  public RecordFactory(Class<T> recordClass, ResultSet resultset, SessionConfig config) {
+    WriteConfig cfg = createWriters(recordClass, resultset, config);
     constructor = cfg.constructor();
     writers = cfg.writers();
   }
@@ -45,7 +47,7 @@ public final class RecordFactory<T extends Record> {
   private static <T extends Record> WriteConfig createWriters(
         Class<T> recordClass,
         ResultSet resultset,
-        NameMapper mapper) {
+        SessionConfig config) {
     Map<String, RecordComponent> components = getComponents(recordClass);
     ColumnReaderFactory factory = ColumnReaderFactory.getInstance();
     if (LOG.isTraceEnabled()) {
@@ -59,16 +61,26 @@ public final class RecordFactory<T extends Record> {
         int jdbcIdx = idx + 1; // JDBC is one-based
         int sqlType = rsmd.getColumnType(jdbcIdx);
         String label = rsmd.getColumnLabel(jdbcIdx);
-        String component = mapper.map(label);
-        RecordComponent rc = components.get(component);
-        if (rc == null) {
+        // the name of the record component
+        String componentName = config.getColumnToPropertyMapper().map(label);
+        RecordComponent component = components.get(componentName);
+        if (component == null) {
           String fmt = "Column {} cannot be mapped to a component of {}";
           LOG.warn(fmt, label, recordClass.getSimpleName());
           continue;
         }
-        Class<?> type = rc.getType();
-        ColumnReader reader = factory.getReader(type, sqlType);
-        ComponentWriter writer = new ComponentWriter(reader, component, jdbcIdx, type);
+        Class<?> type = component.getType();
+        CustomReader customReader = config.getCustomReader(recordClass,
+              componentName,
+              type,
+              sqlType);
+        ComponentWriter writer;
+        if (customReader == null) {
+          ColumnReader reader = factory.getReader(type, sqlType);
+          writer = new ComponentWriter(reader, componentName, jdbcIdx, type);
+        } else {
+          writer = new ComponentWriter(customReader, componentName, jdbcIdx);
+        }
         paramTypes.add(type);
         writers.add(writer);
       }

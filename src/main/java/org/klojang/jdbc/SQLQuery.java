@@ -1,13 +1,11 @@
 package org.klojang.jdbc;
 
-import org.klojang.check.Check;
 import org.klojang.check.aux.Result;
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderFactory;
 import org.klojang.jdbc.x.sql.SQLInfo;
-import org.klojang.templates.NameMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,24 +57,10 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SQLQuery.class);
 
-  private NameMapper mapper = NameMapper.AS_IS;
   private ResultSet resultSet;
 
   SQLQuery(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
     super(ps, sql, sqlInfo);
-  }
-
-  /**
-   * Sets the column-to-property mapper to be used when populating JavaBeans or maps from
-   * a {@link ResultSet}. Beware of the direction of the mappings: <i>from</i> column
-   * names <i>to</i> bean properties (or record components, or map keys).
-   *
-   * @param columnToPropertyMapper the column-to-property mapper to be used
-   * @return this {@code SQLQuery} instance
-   */
-  public SQLQuery withNameMapper(NameMapper columnToPropertyMapper) {
-    this.mapper = Check.notNull(columnToPropertyMapper).ok();
-    return this;
   }
 
   /**
@@ -265,7 +249,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       executeSQL();
       return session
             .getSQL()
-            .getMappifierFactory(mapper)
+            .getMappifierFactory()
             .getMappifier(resultSet);
     } catch (Throwable t) {
       throw Utils.wrap(t);
@@ -288,7 +272,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       executeSQL();
       return session
             .getSQL()
-            .getBeanifierFactory(beanClass, mapper)
+            .getBeanifierFactory(beanClass)
             .getBeanifier(resultSet);
     } catch (Throwable t) {
       throw Utils.wrap(t);
@@ -316,7 +300,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       executeSQL();
       return session
             .getSQL()
-            .getBeanifierFactory(beanClass, beanSupplier, mapper)
+            .getBeanifierFactory(beanClass, beanSupplier)
             .getBeanifier(resultSet);
     } catch (Throwable t) {
       throw Utils.wrap(t);

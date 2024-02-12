@@ -162,7 +162,7 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL simple(String sql, SessionConfig config) {
     Check.notNull(sql, SQL_ARGUMENT);
-    Check.notNull(config, BIND_INFO);
+    Check.notNull(config, CONFIG);
     return new SimpleSQL(sql, false, config);
   }
 
@@ -221,7 +221,7 @@ public sealed interface SQL permits AbstractSQL {
   static SQLQuery simpleQuery(Connection con, String sql, SessionConfig config) {
     Check.notNull(con, CONNECTION);
     Check.notNull(sql, SQL_ARGUMENT);
-    Check.notNull(config, BIND_INFO);
+    Check.notNull(config, CONFIG);
     return simple(sql, config).session(con).prepareQuery();
   }
 
@@ -267,7 +267,7 @@ public sealed interface SQL permits AbstractSQL {
         SessionConfig config) {
     Check.notNull(con, CONNECTION);
     Check.notNull(sql, SQL_ARGUMENT);
-    Check.notNull(config, BIND_INFO);
+    Check.notNull(config, CONFIG);
     return simple(sql, config).session(con).prepareInsert(retrieveKeys);
   }
 
@@ -308,7 +308,7 @@ public sealed interface SQL permits AbstractSQL {
   static SQLUpdate simpleUpdate(Connection con, String sql, SessionConfig config) {
     Check.notNull(con, CONNECTION);
     Check.notNull(sql, SQL_ARGUMENT);
-    Check.notNull(config, BIND_INFO);
+    Check.notNull(config, CONFIG);
     return simple(sql, config).session(con).prepareUpdate();
   }
 
@@ -354,7 +354,7 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL template(String sql, SessionConfig config) {
     Check.notNull(sql, SQL_ARGUMENT);
-    Check.notNull(config, BIND_INFO);
+    Check.notNull(config, CONFIG);
     return new SQLTemplate(sql, config);
   }
 
@@ -422,7 +422,7 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL skeleton(String sql, SessionConfig config) {
     Check.notNull(sql, SQL_ARGUMENT);
-    Check.notNull(config, BIND_INFO);
+    Check.notNull(config, CONFIG);
     return new SQLSkeleton(sql, config);
   }
 

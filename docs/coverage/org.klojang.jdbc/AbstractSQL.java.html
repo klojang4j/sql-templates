@@ -3,8 +3,6 @@
 import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.ps.MapBinder;
 import org.klojang.jdbc.x.sql.SQLInfo;
-import org.klojang.templates.NameMapper;
-import org.klojang.util.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,74 +14,60 @@ abstract sealed class AbstractSQL implements SQL
       permits SimpleSQL, SQLTemplate, SQLSkeleton {
 
   @SuppressWarnings({&quot;unused&quot;})
-<span class="fc" id="L19">  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);</span>
+<span class="fc" id="L17">  private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);</span>
 
   private final String unparsed;
   private final SessionConfig config;
 
-  private final Map&lt;Class&lt;?&gt;, BeanBinder&lt;?&gt;&gt; beanBinders;
-  private final Map&lt;Tuple2&lt;Class&lt;?&gt;, NameMapper&gt;, BeanifierFactory&lt;?&gt;&gt; beanifiers;
-  private final Map&lt;NameMapper, MappifierFactory&gt; mappifiers;
+  @SuppressWarnings(&quot;rawtypes&quot;)
+  private final Map&lt;Class, BeanBinder&gt; beanBinders;
+  @SuppressWarnings(&quot;rawtypes&quot;)
+  private final Map&lt;Class, BeanifierFactory&gt; beanifiers;
 
-<span class="fc" id="L28">  AbstractSQL(String sql, SessionConfig config) {</span>
-<span class="fc" id="L29">    this.unparsed = sql;</span>
-<span class="fc" id="L30">    this.config = config;</span>
+<span class="fc" id="L27">  AbstractSQL(String sql, SessionConfig config) {</span>
+<span class="fc" id="L28">    this.unparsed = sql;</span>
+<span class="fc" id="L29">    this.config = config;</span>
     // These maps are unlikely to grow beyond one or two entries
-<span class="fc" id="L32">    beanBinders = new HashMap&lt;&gt;(4);</span>
-<span class="fc" id="L33">    beanifiers = new HashMap&lt;&gt;(4);</span>
-<span class="fc" id="L34">    mappifiers = new HashMap&lt;&gt;(4);</span>
-<span class="fc" id="L35">  }</span>
+<span class="fc" id="L31">    beanBinders = new HashMap&lt;&gt;(4);</span>
+<span class="fc" id="L32">    beanifiers = new HashMap&lt;&gt;(4);</span>
+<span class="fc" id="L33">  }</span>
 
   /**
    * Returns the raw, unprocessed, user-provided SQL string, with all named parameters and
    * template variables still in it. For reporting purposes only.
    */
   String unparsed() {
-<span class="fc" id="L42">    return unparsed;</span>
+<span class="fc" id="L40">    return unparsed;</span>
   }
 
   SessionConfig config() {
-<span class="nc" id="L46">    return config;</span>
+<span class="nc" id="L44">    return config;</span>
   }
 
-  BeanBinder&lt;?&gt; getBeanBinder(SQLInfo sqlInfo, Class&lt;?&gt; clazz) {
-<span class="fc" id="L50">    BeanBinder&lt;?&gt; binder = beanBinders.get(clazz);</span>
-<span class="fc bfc" id="L51" title="All 2 branches covered.">    if (binder == null) {</span>
-<span class="fc" id="L52">      binder = new BeanBinder&lt;&gt;(clazz, sqlInfo.parameters(), config);</span>
-<span class="fc" id="L53">      beanBinders.put(clazz, binder);</span>
-    }
-<span class="fc" id="L55">    return binder;</span>
+  &lt;T&gt; BeanBinder&lt;T&gt; getBeanBinder(SQLInfo sqlInfo, Class&lt;T&gt; clazz) {
+<span class="fc" id="L48">    return beanBinders.computeIfAbsent(clazz,</span>
+<span class="fc" id="L49">          k -&gt; new BeanBinder&lt;&gt;(clazz, sqlInfo.parameters(), config));</span>
   }
 
   MapBinder getMapBinder(SQLInfo sqlInfo) {
-<span class="fc" id="L59">    return new MapBinder(sqlInfo.parameters(), config);</span>
+<span class="fc" id="L53">    return new MapBinder(sqlInfo.parameters(), config);</span>
   }
 
-  @SuppressWarnings(&quot;unchecked&quot;)
-  &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(Class&lt;T&gt; clazz, NameMapper mapper) {
-<span class="fc" id="L64">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
-<span class="fc" id="L65">    BeanifierFactory&lt;T&gt; factory = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">    if (factory == null) {</span>
-<span class="fc" id="L67">      beanifiers.put(key, factory = new BeanifierFactory&lt;&gt;(clazz, mapper));</span>
-    }
-<span class="fc" id="L69">    return factory;</span>
+  @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
+  &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(Class&lt;T&gt; clazz) {
+<span class="fc" id="L58">    return beanifiers.computeIfAbsent(clazz, k -&gt; new BeanifierFactory&lt;&gt;(k, config));</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
   &lt;T&gt; BeanifierFactory&lt;T&gt; getBeanifierFactory(
         Class&lt;T&gt; clazz,
-        Supplier&lt;T&gt; supplier,
-        NameMapper mapper) {
-<span class="nc" id="L77">    Tuple2&lt;Class&lt;?&gt;, NameMapper&gt; key = Tuple2.of(clazz, mapper);</span>
-<span class="nc" id="L78">    BeanifierFactory&lt;T&gt; factory = (BeanifierFactory&lt;T&gt;) beanifiers.get(key);</span>
-<span class="nc bnc" id="L79" title="All 2 branches missed.">    if (factory == null) {</span>
-<span class="nc" id="L80">      beanifiers.put(key, factory = new BeanifierFactory&lt;&gt;(clazz, supplier, mapper));</span>
-    }
-<span class="nc" id="L82">    return factory;</span>
+        Supplier&lt;T&gt; supplier) {
+<span class="nc" id="L65">    return beanifiers.computeIfAbsent(clazz,</span>
+<span class="nc" id="L66">          k -&gt; new BeanifierFactory&lt;&gt;(clazz, supplier, config));</span>
   }
 
-  MappifierFactory getMappifierFactory(NameMapper mapper) {
-<span class="nc" id="L86">    return mappifiers.computeIfAbsent(mapper, MappifierFactory::new);</span>
+  MappifierFactory getMappifierFactory() {
+<span class="nc" id="L70">    return new MappifierFactory(config);</span>
   }
 
 }

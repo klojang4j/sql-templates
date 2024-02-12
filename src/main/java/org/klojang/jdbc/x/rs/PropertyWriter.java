@@ -3,8 +3,8 @@ package org.klojang.jdbc.x.rs;
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
 import org.klojang.jdbc.DatabaseException;
+import org.klojang.jdbc.SessionConfig;
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.templates.NameMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static org.klojang.jdbc.SessionConfig.CustomReader;
 import static org.klojang.util.CollectionMethods.implode;
 
 /**
@@ -39,7 +40,9 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
 
   @SuppressWarnings("rawtypes")
   public static PropertyWriter[] createWriters(
-        ResultSet rs, Class<?> beanClass, NameMapper nameMapper) {
+        ResultSet rs,
+        Class<?> beanClass,
+        SessionConfig config) {
     Map<String, Setter> setters = SetterFactory.INSTANCE.getSetters(beanClass);
     if (LOG.isTraceEnabled()) {
       log(beanClass, rs, setters);
@@ -53,7 +56,7 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
         int columnIndex = idx + 1; // JDBC is one-based
         int sqlType = rsmd.getColumnType(columnIndex);
         String label = rsmd.getColumnLabel(columnIndex);
-        String property = nameMapper.map(label);
+        String property = config.getColumnToPropertyMapper().map(label);
         Setter setter = setters.get(property);
         if (setter == null) {
           if (LOG.isTraceEnabled()) {
@@ -64,8 +67,18 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
           continue;
         }
         Class<?> javaType = setter.getParamType();
-        ColumnReader<?, ?> columnReader = factory.getReader(javaType, sqlType);
-        writers.add(new PropertyWriter<>(columnReader, columnIndex, setter));
+        CustomReader customReader = config.getCustomReader(beanClass,
+              property,
+              javaType,
+              sqlType);
+        PropertyWriter pw;
+        if (customReader == null) {
+          ColumnReader<?, ?> columnReader = factory.getReader(javaType, sqlType);
+          pw = new PropertyWriter<>(setter, columnIndex, columnReader);
+        } else {
+          pw = new PropertyWriter(setter, columnIndex, customReader);
+        }
+        writers.add(pw);
       }
       return writers.toArray(PropertyWriter[]::new);
     } catch (SQLException e) {
@@ -74,23 +87,41 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
   }
 
   private final Setter setter;
-  private final ColumnReader<COLUMN_TYPE, FIELD_TYPE> reader;
   private final int columnIndex;
+  private final ColumnReader<COLUMN_TYPE, FIELD_TYPE> reader;
+  private final CustomReader custom;
 
-  private PropertyWriter(
-        ColumnReader<COLUMN_TYPE, FIELD_TYPE> reader,
+  private PropertyWriter(Setter setter,
         int columnIndex,
-        Setter setter) {
-    this.reader = reader;
-    this.columnIndex = columnIndex;
+        ColumnReader<COLUMN_TYPE, FIELD_TYPE> reader) {
     this.setter = setter;
+    this.columnIndex = columnIndex;
+    this.reader = reader;
+    this.custom = null;
+  }
+
+  private PropertyWriter(Setter setter, int columnIndex, CustomReader custom) {
+    this.setter = setter;
+    this.columnIndex = columnIndex;
+    this.custom = custom;
+    this.reader = null;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void write(ResultSet resultset, Object bean) throws Throwable {
-    Class cls = setter.getParamType();
-    Object val = reader.getValue(resultset, columnIndex, cls);
-    LOG.trace("==> {}: {}", setter.getProperty(), val);
+    final Object val;
+    if (custom == null) {
+      Class cls = setter.getParamType();
+      val = reader.getValue(resultset, columnIndex, cls);
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("==> {}: {}", setter.getProperty(), val);
+      }
+    } else {
+      val = custom.getValue(resultset, columnIndex);
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("==> {}: {} (using custom reader)", setter.getProperty(), val);
+      }
+    }
     setter.write(bean, val);
   }
 

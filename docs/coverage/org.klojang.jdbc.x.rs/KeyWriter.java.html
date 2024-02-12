@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KeyWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">KeyWriter.java</span></div><h1>KeyWriter.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
 
 import org.klojang.jdbc.DatabaseException;
-import org.klojang.templates.NameMapper;
+import org.klojang.jdbc.SessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +11,9 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.klojang.jdbc.SessionConfig.CustomReader;
+
+
 /**
  * Reads a single column in a ResultSet as the value for a Map key.
  *
@@ -19,54 +22,77 @@ import java.util.Map;
 @SuppressWarnings(&quot;rawtypes&quot;)
 public final class KeyWriter&lt;COLUMN_TYPE&gt; {
 
-<span class="nc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(KeyWriter.class);</span>
+<span class="nc" id="L25">  private static final Logger LOG = LoggerFactory.getLogger(KeyWriter.class);</span>
 
 
   public static Map&lt;String, Object&gt; toMap(ResultSet resultset, KeyWriter[] writers)
         throws Throwable {
     // Allow for some extra data to be inserted into the map by the user
-<span class="nc" id="L28">    Map&lt;String, Object&gt; map = HashMap.newHashMap(writers.length + 4);</span>
-<span class="nc bnc" id="L29" title="All 2 branches missed.">    for (KeyWriter channel : writers) {</span>
-<span class="nc" id="L30">      channel.write(resultset, map);</span>
+<span class="nc" id="L31">    Map&lt;String, Object&gt; map = HashMap.newHashMap(writers.length + 4);</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">    for (KeyWriter channel : writers) {</span>
+<span class="nc" id="L33">      channel.write(resultset, map);</span>
     }
-<span class="nc" id="L32">    return map;</span>
+<span class="nc" id="L35">    return map;</span>
   }
 
-  public static KeyWriter[] createWriters(ResultSet resultset, NameMapper mapper) {
-<span class="nc" id="L36">    ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();</span>
+  public static KeyWriter[] createWriters(ResultSet resultset, SessionConfig config) {
+<span class="nc" id="L39">    ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();</span>
     try {
-<span class="nc" id="L38">      ResultSetMetaData rsmd = resultset.getMetaData();</span>
-<span class="nc" id="L39">      int sz = rsmd.getColumnCount();</span>
-<span class="nc" id="L40">      KeyWriter[] writers = new KeyWriter[sz];</span>
-<span class="nc bnc" id="L41" title="All 2 branches missed.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
-<span class="nc" id="L42">        int columnIndex = idx + 1; // JDBC is one-based</span>
-<span class="nc" id="L43">        int sqlType = rsmd.getColumnType(columnIndex);</span>
-<span class="nc" id="L44">        ResultSetMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
-<span class="nc" id="L45">        String label = rsmd.getColumnLabel(columnIndex);</span>
-<span class="nc" id="L46">        String key = mapper.map(label);</span>
-<span class="nc" id="L47">        writers[idx] = new KeyWriter&lt;&gt;(method, columnIndex, key);</span>
+<span class="nc" id="L41">      ResultSetMetaData rsmd = resultset.getMetaData();</span>
+<span class="nc" id="L42">      int sz = rsmd.getColumnCount();</span>
+<span class="nc" id="L43">      KeyWriter[] writers = new KeyWriter[sz];</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
+<span class="nc" id="L45">        int columnIndex = idx + 1; // JDBC is one-based</span>
+<span class="nc" id="L46">        int sqlType = rsmd.getColumnType(columnIndex);</span>
+<span class="nc" id="L47">        ResultSetMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
+<span class="nc" id="L48">        String label = rsmd.getColumnLabel(columnIndex);</span>
+<span class="nc" id="L49">        String key = config.getColumnToPropertyMapper().map(label);</span>
+<span class="nc" id="L50">        CustomReader custom = config.getCustomReader(HashMap.class,</span>
+              key,
+              Object.class,
+              sqlType);
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (custom == null) {</span>
+<span class="nc" id="L55">          writers[idx] = new KeyWriter&lt;&gt;(method, columnIndex, key);</span>
+        } else {
+<span class="nc" id="L57">          writers[idx] = new KeyWriter&lt;&gt;(custom, columnIndex, key);</span>
+        }
       }
-<span class="nc" id="L49">      return writers;</span>
-<span class="nc" id="L50">    } catch (SQLException e) {</span>
-<span class="nc" id="L51">      throw new DatabaseException(e);</span>
+<span class="nc" id="L60">      return writers;</span>
+<span class="nc" id="L61">    } catch (SQLException e) {</span>
+<span class="nc" id="L62">      throw new DatabaseException(e);</span>
     }
   }
 
   private final ResultSetMethod&lt;COLUMN_TYPE&gt; method;
+  private final CustomReader custom;
   private final int columnIndex;
   private final String key;
 
-<span class="nc" id="L59">  private KeyWriter(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int columnIndex, String key) {</span>
-<span class="nc" id="L60">    this.method = method;</span>
-<span class="nc" id="L61">    this.columnIndex = columnIndex;</span>
-<span class="nc" id="L62">    this.key = key;</span>
-<span class="nc" id="L63">  }</span>
+<span class="nc" id="L71">  private KeyWriter(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int columnIndex, String key) {</span>
+<span class="nc" id="L72">    this.method = method;</span>
+<span class="nc" id="L73">    this.columnIndex = columnIndex;</span>
+<span class="nc" id="L74">    this.key = key;</span>
+<span class="nc" id="L75">    this.custom = null;</span>
+<span class="nc" id="L76">  }</span>
+
+<span class="nc" id="L78">  private KeyWriter(CustomReader custom, int columnIndex, String key) {</span>
+<span class="nc" id="L79">    this.custom = custom;</span>
+<span class="nc" id="L80">    this.columnIndex = columnIndex;</span>
+<span class="nc" id="L81">    this.key = key;</span>
+<span class="nc" id="L82">    this.method = null;</span>
+<span class="nc" id="L83">  }</span>
 
   public void write(ResultSet resultset, Map&lt;String, Object&gt; map) throws SQLException {
-<span class="nc" id="L66">    Object val = method.invoke(resultset, columnIndex);</span>
-<span class="nc" id="L67">    LOG.trace(&quot;==&gt; {}: {}&quot;, key, val);</span>
-<span class="nc" id="L68">    map.put(key, val);</span>
-<span class="nc" id="L69">  }</span>
+    final Object val;
+<span class="nc bnc" id="L87" title="All 2 branches missed.">    if (custom == null) {</span>
+<span class="nc" id="L88">      val = method.invoke(resultset, columnIndex);</span>
+<span class="nc" id="L89">      LOG.trace(&quot;==&gt; {}: {}&quot;, key, val);</span>
+    } else {
+<span class="nc" id="L91">      val = custom.getValue(resultset, columnIndex);</span>
+<span class="nc" id="L92">      LOG.trace(&quot;==&gt; {}: {} (using custom reader)&quot;, key, val);</span>
+    }
+<span class="nc" id="L94">    map.put(key, val);</span>
+<span class="nc" id="L95">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

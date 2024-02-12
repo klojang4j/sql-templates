@@ -28,7 +28,7 @@ import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
   }
 
   private static Function&lt;Date, LocalDate&gt; sqlDateToLocalDate() {
-<span class="pc bpc" id="L31" title="1 of 2 branches missed.">    return x -&gt; x == null ? null : x.toLocalDate();</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">    return x -&gt; x == null ? null : x.toLocalDate();</span>
   }
 
   private static Function&lt;Timestamp, LocalDate&gt; timestampToLocalDate() {

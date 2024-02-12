@@ -22,24 +22,23 @@ public final class MappifierFactory {
   private final AtomicReference<KeyWriter<?>[]> ref = new AtomicReference<>();
   private final ReentrantLock lock = new ReentrantLock();
 
-  private final NameMapper mapper;
+  private final SessionConfig config;
 
   /**
-   * Creates a new {@code MappifierFactory}. Column names will be mapped as-is to map
-   * keys.
+   * Creates a new {@code MappifierFactory}.
    */
   public MappifierFactory() {
-    this(NameMapper.AS_IS);
+    this(SessionConfig.DEFAULT);
   }
 
   /**
    * Creates a new {@code MappifierFactory} using the specified column-to-key mapper.
    *
-   * @param columnToKeyMapper a {@code NameMapper} mapping column names to map keys
-   * @see org.klojang.templates.name.SnakeCaseToCamelCase
+   * @param config a {@code SessionConfig} object that allows you to fine-tune the
+   *       behaviour of the {@code ResultSetMappifier}
    */
-  public MappifierFactory(NameMapper columnToKeyMapper) {
-    this.mapper = Check.notNull(columnToKeyMapper).ok();
+  public MappifierFactory(SessionConfig config) {
+    this.config = Check.notNull(config).ok();
   }
 
   /**
@@ -60,7 +59,7 @@ public final class MappifierFactory {
       lock.lock();
       try {
         if (ref.get() == null) {
-          ref.set(writers = createWriters(rs, mapper));
+          ref.set(writers = createWriters(rs, config));
         }
       } finally {
         lock.unlock();

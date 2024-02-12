@@ -54,7 +54,7 @@ final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
 <span class="fc" id="L54">      bound.add(param);</span>
 <span class="fc" id="L55">      String property = param.name();</span>
 <span class="fc" id="L56">      Class type = getter.getReturnType();</span>
-<span class="fc" id="L57">      CustomBinder custom = config.getCustomBinder(type, beanClass, property);</span>
+<span class="fc" id="L57">      CustomBinder custom = config.getCustomBinder(beanClass, property, type);</span>
 <span class="pc bpc" id="L58" title="1 of 2 branches missed.">      if (custom != null) {</span>
 <span class="nc" id="L59">        PropertyBinder pb = new PropertyBinder(getter, param, custom);</span>
 <span class="nc" id="L60">        readers.add(pb);</span>

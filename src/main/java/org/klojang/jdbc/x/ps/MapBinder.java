@@ -42,7 +42,7 @@ public final class MapBinder {
       Object val = map.get(key);
       CustomBinder cb = val == null
             ? null
-            : config.getCustomBinder(val.getClass(), map.getClass(), key);
+            : config.getCustomBinder(map.getClass(), key, val.getClass());
       if (cb != null) {
         if (LOG.isTraceEnabled()) {
           LOG.trace("==> Parameter \"{}\": {} (using custom binder)", key, val);
@@ -73,8 +73,7 @@ public final class MapBinder {
       Integer sqlType = config.getSqlType(map.getClass(), key, val.getClass());
       if (sqlType == null) {
         if (val instanceof Enum) {
-          Class<? extends Enum<?>> type = (Class<? extends Enum<?>>) val.getClass();
-          if (config.saveEnumAsString(map.getClass(), key, type)) {
+          if (config.saveEnumAsString(map.getClass(), key, (Class) val.getClass())) {
             return ValueBinder.ANY_TO_STRING;
           }
           return EnumBinderLookup.DEFAULT;

@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.rs;
 
 import org.klojang.jdbc.DatabaseException;
-import org.klojang.templates.NameMapper;
+import org.klojang.jdbc.SessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +10,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.klojang.jdbc.SessionConfig.CustomReader;
+
 
 /**
  * Reads a single column in a ResultSet as the value for a Map key.
@@ -32,7 +35,7 @@ public final class KeyWriter<COLUMN_TYPE> {
     return map;
   }
 
-  public static KeyWriter[] createWriters(ResultSet resultset, NameMapper mapper) {
+  public static KeyWriter[] createWriters(ResultSet resultset, SessionConfig config) {
     ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();
     try {
       ResultSetMetaData rsmd = resultset.getMetaData();
@@ -43,8 +46,16 @@ public final class KeyWriter<COLUMN_TYPE> {
         int sqlType = rsmd.getColumnType(columnIndex);
         ResultSetMethod<?> method = methods.getMethod(sqlType);
         String label = rsmd.getColumnLabel(columnIndex);
-        String key = mapper.map(label);
-        writers[idx] = new KeyWriter<>(method, columnIndex, key);
+        String key = config.getColumnToPropertyMapper().map(label);
+        CustomReader custom = config.getCustomReader(HashMap.class,
+              key,
+              Object.class,
+              sqlType);
+        if (custom == null) {
+          writers[idx] = new KeyWriter<>(method, columnIndex, key);
+        } else {
+          writers[idx] = new KeyWriter<>(custom, columnIndex, key);
+        }
       }
       return writers;
     } catch (SQLException e) {
@@ -53,6 +64,7 @@ public final class KeyWriter<COLUMN_TYPE> {
   }
 
   private final ResultSetMethod<COLUMN_TYPE> method;
+  private final CustomReader custom;
   private final int columnIndex;
   private final String key;
 
@@ -60,11 +72,25 @@ public final class KeyWriter<COLUMN_TYPE> {
     this.method = method;
     this.columnIndex = columnIndex;
     this.key = key;
+    this.custom = null;
+  }
+
+  private KeyWriter(CustomReader custom, int columnIndex, String key) {
+    this.custom = custom;
+    this.columnIndex = columnIndex;
+    this.key = key;
+    this.method = null;
   }
 
   public void write(ResultSet resultset, Map<String, Object> map) throws SQLException {
-    Object val = method.invoke(resultset, columnIndex);
-    LOG.trace("==> {}: {}", key, val);
+    final Object val;
+    if (custom == null) {
+      val = method.invoke(resultset, columnIndex);
+      LOG.trace("==> {}: {}", key, val);
+    } else {
+      val = custom.getValue(resultset, columnIndex);
+      LOG.trace("==> {}: {} (using custom reader)", key, val);
+    }
     map.put(key, val);
   }
 

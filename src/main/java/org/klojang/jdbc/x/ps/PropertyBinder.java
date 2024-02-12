@@ -54,7 +54,7 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
       bound.add(param);
       String property = param.name();
       Class type = getter.getReturnType();
-      CustomBinder custom = config.getCustomBinder(type, beanClass, property);
+      CustomBinder custom = config.getCustomBinder(beanClass, property, type);
       if (custom != null) {
         PropertyBinder pb = new PropertyBinder(getter, param, custom);
         readers.add(pb);

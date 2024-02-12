@@ -4,7 +4,6 @@ import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.PropertyWriter;
 import org.klojang.jdbc.x.rs.RecordFactory;
-import org.klojang.templates.NameMapper;
 import org.klojang.util.InvokeMethods;
 
 import java.sql.ResultSet;
@@ -15,7 +14,7 @@ import java.util.function.Supplier;
 
 import static org.klojang.jdbc.x.Strings.*;
 import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
-import static org.klojang.templates.NameMapper.AS_IS;
+import static org.klojang.util.ClassMethods.className;
 
 /**
  * <p>A factory for {@link ResultSetBeanifier} instances. Generally you would create one
@@ -42,22 +41,22 @@ import static org.klojang.templates.NameMapper.AS_IS;
 @SuppressWarnings("rawtypes")
 public final class BeanifierFactory<T> {
 
-  private static final String RECORDS_NOT_ALLOWED = "bean supplier not supported for records";
+  private static final String RECORDS_NOT_ALLOWED
+        = "bean supplier not supported for record type ${0}";
 
   /**
    * The object held by the AtomicReference will either be a RecordFactory in case the
-   * bean class is a record type or a PropertyWriter[] in any other case.
+   * bean class is a record type or a PropertyWriter[] array in any other case.
    */
   private final AtomicReference<Object> ref = new AtomicReference<>();
   private final ReentrantLock lock = new ReentrantLock();
 
   private final Class<T> beanClass;
   private final Supplier<T> beanSupplier;
-  private final NameMapper mapper;
+  private final SessionConfig config;
 
   /**
-   * Creates a new {@code BeanifierFactory}. Column names will be mapped as-is to property
-   * names.
+   * Creates a new {@code BeanifierFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
    *       obtained from this {@code BeanifierFactory}
@@ -66,12 +65,25 @@ public final class BeanifierFactory<T> {
     Check.notNull(beanClass, BEAN_CLASS);
     this.beanClass = beanClass;
     this.beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
-    this.mapper = AS_IS;
+    this.config = SessionConfig.DEFAULT;
   }
 
   /**
-   * Creates a new {@code BeanifierFactory}. Column names will be mapped as-is to property
-   * names.
+   * Creates a new {@code BeanifierFactory}.
+   *
+   * @param beanClass the class of the JavaBeans that will be produced by beanifiers
+   *       obtained from this {@code BeanifierFactory}
+   * @param config a {@code SessionConfig} object that allows you to fine-tune the
+   *       behaviour of the {@code ResultSetBeanifier}
+   */
+  public BeanifierFactory(Class<T> beanClass, SessionConfig config) {
+    this.beanClass = Check.notNull(beanClass, BEAN_CLASS).ok();
+    this.beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
+    this.config = Check.notNull(config, CONFIG).ok();
+  }
+
+  /**
+   * Creates a new {@code BeanifierFactory}.
    *
    * @param beanClass the class of the JavaBeans that the {@code BeanifierFactory}
    *       will be catering for
@@ -81,29 +93,11 @@ public final class BeanifierFactory<T> {
    *       {@code beanClass} is a {@code record} type.
    */
   public BeanifierFactory(Class<T> beanClass, Supplier<T> beanSupplier) {
-    Check.notNull(beanClass, BEAN_CLASS);
-    Check.that(beanClass).isNot(Class::isRecord, RECORDS_NOT_ALLOWED);
-    Check.notNull(beanSupplier, BEAN_SUPPLIER);
-    this.beanClass = beanClass;
-    this.beanSupplier = beanSupplier;
-    this.mapper = AS_IS;
-  }
-
-  /**
-   * Creates a new {@code BeanifierFactory}.
-   *
-   * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   *       obtained from this {@code BeanifierFactory}
-   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to
-   *       property names
-   * @see org.klojang.templates.name.SnakeCaseToCamelCase
-   */
-  public BeanifierFactory(Class<T> beanClass, NameMapper columnToPropertyMapper) {
-    Check.notNull(beanClass, BEAN_CLASS);
-    Check.notNull(columnToPropertyMapper, COLUMN_TO_PROPERTY_MAPPER);
-    this.beanClass = beanClass;
-    this.beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
-    this.mapper = columnToPropertyMapper;
+    this.beanClass = Check.notNull(beanClass, BEAN_CLASS)
+          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))
+          .ok();
+    this.beanSupplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();
+    this.config = SessionConfig.DEFAULT;
   }
 
   /**
@@ -114,19 +108,17 @@ public final class BeanifierFactory<T> {
    * @param beanSupplier the supplier of the JavaBeans. An
    *       {@link IllegalArgumentException} is thrown if {@code beanClass} is a
    *       {@code record} type.
-   * @param columnToPropertyMapper a {@code NameMapper} mapping column names to
-   *       property names
+   * @param config a {@code SessionConfig} object that allows you to fine-tune the
+   *       behaviour of the {@code ResultSetBeanifier}
    */
   public BeanifierFactory(Class<T> beanClass,
         Supplier<T> beanSupplier,
-        NameMapper columnToPropertyMapper) {
-    Check.notNull(beanClass, BEAN_CLASS);
-    Check.that(beanClass).isNot(Class::isRecord, RECORDS_NOT_ALLOWED);
-    Check.notNull(beanSupplier, BEAN_SUPPLIER);
-    Check.notNull(columnToPropertyMapper, COLUMN_TO_PROPERTY_MAPPER);
-    this.beanClass = beanClass;
-    this.beanSupplier = beanSupplier;
-    this.mapper = columnToPropertyMapper;
+        SessionConfig config) {
+    this.beanClass = Check.notNull(beanClass, BEAN_CLASS)
+          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))
+          .ok();
+    this.beanSupplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();
+    this.config = Check.notNull(config, CONFIG).ok();
   }
 
   /**
@@ -151,7 +143,7 @@ public final class BeanifierFactory<T> {
       lock.lock();
       try {
         if (ref.get() == null) {
-          ref.set(writers = createWriters(rs, beanClass, mapper));
+          ref.set(writers = createWriters(rs, beanClass, config));
         }
       } finally {
         lock.unlock();
@@ -167,7 +159,7 @@ public final class BeanifierFactory<T> {
       lock.lock();
       try {
         if (ref.get() == null) {
-          ref.set(recordFactory = new RecordFactory<>((Class) beanClass, rs, mapper));
+          ref.set(recordFactory = new RecordFactory<>((Class) beanClass, rs, config));
         }
       } finally {
         lock.unlock();
