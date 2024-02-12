@@ -161,14 +161,14 @@ public interface SessionConfig {
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
    *       containing the value
-   * @param propertyName the name of the bean property, record component, or map key
+   * @param enumProperty the name of the bean property, record component, or map key
    *       for which to specify the SQL datatype.
    * @param enumType the type of the {@code enum} value whose SQL datatype to
    *       determine
    * @return whether to bind enums as strings ({@code true}) or as ints ({@code false})
    */
   default boolean saveEnumAsString(Class<?> beanType,
-        String propertyName,
+        String enumProperty,
         Class<? extends Enum<?>> enumType) {
     return false;
   }
@@ -237,7 +237,7 @@ public interface SessionConfig {
   default SessionConfig withSaveAllEnumsAsStrings() {
     return new SessionConfig() {
       public boolean saveEnumAsString(Class<?> beanType,
-            String propertyName,
+            String enumProperty,
             Class<? extends Enum<?>> enumType) {
         return true;
       }
