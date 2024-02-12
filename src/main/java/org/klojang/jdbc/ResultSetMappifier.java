@@ -30,9 +30,12 @@ public sealed interface ResultSetMappifier extends Iterable<Map<String, Object>>
   Optional<Map<String, Object>> mappify();
 
   /**
-   * Converts at most {@code limit} rows in the {@code ResultSet} into maps.
+   * Converts at most {@code limit} rows in the {@code ResultSet} into maps, possibly
+   * less, if there are not that many rows left in the {@code ResultSet}. If the
+   * {@code ResultSet} is empty, or if there are no more rows in the {@code ResultSet}, an
+   * empty {@code List} is returned.
    *
-   * @param limit the maximum number of records to mappify
+   * @param limit the maximum number of records to extract and convert
    * @return a {@code List} of {@code Map} objects or an empty {@code List} if the
    *       {@code ResultSet} contained no (more) rows
    */

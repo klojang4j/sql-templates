@@ -31,27 +31,27 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
 public interface SessionConfig {
 
   /**
-   * Returns a {@code SessionConfig} instance which does not override of the defaults
+   * Returns a {@code SessionConfig} instance which does not override any of the defaults
    * provided by the {@code SessionConfig} instance.
    *
-   * @return a {@code SessionConfig} instance which does not override of the defaults
+   * @return a {@code SessionConfig} instance which does not override any of the defaults
    *       provided by the {@code SessionConfig} instance
    */
   static SessionConfig getDefaultConfig() { return Utils.DEFAULT_CONFIG; }
 
   /**
    * A {@code CustomBinder} gives you full control over how values are bound to a
-   * {@link PreparedStatement}. It essentially just hands you the underlying
-   * {@link PreparedStatement} and lets you do the binding yourself. Of course, since you
-   * are now in control of the {@code PreparedStatement}, you can do anything you like
-   * with it, including closing it. <i>Klojang JDBC</i> will not be resistant against such
-   * behaviour. A {@code CustomBinder} can be used, for example, to apply last-minute
-   * transformations to the value that is about to be bound, or to serialize it in a
-   * bespoke way, or to map it to a non-standard SQL datatype. When binding {@code Map}
-   * values using {@link SQLStatement#bind(Map)}, custom binders will only kick in for
-   * non-{@code null} values, because Java's type erase feature prevents the type of the
-   * values from being established beforehand. When binding values in a JavaBean or
-   * {@code record}, custom binders will kick in even for {@code null} values.
+   * {@link PreparedStatement}. It hands you the underlying {@link PreparedStatement} and
+   * lets you do the binding yourself. Of course, since you are now in control of the
+   * {@code PreparedStatement}, you can do anything you like with it, including closing
+   * it. <i>Klojang JDBC</i> will not be resistant against such behaviour. A
+   * {@code CustomBinder} can be used, for example, to apply last-minute transformations
+   * to the value that is about to be bound, or to serialize it in a bespoke way, or to
+   * map it to a non-standard SQL datatype. When binding {@code Map} values using
+   * {@link SQLStatement#bind(Map)}, custom binders will only kick in for non-{@code null}
+   * values, because Java's type erase feature prevents the type of the values from being
+   * established beforehand. When binding values in a JavaBean or {@code record}, custom
+   * binders will kick in even for {@code null} values.
    */
   @FunctionalInterface
   interface CustomBinder {
@@ -64,12 +64,30 @@ public interface SessionConfig {
      * @throws SQLException if parameterIndex does not correspond to a parameter
      *       marker in the SQL statement, or if a database access error occurs
      */
-    void bind(PreparedStatement preparedStatement, int paramIndex, Object value) throws
-          SQLException;
+    void bind(PreparedStatement preparedStatement, int paramIndex, Object value)
+          throws SQLException;
   }
 
+  /**
+   * A {@code CustomReader} gives you full control over how values are extracted from a
+   * {@link ResultSet}. It hands you the underlying {@code ResultSet} and lets you extract
+   * values from it yourself. If the destination of the values is a JavaBean or
+   * {@code record}, it is your responsibility to ensure that the value returned from
+   * {@link #getValue(ResultSet, int)} can be assigned to the bean property or record
+   * component for which it is destined, or a {@link ClassCastException} will ensue.
+   */
   interface CustomReader {
-    Object getValue(ResultSet resultSet, int paramIndex) throws SQLException;
+    /**
+     * Retrieves the value of the designated column in the current row of the specified
+     * {@link ResultSet}.
+     *
+     * @param resultSet the {@code ResultSet}
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @return the column value
+     * @throws SQLException if the columnIndex is not valid or if a database access
+     *       error occurs
+     */
+    Object getValue(ResultSet resultSet, int columnIndex) throws SQLException;
   }
 
   /**
@@ -100,11 +118,18 @@ public interface SessionConfig {
    * {@code CustomReader}.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map} that
-   *       will receive the value from the {@code ResultSet}
+   *       will receive the value from the {@code ResultSet}. Note that when writing to a
+   *       {@code Map} (using a {@link ResultSetMappifier}), this argument will always be
+   *       {@code HashMap.class} because that happens to be the type of {@code Map} that a
+   *       {@link ResultSetMappifier} creates.
    * @param propertyName the name of the bean property, record component, or map key
    *       that will receive the value from the {@code ResultSet}
    * @param propertyType the type of the values for which to specify a
-   *       {@code CustomReader}
+   *       {@code CustomReader}. Note that when writing to a {@code Map} (using a
+   *       {@link ResultSetMappifier}), this argument will always be {@code Object.class}
+   *       because we don't know the runtime type yet of the values when the
+   *       {@code ResultSetMappifier} is configured, and Java's type erase feature
+   *       prevents us from being any more specific beforehand.
    * @param sqlType the SQL datatype of the column for which to specify a
    *       {@code CustomReader}. Must be one of the constants of the
    *       {@link java.sql.Types java.sql.Types}, like
@@ -149,14 +174,14 @@ public interface SessionConfig {
    * Whether to save enums as strings (by calling their {@code toString()} method) or as
    * ints (by calling their {@code ordinal()} method). This method will only be evaluated
    * if {@link #getSqlType(Class, String, Class) getSqlType()} returned {@code null}. The
-   * default implementation return {@code false}, meaning that by default <i>Klojang
+   * default implementation returns {@code false}, meaning that by default <i>Klojang
    * JDBC</i> will save enums as ints. More precisely: <i>Klojang JDBC</i> will bind
-   * {@code enum} types using {@code preparedStatement.setInt(myEnum.ordinal())}. (Thus,
-   * the target column may still be a VARCHAR column.) Whichever option you choose, the
+   * {@code enum} types using {@code preparedStatement.setInt(myEnum.ordinal())}. The
+   * target column could still be a VARCHAR column. Whichever option you choose, the
    * reverse process &#8212; converting {@code ResultSet} values to enums &#8212; will
-   * always work correctly, without requiring extra configuration. You may ignore any
-   * argument that you don't need in order to determine the storage type. To save
-   * <i>all</i> enums in your application as strings, ignore all arguments and simply
+   * always work correctly. It will never require extra configuration. You may ignore any
+   * argument that you don't need in order to determine the storage type for enums. To
+   * save <i>all</i> enums in your application as strings, ignore all arguments and simply
    * return {@code true} straight away.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
@@ -176,7 +201,8 @@ public interface SessionConfig {
   /**
    * Specifies the {@link NameMapper} to be used for mapping bean properties, record
    * components, or map keys to column names. The default implementation returns an
-   * instance of {@link CamelCaseToSnakeUpperCase}.
+   * instance of {@link CamelCaseToSnakeUpperCase}, which would map
+   * {@code "camelCaseToSnakeUpperCase"} to {@code "CAMEL_CASE_TO_SNAKE_UPPER_CASE"}.
    *
    * @return the {@link NameMapper} to be used for mapping bean properties, record
    *       components, or map keys to column names
@@ -188,7 +214,9 @@ public interface SessionConfig {
   /**
    * Specifies the {@link NameMapper} to be used for mapping column names to bean
    * properties, record components, or map keys. The default implementation returns an
-   * instance of {@link SnakeCaseToCamelCase}.
+   * instance of {@link SnakeCaseToCamelCase}, which would map both
+   * {@code "snake_case_to_camel_case"} and {@code "SNAKE_CASE_TO_CAMEL_CASE}" to
+   * {@code "snakeCaseToCamelCase"}.
    *
    * @return the {@link NameMapper} to be used for mapping column names to bean
    *       properties, record components, or map keys

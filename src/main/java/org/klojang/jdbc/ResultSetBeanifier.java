@@ -29,8 +29,8 @@ import java.util.Optional;
  * <h2>JavaBeans vs. Records</h2>
  * When converting a row into a JavaBean, a {@code ResultSetBeanifier} will always use the
  * setters on the JavaBean to populate it. There is no way to populate the bean via its
- * constructors. When converting to a record, a {@code ResultSetBeanifier} will obviously
- * always use one of its constructors to populate it. Make sure the record has a
+ * constructors. When converting to a {@code record}, a {@code ResultSetBeanifier} will
+ * obviously always use one of its constructors to populate it. Make sure the record has a
  * constructor for those record components that are supposed to map to columns in the
  * SELECT clause. The encounter order of the record components within the constructor must
  * match the encounter order of the columns in the SELECT clause. However, it is not
@@ -60,7 +60,8 @@ public sealed interface ResultSetBeanifier<T> extends Iterable<T>
   Optional<T> beanify();
 
   /**
-   * Converts at most {@code limit} rows from the {@code ResultSet} into JavaBeans. If the
+   * Converts at most {@code limit} rows from the {@code ResultSet} into JavaBeans,
+   * possibly less, if there are not that many rows left in the {@code ResultSet}. If the
    * {@code ResultSet} is empty, or if there are no more rows in the {@code ResultSet}, an
    * empty {@code List} is returned.
    *
