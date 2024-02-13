@@ -18,7 +18,8 @@ import java.sql.Statement;
 import java.util.*;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static org.klojang.check.CommonChecks.*;
+import static org.klojang.check.CommonChecks.deepNotNull;
+import static org.klojang.check.CommonChecks.empty;
 import static org.klojang.check.Tag.VARARGS;
 import static org.klojang.jdbc.x.Strings.*;
 
@@ -127,7 +128,6 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   }
 
   private SQLInfo getSQLInfo() {
-    Check.that(session.hasUnsetVariables()).is(no(), rogueVariables());
     return new SQLInfo(new ParamExtractor(session.render()));
   }
 

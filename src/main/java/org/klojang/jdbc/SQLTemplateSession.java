@@ -1,14 +1,12 @@
 package org.klojang.jdbc;
 
-import org.klojang.check.Check;
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.jdbc.x.sql.ParamExtractor;
+import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.RenderSession;
 
 import java.sql.Connection;
 
-import static org.klojang.check.CommonChecks.no;
 
 final class SQLTemplateSession extends DynamicSQLSession {
 
@@ -44,7 +42,6 @@ final class SQLTemplateSession extends DynamicSQLSession {
   }
 
   private SQLInfo getSQLInfo(RenderSession session, ParamExtractor extractor) {
-    Check.that(session.hasUnsetVariables()).is(no(), rogueVariables());
     return new SQLInfo(session.render(), extractor);
   }
 

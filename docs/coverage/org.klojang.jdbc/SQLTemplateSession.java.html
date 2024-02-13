@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLTemplateSession.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLTemplateSession.java</span></div><h1>SQLTemplateSession.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
-import org.klojang.check.Check;
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.jdbc.x.sql.ParamExtractor;
+import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.RenderSession;
 
 import java.sql.Connection;
 
-import static org.klojang.check.CommonChecks.no;
 
 final class SQLTemplateSession extends DynamicSQLSession {
 
@@ -18,34 +16,33 @@ final class SQLTemplateSession extends DynamicSQLSession {
         AbstractSQL sql,
         ParamExtractor extractor,
         RenderSession session) {
-<span class="fc" id="L21">    super(con, sql, session);</span>
-<span class="fc" id="L22">    this.extractor = extractor;</span>
-<span class="fc" id="L23">  }</span>
+<span class="fc" id="L19">    super(con, sql, session);</span>
+<span class="fc" id="L20">    this.extractor = extractor;</span>
+<span class="fc" id="L21">  }</span>
 
   public SQLQuery prepareQuery() {
-<span class="fc" id="L26">    close();</span>
-<span class="fc" id="L27">    var sqlInfo = getSQLInfo(session, extractor);</span>
-<span class="fc" id="L28">    var ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="fc" id="L29">    return new SQLQuery(ps, this, sqlInfo);</span>
+<span class="fc" id="L24">    close();</span>
+<span class="fc" id="L25">    var sqlInfo = getSQLInfo(session, extractor);</span>
+<span class="fc" id="L26">    var ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="fc" id="L27">    return new SQLQuery(ps, this, sqlInfo);</span>
   }
 
   public SQLInsert prepareInsert(boolean retrieveKeys) {
-<span class="nc" id="L33">    close();</span>
-<span class="nc" id="L34">    var sqlInfo = getSQLInfo(session, extractor);</span>
-<span class="nc" id="L35">    var ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
-<span class="nc" id="L36">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L31">    close();</span>
+<span class="nc" id="L32">    var sqlInfo = getSQLInfo(session, extractor);</span>
+<span class="nc" id="L33">    var ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L34">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
   }
 
   public SQLUpdate prepareUpdate() {
-<span class="nc" id="L40">    close();</span>
-<span class="nc" id="L41">    var sqlInfo = getSQLInfo(session, extractor);</span>
-<span class="nc" id="L42">    var ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="nc" id="L43">    return new SQLUpdate(ps, this, sqlInfo);</span>
+<span class="nc" id="L38">    close();</span>
+<span class="nc" id="L39">    var sqlInfo = getSQLInfo(session, extractor);</span>
+<span class="nc" id="L40">    var ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="nc" id="L41">    return new SQLUpdate(ps, this, sqlInfo);</span>
   }
 
   private SQLInfo getSQLInfo(RenderSession session, ParamExtractor extractor) {
-<span class="fc" id="L47">    Check.that(session.hasUnsetVariables()).is(no(), rogueVariables());</span>
-<span class="fc" id="L48">    return new SQLInfo(session.render(), extractor);</span>
+<span class="fc" id="L45">    return new SQLInfo(session.render(), extractor);</span>
   }
 
 

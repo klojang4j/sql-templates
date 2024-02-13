@@ -18,9 +18,10 @@ import static org.klojang.jdbc.x.Strings.*;
  * <h2>Named Parameters</h2>
  * <p>The simplest implementation supports the use of named parameters within SQL query
  * strings. For example:
+ *
  * <blockquote><pre>{@code
  * SELECT *
- *   FROM PERSON
+ *   FROM EMPLOYEE
  *  WHERE FIRST_NAME = :firstName
  *    AND LAST_NAME = :lastName
  *  LIMIT :from, :batchSize
@@ -40,15 +41,17 @@ import static org.klojang.jdbc.x.Strings.*;
  * href="https://klojang4j.github.io/klojang-templates/api/org.klojang.templates/module-summary.html">Klojang
  * template</a></b>. That is: SQL that contains <i>Klojang Templates</i> variables. For
  * example:
+ *
  * <blockquote><pre>{@code
  * SELECT *
- *   FROM PERSON
+ *   FROM EMPLOYEE
  *  WHERE FIRST_NAME = :firstName
  *    AND LAST_NAME = :lastName
  *  ORDER BY ~%sortColumn% ~%sortOrder%
  *  LIMIT :from, :batchSize
  * }</pre></blockquote>
- * <p>(Thus: named parameters look like this: <b>{@code :fooBar}</b>. <i>Klojang
+ *
+ * <p>(So, named parameters look like this: <b>{@code :fooBar}</b>. <i>Klojang
  * Templates</i> variables look like this: <b>{@code ~%fooBar%}</b>.)
  *
  * <p>The workflow is as follows: <i>Klojang Templates</i> variables are set in the
@@ -80,6 +83,33 @@ import static org.klojang.jdbc.x.Strings.*;
  * SQL skeletons, parameter extraction is delayed to the very last moment, just before you
  * retrieve a {@link SQLStatement} from the {@code SQLSession}. This makes SQL skeletons
  * somewhat less efficient, but more dynamic than SQL templates.
+ *
+ *
+ * <blockquote><pre>{@code
+ * SQL sql = SQL.skeleton("""
+ *     SELECT *
+ *       FROM EMPLOYEE A
+ *       ~%joinDepartment%
+ *      ORDER BY ~%sortColumn%
+ *      LIMIT :from, :batchSize
+ *     """;
+ *
+ * try(Connection con = ...) {
+ *   SQLSession session = sql.session(con);
+ *   session.set("sortColumn", "A.SALARY");
+ *   if(departmentName != null) {
+ *     session.set("joinDepartment",
+ *         "JOIN DEPARTMENT B ON (A.DEPARTMENT_ID = B.ID AND B.NAME = :dept)");
+ *   }
+ *   try(SQLQuery query = session.prepareQuery()) {
+ *     query.bind("from", 0).bind("batchSize", 20);
+ *     if(departmentName != null) {
+ *       query.bind("dept", departmentName);
+ *     }
+ *     List<Employee> emps = query.getBeanifier(Employee.class).beanifyAll();
+ *   }
+ * }
+ * }</pre></blockquote>
  *
  * @see org.klojang.templates.Template
  * @see org.klojang.templates.RenderSession
