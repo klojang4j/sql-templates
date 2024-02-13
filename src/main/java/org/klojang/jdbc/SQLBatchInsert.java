@@ -32,7 +32,7 @@ import static org.klojang.util.StringMethods.append;
  * {@link Statement#enquoteLiteral(String) Statement.enquoteLiteral()} &#8212; in other
  * words, the JDBC driver's own escape-and-quote mechanism.
  *
- * <h2>Batch Insert Options</h2>
+ * <h2>Batch Insert Variants</h2>
  *
  * <p><i>Klojang JDBC</i> provides three options for saving batches of beans:
  *
