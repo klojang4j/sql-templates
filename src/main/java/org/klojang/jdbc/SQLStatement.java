@@ -105,7 +105,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    * @return this {@code SQLStatement} instance
    */
   @SuppressWarnings("unchecked")
-  public T bind(Map<String, Object> map) {
+  public T bind(Map<String, ?> map) {
     Check.that(fresh).is(yes(), DIRTY_INSTANCE);
     Check.notNull(map, MAP).then(bindings::add);
     return (T) this;

@@ -5,6 +5,7 @@ import org.klojang.invoke.BeanReader;
 import org.klojang.invoke.IncludeExclude;
 import org.klojang.jdbc.x.sql.BatchInsertConfig;
 import org.klojang.templates.NameMapper;
+import org.klojang.templates.name.CamelCaseToSnakeUpperCase;
 
 import java.sql.Connection;
 
@@ -15,6 +16,7 @@ import static org.klojang.invoke.IncludeExclude.EXCLUDE;
 import static org.klojang.invoke.IncludeExclude.INCLUDE;
 import static org.klojang.jdbc.x.Strings.BEAN_CLASS;
 import static org.klojang.jdbc.x.Strings.PROCESSOR;
+import static org.klojang.templates.name.CamelCaseToSnakeUpperCase.camelCaseToSnakeUpperCase;
 import static org.klojang.util.ArrayMethods.EMPTY_STRING_ARRAY;
 
 /**
@@ -27,11 +29,11 @@ public final class BatchInsertBuilder {
   private BeanValueProcessor processor = BeanValueProcessor.identity();
   private IncludeExclude includeExclude = INCLUDE;
   private String[] properties = EMPTY_STRING_ARRAY;
-  private NameMapper nameMapper = NameMapper.AS_IS;
+  private NameMapper nameMapper = camelCaseToSnakeUpperCase();
   private int chunkSize = -1;
   boolean commitPerChunk = true;
 
-  private Class beanClass;
+  private Class clazz;
   private String tableName;
 
   BatchInsertBuilder() { }
@@ -39,17 +41,18 @@ public final class BatchInsertBuilder {
   /**
    * Sets the type of the beans or records to be saved.
    *
-   * @param beanClass the type of the beans or records to be saved
+   * @param clazz the type of the beans or records to be saved
    * @return this {@code BatchInsertBuilder}
    */
-  public BatchInsertBuilder of(Class<?> beanClass) {
-    this.beanClass = Check.notNull(beanClass).ok();
+  public BatchInsertBuilder of(Class<?> clazz) {
+    this.clazz = Check.notNull(clazz).ok();
     return this;
   }
 
   /**
    * Sets the table name to insert the data into. If not specified, this defaults to the
-   * simple class name of the bean class.
+   * simple name of the bean or {@code record} class, mapped using the
+   * {@link #withNameMapper(NameMapper) NameMapper}.
    *
    * @param tableName the table name to insert the data into
    * @return this {@code BatchInsertBuilder}
@@ -91,9 +94,9 @@ public final class BatchInsertBuilder {
   }
 
   /**
-   * Sets the number of beans that will be saved at a time. By default the entire batch
-   * will be saved at once. Make sure this does not exceed the limits of your database or
-   * JDBC driver.
+   * Sets the number of beans that will be saved at a time. If specified, batches will be
+   * split into sublists of the specified size. By default the entire batch will be saved
+   * at once. Make sure this does not exceed the limits of your database or JDBC driver.
    *
    * @param chunkSize the number of beans that will be saved at a time
    * @return this {@code BatchInsertBuilder}
@@ -131,9 +134,14 @@ public final class BatchInsertBuilder {
   }
 
   /**
-   * Sets the property-to-column mapper to be used when mapping bean properties to column
-   * names. Beware of the direction of the mappings: <i>from</i> bean properties
-   * <i>to</i> column names.
+   * Sets the property-to-column mapper to be used when mapping bean properties or record
+   * components to column names. Beware of the direction of the mappings: <i>from</i> bean
+   * properties <i>to</i> column names. Defaults to
+   * {@link CamelCaseToSnakeUpperCase#camelCaseToSnakeUpperCase()
+   * camelCaseToSnakeUpperCase()}, which would map {@code "camelCaseToSnakeUpperCase"} to
+   * {@code "CAMEL_CASE_TO_SNAKE_UPPER_CASE"}. (It would also map {@code "WordCase"}
+   * a.k.a. {@code "PascalCase"} to {@code "WORD_CASE"} and {@code "PASCAL_CASE"},
+   * respectively, since all characters end up in upper case anyway.)
    *
    * @param propertyToColumnMapper the property-to-column mapper
    * @return this {@code SQLBatchInsertBuilder}
@@ -156,8 +164,11 @@ public final class BatchInsertBuilder {
    */
   public <T> SQLBatchInsert<T> prepare(Connection con) {
     Check.notNull(con);
-    Check.on(STATE, beanClass, BEAN_CLASS).is(notNull());
-    BeanReader reader = new BeanReader<>(beanClass, includeExclude, properties);
+    Check.on(STATE, clazz, BEAN_CLASS).is(notNull());
+    BeanReader reader = new BeanReader<>(clazz, includeExclude, properties);
+    if (tableName == null) {
+      tableName = nameMapper.map(clazz.getSimpleName());
+    }
     BatchInsertConfig cfg = new BatchInsertConfig<>(con,
           reader,
           processor,

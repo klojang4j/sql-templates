@@ -57,10 +57,7 @@ import static org.klojang.util.StringMethods.append;
 @SuppressWarnings({"resource"})
 public final class SQLBatchInsert<T> {
 
-  private static final String RECORDS_DONT_HAVE_SETTERS = "cannot set id on record types";
-
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);
-
 
   private final BatchInsertConfig<T> cfg;
   private final String[] props;

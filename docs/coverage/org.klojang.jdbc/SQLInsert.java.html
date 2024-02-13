@@ -120,7 +120,7 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
    * @return this {@code SQLInsert} instance
    */
   @Override
-  public SQLInsert bind(Map&lt;String, Object&gt; map) {
+  public SQLInsert bind(Map&lt;String, ?&gt; map) {
 <span class="fc" id="L124">    super.bind(map);</span>
 <span class="fc" id="L125">    idProperties.add(null);</span>
 <span class="fc" id="L126">    return this;</span>

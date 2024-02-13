@@ -216,7 +216,10 @@ public interface SessionConfig {
    * Specifies the {@link NameMapper} to be used for mapping bean properties, record
    * components, or map keys to column names. The default implementation returns an
    * instance of {@link CamelCaseToSnakeUpperCase}, which would map
-   * {@code "camelCaseToSnakeUpperCase"} to {@code "CAMEL_CASE_TO_SNAKE_UPPER_CASE"}.
+   * {@code "camelCaseToSnakeUpperCase"} to {@code "CAMEL_CASE_TO_SNAKE_UPPER_CASE"}. (It
+   * would also map {@code "WordCase"} a.k.a. {@code "PascalCase"} to {@code "WORD_CASE"}
+   * and {@code "PASCAL_CASE"}, respectively, since all characters end up in upper case
+   * anyway.)
    *
    * @return the {@link NameMapper} to be used for mapping bean properties, record
    *       components, or map keys to column names
