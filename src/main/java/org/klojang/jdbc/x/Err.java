@@ -13,6 +13,7 @@ public final class Err {
 
   public static final String NOT_MUTABLE
         = "method not supported for immutable types ({})";
+  public static final String ILLEGAL_NULL_VALUE_IN_LIST = "list must not contain null values";
 
   private Err() { throw new UnsupportedOperationException(); }
 }

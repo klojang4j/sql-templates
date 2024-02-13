@@ -130,10 +130,10 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
       AbstractSQL sql = session.getSQL();
       if (obj instanceof Map map) {
         MapBinder binder = sql.getMapBinder(sqlInfo);
-        binder.bind(map, ps, bound);
+        binder.bind(ps, map, bound);
       } else {
         BeanBinder binder = sql.getBeanBinder(sqlInfo, obj.getClass());
-        binder.bind(obj, ps);
+        binder.bind(ps, obj);
         bound.addAll(binder.getBoundParameters());
       }
     }

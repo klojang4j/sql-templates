@@ -30,8 +30,7 @@ public final class MapBinder {
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void bind(Map<String, Object> map,
-        PreparedStatement ps,
+  public void bind(PreparedStatement ps, Map<String, Object> map,
         Set<NamedParameter> bound) throws Throwable {
     for (NamedParameter param : params) {
       String key = param.name();

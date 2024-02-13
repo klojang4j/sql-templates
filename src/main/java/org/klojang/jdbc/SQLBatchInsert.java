@@ -23,8 +23,8 @@ import static org.klojang.util.ClassMethods.className;
 import static org.klojang.util.StringMethods.append;
 
 /**
- * <p>{@code SQLBatchInsert} specializes in saving large batches of
- * JavaBeans or records to the database. Instances are configured and obtained via a
+ * <p>{@code SQLBatchInsert} specializes in saving large batches of JavaBeans or records
+ * to the database. Instances are configured and obtained via a
  * {@link BatchInsertBuilder}. A {@code SQLBatchInsert} is not underpinned by a
  * {@link java.sql.PreparedStatement}. Yet, it provides just as much protection against
  * SQL injection, as it will process each and every value in the batch using
@@ -37,18 +37,14 @@ import static org.klojang.util.StringMethods.append;
  * <p><i>Klojang JDBC</i> provides three options for saving batches of beans:
  *
  * <ol>
- *   <li>via {@link SQLInsert#insertBatch(List) SQLInsert.insertBatch()}
- *   <li>via a {@code SQLBatchInsert} instance
- *   <li>via {@link SQLSession#setValues(List) SQLSession.setValues()}
+ *   <li>using this class
+ *   <li>using {@link SQLInsert#insertBatch(List) SQLInsert.insertBatch()}
+ *   <li>using {@link SQLSession#setValues(List) SQLSession.setValues()}
  * </ol>
  *
- * <p>The first option is convenient for small batches, but not very efficient for large
- * ones as it, in fact, saves the beans one at a time. The second and third option are
- * equivalent, although, currently, their implementation details do differ.
- * {@code SQLBatchInsert} instances are configured through a fluent API, which you may
- * find attractive. Batch inserts via {@code SQLSession.setValues()} are more in line
- * with the <i>Klojang JDBC</i> idiom in general. Which one you choose largely is a matter
- * of taste.
+ * <p>Functionally these options are equivalent, but they all implement the batch insert
+ * operation differently, so if performance is important, you should test which one works
+ * best for your use case. Otherwise, which one you choose largely is a matter of taste.
  *
  * @param <T> the type of the JavaBeans or records to save to the database.
  * @see BatchInsertBuilder

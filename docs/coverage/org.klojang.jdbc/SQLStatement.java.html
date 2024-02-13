@@ -130,10 +130,10 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
 <span class="fc" id="L130">      AbstractSQL sql = session.getSQL();</span>
 <span class="fc bfc" id="L131" title="All 2 branches covered.">      if (obj instanceof Map map) {</span>
 <span class="fc" id="L132">        MapBinder binder = sql.getMapBinder(sqlInfo);</span>
-<span class="fc" id="L133">        binder.bind(map, ps, bound);</span>
+<span class="fc" id="L133">        binder.bind(ps, map, bound);</span>
 <span class="fc" id="L134">      } else {</span>
 <span class="fc" id="L135">        BeanBinder binder = sql.getBeanBinder(sqlInfo, obj.getClass());</span>
-<span class="fc" id="L136">        binder.bind(obj, ps);</span>
+<span class="fc" id="L136">        binder.bind(ps, obj);</span>
 <span class="fc" id="L137">        bound.addAll(binder.getBoundParameters());</span>
       }
 <span class="fc" id="L139">    }</span>

@@ -27,9 +27,10 @@ abstract sealed class AbstractSQL implements SQL
   AbstractSQL(String sql, SessionConfig config) {
     this.unparsed = sql;
     this.config = config;
-    // These maps are unlikely to grow beyond one or two entries
-    beanBinders = new HashMap<>(4);
-    beanifiers = new HashMap<>(4);
+    // These maps are unlikely to grow beyond one or two entries (you can't extract that
+    // many beans from a single row).
+    beanBinders = new HashMap<>();
+    beanifiers = new HashMap<>();
   }
 
   /**
@@ -44,6 +45,7 @@ abstract sealed class AbstractSQL implements SQL
     return config;
   }
 
+  @SuppressWarnings("unchecked")
   <T> BeanBinder<T> getBeanBinder(SQLInfo sqlInfo, Class<T> clazz) {
     return beanBinders.computeIfAbsent(clazz,
           k -> new BeanBinder<>(clazz, sqlInfo.parameters(), config));

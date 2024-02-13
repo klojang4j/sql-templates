@@ -22,7 +22,7 @@ public final class BeanBinder<T> {
     readers = PropertyBinder.createReaders(beanClass, params, config, bound);
   }
 
-  public void bind(T bean, PreparedStatement ps) throws Throwable {
+  public void bind(PreparedStatement ps, T bean) throws Throwable {
     PropertyBinder.readAll(ps, bean, readers);
   }
 

@@ -12,9 +12,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 
 //@Disabled
@@ -222,12 +226,12 @@ public class SQLInsertTest {
           .prepare(MY_CON.get())) {
       insert.insertBatchAndSetIDs("id", beans);
     }
-    int[] ids = beans.stream().mapToInt(Person::getId).toArray();
+    List<Integer> ids = beans.stream().mapToInt(Person::getId).boxed().collect(toList());
     try (SQLQuery query = SQL.simple("SELECT ID FROM TEST")
           .session(MY_CON.get())
           .prepareQuery()) {
-      int[] actual = Morph.convert(query.firstColumn(), int[].class);
-      assertArrayEquals(ids, actual);
+      List<Integer> actual = query.firstColumn(Integer.class);
+      assertEquals(ids, actual);
     }
   }
 
