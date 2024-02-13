@@ -74,93 +74,111 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   @Override
+  public final SQLSession setArray(String varName, Object... values) {
+<span class="nc" id="L78">    Check.notNull(varName, VAR_NAME);</span>
+<span class="nc" id="L79">    Check.notNull(values, VARARGS);</span>
+<span class="nc" id="L80">    String val = ArrayMethods.implode(values, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L81">    session.set(varName, val);</span>
+<span class="nc" id="L82">    return this;</span>
+  }
+
+  @Override
+  public final SQLSession setArray(String varName, int... values) {
+<span class="nc" id="L87">    Check.notNull(varName, VAR_NAME);</span>
+<span class="nc" id="L88">    Check.notNull(values, VARARGS);</span>
+<span class="nc" id="L89">    String val = ArrayMethods.implodeInts(values, &quot;,&quot;);</span>
+<span class="nc" id="L90">    session.set(varName, val);</span>
+<span class="nc" id="L91">    return this;</span>
+  }
+
+  @Override
   public final SQLSession setIdentifier(String varName, String identifier) {
-<span class="fc" id="L78">    Check.notNull(varName, VAR_NAME);</span>
-<span class="fc" id="L79">    Check.notNull(identifier, IDENTIFIER);</span>
-<span class="fc" id="L80">    session.set(varName, quoteIdentifier(identifier));</span>
-<span class="fc" id="L81">    return this;</span>
+<span class="fc" id="L96">    Check.notNull(varName, VAR_NAME);</span>
+<span class="fc" id="L97">    Check.notNull(identifier, IDENTIFIER);</span>
+<span class="fc" id="L98">    session.set(varName, quoteIdentifier(identifier));</span>
+<span class="fc" id="L99">    return this;</span>
   }
 
   @Override
   public final SQLSession setOrderBy(String sortColumn) {
-<span class="fc" id="L86">    Check.notNull(sortColumn, SORT_COLUMN);</span>
-<span class="fc" id="L87">    return setIdentifier(ORDER_BY, sortColumn);</span>
+<span class="fc" id="L104">    Check.notNull(sortColumn, SORT_COLUMN);</span>
+<span class="fc" id="L105">    return setIdentifier(ORDER_BY, sortColumn);</span>
   }
 
   @Override
   public final SQLSession setOrderBy(String sortColumn, boolean isDescending) {
-<span class="nc bnc" id="L92" title="All 2 branches missed.">    String orderBy = quoteIdentifier(sortColumn) + (isDescending ? &quot; DESC&quot; : &quot; ASC&quot;);</span>
-<span class="nc" id="L93">    return set(ORDER_BY, orderBy);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">    String orderBy = quoteIdentifier(sortColumn) + (isDescending ? &quot; DESC&quot; : &quot; ASC&quot;);</span>
+<span class="nc" id="L111">    return set(ORDER_BY, orderBy);</span>
   }
 
 
   @Override
   public final String quoteValue(Object obj) {
     try {
-<span class="fc" id="L100">      return JDBC.quote(statement(), obj);</span>
-<span class="nc" id="L101">    } catch (SQLException e) {</span>
-<span class="nc" id="L102">      close();</span>
-<span class="nc" id="L103">      throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L118">      return JDBC.quote(statement(), obj);</span>
+<span class="nc" id="L119">    } catch (SQLException e) {</span>
+<span class="nc" id="L120">      close();</span>
+<span class="nc" id="L121">      throw DatabaseException.wrap(e, sql);</span>
     }
   }
 
   @Override
   public final SQLExpression sqlFunction(String name, Object... args) {
-<span class="nc" id="L109">    Check.notNull(name, FUNCTION_NAME);</span>
-<span class="nc" id="L110">    Check.notNull(args, VARARGS);</span>
-<span class="nc" id="L111">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
-<span class="nc" id="L112">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
-<span class="nc" id="L113">    return new SQLExpression(expr);</span>
+<span class="nc" id="L127">    Check.notNull(name, FUNCTION_NAME);</span>
+<span class="nc" id="L128">    Check.notNull(args, VARARGS);</span>
+<span class="nc" id="L129">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L130">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
+<span class="nc" id="L131">    return new SQLExpression(expr);</span>
   }
 
   @Override
   public final String quoteIdentifier(String identifier) {
-<span class="fc" id="L118">    Check.notNull(identifier, IDENTIFIER);</span>
+<span class="fc" id="L136">    Check.notNull(identifier, IDENTIFIER);</span>
     try {
-<span class="fc" id="L120">      return statement().enquoteIdentifier(identifier, false);</span>
-<span class="nc" id="L121">    } catch (SQLException e) {</span>
-<span class="nc" id="L122">      close();</span>
-<span class="nc" id="L123">      throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L138">      return statement().enquoteIdentifier(identifier, false);</span>
+<span class="nc" id="L139">    } catch (SQLException e) {</span>
+<span class="nc" id="L140">      close();</span>
+<span class="nc" id="L141">      throw DatabaseException.wrap(e, sql);</span>
     }
   }
 
   @Override
   public final int execute() {
     try {
-<span class="fc" id="L130">      Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());</span>
-<span class="fc" id="L131">      return execute(session.render());</span>
+<span class="fc" id="L148">      Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());</span>
+<span class="fc" id="L149">      return execute(session.render());</span>
     } finally {
-<span class="fc" id="L133">      close();</span>
+<span class="fc" id="L151">      close();</span>
     }
   }
 
 
   Statement statement() {
-<span class="fc bfc" id="L139" title="All 2 branches covered.">    if (stmt == null) {</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">    if (stmt == null) {</span>
       try {
-<span class="fc" id="L141">        stmt = con.createStatement();</span>
-<span class="nc" id="L142">      } catch (SQLException e) {</span>
-<span class="nc" id="L143">        throw DatabaseException.wrap(e, sql);</span>
-<span class="fc" id="L144">      }</span>
+<span class="fc" id="L159">        stmt = con.createStatement();</span>
+<span class="nc" id="L160">      } catch (SQLException e) {</span>
+<span class="nc" id="L161">        throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L162">      }</span>
     }
-<span class="fc" id="L146">    return stmt;</span>
+<span class="fc" id="L164">    return stmt;</span>
   }
 
   void close() {
-<span class="fc bfc" id="L150" title="All 2 branches covered.">    if (stmt != null) {</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">    if (stmt != null) {</span>
       try {
-<span class="fc" id="L152">        stmt.close();</span>
-<span class="nc" id="L153">      } catch (SQLException e) {</span>
-<span class="nc" id="L154">        throw DatabaseException.wrap(e, sql);</span>
+<span class="fc" id="L170">        stmt.close();</span>
+<span class="nc" id="L171">      } catch (SQLException e) {</span>
+<span class="nc" id="L172">        throw DatabaseException.wrap(e, sql);</span>
       } finally {
-<span class="fc" id="L156">        stmt = null;</span>
+<span class="fc" id="L174">        stmt = null;</span>
       }
     }
-<span class="fc" id="L159">  }</span>
+<span class="fc" id="L177">  }</span>
 
   Supplier&lt;IllegalStateException&gt; rogueVariables() {
-<span class="fc" id="L162">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
-<span class="fc" id="L163">    return illegalState(&quot;unset variables in SQL template: &quot; + unset);</span>
+<span class="fc" id="L180">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
+<span class="fc" id="L181">    return illegalState(&quot;unset variables in SQL template: &quot; + unset);</span>
   }
 
 

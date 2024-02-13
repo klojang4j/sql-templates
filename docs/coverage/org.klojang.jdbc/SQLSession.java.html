@@ -53,10 +53,10 @@ public sealed interface SQLSession permits AbstractSQLSession {
   /**
    * Sets the specified template variable to the escaped and quoted version of the
    * specified value. Use this method if you do not know or trust the origin of the value
-   * to prevent SQL injection. If the value is an array or collection, it will be
-   * &quot;imploded&quot; to a string, using {@code &quot;,&quot; } (comma) to separate the elements in the
-   * array or collection, and using {@link #quoteValue(Object) quoteValue()} to escape and
-   * quote each element separately. Otherwise this method is equivalent to
+   * to prevent SQL injection. If the value is an array or {@link Collection}, it will be
+   * &quot;imploded&quot; to a string, using a comma to separate the elements in the array or
+   * collection, and using {@link #quoteValue(Object) quoteValue()} to escape and quote
+   * each element separately. Otherwise this method is equivalent to
    * {@code set(varName, quoteValue(value))}.
    *
    * @param varName the name of the template variable
@@ -72,6 +72,57 @@ public sealed interface SQLSession permits AbstractSQLSession {
   }
 
   /**
+   * &lt;p&gt;Equivalent to {@link #setValue(String, Object) setValue(varName, values)}. Can be
+   * used to elegantly populate an SQL IN clause with an arbitrary number of values:
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * SQL sql = SQL.template(&quot;SELECT * FROM AIRPORT WHERE NAME IN(~%names%)&quot;;
+   * try(Connection con = ...) {
+   *   List&lt;Airport&gt; airports =  sql.session(con)
+   *       .setArray(&quot;names&quot;, &quot;London Heathrow&quot;, &quot;Chicago O'Hare&quot;)
+   *       .prepareQuery()
+   *       .getBeanifier()
+   *       .beanifyAll();
+   * }
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * &lt;p&gt;This will execute the following SQL:
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * SELECT * FROM AIRPORT WHERE NAME IN('London Heathrow','Chicago O''Hare')
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * @param varName the name of the template variable
+   * @param values an array, which will be &quot;imploded&quot; to a {@code String}, using a
+   *       comma to separate the array elements, and using
+   *       {@link #quoteValue(Object) quoteValue()} to escape and quote the array
+   *       elements
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   * @see #quoteValue(Object)
+   */
+  default SQLSession setArray(String varName, Object... values)
+        throws UnsupportedOperationException {
+<span class="nc" id="L107">    throw notSupported(&quot;setArray&quot;);</span>
+  }
+
+  /**
+   * Equivalent to {@link #setValue(String, Object) setValue(varName, values)}.
+   *
+   * @param varName the name of the template variable
+   * @param values an array, which will be &quot;imploded&quot; to a {@code String}, using a
+   *       comma to separate the array elements
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   */
+  default SQLSession setArray(String varName, int... values)
+        throws UnsupportedOperationException {
+<span class="nc" id="L122">    throw notSupported(&quot;setArray&quot;);</span>
+  }
+
+  /**
    * Sets the specified template variable to the escaped and quoted version of the
    * specified identifier (e&amp;#46;g&amp;#46; a column name or table name).
    *
@@ -84,7 +135,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setIdentifier(String varName, String identifier)
         throws UnsupportedOperationException {
-<span class="nc" id="L87">    throw notSupported(&quot;setIdentifier&quot;);</span>
+<span class="nc" id="L138">    throw notSupported(&quot;setIdentifier&quot;);</span>
   }
 
   /**
@@ -103,7 +154,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   default &lt;T&gt; SQLSession setValues(T... beans) throws UnsupportedOperationException {
-<span class="nc" id="L106">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L157">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -152,14 +203,16 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       {@link SQL#template(String) SQL.template()} method
    */
   default &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans) throws UnsupportedOperationException {
-<span class="nc" id="L155">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L206">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
    * &lt;p&gt;Sets the contents of the VALUES clause within an INSERT statement. This method is
    * only supported by {@code SQL} instances obtained via
-   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
-   * template named &quot;record&quot;. This template will be repeated for each of the beans or
+   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a
+   * &lt;a
+   * href=&quot;https://github.com/klojang4j/klojang-templates?tab=readme-ov-file#nested-templates&quot;&gt;nested
+   * template&lt;/a&gt; named &quot;record&quot;. This template will be repeated for each of the beans or
    * records in the provided list. This is best illustrated using an example:
    *
    * &lt;blockquote&gt;&lt;pre&gt;{@code
@@ -237,7 +290,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans, BeanValueProcessor&lt;T&gt; processor)
         throws UnsupportedOperationException {
-<span class="nc" id="L240">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L293">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -259,7 +312,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default &lt;T&gt; long[] setValuesAndExecute(List&lt;T&gt; beans)
         throws UnsupportedOperationException {
-<span class="nc" id="L262">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L315">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -283,7 +336,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default &lt;T&gt; long[] setValuesAndExecute(List&lt;T&gt; beans, BeanValueProcessor&lt;T&gt; processor)
         throws UnsupportedOperationException {
-<span class="nc" id="L286">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L339">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -310,7 +363,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setOrderBy(String sortColumn) throws UnsupportedOperationException {
-<span class="nc" id="L313">    throw notSupported(&quot;setOrderBy&quot;);</span>
+<span class="nc" id="L366">    throw notSupported(&quot;setOrderBy&quot;);</span>
   }
 
   /**
@@ -336,7 +389,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setOrderBy(String sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
-<span class="nc" id="L339">    throw notSupported(&quot;setOrderBy&quot;);</span>
+<span class="nc" id="L392">    throw notSupported(&quot;setOrderBy&quot;);</span>
   }
 
   /**
@@ -362,7 +415,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @see Quoter#quoteValue(Object)
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
-<span class="nc" id="L365">    throw notSupported(&quot;quoteValue&quot;);</span>
+<span class="nc" id="L418">    throw notSupported(&quot;quoteValue&quot;);</span>
   }
 
   /**
@@ -378,7 +431,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLExpression sqlFunction(String name, Object... args)
         throws UnsupportedOperationException {
-<span class="nc" id="L381">    throw notSupported(&quot;sqlFunction&quot;);</span>
+<span class="nc" id="L434">    throw notSupported(&quot;sqlFunction&quot;);</span>
   }
 
   /**
@@ -394,7 +447,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @see Quoter#quoteIdentifier(String)
    */
   default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
-<span class="nc" id="L397">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
+<span class="nc" id="L450">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
   }
 
   /**
@@ -423,7 +476,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @return a {@code SQLInsert} instance
    */
   default SQLInsert prepareInsert() {
-<span class="fc" id="L426">    return prepareInsert(true);</span>
+<span class="fc" id="L479">    return prepareInsert(true);</span>
   }
 
   /**
@@ -445,12 +498,12 @@ public sealed interface SQLSession permits AbstractSQLSession {
   SQLUpdate prepareUpdate();
 
   private static UnsupportedOperationException notSupported(String method) {
-<span class="nc" id="L448">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
-<span class="nc" id="L449">    return new UnsupportedOperationException(String.format(fmt, method));</span>
+<span class="nc" id="L501">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
+<span class="nc" id="L502">    return new UnsupportedOperationException(String.format(fmt, method));</span>
   }
 
   private static String sqlSkeletonsOnly() {
-<span class="nc" id="L453">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
+<span class="nc" id="L506">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
   }
 
 }

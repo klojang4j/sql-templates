@@ -74,6 +74,24 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   @Override
+  public final SQLSession setArray(String varName, Object... values) {
+    Check.notNull(varName, VAR_NAME);
+    Check.notNull(values, VARARGS);
+    String val = ArrayMethods.implode(values, this::quoteValue, ",");
+    session.set(varName, val);
+    return this;
+  }
+
+  @Override
+  public final SQLSession setArray(String varName, int... values) {
+    Check.notNull(varName, VAR_NAME);
+    Check.notNull(values, VARARGS);
+    String val = ArrayMethods.implodeInts(values, ",");
+    session.set(varName, val);
+    return this;
+  }
+
+  @Override
   public final SQLSession setIdentifier(String varName, String identifier) {
     Check.notNull(varName, VAR_NAME);
     Check.notNull(identifier, IDENTIFIER);

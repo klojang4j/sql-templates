@@ -53,10 +53,10 @@ public sealed interface SQLSession permits AbstractSQLSession {
   /**
    * Sets the specified template variable to the escaped and quoted version of the
    * specified value. Use this method if you do not know or trust the origin of the value
-   * to prevent SQL injection. If the value is an array or collection, it will be
-   * "imploded" to a string, using {@code "," } (comma) to separate the elements in the
-   * array or collection, and using {@link #quoteValue(Object) quoteValue()} to escape and
-   * quote each element separately. Otherwise this method is equivalent to
+   * to prevent SQL injection. If the value is an array or {@link Collection}, it will be
+   * "imploded" to a string, using a comma to separate the elements in the array or
+   * collection, and using {@link #quoteValue(Object) quoteValue()} to escape and quote
+   * each element separately. Otherwise this method is equivalent to
    * {@code set(varName, quoteValue(value))}.
    *
    * @param varName the name of the template variable
@@ -69,6 +69,57 @@ public sealed interface SQLSession permits AbstractSQLSession {
   default SQLSession setValue(String varName, Object value)
         throws UnsupportedOperationException {
     throw notSupported("setValue");
+  }
+
+  /**
+   * <p>Equivalent to {@link #setValue(String, Object) setValue(varName, values)}. Can be
+   * used to elegantly populate an SQL IN clause with an arbitrary number of values:
+   *
+   * <blockquote><pre>{@code
+   * SQL sql = SQL.template("SELECT * FROM AIRPORT WHERE NAME IN(~%names%)";
+   * try(Connection con = ...) {
+   *   List<Airport> airports =  sql.session(con)
+   *       .setArray("names", "London Heathrow", "Chicago O'Hare")
+   *       .prepareQuery()
+   *       .getBeanifier()
+   *       .beanifyAll();
+   * }
+   * }</pre></blockquote>
+   *
+   * <p>This will execute the following SQL:
+   *
+   * <blockquote><pre>{@code
+   * SELECT * FROM AIRPORT WHERE NAME IN('London Heathrow','Chicago O''Hare')
+   * }</pre></blockquote>
+   *
+   * @param varName the name of the template variable
+   * @param values an array, which will be "imploded" to a {@code String}, using a
+   *       comma to separate the array elements, and using
+   *       {@link #quoteValue(Object) quoteValue()} to escape and quote the array
+   *       elements
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   * @see #quoteValue(Object)
+   */
+  default SQLSession setArray(String varName, Object... values)
+        throws UnsupportedOperationException {
+    throw notSupported("setArray");
+  }
+
+  /**
+   * Equivalent to {@link #setValue(String, Object) setValue(varName, values)}.
+   *
+   * @param varName the name of the template variable
+   * @param values an array, which will be "imploded" to a {@code String}, using a
+   *       comma to separate the array elements
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   */
+  default SQLSession setArray(String varName, int... values)
+        throws UnsupportedOperationException {
+    throw notSupported("setArray");
   }
 
   /**
@@ -158,8 +209,10 @@ public sealed interface SQLSession permits AbstractSQLSession {
   /**
    * <p>Sets the contents of the VALUES clause within an INSERT statement. This method is
    * only supported by {@code SQL} instances obtained via
-   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
-   * template named "record". This template will be repeated for each of the beans or
+   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a
+   * <a
+   * href="https://github.com/klojang4j/klojang-templates?tab=readme-ov-file#nested-templates">nested
+   * template</a> named "record". This template will be repeated for each of the beans or
    * records in the provided list. This is best illustrated using an example:
    *
    * <blockquote><pre>{@code
