@@ -80,7 +80,6 @@ module org.klojang.jdbc {
 
   exports org.klojang.jdbc;
   exports org.klojang.jdbc.util;
-  exports org.klojang.jdbc.x.rs;
 
   requires java.sql;
 
