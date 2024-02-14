@@ -19,21 +19,23 @@ import static org.klojang.util.ClassMethods.className;
 /**
  * <p>A factory for {@link BeanExtractor} instances. Generally you would create one
  * {@code BeanExtractorFactory} per SQL query. If multiple types of beans are extracted
- * from the query result, you would create more than one {@code BeanExtractorFactory} per
- * SQL query. The very first {@link ResultSet} passed to
+ * from the query result (with different sets of columns feeding into different types of
+ * beans), you would create more than one {@code BeanExtractorFactory} per SQL query. The
+ * very first {@link ResultSet} passed to
  * {@link #getExtractor(ResultSet) BeanExtractorFactory.getExtractor()} is used to
- * configure the extraction process. Subsequent calls to {@code getExtractor()} will use
- * the same configuration. Therefore, although multiple {@code BeanExtractorFactory}
- * instances may be instantiated for a single SQL query, a single
- * {@code BeanExtractorFactory} should not be used to process result sets from different
- * SQL queries.
+ * configure the extraction process. {@code ResultSet} objects passed subsequently to
+ * {@code getExtractor()} will be processed identically. Therefore, passing a
+ * {@code ResultSet} that came from a completely different query will almost certainly
+ * lead to unexpected outcomes or exceptions. In short: Multiple
+ * {@code BeanExtractorFactory} instances may be created for a single SQL query, but a
+ * single {@code BeanExtractorFactory} should not be used to handle multiple SQL queries.
  *
  * <p><i>(More precisely: all result sets subsequently passed to
  * {@link #getExtractor(ResultSet) getExtractor()} must have the same number of columns,
  * and they must have the same column types in the same order. Column names do not matter.
  * Thus, you <b>could</b>, in fact, use a single {@code BeanExtractorFactory} for multiple
- * SQL queries &#8212; for example if they all select a primary key column and (say) a
- * {@code DESCRIPTION} column from different tables. This might be the case for web
+ * SQL queries &#8212; for example if they all select the primary key column and (say) a
+ * {@code VARCHAR} column from different tables. This might be the case for web
  * applications that need to fill multiple {@code <select>}) boxes.)</i>
  *
  * @param <T> the type of JavaBeans or records produced by the extractor
