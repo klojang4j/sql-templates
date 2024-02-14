@@ -20,17 +20,17 @@ abstract sealed class AbstractSQL implements SQL
   private final SessionConfig config;
 
   @SuppressWarnings("rawtypes")
-  private final Map<Class, BeanBinder> beanBinders;
+  private final Map<Class, BeanBinder> binders;
   @SuppressWarnings("rawtypes")
-  private final Map<Class, BeanExtractorFactory> beanifiers;
+  private final Map<Class, BeanExtractorFactory> factories;
 
   AbstractSQL(String sql, SessionConfig config) {
     this.unparsed = sql;
     this.config = config;
     // These maps are unlikely to grow beyond one or two entries (you can't extract that
     // many beans from a single row).
-    beanBinders = new HashMap<>();
-    beanifiers = new HashMap<>();
+    binders = new HashMap<>();
+    factories = new HashMap<>();
   }
 
   /**
@@ -47,7 +47,7 @@ abstract sealed class AbstractSQL implements SQL
 
   @SuppressWarnings("unchecked")
   <T> BeanBinder<T> getBeanBinder(SQLInfo sqlInfo, Class<T> clazz) {
-    return beanBinders.computeIfAbsent(clazz,
+    return binders.computeIfAbsent(clazz,
           k -> new BeanBinder<>(clazz, sqlInfo.parameters(), config));
   }
 
@@ -57,14 +57,13 @@ abstract sealed class AbstractSQL implements SQL
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   <T> BeanExtractorFactory<T> getBeanExtractorFactory(Class<T> clazz) {
-    return beanifiers.computeIfAbsent(clazz, k -> new BeanExtractorFactory<>(k, config));
+    return factories.computeIfAbsent(clazz, k -> new BeanExtractorFactory<>(k, config));
   }
 
   @SuppressWarnings("unchecked")
-  <T> BeanExtractorFactory<T> getBeanExtractorFactory(
-        Class<T> clazz,
+  <T> BeanExtractorFactory<T> getBeanExtractorFactory(Class<T> clazz,
         Supplier<T> supplier) {
-    return beanifiers.computeIfAbsent(clazz,
+    return factories.computeIfAbsent(clazz,
           k -> new BeanExtractorFactory<>(clazz, supplier, config));
   }
 

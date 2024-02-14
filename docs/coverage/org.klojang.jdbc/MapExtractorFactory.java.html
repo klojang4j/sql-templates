@@ -50,7 +50,7 @@ public final class MapExtractorFactory {
    *       {@code ResultSet} into {@code Map&lt;String, Object&gt;} pseudo-objects.
    * @throws SQLException if a database error occurs
    */
-  public MapExtractor getMappifier(ResultSet rs) throws SQLException {
+  public MapExtractor getExtractor(ResultSet rs) throws SQLException {
 <span class="nc bnc" id="L54" title="All 2 branches missed.">    if (!rs.next()) {</span>
 <span class="nc" id="L55">      return NoopMapExtractor.INSTANCE;</span>
     }

@@ -18,20 +18,21 @@ import static org.klojang.util.ClassMethods.className;
 
 /**
  * <p>A factory for {@link BeanExtractor} instances. Generally you would create one
- * {@code BeanExtractorFactory} per SQL query. If multiple types of beans are extracted from
- * the query result, you would create more than one {@code BeanExtractorFactory} per SQL
- * query. The very first {@link ResultSet} passed to
- * {@link #getBeanifier(ResultSet) BeanExtractorFactory.getBeanifier()} is used to configure
- * the extraction process. Subsequent calls to {@code getBeanifier()} will use the same
- * configuration. Therefore, although multiple {@code BeanExtractorFactory} instances may be
- * instantiated for a single SQL query, a single {@code BeanExtractorFactory} should not be
- * used to process result sets from different SQL queries.
+ * {@code BeanExtractorFactory} per SQL query. If multiple types of beans are extracted
+ * from the query result, you would create more than one {@code BeanExtractorFactory} per
+ * SQL query. The very first {@link ResultSet} passed to
+ * {@link #getExtractor(ResultSet) BeanExtractorFactory.getBeanifier()} is used to
+ * configure the extraction process. Subsequent calls to {@code getBeanifier()} will use
+ * the same configuration. Therefore, although multiple {@code BeanExtractorFactory}
+ * instances may be instantiated for a single SQL query, a single
+ * {@code BeanExtractorFactory} should not be used to process result sets from different
+ * SQL queries.
  *
  * <p><i>(More precisely: all result sets subsequently passed to
- * {@link #getBeanifier(ResultSet) getBeanifier()} must have the same number of columns,
+ * {@link #getExtractor(ResultSet) getBeanifier()} must have the same number of columns,
  * and they must have the same column types in the same order. Column names do not matter.
- * Thus, you <b>could</b>, in fact, use a single {@code BeanExtractorFactory} for multiple SQL
- * queries &#8212; for example if they all select a primary key column and (say) a
+ * Thus, you <b>could</b>, in fact, use a single {@code BeanExtractorFactory} for multiple
+ * SQL queries &#8212; for example if they all select a primary key column and (say) a
  * {@code DESCRIPTION} column from different tables. This might be the case for web
  * applications that need to fill multiple {@code <select>}) boxes.)</i>
  *
@@ -85,8 +86,8 @@ public final class BeanExtractorFactory<T> {
   /**
    * Creates a new {@code BeanExtractorFactory}.
    *
-   * @param beanClass the class of the JavaBeans that the {@code BeanExtractorFactory}
-   *       will be catering for
+   * @param beanClass the class of the JavaBeans that the
+   *       {@code BeanExtractorFactory} will be catering for
    * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a
    *       method reference to the constructor of the JavaBean (e.g.
    *       {@code Employee::new}). An {@link IllegalArgumentException} is thrown if
@@ -131,13 +132,13 @@ public final class BeanExtractorFactory<T> {
    * @throws SQLException if a database error occurs
    */
   @SuppressWarnings("unchecked")
-  public BeanExtractor<T> getBeanifier(ResultSet rs) throws SQLException {
+  public BeanExtractor<T> getExtractor(ResultSet rs) throws SQLException {
     return rs.next() ? beanClass.isRecord()
-          ? getRecordBeanifier(rs) : getDefaultBeanifier(rs)
+          ? recordExtractor(rs) : defaultExtractor(rs)
           : NoopBeanExtractor.INSTANCE;
   }
 
-  private DefaultBeanExtractor<T> getDefaultBeanifier(ResultSet rs) {
+  private DefaultBeanExtractor<T> defaultExtractor(ResultSet rs) {
     PropertyWriter[] writers;
     if ((writers = (PropertyWriter[]) ref.getPlain()) == null) {
       lock.lock();
@@ -153,7 +154,7 @@ public final class BeanExtractorFactory<T> {
   }
 
   @SuppressWarnings("unchecked")
-  private RecordBeanifier getRecordBeanifier(ResultSet rs) {
+  private RecordExtractor recordExtractor(ResultSet rs) {
     RecordFactory recordFactory;
     if ((recordFactory = (RecordFactory) ref.getPlain()) == null) {
       lock.lock();
@@ -165,7 +166,7 @@ public final class BeanExtractorFactory<T> {
         lock.unlock();
       }
     }
-    return new RecordBeanifier<>(rs, recordFactory);
+    return new RecordExtractor<>(rs, recordFactory);
   }
 
   private static <U> U newInstance(Class<U> beanClass) {

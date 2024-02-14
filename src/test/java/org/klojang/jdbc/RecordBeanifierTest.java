@@ -86,7 +86,7 @@ public class RecordBeanifierTest {
     try (SQLQuery query = session.prepareQuery()) {
       List<Person> persons = query
             .bind("lastName", "Smith")
-            .getBeanifier(Person.class)
+            .getExtractor(Person.class)
             .extractAll();
       for (Person person : persons) {
         System.out.println(person);

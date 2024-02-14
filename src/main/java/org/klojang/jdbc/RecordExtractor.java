@@ -15,16 +15,16 @@ import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 
-final class RecordBeanifier<T extends Record> implements BeanExtractor<T> {
+final class RecordExtractor<T extends Record> implements BeanExtractor<T> {
 
   @SuppressWarnings("unused")
-  private static final Logger LOG = LoggerFactory.getLogger(RecordBeanifier.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RecordExtractor.class);
 
   private static class BeanIterator<T extends Record> implements Iterator<T> {
 
-    private final RecordBeanifier<T> extractor;
+    private final RecordExtractor<T> extractor;
 
-    BeanIterator(RecordBeanifier<T> extractor) {
+    BeanIterator(RecordExtractor<T> extractor) {
       this.extractor = extractor;
     }
 
@@ -44,7 +44,7 @@ final class RecordBeanifier<T extends Record> implements BeanExtractor<T> {
   private final ResultSet rs;
   private final RecordFactory<T> factory;
 
-  RecordBeanifier(ResultSet rs, RecordFactory<T> factory) {
+  RecordExtractor(ResultSet rs, RecordFactory<T> factory) {
     this.rs = rs;
     this.factory = factory;
   }

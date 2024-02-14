@@ -7,7 +7,7 @@ import java.util.Optional;
 /**
  * <p>Converts the rows in a JDBC {@link ResultSet} into JavaBeans or records. Instances
  * are obtained via
- * {@link BeanExtractorFactory#getBeanifier(ResultSet) BeanExtractorFactory.getBeanifier()}. A
+ * {@link BeanExtractorFactory#getExtractor(ResultSet) BeanExtractorFactory.getBeanifier()}. A
  * {@code BeanExtractor} is agnostic about, and has no opinion on how the
  * {@link ResultSet} was obtained. It may have been produced using regular JDBC calls. It
  * does not aim to be an ORM-like class. It just converts result sets into (flat)
@@ -45,7 +45,7 @@ import java.util.Optional;
  * @see MapExtractor
  */
 public sealed interface BeanExtractor<T> extends Iterable<T>
-      permits DefaultBeanExtractor, NoopBeanExtractor, RecordBeanifier {
+      permits DefaultBeanExtractor, NoopBeanExtractor, RecordExtractor {
 
   /**
    * Converts the current row within the {@code ResultSet} into a JavaBean. If the

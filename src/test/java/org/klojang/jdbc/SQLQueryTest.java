@@ -131,7 +131,7 @@ public class SQLQueryTest {
     try (SQLQuery query = session.prepareQuery()) {
       List<Person> persons = query
             .bind("lastName", "Smith")
-            .getBeanifier(Person.class)
+            .getExtractor(Person.class)
             .extractAll();
       for (Person person : persons) {
         System.out.println(person);
@@ -210,7 +210,7 @@ public class SQLQueryTest {
                 "INSERT INTO PERSON(FIRST_NAME,LAST_NAME,BIRTH_DATE)VALUES(NULL,NULL,NULL)")
           .execute();
     Person person = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM PERSON")
-          .getBeanifier(Person.class)
+          .getExtractor(Person.class)
           .extract()
           .get();
     assertNull(person.getFirstName());

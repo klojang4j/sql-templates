@@ -8,7 +8,7 @@ import java.util.Optional;
 /**
  * <p>Converts the rows in a JDBC {@link ResultSet} into {@code Map<String, Object>}
  * pseudo-objects. Instances are obtained via
- * {@link MapExtractorFactory#getMappifier(ResultSet) MapExtractorFactory.getMappifier()}.
+ * {@link MapExtractorFactory#getExtractor(ResultSet) MapExtractorFactory.getExtractor()}.
  *
  * @author Ayco Holleman
  * @see MapExtractorFactory
@@ -25,7 +25,7 @@ public sealed interface MapExtractor extends Iterable<Map<String, Object>>
    * {@code Optional}, or until {@link #isEmpty()} returns {@code true}.
    *
    * @return a map containing the values in the current row in a {@code ResultSet}
-   * @see MapExtractorFactory#getMappifier(ResultSet)
+   * @see MapExtractorFactory#getExtractor(ResultSet)
    */
   Optional<Map<String, Object>> extract();
 

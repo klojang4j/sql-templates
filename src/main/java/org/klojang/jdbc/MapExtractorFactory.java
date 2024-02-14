@@ -50,7 +50,7 @@ public final class MapExtractorFactory {
    *       {@code ResultSet} into {@code Map<String, Object>} pseudo-objects.
    * @throws SQLException if a database error occurs
    */
-  public MapExtractor getMappifier(ResultSet rs) throws SQLException {
+  public MapExtractor getExtractor(ResultSet rs) throws SQLException {
     if (!rs.next()) {
       return NoopMapExtractor.INSTANCE;
     }

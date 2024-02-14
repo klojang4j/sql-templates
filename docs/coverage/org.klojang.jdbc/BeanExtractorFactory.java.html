@@ -18,20 +18,21 @@ import static org.klojang.util.ClassMethods.className;
 
 /**
  * &lt;p&gt;A factory for {@link BeanExtractor} instances. Generally you would create one
- * {@code BeanExtractorFactory} per SQL query. If multiple types of beans are extracted from
- * the query result, you would create more than one {@code BeanExtractorFactory} per SQL
- * query. The very first {@link ResultSet} passed to
- * {@link #getBeanifier(ResultSet) BeanExtractorFactory.getBeanifier()} is used to configure
- * the extraction process. Subsequent calls to {@code getBeanifier()} will use the same
- * configuration. Therefore, although multiple {@code BeanExtractorFactory} instances may be
- * instantiated for a single SQL query, a single {@code BeanExtractorFactory} should not be
- * used to process result sets from different SQL queries.
+ * {@code BeanExtractorFactory} per SQL query. If multiple types of beans are extracted
+ * from the query result, you would create more than one {@code BeanExtractorFactory} per
+ * SQL query. The very first {@link ResultSet} passed to
+ * {@link #getExtractor(ResultSet) BeanExtractorFactory.getBeanifier()} is used to
+ * configure the extraction process. Subsequent calls to {@code getBeanifier()} will use
+ * the same configuration. Therefore, although multiple {@code BeanExtractorFactory}
+ * instances may be instantiated for a single SQL query, a single
+ * {@code BeanExtractorFactory} should not be used to process result sets from different
+ * SQL queries.
  *
  * &lt;p&gt;&lt;i&gt;(More precisely: all result sets subsequently passed to
- * {@link #getBeanifier(ResultSet) getBeanifier()} must have the same number of columns,
+ * {@link #getExtractor(ResultSet) getBeanifier()} must have the same number of columns,
  * and they must have the same column types in the same order. Column names do not matter.
- * Thus, you &lt;b&gt;could&lt;/b&gt;, in fact, use a single {@code BeanExtractorFactory} for multiple SQL
- * queries &amp;#8212; for example if they all select a primary key column and (say) a
+ * Thus, you &lt;b&gt;could&lt;/b&gt;, in fact, use a single {@code BeanExtractorFactory} for multiple
+ * SQL queries &amp;#8212; for example if they all select a primary key column and (say) a
  * {@code DESCRIPTION} column from different tables. This might be the case for web
  * applications that need to fill multiple {@code &lt;select&gt;}) boxes.)&lt;/i&gt;
  *
@@ -48,8 +49,8 @@ public final class BeanExtractorFactory&lt;T&gt; {
    * The object held by the AtomicReference will either be a RecordFactory in case the
    * bean class is a record type or a PropertyWriter[] array in any other case.
    */
-<span class="pc" id="L51">  private final AtomicReference&lt;Object&gt; ref = new AtomicReference&lt;&gt;();</span>
-<span class="pc" id="L52">  private final ReentrantLock lock = new ReentrantLock();</span>
+<span class="pc" id="L52">  private final AtomicReference&lt;Object&gt; ref = new AtomicReference&lt;&gt;();</span>
+<span class="pc" id="L53">  private final ReentrantLock lock = new ReentrantLock();</span>
 
   private final Class&lt;T&gt; beanClass;
   private final Supplier&lt;T&gt; beanSupplier;
@@ -61,12 +62,12 @@ public final class BeanExtractorFactory&lt;T&gt; {
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
    *       obtained from this {@code BeanExtractorFactory}
    */
-<span class="nc" id="L64">  public BeanExtractorFactory(Class&lt;T&gt; beanClass) {</span>
-<span class="nc" id="L65">    Check.notNull(beanClass, BEAN_CLASS);</span>
-<span class="nc" id="L66">    this.beanClass = beanClass;</span>
-<span class="nc bnc" id="L67" title="All 2 branches missed.">    this.beanSupplier = beanClass.isRecord() ? null : () -&gt; newInstance(beanClass);</span>
-<span class="nc" id="L68">    this.config = Utils.DEFAULT_CONFIG;</span>
-<span class="nc" id="L69">  }</span>
+<span class="nc" id="L65">  public BeanExtractorFactory(Class&lt;T&gt; beanClass) {</span>
+<span class="nc" id="L66">    Check.notNull(beanClass, BEAN_CLASS);</span>
+<span class="nc" id="L67">    this.beanClass = beanClass;</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">    this.beanSupplier = beanClass.isRecord() ? null : () -&gt; newInstance(beanClass);</span>
+<span class="nc" id="L69">    this.config = Utils.DEFAULT_CONFIG;</span>
+<span class="nc" id="L70">  }</span>
 
   /**
    * Creates a new {@code BeanExtractorFactory}.
@@ -76,29 +77,29 @@ public final class BeanExtractorFactory&lt;T&gt; {
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
    *       behaviour of the {@code BeanExtractor}
    */
-<span class="fc" id="L79">  public BeanExtractorFactory(Class&lt;T&gt; beanClass, SessionConfig config) {</span>
-<span class="fc" id="L80">    this.beanClass = Check.notNull(beanClass, BEAN_CLASS).ok();</span>
-<span class="fc bfc" id="L81" title="All 2 branches covered.">    this.beanSupplier = beanClass.isRecord() ? null : () -&gt; newInstance(beanClass);</span>
-<span class="fc" id="L82">    this.config = Check.notNull(config, CONFIG).ok();</span>
-<span class="fc" id="L83">  }</span>
+<span class="fc" id="L80">  public BeanExtractorFactory(Class&lt;T&gt; beanClass, SessionConfig config) {</span>
+<span class="fc" id="L81">    this.beanClass = Check.notNull(beanClass, BEAN_CLASS).ok();</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">    this.beanSupplier = beanClass.isRecord() ? null : () -&gt; newInstance(beanClass);</span>
+<span class="fc" id="L83">    this.config = Check.notNull(config, CONFIG).ok();</span>
+<span class="fc" id="L84">  }</span>
 
   /**
    * Creates a new {@code BeanExtractorFactory}.
    *
-   * @param beanClass the class of the JavaBeans that the {@code BeanExtractorFactory}
-   *       will be catering for
+   * @param beanClass the class of the JavaBeans that the
+   *       {@code BeanExtractorFactory} will be catering for
    * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a
    *       method reference to the constructor of the JavaBean (e.g.
    *       {@code Employee::new}). An {@link IllegalArgumentException} is thrown if
    *       {@code beanClass} is a {@code record} type.
    */
-<span class="nc" id="L95">  public BeanExtractorFactory(Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier) {</span>
-<span class="nc" id="L96">    this.beanClass = Check.notNull(beanClass, BEAN_CLASS)</span>
-<span class="nc" id="L97">          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))</span>
-<span class="nc" id="L98">          .ok();</span>
-<span class="nc" id="L99">    this.beanSupplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();</span>
-<span class="nc" id="L100">    this.config = Utils.DEFAULT_CONFIG;</span>
-<span class="nc" id="L101">  }</span>
+<span class="nc" id="L96">  public BeanExtractorFactory(Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier) {</span>
+<span class="nc" id="L97">    this.beanClass = Check.notNull(beanClass, BEAN_CLASS)</span>
+<span class="nc" id="L98">          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))</span>
+<span class="nc" id="L99">          .ok();</span>
+<span class="nc" id="L100">    this.beanSupplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();</span>
+<span class="nc" id="L101">    this.config = Utils.DEFAULT_CONFIG;</span>
+<span class="nc" id="L102">  }</span>
 
   /**
    * Creates a new {@code BeanExtractorFactory}.
@@ -113,13 +114,13 @@ public final class BeanExtractorFactory&lt;T&gt; {
    */
   public BeanExtractorFactory(Class&lt;T&gt; beanClass,
         Supplier&lt;T&gt; beanSupplier,
-<span class="nc" id="L116">        SessionConfig config) {</span>
-<span class="nc" id="L117">    this.beanClass = Check.notNull(beanClass, BEAN_CLASS)</span>
-<span class="nc" id="L118">          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))</span>
-<span class="nc" id="L119">          .ok();</span>
-<span class="nc" id="L120">    this.beanSupplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();</span>
-<span class="nc" id="L121">    this.config = Check.notNull(config, CONFIG).ok();</span>
-<span class="nc" id="L122">  }</span>
+<span class="nc" id="L117">        SessionConfig config) {</span>
+<span class="nc" id="L118">    this.beanClass = Check.notNull(beanClass, BEAN_CLASS)</span>
+<span class="nc" id="L119">          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))</span>
+<span class="nc" id="L120">          .ok();</span>
+<span class="nc" id="L121">    this.beanSupplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();</span>
+<span class="nc" id="L122">    this.config = Check.notNull(config, CONFIG).ok();</span>
+<span class="nc" id="L123">  }</span>
 
   /**
    * Returns a {@code BeanExtractor} that will convert the rows in the specified
@@ -131,48 +132,48 @@ public final class BeanExtractorFactory&lt;T&gt; {
    * @throws SQLException if a database error occurs
    */
   @SuppressWarnings(&quot;unchecked&quot;)
-  public BeanExtractor&lt;T&gt; getBeanifier(ResultSet rs) throws SQLException {
-<span class="pc bpc" id="L135" title="1 of 4 branches missed.">    return rs.next() ? beanClass.isRecord()</span>
-<span class="fc" id="L136">          ? getRecordBeanifier(rs) : getDefaultBeanifier(rs)</span>
-<span class="nc" id="L137">          : NoopBeanExtractor.INSTANCE;</span>
+  public BeanExtractor&lt;T&gt; getExtractor(ResultSet rs) throws SQLException {
+<span class="pc bpc" id="L136" title="1 of 4 branches missed.">    return rs.next() ? beanClass.isRecord()</span>
+<span class="fc" id="L137">          ? recordExtractor(rs) : defaultExtractor(rs)</span>
+<span class="nc" id="L138">          : NoopBeanExtractor.INSTANCE;</span>
   }
 
-  private DefaultBeanExtractor&lt;T&gt; getDefaultBeanifier(ResultSet rs) {
+  private DefaultBeanExtractor&lt;T&gt; defaultExtractor(ResultSet rs) {
     PropertyWriter[] writers;
-<span class="pc bpc" id="L142" title="1 of 2 branches missed.">    if ((writers = (PropertyWriter[]) ref.getPlain()) == null) {</span>
-<span class="fc" id="L143">      lock.lock();</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">    if ((writers = (PropertyWriter[]) ref.getPlain()) == null) {</span>
+<span class="fc" id="L144">      lock.lock();</span>
       try {
-<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        if (ref.get() == null) {</span>
-<span class="fc" id="L146">          ref.set(writers = createWriters(rs, beanClass, config));</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (ref.get() == null) {</span>
+<span class="fc" id="L147">          ref.set(writers = createWriters(rs, beanClass, config));</span>
         }
       } finally {
-<span class="fc" id="L149">        lock.unlock();</span>
+<span class="fc" id="L150">        lock.unlock();</span>
       }
     }
-<span class="fc" id="L152">    return new DefaultBeanExtractor&lt;&gt;(rs, writers, beanSupplier);</span>
+<span class="fc" id="L153">    return new DefaultBeanExtractor&lt;&gt;(rs, writers, beanSupplier);</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
-  private RecordBeanifier getRecordBeanifier(ResultSet rs) {
+  private RecordExtractor recordExtractor(ResultSet rs) {
     RecordFactory recordFactory;
-<span class="pc bpc" id="L158" title="1 of 2 branches missed.">    if ((recordFactory = (RecordFactory) ref.getPlain()) == null) {</span>
-<span class="fc" id="L159">      lock.lock();</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">    if ((recordFactory = (RecordFactory) ref.getPlain()) == null) {</span>
+<span class="fc" id="L160">      lock.lock();</span>
       try {
-<span class="pc bpc" id="L161" title="1 of 2 branches missed.">        if (ref.get() == null) {</span>
-<span class="fc" id="L162">          ref.set(recordFactory = new RecordFactory&lt;&gt;((Class) beanClass, rs, config));</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        if (ref.get() == null) {</span>
+<span class="fc" id="L163">          ref.set(recordFactory = new RecordFactory&lt;&gt;((Class) beanClass, rs, config));</span>
         }
       } finally {
-<span class="fc" id="L165">        lock.unlock();</span>
+<span class="fc" id="L166">        lock.unlock();</span>
       }
     }
-<span class="fc" id="L168">    return new RecordBeanifier&lt;&gt;(rs, recordFactory);</span>
+<span class="fc" id="L169">    return new RecordExtractor&lt;&gt;(rs, recordFactory);</span>
   }
 
   private static &lt;U&gt; U newInstance(Class&lt;U&gt; beanClass) {
     try {
-<span class="fc" id="L173">      return InvokeMethods.newInstance(beanClass);</span>
-<span class="nc" id="L174">    } catch (Exception e) {</span>
-<span class="nc" id="L175">      throw Utils.wrap(e);</span>
+<span class="fc" id="L174">      return InvokeMethods.newInstance(beanClass);</span>
+<span class="nc" id="L175">    } catch (Exception e) {</span>
+<span class="nc" id="L176">      throw Utils.wrap(e);</span>
     }
   }
 }

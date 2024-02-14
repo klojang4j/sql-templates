@@ -65,7 +65,7 @@ public class ColumnReaderFinderTest {
     String sql = "SELECT * FROM STUFF";
     SQLSession session = SQL.staticSQL(sql).session(MY_CON.get());
     Stuff stuff = session.prepareQuery()
-          .getBeanifier(Stuff.class)
+          .getExtractor(Stuff.class)
           .extract()
           .get();assertEquals(uuid1, stuff.uuid1());
     assertEquals(uuid2, stuff.uuid2());

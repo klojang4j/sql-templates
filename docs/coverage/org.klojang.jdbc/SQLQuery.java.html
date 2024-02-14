@@ -235,55 +235,54 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
   }
 
   /**
-   * Executes the query and returns a {@code MapExtractor} that you can use to
-   * convert the rows in the {@link ResultSet} into {@code Map&lt;String, Object&gt;}
-   * pseudo-objects. If the query had already been executed, it will not be executed
-   * again. Call {@link SQLStatement#reset() reset()} to force the query to be
-   * re-executed.
+   * Executes the query and returns a {@code MapExtractor} that you can use to convert the
+   * rows in the {@link ResultSet} into {@code Map&lt;String, Object&gt;} pseudo-objects. If the
+   * query had already been executed, it will not be executed again. Call
+   * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
    * @return a {@code MapExtractor} that you can use to convert the rows in the
    *       {@link ResultSet} into {@code Map&lt;String, Object&gt;} pseudo objects.
    */
-  public MapExtractor getMappifier() {
+  public MapExtractor getExtractor() {
     try {
-<span class="nc" id="L249">      executeSQL();</span>
-<span class="nc" id="L250">      return session</span>
-<span class="nc" id="L251">            .getSQL()</span>
-<span class="nc" id="L252">            .getMapExtractorFactory()</span>
-<span class="nc" id="L253">            .getMappifier(resultSet);</span>
-<span class="nc" id="L254">    } catch (Throwable t) {</span>
-<span class="nc" id="L255">      throw Utils.wrap(t);</span>
+<span class="nc" id="L248">      executeSQL();</span>
+<span class="nc" id="L249">      return session</span>
+<span class="nc" id="L250">            .getSQL()</span>
+<span class="nc" id="L251">            .getMapExtractorFactory()</span>
+<span class="nc" id="L252">            .getExtractor(resultSet);</span>
+<span class="nc" id="L253">    } catch (Throwable t) {</span>
+<span class="nc" id="L254">      throw Utils.wrap(t);</span>
     }
   }
 
   /**
-   * Executes the query and returns a {@code BeanExtractor} that you can use to
-   * convert the rows in the {@link ResultSet} into JavaBeans. If the query had already
+   * Executes the query and returns a {@code BeanExtractor} that you can use to convert
+   * the rows in the {@link ResultSet} into JavaBeans or record. If the query had already
    * been executed, it will not be executed again. Call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
    * @param &lt;T&gt; the type of the JavaBeans (may be a {@code record} type)
    * @param beanClass the class of the JavaBeans
    * @return a {@code BeanExtractor} that you can use to convert the rows in the
-   *       {@link ResultSet} into JavaBeans.
+   *       {@link ResultSet} into JavaBeans or records.
    */
-  public &lt;T&gt; BeanExtractor&lt;T&gt; getBeanifier(Class&lt;T&gt; beanClass) {
+  public &lt;T&gt; BeanExtractor&lt;T&gt; getExtractor(Class&lt;T&gt; beanClass) {
     try {
-<span class="fc" id="L272">      executeSQL();</span>
-<span class="fc" id="L273">      return session</span>
-<span class="fc" id="L274">            .getSQL()</span>
-<span class="fc" id="L275">            .getBeanExtractorFactory(beanClass)</span>
-<span class="fc" id="L276">            .getBeanifier(resultSet);</span>
-<span class="nc" id="L277">    } catch (Throwable t) {</span>
-<span class="nc" id="L278">      throw Utils.wrap(t);</span>
+<span class="fc" id="L271">      executeSQL();</span>
+<span class="fc" id="L272">      return session</span>
+<span class="fc" id="L273">            .getSQL()</span>
+<span class="fc" id="L274">            .getBeanExtractorFactory(beanClass)</span>
+<span class="fc" id="L275">            .getExtractor(resultSet);</span>
+<span class="nc" id="L276">    } catch (Throwable t) {</span>
+<span class="nc" id="L277">      throw Utils.wrap(t);</span>
     }
   }
 
   /**
-   * Executes the query and returns a {@code BeanExtractor} that you can use to
-   * convert the rows in the {@link ResultSet} into JavaBeans. If the query had already
-   * been executed, it will not be executed again. Call
-   * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
+   * Executes the query and returns a {@code BeanExtractor} that you can use to convert
+   * the rows in the {@link ResultSet} into JavaBeans. If the query had already been
+   * executed, it will not be executed again. Call {@link SQLStatement#reset() reset()} to
+   * force the query to be re-executed.
    *
    * @param &lt;T&gt; the type of the JavaBeans (may be a {@code record} type)
    * @param beanClass the class of the JavaBeans
@@ -293,40 +292,38 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @return a {@code BeanExtractor} that you can use to convert the rows in the
    *       {@link ResultSet} into JavaBeans.
    */
-  public &lt;T&gt; BeanExtractor&lt;T&gt; getBeanifier(
-        Class&lt;T&gt; beanClass,
-        Supplier&lt;T&gt; beanSupplier) {
+  public &lt;T&gt; BeanExtractor&lt;T&gt; getExtractor(Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier) {
     try {
-<span class="nc" id="L300">      executeSQL();</span>
-<span class="nc" id="L301">      return session</span>
-<span class="nc" id="L302">            .getSQL()</span>
-<span class="nc" id="L303">            .getBeanExtractorFactory(beanClass, beanSupplier)</span>
-<span class="nc" id="L304">            .getBeanifier(resultSet);</span>
-<span class="nc" id="L305">    } catch (Throwable t) {</span>
-<span class="nc" id="L306">      throw Utils.wrap(t);</span>
+<span class="nc" id="L297">      executeSQL();</span>
+<span class="nc" id="L298">      return session</span>
+<span class="nc" id="L299">            .getSQL()</span>
+<span class="nc" id="L300">            .getBeanExtractorFactory(beanClass, beanSupplier)</span>
+<span class="nc" id="L301">            .getExtractor(resultSet);</span>
+<span class="nc" id="L302">    } catch (Throwable t) {</span>
+<span class="nc" id="L303">      throw Utils.wrap(t);</span>
     }
   }
 
   @Override
   void initialize() {
     try {
-<span class="nc bnc" id="L313" title="All 2 branches missed.">      if (resultSet != null) {</span>
-<span class="nc" id="L314">        resultSet.close();</span>
-<span class="nc" id="L315">        resultSet = null;</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">      if (resultSet != null) {</span>
+<span class="nc" id="L311">        resultSet.close();</span>
+<span class="nc" id="L312">        resultSet = null;</span>
       }
-<span class="nc" id="L317">      ps.clearParameters();</span>
-<span class="nc" id="L318">    } catch (SQLException e) {</span>
-<span class="nc" id="L319">      throw Utils.wrap(e);</span>
-<span class="nc" id="L320">    }</span>
-<span class="nc" id="L321">  }</span>
+<span class="nc" id="L314">      ps.clearParameters();</span>
+<span class="nc" id="L315">    } catch (SQLException e) {</span>
+<span class="nc" id="L316">      throw Utils.wrap(e);</span>
+<span class="nc" id="L317">    }</span>
+<span class="nc" id="L318">  }</span>
 
   private void executeSQL() throws Throwable {
-<span class="pc bpc" id="L324" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
-<span class="fc" id="L325">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
-<span class="fc" id="L326">      applyBindings(ps);</span>
-<span class="fc" id="L327">      resultSet = ps.executeQuery();</span>
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
+<span class="fc" id="L322">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L323">      applyBindings(ps);</span>
+<span class="fc" id="L324">      resultSet = ps.executeQuery();</span>
     }
-<span class="fc" id="L329">  }</span>
+<span class="fc" id="L326">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
