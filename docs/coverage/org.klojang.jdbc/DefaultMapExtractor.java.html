@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultMappifier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">DefaultMappifier.java</span></div><h1>DefaultMappifier.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultMapExtractor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">DefaultMapExtractor.java</span></div><h1>DefaultMapExtractor.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.Err;
@@ -16,16 +16,16 @@ import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 import static org.klojang.jdbc.x.rs.KeyWriter.toMap;
 
-final class DefaultMappifier implements ResultSetMappifier {
+final class DefaultMapExtractor implements MapExtractor {
 
   @SuppressWarnings(&quot;unused&quot;)
-<span class="nc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(DefaultMappifier.class);</span>
+<span class="nc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(DefaultMapExtractor.class);</span>
 
   private static class MapIterator implements Iterator&lt;Map&lt;String, Object&gt;&gt; {
 
-    private final DefaultMappifier m;
+    private final DefaultMapExtractor m;
 
-<span class="nc" id="L28">    MapIterator(DefaultMappifier m) {</span>
+<span class="nc" id="L28">    MapIterator(DefaultMapExtractor m) {</span>
 <span class="nc" id="L29">      this.m = m;</span>
 <span class="nc" id="L30">    }</span>
 
@@ -37,7 +37,7 @@ final class DefaultMappifier implements ResultSetMappifier {
     @Override
     public Map&lt;String, Object&gt; next() {
 <span class="nc" id="L39">      Check.on(STATE, m.isEmpty()).is(no(), Err.NO_MORE_ROWS);</span>
-<span class="nc" id="L40">      return m.mappify().get();</span>
+<span class="nc" id="L40">      return m.extract().get();</span>
     }
   }
 
@@ -46,13 +46,13 @@ final class DefaultMappifier implements ResultSetMappifier {
 
   private boolean empty;
 
-<span class="nc" id="L49">  DefaultMappifier(ResultSet rs, KeyWriter&lt;?&gt;[] writers) {</span>
+<span class="nc" id="L49">  DefaultMapExtractor(ResultSet rs, KeyWriter&lt;?&gt;[] writers) {</span>
 <span class="nc" id="L50">    this.rs = rs;</span>
 <span class="nc" id="L51">    this.writers = writers;</span>
 <span class="nc" id="L52">  }</span>
 
   @Override
-  public Optional&lt;Map&lt;String, Object&gt;&gt; mappify() {
+  public Optional&lt;Map&lt;String, Object&gt;&gt; extract() {
 <span class="nc bnc" id="L56" title="All 2 branches missed.">    if (empty) {</span>
 <span class="nc" id="L57">      return Optional.empty();</span>
     }
@@ -66,7 +66,7 @@ final class DefaultMappifier implements ResultSetMappifier {
   }
 
   @Override
-  public List&lt;Map&lt;String, Object&gt;&gt; mappify(int limit) {
+  public List&lt;Map&lt;String, Object&gt;&gt; extract(int limit) {
 <span class="nc" id="L70">    Check.that(limit, LIMIT).is(gt(), 0);</span>
 <span class="nc bnc" id="L71" title="All 2 branches missed.">    if (empty) {</span>
 <span class="nc" id="L72">      return Collections.emptyList();</span>
@@ -84,12 +84,12 @@ final class DefaultMappifier implements ResultSetMappifier {
   }
 
   @Override
-  public List&lt;Map&lt;String, Object&gt;&gt; mappifyAll() {
-<span class="nc" id="L88">    return mappifyAll(10);</span>
+  public List&lt;Map&lt;String, Object&gt;&gt; extractAll() {
+<span class="nc" id="L88">    return extractAll(10);</span>
   }
 
   @Override
-  public List&lt;Map&lt;String, Object&gt;&gt; mappifyAll(int sizeEstimate) {
+  public List&lt;Map&lt;String, Object&gt;&gt; extractAll(int sizeEstimate) {
 <span class="nc" id="L93">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
 <span class="nc bnc" id="L94" title="All 2 branches missed.">    if (empty) {</span>
 <span class="nc" id="L95">      return Collections.emptyList();</span>

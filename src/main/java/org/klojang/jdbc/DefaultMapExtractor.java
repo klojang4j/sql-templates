@@ -16,16 +16,16 @@ import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 import static org.klojang.jdbc.x.rs.KeyWriter.toMap;
 
-final class DefaultMappifier implements ResultSetMappifier {
+final class DefaultMapExtractor implements MapExtractor {
 
   @SuppressWarnings("unused")
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultMappifier.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultMapExtractor.class);
 
   private static class MapIterator implements Iterator<Map<String, Object>> {
 
-    private final DefaultMappifier m;
+    private final DefaultMapExtractor m;
 
-    MapIterator(DefaultMappifier m) {
+    MapIterator(DefaultMapExtractor m) {
       this.m = m;
     }
 
@@ -37,7 +37,7 @@ final class DefaultMappifier implements ResultSetMappifier {
     @Override
     public Map<String, Object> next() {
       Check.on(STATE, m.isEmpty()).is(no(), Err.NO_MORE_ROWS);
-      return m.mappify().get();
+      return m.extract().get();
     }
   }
 
@@ -46,13 +46,13 @@ final class DefaultMappifier implements ResultSetMappifier {
 
   private boolean empty;
 
-  DefaultMappifier(ResultSet rs, KeyWriter<?>[] writers) {
+  DefaultMapExtractor(ResultSet rs, KeyWriter<?>[] writers) {
     this.rs = rs;
     this.writers = writers;
   }
 
   @Override
-  public Optional<Map<String, Object>> mappify() {
+  public Optional<Map<String, Object>> extract() {
     if (empty) {
       return Optional.empty();
     }
@@ -66,7 +66,7 @@ final class DefaultMappifier implements ResultSetMappifier {
   }
 
   @Override
-  public List<Map<String, Object>> mappify(int limit) {
+  public List<Map<String, Object>> extract(int limit) {
     Check.that(limit, LIMIT).is(gt(), 0);
     if (empty) {
       return Collections.emptyList();
@@ -84,12 +84,12 @@ final class DefaultMappifier implements ResultSetMappifier {
   }
 
   @Override
-  public List<Map<String, Object>> mappifyAll() {
-    return mappifyAll(10);
+  public List<Map<String, Object>> extractAll() {
+    return extractAll(10);
   }
 
   @Override
-  public List<Map<String, Object>> mappifyAll(int sizeEstimate) {
+  public List<Map<String, Object>> extractAll(int sizeEstimate) {
     Check.that(sizeEstimate, "sizeEstimate").is(gt(), 0);
     if (empty) {
       return Collections.emptyList();

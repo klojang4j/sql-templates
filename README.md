@@ -89,7 +89,7 @@ try (SQLQuery query = session.prepareQuery()) {
         .withNameMapper(new SnakeCaseToCamelCase())
         .bind("lastName", "Smith")
         .getBeanifier(Person.class)
-        .beanifyAll();
+        .extractAll();
   for (Person person : persons) {
     System.out.println(person);
   }

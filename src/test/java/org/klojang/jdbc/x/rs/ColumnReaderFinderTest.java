@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.klojang.jdbc.SQL;
 import org.klojang.jdbc.SQLSession;
 import org.klojang.jdbc.Stuff;
-import org.klojang.templates.name.SnakeCaseToCamelCase;
 import org.klojang.util.IOMethods;
 
 import java.io.IOException;
@@ -67,7 +66,7 @@ public class ColumnReaderFinderTest {
     SQLSession session = SQL.staticSQL(sql).session(MY_CON.get());
     Stuff stuff = session.prepareQuery()
           .getBeanifier(Stuff.class)
-          .beanify()
+          .extract()
           .get();assertEquals(uuid1, stuff.uuid1());
     assertEquals(uuid2, stuff.uuid2());
     assertEquals(url, stuff.url());

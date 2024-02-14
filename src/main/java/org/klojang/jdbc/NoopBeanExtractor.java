@@ -5,30 +5,30 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-final class EmptyBeanifier<T> implements ResultSetBeanifier<T> {
+final class NoopBeanExtractor<T> implements BeanExtractor<T> {
 
   @SuppressWarnings("rawtypes")
-  static final EmptyBeanifier INSTANCE = new EmptyBeanifier();
+  static final NoopBeanExtractor INSTANCE = new NoopBeanExtractor();
 
-  private EmptyBeanifier() {}
+  private NoopBeanExtractor() {}
 
   @Override
-  public Optional<T> beanify() {
+  public Optional<T> extract() {
     return Optional.empty();
   }
 
   @Override
-  public List<T> beanify(int limit) {
+  public List<T> extract(int limit) {
     return Collections.emptyList();
   }
 
   @Override
-  public List<T> beanifyAll() {
+  public List<T> extractAll() {
     return Collections.emptyList();
   }
 
   @Override
-  public List<T> beanifyAll(int sizeEstimate) {
+  public List<T> extractAll(int sizeEstimate) {
     return Collections.emptyList();
   }
 

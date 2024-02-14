@@ -8,26 +8,26 @@ import java.util.Optional;
 /**
  * <p>Converts the rows in a JDBC {@link ResultSet} into {@code Map<String, Object>}
  * pseudo-objects. Instances are obtained via
- * {@link MappifierFactory#getMappifier(ResultSet) MappifierFactory.getMappifier()}.
+ * {@link MapExtractorFactory#getMappifier(ResultSet) MapExtractorFactory.getMappifier()}.
  *
  * @author Ayco Holleman
- * @see MappifierFactory
- * @see ResultSetBeanifier
+ * @see MapExtractorFactory
+ * @see BeanExtractor
  */
-public sealed interface ResultSetMappifier extends Iterable<Map<String, Object>>
-      permits DefaultMappifier, EmptyMappifier {
+public sealed interface MapExtractor extends Iterable<Map<String, Object>>
+      permits DefaultMapExtractor, NoopMapExtractor {
 
   /**
    * Converts the current row in the {@code ResultSet} into a map. If the
    * {@code ResultSet} is empty, or if there are no more rows in the {@code ResultSet}, an
-   * empty {@code Optional} is returned. You can keep calling {@code mappify()} to
+   * empty {@code Optional} is returned. You can keep calling {@code extract()} to
    * successively extract all rows in the result set until you receive an empty
    * {@code Optional}, or until {@link #isEmpty()} returns {@code true}.
    *
    * @return a map containing the values in the current row in a {@code ResultSet}
-   * @see MappifierFactory#getMappifier(ResultSet)
+   * @see MapExtractorFactory#getMappifier(ResultSet)
    */
-  Optional<Map<String, Object>> mappify();
+  Optional<Map<String, Object>> extract();
 
   /**
    * Converts at most {@code limit} rows in the {@code ResultSet} into maps, possibly
@@ -39,7 +39,7 @@ public sealed interface ResultSetMappifier extends Iterable<Map<String, Object>>
    * @return a {@code List} of {@code Map} objects or an empty {@code List} if the
    *       {@code ResultSet} contained no (more) rows
    */
-  List<Map<String, Object>> mappify(int limit);
+  List<Map<String, Object>> extract(int limit);
 
   /**
    * Converts all remaining rows in the {@code ResultSet} into maps.
@@ -47,7 +47,7 @@ public sealed interface ResultSetMappifier extends Iterable<Map<String, Object>>
    * @return a {@code List} of {@code Map} objects or an empty {@code List} if the
    *       {@code ResultSet} contained no (more) rows
    */
-  List<Map<String, Object>> mappifyAll();
+  List<Map<String, Object>> extractAll();
 
   /**
    * Converts all remaining rows in the {@code ResultSet} into maps.
@@ -57,7 +57,7 @@ public sealed interface ResultSetMappifier extends Iterable<Map<String, Object>>
    * @return a {@code List} of {@code Map} objects or an empty {@code List} if the
    *       {@code ResultSet} contained no (more) rows
    */
-  List<Map<String, Object>> mappifyAll(int sizeEstimate);
+  List<Map<String, Object>> extractAll(int sizeEstimate);
 
   /**
    * Returns {@code true} if the end of the {@code ResultSet} has been reached;

@@ -15,28 +15,28 @@ import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 
-final class RecordBeanifier&lt;T extends Record&gt; implements ResultSetBeanifier&lt;T&gt; {
+final class RecordBeanifier&lt;T extends Record&gt; implements BeanExtractor&lt;T&gt; {
 
   @SuppressWarnings(&quot;unused&quot;)
 <span class="fc" id="L21">  private static final Logger LOG = LoggerFactory.getLogger(RecordBeanifier.class);</span>
 
   private static class BeanIterator&lt;T extends Record&gt; implements Iterator&lt;T&gt; {
 
-    private final RecordBeanifier&lt;T&gt; beanifier;
+    private final RecordBeanifier&lt;T&gt; extractor;
 
-<span class="nc" id="L27">    BeanIterator(RecordBeanifier&lt;T&gt; beanifier) {</span>
-<span class="nc" id="L28">      this.beanifier = beanifier;</span>
+<span class="nc" id="L27">    BeanIterator(RecordBeanifier&lt;T&gt; extractor) {</span>
+<span class="nc" id="L28">      this.extractor = extractor;</span>
 <span class="nc" id="L29">    }</span>
 
     @Override
     public boolean hasNext() {
-<span class="nc bnc" id="L33" title="All 2 branches missed.">      return !beanifier.empty;</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">      return !extractor.empty;</span>
     }
 
     @Override
     public T next() {
-<span class="nc" id="L38">      Check.on(STATE, beanifier.empty).is(yes(), Err.NO_MORE_ROWS);</span>
-<span class="nc" id="L39">      return beanifier.beanify().get();</span>
+<span class="nc" id="L38">      Check.on(STATE, extractor.empty).is(yes(), Err.NO_MORE_ROWS);</span>
+<span class="nc" id="L39">      return extractor.extract().get();</span>
     }
   }
 
@@ -52,7 +52,7 @@ final class RecordBeanifier&lt;T extends Record&gt; implements ResultSetBeanifie
   private boolean empty;
 
   @Override
-  public Optional&lt;T&gt; beanify() {
+  public Optional&lt;T&gt; extract() {
 <span class="pc bpc" id="L56" title="1 of 2 branches missed.">    if (empty) {</span>
 <span class="nc" id="L57">      return Optional.empty();</span>
     }
@@ -66,7 +66,7 @@ final class RecordBeanifier&lt;T extends Record&gt; implements ResultSetBeanifie
   }
 
   @Override
-  public List&lt;T&gt; beanify(int limit) {
+  public List&lt;T&gt; extract(int limit) {
 <span class="nc" id="L70">    Check.that(limit, LIMIT).is(gt(), 0);</span>
 <span class="nc bnc" id="L71" title="All 2 branches missed.">    if (empty) {</span>
 <span class="nc" id="L72">      return Collections.emptyList();</span>
@@ -84,12 +84,12 @@ final class RecordBeanifier&lt;T extends Record&gt; implements ResultSetBeanifie
   }
 
   @Override
-  public List&lt;T&gt; beanifyAll() {
-<span class="fc" id="L88">    return beanifyAll(10);</span>
+  public List&lt;T&gt; extractAll() {
+<span class="fc" id="L88">    return extractAll(10);</span>
   }
 
   @Override
-  public List&lt;T&gt; beanifyAll(int sizeEstimate) {
+  public List&lt;T&gt; extractAll(int sizeEstimate) {
 <span class="fc" id="L93">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
 <span class="pc bpc" id="L94" title="1 of 2 branches missed.">    if (empty) {</span>
 <span class="nc" id="L95">      return Collections.emptyList();</span>

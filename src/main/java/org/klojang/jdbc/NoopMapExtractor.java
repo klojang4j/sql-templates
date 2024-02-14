@@ -2,27 +2,27 @@ package org.klojang.jdbc;
 
 import java.util.*;
 
-final class EmptyMappifier implements ResultSetMappifier {
+final class NoopMapExtractor implements MapExtractor {
 
-  static final EmptyMappifier INSTANCE = new EmptyMappifier();
+  static final NoopMapExtractor INSTANCE = new NoopMapExtractor();
 
   @Override
-  public Optional<Map<String,Object>> mappify() {
+  public Optional<Map<String,Object>> extract() {
     return Optional.empty();
   }
 
   @Override
-  public List<Map<String,Object>> mappify(int limit) {
+  public List<Map<String,Object>> extract(int limit) {
     return Collections.emptyList();
   }
 
   @Override
-  public List<Map<String,Object>> mappifyAll() {
+  public List<Map<String,Object>> extractAll() {
     return Collections.emptyList();
   }
 
   @Override
-  public List<Map<String,Object>> mappifyAll(int sizeEstimate) {
+  public List<Map<String,Object>> extractAll(int sizeEstimate) {
     return Collections.emptyList();
   }
 

@@ -82,7 +82,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       .setArray("names", "London Heathrow", "Chicago O'Hare")
    *       .prepareQuery()
    *       .getBeanifier()
-   *       .beanifyAll();
+   *       .extractAll();
    * }
    * }</pre></blockquote>
    *
@@ -353,7 +353,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       .setOrderBy("LAST_NAME")
    *       .prepareQuery(con)
    *       .getBeanifier(Person.class)
-   *       .beanifyAll();
+   *       .extractAll();
    * }
    * }</pre></blockquote>
    *

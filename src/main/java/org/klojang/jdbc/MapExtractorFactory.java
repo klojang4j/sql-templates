@@ -12,12 +12,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
 
 /**
- * <p>A factory for {@link ResultSetMappifier} instances. This class behaves analogously
- * to the {@link BeanifierFactory} class. See there for more details.
+ * <p>A factory for {@link MapExtractor} instances. This class behaves analogously
+ * to the {@link BeanExtractorFactory} class. See there for more details.
  *
  * @author Ayco Holleman
  */
-public final class MappifierFactory {
+public final class MapExtractorFactory {
 
   private final AtomicReference<KeyWriter<?>[]> ref = new AtomicReference<>();
   private final ReentrantLock lock = new ReentrantLock();
@@ -25,34 +25,34 @@ public final class MappifierFactory {
   private final SessionConfig config;
 
   /**
-   * Creates a new {@code MappifierFactory}.
+   * Creates a new {@code MapExtractorFactory}.
    */
-  public MappifierFactory() {
+  public MapExtractorFactory() {
     this(Utils.DEFAULT_CONFIG);
   }
 
   /**
-   * Creates a new {@code MappifierFactory} using the specified configuration object
+   * Creates a new {@code MapExtractorFactory} using the specified configuration object
    *
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
-   *       behaviour of the {@code ResultSetMappifier}
+   *       behaviour of the {@code MapExtractor}
    */
-  public MappifierFactory(SessionConfig config) {
+  public MapExtractorFactory(SessionConfig config) {
     this.config = Check.notNull(config).ok();
   }
 
   /**
-   * Returns a {@code ResultSetMappifier} that will convert the rows in the specified
+   * Returns a {@code MapExtractor} that will convert the rows in the specified
    * {@code ResultSet} into {@code Map<String, Object>} pseudo-objects.
    *
    * @param rs the {@code ResultSet}
-   * @return a {@code ResultSetMappifier} that will convert the rows in the specified
+   * @return a {@code MapExtractor} that will convert the rows in the specified
    *       {@code ResultSet} into {@code Map<String, Object>} pseudo-objects.
    * @throws SQLException if a database error occurs
    */
-  public ResultSetMappifier getMappifier(ResultSet rs) throws SQLException {
+  public MapExtractor getMappifier(ResultSet rs) throws SQLException {
     if (!rs.next()) {
-      return EmptyMappifier.INSTANCE;
+      return NoopMapExtractor.INSTANCE;
     }
     KeyWriter<?>[] writers;
     if ((writers = ref.getPlain()) == null) {
@@ -65,6 +65,6 @@ public final class MappifierFactory {
         lock.unlock();
       }
     }
-    return new DefaultMappifier(rs, writers);
+    return new DefaultMapExtractor(rs, writers);
   }
 }

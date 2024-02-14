@@ -7,29 +7,29 @@ import java.util.Optional;
 /**
  * <p>Converts the rows in a JDBC {@link ResultSet} into JavaBeans or records. Instances
  * are obtained via
- * {@link BeanifierFactory#getBeanifier(ResultSet) BeanifierFactory.getBeanifier()}. A
- * {@code ResultSetBeanifier} is agnostic about, and has no opinion on how the
+ * {@link BeanExtractorFactory#getBeanifier(ResultSet) BeanExtractorFactory.getBeanifier()}. A
+ * {@code BeanExtractor} is agnostic about, and has no opinion on how the
  * {@link ResultSet} was obtained. It may have been produced using regular JDBC calls. It
  * does not aim to be an ORM-like class. It just converts result sets into (flat)
  * JavaBeans, to be carried across the boundary of the data access module (and into the
  * view layer, for example). The JavaBeans may have nested structures, but only top-level
  * properties will be populated.
  *
- * <p>{@code ResultSetBeanifier} is an extension of the {@link Iterable} interface,
+ * <p>{@code BeanExtractor} is an extension of the {@link Iterable} interface,
  * enabling you to extract the JavaBeans in a {@code forEach} loop:
  *
  * <blockquote><pre>{@code
  * ResultSet rs = ...;
- * BeanifierFactory factory = new BeanifierFactory(Employee.class);
+ * BeanExtractorFactory factory = new BeanExtractorFactory(Employee.class);
  * for(Employee emp : factory.getBeanifier(rs)) {
  *   // do stuff ...
  * }
  * }</pre></blockquote>
  *
  * <h2>JavaBeans vs. Records</h2>
- * When converting a row into a JavaBean, a {@code ResultSetBeanifier} will always use the
+ * When converting a row into a JavaBean, a {@code BeanExtractor} will always use the
  * setters on the JavaBean to populate it. There is no way to populate the bean via its
- * constructors. When converting to a {@code record}, a {@code ResultSetBeanifier} will
+ * constructors. When converting to a {@code record}, a {@code BeanExtractor} will
  * obviously always use one of its constructors to populate it. Make sure the record has a
  * constructor for those record components that are supposed to map to columns in the
  * SELECT clause. The encounter order of the record components within the constructor must
@@ -39,25 +39,25 @@ import java.util.Optional;
  * record component.
  *
  * @param <T> the type of the JavaBeans or records produced by the
- *       {@code ResultSetBeanifier}
+ *       {@code BeanExtractor}
  * @author Ayco Holleman
- * @see BeanifierFactory
- * @see ResultSetMappifier
+ * @see BeanExtractorFactory
+ * @see MapExtractor
  */
-public sealed interface ResultSetBeanifier<T> extends Iterable<T>
-      permits DefaultBeanifier, EmptyBeanifier, RecordBeanifier {
+public sealed interface BeanExtractor<T> extends Iterable<T>
+      permits DefaultBeanExtractor, NoopBeanExtractor, RecordBeanifier {
 
   /**
    * Converts the current row within the {@code ResultSet} into a JavaBean. If the
    * {@code ResultSet} is empty, or if there are no more rows in the {@code ResultSet}, an
-   * empty {@code Optional} is returned. You can keep calling {@code beanify()} to
+   * empty {@code Optional} is returned. You can keep calling {@code extract()} to
    * successively extract all rows in the result set until you receive an empty
    * {@code Optional}, or until {@link #isEmpty()} returns {@code true}.
    *
    * @return an {@code Optional} containing the JavaBean or an empty {@code Optional} if
    *       the {@code ResultSet} contained no (more) rows
    */
-  Optional<T> beanify();
+  Optional<T> extract();
 
   /**
    * Converts at most {@code limit} rows from the {@code ResultSet} into JavaBeans,
@@ -69,7 +69,7 @@ public sealed interface ResultSetBeanifier<T> extends Iterable<T>
    * @return a {@code List} of JavaBeans or an empty {@code List} if the {@code ResultSet}
    *       contained no (more) rows
    */
-  List<T> beanify(int limit);
+  List<T> extract(int limit);
 
   /**
    * Converts all remaining rows in the {@code ResultSet} into JavaBeans.
@@ -77,7 +77,7 @@ public sealed interface ResultSetBeanifier<T> extends Iterable<T>
    * @return a {@code List} of JavaBeans or an empty {@code List} if the {@code ResultSet}
    *       contained no (more) rows
    */
-  List<T> beanifyAll();
+  List<T> extractAll();
 
   /**
    * Converts all remaining rows in the {@code ResultSet} into JavaBeans.
@@ -86,7 +86,7 @@ public sealed interface ResultSetBeanifier<T> extends Iterable<T>
    * @return a {@code List} of JavaBeans or an empty {@code List} if the {@code ResultSet}
    *       contained no (more) rows
    */
-  List<T> beanifyAll(int sizeEstimate);
+  List<T> extractAll(int sizeEstimate);
 
   /**
    * Returns {@code true} if the end of the {@code ResultSet} has been reached;

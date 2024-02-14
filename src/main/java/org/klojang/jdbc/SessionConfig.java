@@ -131,16 +131,16 @@ public interface SessionConfig {
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map} that
    *       will receive the value from the {@code ResultSet}. Note that when writing to a
-   *       {@code Map} (using a {@link ResultSetMappifier}), this argument will always be
+   *       {@code Map} (using a {@link MapExtractor}), this argument will always be
    *       {@code HashMap.class} because that happens to be the type of {@code Map} that a
-   *       {@link ResultSetMappifier} creates.
+   *       {@link MapExtractor} creates.
    * @param propertyName the name of the bean property, record component, or map key
    *       that will receive the value from the {@code ResultSet}
    * @param propertyType the type of the values for which to specify a
    *       {@code CustomReader}. Note that when writing to a {@code Map} (using a
-   *       {@link ResultSetMappifier}), this argument will always be {@code Object.class}
+   *       {@link MapExtractor}), this argument will always be {@code Object.class}
    *       because we don't know the runtime type yet of the values when the
-   *       {@code ResultSetMappifier} is configured, and Java's type erase feature
+   *       {@code MapExtractor} is configured, and Java's type erase feature
    *       prevents us from being any more specific beforehand.
    * @param sqlType the SQL datatype of the column for which to specify a
    *       {@code CustomReader}. Must be one of the constants of the

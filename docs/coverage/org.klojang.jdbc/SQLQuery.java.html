@@ -235,21 +235,21 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
   }
 
   /**
-   * Executes the query and returns a {@code ResultSetMappifier} that you can use to
+   * Executes the query and returns a {@code MapExtractor} that you can use to
    * convert the rows in the {@link ResultSet} into {@code Map&lt;String, Object&gt;}
    * pseudo-objects. If the query had already been executed, it will not be executed
    * again. Call {@link SQLStatement#reset() reset()} to force the query to be
    * re-executed.
    *
-   * @return a {@code ResultSetMappifier} that you can use to convert the rows in the
+   * @return a {@code MapExtractor} that you can use to convert the rows in the
    *       {@link ResultSet} into {@code Map&lt;String, Object&gt;} pseudo objects.
    */
-  public ResultSetMappifier getMappifier() {
+  public MapExtractor getMappifier() {
     try {
 <span class="nc" id="L249">      executeSQL();</span>
 <span class="nc" id="L250">      return session</span>
 <span class="nc" id="L251">            .getSQL()</span>
-<span class="nc" id="L252">            .getMappifierFactory()</span>
+<span class="nc" id="L252">            .getMapExtractorFactory()</span>
 <span class="nc" id="L253">            .getMappifier(resultSet);</span>
 <span class="nc" id="L254">    } catch (Throwable t) {</span>
 <span class="nc" id="L255">      throw Utils.wrap(t);</span>
@@ -257,22 +257,22 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
   }
 
   /**
-   * Executes the query and returns a {@code ResultSetBeanifier} that you can use to
+   * Executes the query and returns a {@code BeanExtractor} that you can use to
    * convert the rows in the {@link ResultSet} into JavaBeans. If the query had already
    * been executed, it will not be executed again. Call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
    * @param &lt;T&gt; the type of the JavaBeans (may be a {@code record} type)
    * @param beanClass the class of the JavaBeans
-   * @return a {@code ResultSetBeanifier} that you can use to convert the rows in the
+   * @return a {@code BeanExtractor} that you can use to convert the rows in the
    *       {@link ResultSet} into JavaBeans.
    */
-  public &lt;T&gt; ResultSetBeanifier&lt;T&gt; getBeanifier(Class&lt;T&gt; beanClass) {
+  public &lt;T&gt; BeanExtractor&lt;T&gt; getBeanifier(Class&lt;T&gt; beanClass) {
     try {
 <span class="fc" id="L272">      executeSQL();</span>
 <span class="fc" id="L273">      return session</span>
 <span class="fc" id="L274">            .getSQL()</span>
-<span class="fc" id="L275">            .getBeanifierFactory(beanClass)</span>
+<span class="fc" id="L275">            .getBeanExtractorFactory(beanClass)</span>
 <span class="fc" id="L276">            .getBeanifier(resultSet);</span>
 <span class="nc" id="L277">    } catch (Throwable t) {</span>
 <span class="nc" id="L278">      throw Utils.wrap(t);</span>
@@ -280,7 +280,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
   }
 
   /**
-   * Executes the query and returns a {@code ResultSetBeanifier} that you can use to
+   * Executes the query and returns a {@code BeanExtractor} that you can use to
    * convert the rows in the {@link ResultSet} into JavaBeans. If the query had already
    * been executed, it will not be executed again. Call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
@@ -290,17 +290,17 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @param beanSupplier the supplier of the JavaBean instances. This would
    *       ordinarily be a method reference to the constructor of the JavaBean (like
    *       {@code Person::new})
-   * @return a {@code ResultSetBeanifier} that you can use to convert the rows in the
+   * @return a {@code BeanExtractor} that you can use to convert the rows in the
    *       {@link ResultSet} into JavaBeans.
    */
-  public &lt;T&gt; ResultSetBeanifier&lt;T&gt; getBeanifier(
+  public &lt;T&gt; BeanExtractor&lt;T&gt; getBeanifier(
         Class&lt;T&gt; beanClass,
         Supplier&lt;T&gt; beanSupplier) {
     try {
 <span class="nc" id="L300">      executeSQL();</span>
 <span class="nc" id="L301">      return session</span>
 <span class="nc" id="L302">            .getSQL()</span>
-<span class="nc" id="L303">            .getBeanifierFactory(beanClass, beanSupplier)</span>
+<span class="nc" id="L303">            .getBeanExtractorFactory(beanClass, beanSupplier)</span>
 <span class="nc" id="L304">            .getBeanifier(resultSet);</span>
 <span class="nc" id="L305">    } catch (Throwable t) {</span>
 <span class="nc" id="L306">      throw Utils.wrap(t);</span>

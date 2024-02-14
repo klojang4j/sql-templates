@@ -15,28 +15,28 @@ import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 
-final class RecordBeanifier<T extends Record> implements ResultSetBeanifier<T> {
+final class RecordBeanifier<T extends Record> implements BeanExtractor<T> {
 
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(RecordBeanifier.class);
 
   private static class BeanIterator<T extends Record> implements Iterator<T> {
 
-    private final RecordBeanifier<T> beanifier;
+    private final RecordBeanifier<T> extractor;
 
-    BeanIterator(RecordBeanifier<T> beanifier) {
-      this.beanifier = beanifier;
+    BeanIterator(RecordBeanifier<T> extractor) {
+      this.extractor = extractor;
     }
 
     @Override
     public boolean hasNext() {
-      return !beanifier.empty;
+      return !extractor.empty;
     }
 
     @Override
     public T next() {
-      Check.on(STATE, beanifier.empty).is(yes(), Err.NO_MORE_ROWS);
-      return beanifier.beanify().get();
+      Check.on(STATE, extractor.empty).is(yes(), Err.NO_MORE_ROWS);
+      return extractor.extract().get();
     }
   }
 
@@ -52,7 +52,7 @@ final class RecordBeanifier<T extends Record> implements ResultSetBeanifier<T> {
   private boolean empty;
 
   @Override
-  public Optional<T> beanify() {
+  public Optional<T> extract() {
     if (empty) {
       return Optional.empty();
     }
@@ -66,7 +66,7 @@ final class RecordBeanifier<T extends Record> implements ResultSetBeanifier<T> {
   }
 
   @Override
-  public List<T> beanify(int limit) {
+  public List<T> extract(int limit) {
     Check.that(limit, LIMIT).is(gt(), 0);
     if (empty) {
       return Collections.emptyList();
@@ -84,12 +84,12 @@ final class RecordBeanifier<T extends Record> implements ResultSetBeanifier<T> {
   }
 
   @Override
-  public List<T> beanifyAll() {
-    return beanifyAll(10);
+  public List<T> extractAll() {
+    return extractAll(10);
   }
 
   @Override
-  public List<T> beanifyAll(int sizeEstimate) {
+  public List<T> extractAll(int sizeEstimate) {
     Check.that(sizeEstimate, "sizeEstimate").is(gt(), 0);
     if (empty) {
       return Collections.emptyList();

@@ -17,29 +17,29 @@ import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 import static org.klojang.util.ClassMethods.className;
 
 /**
- * <p>A factory for {@link ResultSetBeanifier} instances. Generally you would create one
- * {@code BeanifierFactory} per SQL query. If multiple types of beans are extracted from
- * the query result, you would create more than one {@code BeanifierFactory} per SQL
+ * <p>A factory for {@link BeanExtractor} instances. Generally you would create one
+ * {@code BeanExtractorFactory} per SQL query. If multiple types of beans are extracted from
+ * the query result, you would create more than one {@code BeanExtractorFactory} per SQL
  * query. The very first {@link ResultSet} passed to
- * {@link #getBeanifier(ResultSet) BeanifierFactory.getBeanifier()} is used to configure
+ * {@link #getBeanifier(ResultSet) BeanExtractorFactory.getBeanifier()} is used to configure
  * the extraction process. Subsequent calls to {@code getBeanifier()} will use the same
- * configuration. Therefore, although multiple {@code BeanifierFactory} instances may be
- * instantiated for a single SQL query, a single {@code BeanifierFactory} should not be
+ * configuration. Therefore, although multiple {@code BeanExtractorFactory} instances may be
+ * instantiated for a single SQL query, a single {@code BeanExtractorFactory} should not be
  * used to process result sets from different SQL queries.
  *
  * <p><i>(More precisely: all result sets subsequently passed to
  * {@link #getBeanifier(ResultSet) getBeanifier()} must have the same number of columns,
  * and they must have the same column types in the same order. Column names do not matter.
- * Thus, you <b>could</b>, in fact, use a single {@code BeanifierFactory} for multiple SQL
+ * Thus, you <b>could</b>, in fact, use a single {@code BeanExtractorFactory} for multiple SQL
  * queries &#8212; for example if they all select a primary key column and (say) a
  * {@code DESCRIPTION} column from different tables. This might be the case for web
  * applications that need to fill multiple {@code <select>}) boxes.)</i>
  *
- * @param <T> the type of JavaBeans or records produced by the beanifier
+ * @param <T> the type of JavaBeans or records produced by the extractor
  * @author Ayco Holleman
  */
 @SuppressWarnings("rawtypes")
-public final class BeanifierFactory<T> {
+public final class BeanExtractorFactory<T> {
 
   private static final String RECORDS_NOT_ALLOWED
         = "bean supplier not supported for record type ${0}";
@@ -56,12 +56,12 @@ public final class BeanifierFactory<T> {
   private final SessionConfig config;
 
   /**
-   * Creates a new {@code BeanifierFactory}.
+   * Creates a new {@code BeanExtractorFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   *       obtained from this {@code BeanifierFactory}
+   *       obtained from this {@code BeanExtractorFactory}
    */
-  public BeanifierFactory(Class<T> beanClass) {
+  public BeanExtractorFactory(Class<T> beanClass) {
     Check.notNull(beanClass, BEAN_CLASS);
     this.beanClass = beanClass;
     this.beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
@@ -69,30 +69,30 @@ public final class BeanifierFactory<T> {
   }
 
   /**
-   * Creates a new {@code BeanifierFactory}.
+   * Creates a new {@code BeanExtractorFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   *       obtained from this {@code BeanifierFactory}
+   *       obtained from this {@code BeanExtractorFactory}
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
-   *       behaviour of the {@code ResultSetBeanifier}
+   *       behaviour of the {@code BeanExtractor}
    */
-  public BeanifierFactory(Class<T> beanClass, SessionConfig config) {
+  public BeanExtractorFactory(Class<T> beanClass, SessionConfig config) {
     this.beanClass = Check.notNull(beanClass, BEAN_CLASS).ok();
     this.beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
     this.config = Check.notNull(config, CONFIG).ok();
   }
 
   /**
-   * Creates a new {@code BeanifierFactory}.
+   * Creates a new {@code BeanExtractorFactory}.
    *
-   * @param beanClass the class of the JavaBeans that the {@code BeanifierFactory}
+   * @param beanClass the class of the JavaBeans that the {@code BeanExtractorFactory}
    *       will be catering for
    * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a
    *       method reference to the constructor of the JavaBean (e.g.
    *       {@code Employee::new}). An {@link IllegalArgumentException} is thrown if
    *       {@code beanClass} is a {@code record} type.
    */
-  public BeanifierFactory(Class<T> beanClass, Supplier<T> beanSupplier) {
+  public BeanExtractorFactory(Class<T> beanClass, Supplier<T> beanSupplier) {
     this.beanClass = Check.notNull(beanClass, BEAN_CLASS)
           .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))
           .ok();
@@ -101,17 +101,17 @@ public final class BeanifierFactory<T> {
   }
 
   /**
-   * Creates a new {@code BeanifierFactory}.
+   * Creates a new {@code BeanExtractorFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   *       obtained from this {@code BeanifierFactory}
+   *       obtained from this {@code BeanExtractorFactory}
    * @param beanSupplier the supplier of the JavaBeans. An
    *       {@link IllegalArgumentException} is thrown if {@code beanClass} is a
    *       {@code record} type.
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
-   *       behaviour of the {@code ResultSetBeanifier}
+   *       behaviour of the {@code BeanExtractor}
    */
-  public BeanifierFactory(Class<T> beanClass,
+  public BeanExtractorFactory(Class<T> beanClass,
         Supplier<T> beanSupplier,
         SessionConfig config) {
     this.beanClass = Check.notNull(beanClass, BEAN_CLASS)
@@ -122,22 +122,22 @@ public final class BeanifierFactory<T> {
   }
 
   /**
-   * Returns a {@code ResultSetBeanifier} that will convert the rows in the specified
+   * Returns a {@code BeanExtractor} that will convert the rows in the specified
    * {@code ResultSet} into JavaBeans or records of type {@code <T>}.
    *
    * @param rs the {@code ResultSet}
-   * @return A {@code ResultSetBeanifier} that will convert the rows in the specified
+   * @return A {@code BeanExtractor} that will convert the rows in the specified
    *       {@code ResultSet} into JavaBeans or records of type {@code <T>}
    * @throws SQLException if a database error occurs
    */
   @SuppressWarnings("unchecked")
-  public ResultSetBeanifier<T> getBeanifier(ResultSet rs) throws SQLException {
+  public BeanExtractor<T> getBeanifier(ResultSet rs) throws SQLException {
     return rs.next() ? beanClass.isRecord()
           ? getRecordBeanifier(rs) : getDefaultBeanifier(rs)
-          : EmptyBeanifier.INSTANCE;
+          : NoopBeanExtractor.INSTANCE;
   }
 
-  private DefaultBeanifier<T> getDefaultBeanifier(ResultSet rs) {
+  private DefaultBeanExtractor<T> getDefaultBeanifier(ResultSet rs) {
     PropertyWriter[] writers;
     if ((writers = (PropertyWriter[]) ref.getPlain()) == null) {
       lock.lock();
@@ -149,7 +149,7 @@ public final class BeanifierFactory<T> {
         lock.unlock();
       }
     }
-    return new DefaultBeanifier<>(rs, writers, beanSupplier);
+    return new DefaultBeanExtractor<>(rs, writers, beanSupplier);
   }
 
   @SuppressWarnings("unchecked")

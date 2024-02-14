@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.klojang.templates.name.CamelCaseToSnakeUpperCase;
-import org.klojang.templates.name.SnakeCaseToCamelCase;
 import org.klojang.util.IOMethods;
 
 import java.io.IOException;
@@ -88,7 +87,7 @@ public class RecordBeanifierTest {
       List<Person> persons = query
             .bind("lastName", "Smith")
             .getBeanifier(Person.class)
-            .beanifyAll();
+            .extractAll();
       for (Person person : persons) {
         System.out.println(person);
       }

@@ -16,28 +16,28 @@ import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.*;
 
-final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
+final class DefaultBeanExtractor<T> implements BeanExtractor<T> {
 
   @SuppressWarnings("unused")
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultBeanifier.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultBeanExtractor.class);
 
   private static class BeanIterator<T> implements Iterator<T> {
 
-    private final DefaultBeanifier<T> beanifier;
+    private final DefaultBeanExtractor<T> extractor;
 
-    BeanIterator(DefaultBeanifier<T> beanifier) {
-      this.beanifier = beanifier;
+    BeanIterator(DefaultBeanExtractor<T> extractor) {
+      this.extractor = extractor;
     }
 
     @Override
     public boolean hasNext() {
-      return !beanifier.empty;
+      return !extractor.empty;
     }
 
     @Override
     public T next() {
-      Check.on(STATE, beanifier.empty).is(yes(), Err.NO_MORE_ROWS);
-      return beanifier.beanify().get();
+      Check.on(STATE, extractor.empty).is(yes(), Err.NO_MORE_ROWS);
+      return extractor.extract().get();
     }
   }
 
@@ -47,14 +47,16 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
 
   private boolean empty;
 
-  DefaultBeanifier(ResultSet rs, PropertyWriter<?, ?>[] writers, Supplier<T> supplier) {
+  DefaultBeanExtractor(ResultSet rs,
+        PropertyWriter<?, ?>[] writers,
+        Supplier<T> supplier) {
     this.rs = rs;
     this.writers = writers;
     this.beanSupplier = supplier;
   }
 
   @Override
-  public Optional<T> beanify() {
+  public Optional<T> extract() {
     if (empty) {
       return Optional.empty();
     }
@@ -68,7 +70,7 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
   }
 
   @Override
-  public List<T> beanify(int limit) {
+  public List<T> extract(int limit) {
     Check.that(limit, LIMIT).is(gt(), 0);
     if (empty) {
       return Collections.emptyList();
@@ -86,12 +88,12 @@ final class DefaultBeanifier<T> implements ResultSetBeanifier<T> {
   }
 
   @Override
-  public List<T> beanifyAll() {
-    return beanifyAll(10);
+  public List<T> extractAll() {
+    return extractAll(10);
   }
 
   @Override
-  public List<T> beanifyAll(int sizeEstimate) {
+  public List<T> extractAll(int sizeEstimate) {
     Check.that(sizeEstimate, SIZE_ESTIMATE).is(gt(), 0);
     if (empty) {
       return Collections.emptyList();

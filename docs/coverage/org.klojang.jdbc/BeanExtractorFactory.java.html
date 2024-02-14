@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BeanifierFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">BeanifierFactory.java</span></div><h1>BeanifierFactory.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BeanExtractorFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">BeanExtractorFactory.java</span></div><h1>BeanExtractorFactory.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
@@ -17,29 +17,29 @@ import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 import static org.klojang.util.ClassMethods.className;
 
 /**
- * &lt;p&gt;A factory for {@link ResultSetBeanifier} instances. Generally you would create one
- * {@code BeanifierFactory} per SQL query. If multiple types of beans are extracted from
- * the query result, you would create more than one {@code BeanifierFactory} per SQL
+ * &lt;p&gt;A factory for {@link BeanExtractor} instances. Generally you would create one
+ * {@code BeanExtractorFactory} per SQL query. If multiple types of beans are extracted from
+ * the query result, you would create more than one {@code BeanExtractorFactory} per SQL
  * query. The very first {@link ResultSet} passed to
- * {@link #getBeanifier(ResultSet) BeanifierFactory.getBeanifier()} is used to configure
+ * {@link #getBeanifier(ResultSet) BeanExtractorFactory.getBeanifier()} is used to configure
  * the extraction process. Subsequent calls to {@code getBeanifier()} will use the same
- * configuration. Therefore, although multiple {@code BeanifierFactory} instances may be
- * instantiated for a single SQL query, a single {@code BeanifierFactory} should not be
+ * configuration. Therefore, although multiple {@code BeanExtractorFactory} instances may be
+ * instantiated for a single SQL query, a single {@code BeanExtractorFactory} should not be
  * used to process result sets from different SQL queries.
  *
  * &lt;p&gt;&lt;i&gt;(More precisely: all result sets subsequently passed to
  * {@link #getBeanifier(ResultSet) getBeanifier()} must have the same number of columns,
  * and they must have the same column types in the same order. Column names do not matter.
- * Thus, you &lt;b&gt;could&lt;/b&gt;, in fact, use a single {@code BeanifierFactory} for multiple SQL
+ * Thus, you &lt;b&gt;could&lt;/b&gt;, in fact, use a single {@code BeanExtractorFactory} for multiple SQL
  * queries &amp;#8212; for example if they all select a primary key column and (say) a
  * {@code DESCRIPTION} column from different tables. This might be the case for web
  * applications that need to fill multiple {@code &lt;select&gt;}) boxes.)&lt;/i&gt;
  *
- * @param &lt;T&gt; the type of JavaBeans or records produced by the beanifier
+ * @param &lt;T&gt; the type of JavaBeans or records produced by the extractor
  * @author Ayco Holleman
  */
 @SuppressWarnings(&quot;rawtypes&quot;)
-public final class BeanifierFactory&lt;T&gt; {
+public final class BeanExtractorFactory&lt;T&gt; {
 
   private static final String RECORDS_NOT_ALLOWED
         = &quot;bean supplier not supported for record type ${0}&quot;;
@@ -56,12 +56,12 @@ public final class BeanifierFactory&lt;T&gt; {
   private final SessionConfig config;
 
   /**
-   * Creates a new {@code BeanifierFactory}.
+   * Creates a new {@code BeanExtractorFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   *       obtained from this {@code BeanifierFactory}
+   *       obtained from this {@code BeanExtractorFactory}
    */
-<span class="nc" id="L64">  public BeanifierFactory(Class&lt;T&gt; beanClass) {</span>
+<span class="nc" id="L64">  public BeanExtractorFactory(Class&lt;T&gt; beanClass) {</span>
 <span class="nc" id="L65">    Check.notNull(beanClass, BEAN_CLASS);</span>
 <span class="nc" id="L66">    this.beanClass = beanClass;</span>
 <span class="nc bnc" id="L67" title="All 2 branches missed.">    this.beanSupplier = beanClass.isRecord() ? null : () -&gt; newInstance(beanClass);</span>
@@ -69,30 +69,30 @@ public final class BeanifierFactory&lt;T&gt; {
 <span class="nc" id="L69">  }</span>
 
   /**
-   * Creates a new {@code BeanifierFactory}.
+   * Creates a new {@code BeanExtractorFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   *       obtained from this {@code BeanifierFactory}
+   *       obtained from this {@code BeanExtractorFactory}
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
-   *       behaviour of the {@code ResultSetBeanifier}
+   *       behaviour of the {@code BeanExtractor}
    */
-<span class="fc" id="L79">  public BeanifierFactory(Class&lt;T&gt; beanClass, SessionConfig config) {</span>
+<span class="fc" id="L79">  public BeanExtractorFactory(Class&lt;T&gt; beanClass, SessionConfig config) {</span>
 <span class="fc" id="L80">    this.beanClass = Check.notNull(beanClass, BEAN_CLASS).ok();</span>
 <span class="fc bfc" id="L81" title="All 2 branches covered.">    this.beanSupplier = beanClass.isRecord() ? null : () -&gt; newInstance(beanClass);</span>
 <span class="fc" id="L82">    this.config = Check.notNull(config, CONFIG).ok();</span>
 <span class="fc" id="L83">  }</span>
 
   /**
-   * Creates a new {@code BeanifierFactory}.
+   * Creates a new {@code BeanExtractorFactory}.
    *
-   * @param beanClass the class of the JavaBeans that the {@code BeanifierFactory}
+   * @param beanClass the class of the JavaBeans that the {@code BeanExtractorFactory}
    *       will be catering for
    * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a
    *       method reference to the constructor of the JavaBean (e.g.
    *       {@code Employee::new}). An {@link IllegalArgumentException} is thrown if
    *       {@code beanClass} is a {@code record} type.
    */
-<span class="nc" id="L95">  public BeanifierFactory(Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier) {</span>
+<span class="nc" id="L95">  public BeanExtractorFactory(Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier) {</span>
 <span class="nc" id="L96">    this.beanClass = Check.notNull(beanClass, BEAN_CLASS)</span>
 <span class="nc" id="L97">          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))</span>
 <span class="nc" id="L98">          .ok();</span>
@@ -101,17 +101,17 @@ public final class BeanifierFactory&lt;T&gt; {
 <span class="nc" id="L101">  }</span>
 
   /**
-   * Creates a new {@code BeanifierFactory}.
+   * Creates a new {@code BeanExtractorFactory}.
    *
    * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   *       obtained from this {@code BeanifierFactory}
+   *       obtained from this {@code BeanExtractorFactory}
    * @param beanSupplier the supplier of the JavaBeans. An
    *       {@link IllegalArgumentException} is thrown if {@code beanClass} is a
    *       {@code record} type.
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
-   *       behaviour of the {@code ResultSetBeanifier}
+   *       behaviour of the {@code BeanExtractor}
    */
-  public BeanifierFactory(Class&lt;T&gt; beanClass,
+  public BeanExtractorFactory(Class&lt;T&gt; beanClass,
         Supplier&lt;T&gt; beanSupplier,
 <span class="nc" id="L116">        SessionConfig config) {</span>
 <span class="nc" id="L117">    this.beanClass = Check.notNull(beanClass, BEAN_CLASS)</span>
@@ -122,22 +122,22 @@ public final class BeanifierFactory&lt;T&gt; {
 <span class="nc" id="L122">  }</span>
 
   /**
-   * Returns a {@code ResultSetBeanifier} that will convert the rows in the specified
+   * Returns a {@code BeanExtractor} that will convert the rows in the specified
    * {@code ResultSet} into JavaBeans or records of type {@code &lt;T&gt;}.
    *
    * @param rs the {@code ResultSet}
-   * @return A {@code ResultSetBeanifier} that will convert the rows in the specified
+   * @return A {@code BeanExtractor} that will convert the rows in the specified
    *       {@code ResultSet} into JavaBeans or records of type {@code &lt;T&gt;}
    * @throws SQLException if a database error occurs
    */
   @SuppressWarnings(&quot;unchecked&quot;)
-  public ResultSetBeanifier&lt;T&gt; getBeanifier(ResultSet rs) throws SQLException {
+  public BeanExtractor&lt;T&gt; getBeanifier(ResultSet rs) throws SQLException {
 <span class="pc bpc" id="L135" title="1 of 4 branches missed.">    return rs.next() ? beanClass.isRecord()</span>
 <span class="fc" id="L136">          ? getRecordBeanifier(rs) : getDefaultBeanifier(rs)</span>
-<span class="nc" id="L137">          : EmptyBeanifier.INSTANCE;</span>
+<span class="nc" id="L137">          : NoopBeanExtractor.INSTANCE;</span>
   }
 
-  private DefaultBeanifier&lt;T&gt; getDefaultBeanifier(ResultSet rs) {
+  private DefaultBeanExtractor&lt;T&gt; getDefaultBeanifier(ResultSet rs) {
     PropertyWriter[] writers;
 <span class="pc bpc" id="L142" title="1 of 2 branches missed.">    if ((writers = (PropertyWriter[]) ref.getPlain()) == null) {</span>
 <span class="fc" id="L143">      lock.lock();</span>
@@ -149,7 +149,7 @@ public final class BeanifierFactory&lt;T&gt; {
 <span class="fc" id="L149">        lock.unlock();</span>
       }
     }
-<span class="fc" id="L152">    return new DefaultBeanifier&lt;&gt;(rs, writers, beanSupplier);</span>
+<span class="fc" id="L152">    return new DefaultBeanExtractor&lt;&gt;(rs, writers, beanSupplier);</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)

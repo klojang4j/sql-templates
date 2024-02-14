@@ -22,7 +22,7 @@ abstract sealed class AbstractSQL implements SQL
   @SuppressWarnings("rawtypes")
   private final Map<Class, BeanBinder> beanBinders;
   @SuppressWarnings("rawtypes")
-  private final Map<Class, BeanifierFactory> beanifiers;
+  private final Map<Class, BeanExtractorFactory> beanifiers;
 
   AbstractSQL(String sql, SessionConfig config) {
     this.unparsed = sql;
@@ -56,20 +56,20 @@ abstract sealed class AbstractSQL implements SQL
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  <T> BeanifierFactory<T> getBeanifierFactory(Class<T> clazz) {
-    return beanifiers.computeIfAbsent(clazz, k -> new BeanifierFactory<>(k, config));
+  <T> BeanExtractorFactory<T> getBeanExtractorFactory(Class<T> clazz) {
+    return beanifiers.computeIfAbsent(clazz, k -> new BeanExtractorFactory<>(k, config));
   }
 
   @SuppressWarnings("unchecked")
-  <T> BeanifierFactory<T> getBeanifierFactory(
+  <T> BeanExtractorFactory<T> getBeanExtractorFactory(
         Class<T> clazz,
         Supplier<T> supplier) {
     return beanifiers.computeIfAbsent(clazz,
-          k -> new BeanifierFactory<>(clazz, supplier, config));
+          k -> new BeanExtractorFactory<>(clazz, supplier, config));
   }
 
-  MappifierFactory getMappifierFactory() {
-    return new MappifierFactory(config);
+  MapExtractorFactory getMapExtractorFactory() {
+    return new MapExtractorFactory(config);
   }
 
 }
