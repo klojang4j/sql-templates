@@ -31,13 +31,17 @@ import static org.klojang.util.ClassMethods.className;
  * {@code BeanExtractorFactory} instances may be created for a single SQL query, but a
  * single {@code BeanExtractorFactory} should not be used to handle multiple SQL queries.
  *
- * &lt;p&gt;&lt;i&gt;(More precisely: all result sets subsequently passed to
+ * &lt;p&gt;&lt;i&gt;(More precisely: all {@code ResultSet} objects subsequently passed to
  * {@link #getExtractor(ResultSet) getExtractor()} must have the same number of columns,
  * and they must have the same column types in the same order. Column names do not matter.
  * Thus, you &lt;b&gt;could&lt;/b&gt;, in fact, use a single {@code BeanExtractorFactory} for multiple
- * SQL queries &amp;#8212; for example if they all select the primary key column and (say) a
+ * SQL queries &amp;#8212; for example if they all select the primary key column and, say, a
  * {@code VARCHAR} column from different tables. This might be the case for web
  * applications that need to fill multiple {@code &lt;select&gt;}) boxes.)&lt;/i&gt;
+ *
+ * &lt;p&gt;It is not necessary to cache {@code BeanExtractorFactory} objects or
+ * {@code BeanExtractor} objects. &lt;i&gt;Klojang JDBC&lt;/i&gt; already caches the relevant data,
+ * making both essentially light-weight objects. Create them when you need them.
  *
  * @param &lt;T&gt; the type of JavaBeans or records produced by the extractor
  * @author Ayco Holleman
@@ -45,23 +49,19 @@ import static org.klojang.util.ClassMethods.className;
 @SuppressWarnings(&quot;rawtypes&quot;)
 public final class BeanExtractorFactory&lt;T&gt; {
 
-<span class="fc" id="L48">  private record ExtractorID(Class clazz, Supplier supplier, SessionConfig config) {</span>
+<span class="fc" id="L52">  private record ExtractorID(Class clazz, Supplier supplier, SessionConfig config) {</span>
     public int hashCode() {
-<span class="fc" id="L50">      return Objects.hash(clazz, supplier, config);</span>
+<span class="fc" id="L54">      return Objects.hash(clazz, supplier, config);</span>
     }
 
     public boolean equals(Object obj) {
-<span class="nc bnc" id="L54" title="All 10 branches missed.">      return this == obj || (obj instanceof ExtractorID e</span>
-            &amp;&amp; clazz == e.clazz
-            &amp;&amp; supplier == e.supplier
-            &amp;&amp; config == e.config);
+<span class="nc bnc" id="L58" title="All 10 branches missed.">      return this == obj || (obj instanceof ExtractorID e &amp;&amp; clazz == e.clazz &amp;&amp; supplier == e.supplier &amp;&amp; config == e.config);</span>
     }
   }
 
-<span class="fc" id="L61">  private static final Map&lt;ExtractorID, BeanExtractor&gt; cache = new HashMap&lt;&gt;(32);</span>
+<span class="fc" id="L62">  private static final Map&lt;ExtractorID, BeanExtractor&gt; cache = new HashMap&lt;&gt;();</span>
 
-  private static final String RECORDS_NOT_ALLOWED
-        = &quot;bean supplier not supported for record type ${0}&quot;;
+  private static final String RECORDS_NOT_ALLOWED = &quot;bean supplier not supported for record type ${0}&quot;;
 
   private final Class&lt;T&gt; clazz;
   private final Supplier&lt;T&gt; supplier;

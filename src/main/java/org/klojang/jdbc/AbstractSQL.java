@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 abstract sealed class AbstractSQL implements SQL
       permits SimpleSQL, SQLTemplate, SQLSkeleton {
@@ -53,22 +52,6 @@ abstract sealed class AbstractSQL implements SQL
 
   MapBinder getMapBinder(SQLInfo sqlInfo) {
     return new MapBinder(sqlInfo.parameters(), config);
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  <T> BeanExtractorFactory<T> getBeanExtractorFactory(Class<T> clazz) {
-    return factories.computeIfAbsent(clazz, k -> new BeanExtractorFactory<>(k, config));
-  }
-
-  @SuppressWarnings("unchecked")
-  <T> BeanExtractorFactory<T> getBeanExtractorFactory(Class<T> clazz,
-        Supplier<T> supplier) {
-    return factories.computeIfAbsent(clazz,
-          k -> new BeanExtractorFactory<>(clazz, supplier, config));
-  }
-
-  MapExtractorFactory getMapExtractorFactory() {
-    return new MapExtractorFactory(config);
   }
 
 }

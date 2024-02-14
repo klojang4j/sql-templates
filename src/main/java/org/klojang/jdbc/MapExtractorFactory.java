@@ -2,12 +2,11 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.rs.KeyWriter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
 
@@ -19,8 +18,7 @@ import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
  */
 public final class MapExtractorFactory {
 
-  private final AtomicReference<KeyWriter<?>[]> ref = new AtomicReference<>();
-  private final ReentrantLock lock = new ReentrantLock();
+  private static final Map<SessionConfig, MapExtractor> cache = new HashMap<>();
 
   private final SessionConfig config;
 
@@ -54,17 +52,7 @@ public final class MapExtractorFactory {
     if (!rs.next()) {
       return NoopMapExtractor.INSTANCE;
     }
-    KeyWriter<?>[] writers;
-    if ((writers = ref.getPlain()) == null) {
-      lock.lock();
-      try {
-        if (ref.get() == null) {
-          ref.set(writers = createWriters(rs, config));
-        }
-      } finally {
-        lock.unlock();
-      }
-    }
-    return new DefaultMapExtractor(rs, writers);
+    return cache.computeIfAbsent(config,
+          k -> new DefaultMapExtractor(rs, createWriters(rs, k)));
   }
 }

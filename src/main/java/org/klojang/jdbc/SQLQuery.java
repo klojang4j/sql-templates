@@ -246,10 +246,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public MapExtractor getExtractor() {
     try {
       executeSQL();
-      return session
-            .getSQL()
-            .getMapExtractorFactory()
-            .getExtractor(resultSet);
+      SessionConfig config = session.getSQL().config();
+      return new MapExtractorFactory(config).getExtractor(resultSet);
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -269,10 +267,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public <T> BeanExtractor<T> getExtractor(Class<T> clazz) {
     try {
       executeSQL();
-      return session
-            .getSQL()
-            .getBeanExtractorFactory(clazz)
-            .getExtractor(resultSet);
+      SessionConfig config = session.getSQL().config();
+      return new BeanExtractorFactory<>(clazz, config).getExtractor(resultSet);
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -297,9 +293,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public <T> BeanExtractor<T> getExtractor(Class<T> clazz, Supplier<T> beanSupplier) {
     try {
       executeSQL();
-      return session
-            .getSQL()
-            .getBeanExtractorFactory(clazz, beanSupplier)
+      SessionConfig config = session.getSQL().config();
+      return new BeanExtractorFactory<>(clazz, beanSupplier, config)
             .getExtractor(resultSet);
     } catch (Throwable t) {
       throw Utils.wrap(t);
@@ -311,11 +306,12 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
     try {
       if (resultSet != null) {
         resultSet.close();
-        resultSet = null;
       }
       ps.clearParameters();
     } catch (SQLException e) {
       throw Utils.wrap(e);
+    } finally {
+      resultSet = null;
     }
   }
 

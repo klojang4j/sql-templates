@@ -246,12 +246,10 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
   public MapExtractor getExtractor() {
     try {
 <span class="nc" id="L248">      executeSQL();</span>
-<span class="nc" id="L249">      return session</span>
-<span class="nc" id="L250">            .getSQL()</span>
-<span class="nc" id="L251">            .getMapExtractorFactory()</span>
-<span class="nc" id="L252">            .getExtractor(resultSet);</span>
-<span class="nc" id="L253">    } catch (Throwable t) {</span>
-<span class="nc" id="L254">      throw Utils.wrap(t);</span>
+<span class="nc" id="L249">      SessionConfig config = session.getSQL().config();</span>
+<span class="nc" id="L250">      return new MapExtractorFactory(config).getExtractor(resultSet);</span>
+<span class="nc" id="L251">    } catch (Throwable t) {</span>
+<span class="nc" id="L252">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -268,13 +266,11 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; BeanExtractor&lt;T&gt; getExtractor(Class&lt;T&gt; clazz) {
     try {
-<span class="fc" id="L271">      executeSQL();</span>
-<span class="fc" id="L272">      return session</span>
-<span class="fc" id="L273">            .getSQL()</span>
-<span class="fc" id="L274">            .getBeanExtractorFactory(clazz)</span>
-<span class="fc" id="L275">            .getExtractor(resultSet);</span>
-<span class="nc" id="L276">    } catch (Throwable t) {</span>
-<span class="nc" id="L277">      throw Utils.wrap(t);</span>
+<span class="fc" id="L269">      executeSQL();</span>
+<span class="fc" id="L270">      SessionConfig config = session.getSQL().config();</span>
+<span class="fc" id="L271">      return new BeanExtractorFactory&lt;&gt;(clazz, config).getExtractor(resultSet);</span>
+<span class="nc" id="L272">    } catch (Throwable t) {</span>
+<span class="nc" id="L273">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -296,36 +292,36 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; BeanExtractor&lt;T&gt; getExtractor(Class&lt;T&gt; clazz, Supplier&lt;T&gt; beanSupplier) {
     try {
-<span class="nc" id="L299">      executeSQL();</span>
-<span class="nc" id="L300">      return session</span>
-<span class="nc" id="L301">            .getSQL()</span>
-<span class="nc" id="L302">            .getBeanExtractorFactory(clazz, beanSupplier)</span>
-<span class="nc" id="L303">            .getExtractor(resultSet);</span>
-<span class="nc" id="L304">    } catch (Throwable t) {</span>
-<span class="nc" id="L305">      throw Utils.wrap(t);</span>
+<span class="nc" id="L295">      executeSQL();</span>
+<span class="nc" id="L296">      SessionConfig config = session.getSQL().config();</span>
+<span class="nc" id="L297">      return new BeanExtractorFactory&lt;&gt;(clazz, beanSupplier, config)</span>
+<span class="nc" id="L298">            .getExtractor(resultSet);</span>
+<span class="nc" id="L299">    } catch (Throwable t) {</span>
+<span class="nc" id="L300">      throw Utils.wrap(t);</span>
     }
   }
 
   @Override
   void initialize() {
     try {
-<span class="nc bnc" id="L312" title="All 2 branches missed.">      if (resultSet != null) {</span>
-<span class="nc" id="L313">        resultSet.close();</span>
-<span class="nc" id="L314">        resultSet = null;</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">      if (resultSet != null) {</span>
+<span class="nc" id="L308">        resultSet.close();</span>
       }
-<span class="nc" id="L316">      ps.clearParameters();</span>
-<span class="nc" id="L317">    } catch (SQLException e) {</span>
-<span class="nc" id="L318">      throw Utils.wrap(e);</span>
-<span class="nc" id="L319">    }</span>
-<span class="nc" id="L320">  }</span>
+<span class="nc" id="L310">      ps.clearParameters();</span>
+<span class="nc" id="L311">    } catch (SQLException e) {</span>
+<span class="nc" id="L312">      throw Utils.wrap(e);</span>
+    } finally {
+<span class="nc" id="L314">      resultSet = null;</span>
+    }
+<span class="nc" id="L316">  }</span>
 
   private void executeSQL() throws Throwable {
-<span class="pc bpc" id="L323" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
-<span class="fc" id="L324">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
-<span class="fc" id="L325">      applyBindings(ps);</span>
-<span class="fc" id="L326">      resultSet = ps.executeQuery();</span>
+<span class="pc bpc" id="L319" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
+<span class="fc" id="L320">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L321">      applyBindings(ps);</span>
+<span class="fc" id="L322">      resultSet = ps.executeQuery();</span>
     }
-<span class="fc" id="L328">  }</span>
+<span class="fc" id="L324">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

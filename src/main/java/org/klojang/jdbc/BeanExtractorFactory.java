@@ -31,13 +31,17 @@ import static org.klojang.util.ClassMethods.className;
  * {@code BeanExtractorFactory} instances may be created for a single SQL query, but a
  * single {@code BeanExtractorFactory} should not be used to handle multiple SQL queries.
  *
- * <p><i>(More precisely: all result sets subsequently passed to
+ * <p><i>(More precisely: all {@code ResultSet} objects subsequently passed to
  * {@link #getExtractor(ResultSet) getExtractor()} must have the same number of columns,
  * and they must have the same column types in the same order. Column names do not matter.
  * Thus, you <b>could</b>, in fact, use a single {@code BeanExtractorFactory} for multiple
- * SQL queries &#8212; for example if they all select the primary key column and (say) a
+ * SQL queries &#8212; for example if they all select the primary key column and, say, a
  * {@code VARCHAR} column from different tables. This might be the case for web
  * applications that need to fill multiple {@code <select>}) boxes.)</i>
+ *
+ * <p>It is not necessary to cache {@code BeanExtractorFactory} objects or
+ * {@code BeanExtractor} objects. <i>Klojang JDBC</i> already caches the relevant data,
+ * making both essentially light-weight objects. Create them when you need them.
  *
  * @param <T> the type of JavaBeans or records produced by the extractor
  * @author Ayco Holleman
@@ -51,17 +55,13 @@ public final class BeanExtractorFactory<T> {
     }
 
     public boolean equals(Object obj) {
-      return this == obj || (obj instanceof ExtractorID e
-            && clazz == e.clazz
-            && supplier == e.supplier
-            && config == e.config);
+      return this == obj || (obj instanceof ExtractorID e && clazz == e.clazz && supplier == e.supplier && config == e.config);
     }
   }
 
-  private static final Map<ExtractorID, BeanExtractor> cache = new HashMap<>(32);
+  private static final Map<ExtractorID, BeanExtractor> cache = new HashMap<>();
 
-  private static final String RECORDS_NOT_ALLOWED
-        = "bean supplier not supported for record type ${0}";
+  private static final String RECORDS_NOT_ALLOWED = "bean supplier not supported for record type ${0}";
 
   private final Class<T> clazz;
   private final Supplier<T> supplier;
