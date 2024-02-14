@@ -24,9 +24,9 @@ final class ResultSetId {
   @Override
   public int hashCode() {
 <span class="fc" id="L26">    int hash = 1;</span>
-<span class="fc bfc" id="L27" title="All 2 branches covered.">    for (int i = 0; i &lt; types.length; ++i) {</span>
-<span class="fc" id="L28">      hash = (hash * 31) + types[i];</span>
-<span class="fc" id="L29">      hash = (hash * 31) + columns[i].hashCode();</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">    for (int i = 0; i &lt; columns.length; ++i) {</span>
+<span class="fc" id="L28">      hash = (hash * 31) + columns[i].hashCode();</span>
+<span class="fc" id="L29">      hash = (hash * 31) + types[i];</span>
     }
 <span class="fc" id="L31">    return hash;</span>
   }
