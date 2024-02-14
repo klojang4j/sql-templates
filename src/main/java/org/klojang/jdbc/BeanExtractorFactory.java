@@ -8,8 +8,9 @@ import org.klojang.util.InvokeMethods;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static org.klojang.jdbc.x.Strings.*;
@@ -44,83 +45,94 @@ import static org.klojang.util.ClassMethods.className;
 @SuppressWarnings("rawtypes")
 public final class BeanExtractorFactory<T> {
 
+  private record ExtractorID(Class clazz, Supplier supplier, SessionConfig config) {
+    public int hashCode() {
+      return Objects.hash(clazz, supplier, config);
+    }
+
+    public boolean equals(Object obj) {
+      return this == obj || (obj instanceof ExtractorID e
+            && clazz == e.clazz
+            && supplier == e.supplier
+            && config == e.config);
+    }
+  }
+
+  private static final Map<ExtractorID, BeanExtractor> cache = new HashMap<>(32);
+
   private static final String RECORDS_NOT_ALLOWED
         = "bean supplier not supported for record type ${0}";
 
-  /**
-   * The object held by the AtomicReference will either be a RecordFactory in case the
-   * bean class is a record type or a PropertyWriter[] array in any other case.
-   */
-  private final AtomicReference<Object> ref = new AtomicReference<>();
-  private final ReentrantLock lock = new ReentrantLock();
-
-  private final Class<T> beanClass;
-  private final Supplier<T> beanSupplier;
+  private final Class<T> clazz;
+  private final Supplier<T> supplier;
   private final SessionConfig config;
 
   /**
    * Creates a new {@code BeanExtractorFactory}.
    *
-   * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   *       obtained from this {@code BeanExtractorFactory}
+   * @param clazz the class of the JavaBeans or records that will be extracted by
+   *       the {@code BeanExtractor} instances obtained from this
+   *       {@code BeanExtractorFactory}
    */
-  public BeanExtractorFactory(Class<T> beanClass) {
-    Check.notNull(beanClass, BEAN_CLASS);
-    this.beanClass = beanClass;
-    this.beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
+  public BeanExtractorFactory(Class<T> clazz) {
+    Check.notNull(clazz);
+    this.clazz = clazz;
+    this.supplier = clazz.isRecord() ? null : () -> newInstance(clazz);
     this.config = Utils.DEFAULT_CONFIG;
   }
 
   /**
    * Creates a new {@code BeanExtractorFactory}.
    *
-   * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   *       obtained from this {@code BeanExtractorFactory}
+   * @param clazz the class of the JavaBeans or records that will be extracted by
+   *       the {@code BeanExtractor} instances obtained from this
+   *       {@code BeanExtractorFactory}
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
    *       behaviour of the {@code BeanExtractor}
    */
-  public BeanExtractorFactory(Class<T> beanClass, SessionConfig config) {
-    this.beanClass = Check.notNull(beanClass, BEAN_CLASS).ok();
-    this.beanSupplier = beanClass.isRecord() ? null : () -> newInstance(beanClass);
+  public BeanExtractorFactory(Class<T> clazz, SessionConfig config) {
+    this.clazz = Check.notNull(clazz, BEAN_CLASS).ok();
+    this.supplier = clazz.isRecord() ? null : () -> newInstance(clazz);
     this.config = Check.notNull(config, CONFIG).ok();
   }
 
   /**
-   * Creates a new {@code BeanExtractorFactory}.
+   * Creates a new {@code BeanExtractorFactory}. The provided class must <i>not</i> be a
+   * {@code record} type.
    *
-   * @param beanClass the class of the JavaBeans that the
-   *       {@code BeanExtractorFactory} will be catering for
+   * @param clazz the class of the JavaBeans that will be extracted by the
+   *       {@code BeanExtractor} instances obtained from this
+   *       {@code BeanExtractorFactory}
    * @param beanSupplier the supplier of the JavaBeans. This would ordinarily be a
    *       method reference to the constructor of the JavaBean (e.g.
-   *       {@code Employee::new}). An {@link IllegalArgumentException} is thrown if
-   *       {@code beanClass} is a {@code record} type.
+   *       {@code Employee::new}).
    */
-  public BeanExtractorFactory(Class<T> beanClass, Supplier<T> beanSupplier) {
-    this.beanClass = Check.notNull(beanClass, BEAN_CLASS)
-          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))
+  public BeanExtractorFactory(Class<T> clazz, Supplier<T> beanSupplier) {
+    this.clazz = Check.notNull(clazz, BEAN_CLASS)
+          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(clazz))
           .ok();
-    this.beanSupplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();
+    this.supplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();
     this.config = Utils.DEFAULT_CONFIG;
   }
 
   /**
-   * Creates a new {@code BeanExtractorFactory}.
+   * Creates a new {@code BeanExtractorFactory}. The provided class must <i>not</i> be a
+   * {@code record} type.
    *
-   * @param beanClass the class of the JavaBeans that will be produced by beanifiers
-   *       obtained from this {@code BeanExtractorFactory}
-   * @param beanSupplier the supplier of the JavaBeans. An
-   *       {@link IllegalArgumentException} is thrown if {@code beanClass} is a
-   *       {@code record} type.
+   * @param clazz the class of the JavaBeans that will be extracted by the
+   *       {@code BeanExtractor} instances obtained from this
+   *       {@code BeanExtractorFactory}
+   * @param beanSupplier the supplier of the JavaBeans.
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
    *       behaviour of the {@code BeanExtractor}
    */
-  public BeanExtractorFactory(Class<T> beanClass,
+  public BeanExtractorFactory(Class<T> clazz,
         Supplier<T> beanSupplier,
         SessionConfig config) {
-    this.beanClass = Check.notNull(beanClass, BEAN_CLASS)
-          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(beanClass))
+    this.clazz = Check.notNull(clazz, BEAN_CLASS)
+          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(clazz))
           .ok();
-    this.beanSupplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();
+    this.supplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();
     this.config = Check.notNull(config, CONFIG).ok();
   }
 
@@ -135,45 +147,32 @@ public final class BeanExtractorFactory<T> {
    */
   @SuppressWarnings("unchecked")
   public BeanExtractor<T> getExtractor(ResultSet rs) throws SQLException {
-    return rs.next() ? beanClass.isRecord()
-          ? recordExtractor(rs) : defaultExtractor(rs)
-          : NoopBeanExtractor.INSTANCE;
+    if (!rs.next()) {
+      return NoopBeanExtractor.INSTANCE;
+    }
+    ExtractorID key = new ExtractorID(clazz, supplier, config);
+    BeanExtractor extractor = cache.get(key);
+    if (extractor == null) {
+      extractor = clazz.isRecord() ? recordExtractor(rs) : defaultExtractor(rs);
+      cache.put(key, extractor);
+    }
+    return extractor;
   }
 
   private DefaultBeanExtractor<T> defaultExtractor(ResultSet rs) {
-    PropertyWriter[] writers;
-    if ((writers = (PropertyWriter[]) ref.getPlain()) == null) {
-      lock.lock();
-      try {
-        if (ref.get() == null) {
-          ref.set(writers = createWriters(rs, beanClass, config));
-        }
-      } finally {
-        lock.unlock();
-      }
-    }
-    return new DefaultBeanExtractor<>(rs, writers, beanSupplier);
+    PropertyWriter[] writers = createWriters(rs, clazz, config);
+    return new DefaultBeanExtractor<>(rs, writers, supplier);
   }
 
   @SuppressWarnings("unchecked")
   private RecordExtractor recordExtractor(ResultSet rs) {
-    RecordFactory recordFactory;
-    if ((recordFactory = (RecordFactory) ref.getPlain()) == null) {
-      lock.lock();
-      try {
-        if (ref.get() == null) {
-          ref.set(recordFactory = new RecordFactory<>((Class) beanClass, rs, config));
-        }
-      } finally {
-        lock.unlock();
-      }
-    }
-    return new RecordExtractor<>(rs, recordFactory);
+    RecordFactory factory = new RecordFactory<>((Class) clazz, rs, config);
+    return new RecordExtractor<>(rs, factory);
   }
 
-  private static <U> U newInstance(Class<U> beanClass) {
+  private static <U> U newInstance(Class<U> clazz) {
     try {
-      return InvokeMethods.newInstance(beanClass);
+      return InvokeMethods.newInstance(clazz);
     } catch (Exception e) {
       throw Utils.wrap(e);
     }
