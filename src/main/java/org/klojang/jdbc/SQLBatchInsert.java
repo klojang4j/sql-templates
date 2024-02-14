@@ -48,7 +48,7 @@ import static org.klojang.util.StringMethods.append;
  *
  * @param <T> the type of the JavaBeans or records to save to the database.
  * @see BatchInsertBuilder
- * @see SQL#batchInsert()
+ * @see SQL#insertBatch()
  */
 @SuppressWarnings({"resource"})
 public final class SQLBatchInsert<T> {

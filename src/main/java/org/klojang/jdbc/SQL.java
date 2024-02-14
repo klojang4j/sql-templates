@@ -495,7 +495,7 @@ public sealed interface SQL permits AbstractSQL {
    * @return an {@code SQLBatchInsertBuilder} that enables you to easily configure large
    *       batch inserts.
    */
-  static BatchInsertBuilder batchInsert() {
+  static BatchInsertBuilder insertBatch() {
     return new BatchInsertBuilder();
   }
 

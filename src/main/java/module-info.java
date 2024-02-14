@@ -13,8 +13,9 @@
  *       only top-level properties are populated.
  *   <li>Enable parametrization of parts of SQL that cannot be parametrized using
  *       {@linkplain java.sql.PreparedStatement prepared statements} alone.
- *       <i>Klojang JDBC</i> allows you to do this without exposing yourself to the
- *       dangers of SQL Injection.
+ *       <i>Klojang JDBC</i> lets you to do this without exposing yourself to the
+ *       dangers of SQL Injection. Values will still be escaped and quoted according to
+ *       the requirements of the target database.
  *   <li>Special attention has been paid to persisting Java objects in large batches.
  * </ol>
  *
@@ -30,49 +31,45 @@
  *          LAST_NAME VARCHAR(255),
  *          BIRTH_DATE DATE)
  *      """;
- * SQL.simple(sql).session(con).execute();
+ * SQL.staticSQL(sql).session(con).execute();
  *
  * List<Person> persons = List.of(
  *    new Person("John", "Smith", LocalDate.of(1960, 4, 15)),
  *    new Person("Mary", "Smith", LocalDate.of(1980, 10, 5)),
  *    new Person("Joan", "de Santos", LocalDate.of(1977, 5, 23)),
- *    new Person("Jill", "Kriel", LocalDate.of(1977, 2, 10)),
- *    new Person("Stephen", "Bester", LocalDate.of(2001, 2, 8)),
- *    new Person("Carlos", "Smith", LocalDate.of(2004, 2, 8)),
+ *    new Person("Jill", "Jackson", LocalDate.of(1977, 2, 10)),
  *    new Person("Mary", "Bear", LocalDate.of(1956, 11, 7)),
- *    new Person("Dieter", "Washington", LocalDate.of(1989, 2, 4)),
- *    new Person("Peter", "Peterson", LocalDate.of(1963, 5, 3)),
  *    new Person("Joe", "Peterson", LocalDate.of(1998, 9, 23))
  * );
  *
- * SQLBatchInsert bi = SQL.insert()
+ * SQLBatchInsert batchInsert = SQL.insertBatch()
  *    .of(Person.class)
- *    .into("PERSON")
  *    .excluding("personId")
- *    .withNameMapper(new CamelCaseToSnakeUpperCase())
  *    .prepare(con);
  * // Save the beans to the database and put the database-generated keys
  * // back onto the beans
- * bi.insertBatchAndSetIDs("personId", persons);
+ * batchInsert.insertBatchAndSetIDs("personId", persons);
  *
- * sql = """
- *    SELECT * FROM PERSON
- *     WHERE LAST_NAME = :lastName
- *     ORDER BY ~%orderBy%
- *    """;
+ * sql = "SELECT * FROM PERSON WHERE LAST_NAME = :lastName ORDER BY ~%orderBy%";
  *
  * SQLSession session = SQL.template(sql).session(con);
  * session.setOrderBy("SALARY");
  * try (SQLQuery query = session.prepareQuery()) {
- *   List<Person> persons = query
- *       .withNameMapper(new SnakeCaseToCamelCase())
- *       .bind("lastName", "Smith")
- *       .getExtractor(Person.class)
- *       .extractAll();
- *   for (Person person : persons) {
- *     System.out.println(person);
- *   }
+ *   query.bind("lastName", "Smith");
+ *   BeanExtractor<Person> extractor = query.getExtractor();
+ *   List<Person> persons = extractor.extractAll();
+ *   persons.forEach(System.out::print);
  * }
+ *
+ * // Or, more concisely:
+ * SQL.template(sql)
+ *     .session(con)
+ *     .setOrderBy("SALARY")
+ *     .prepareQuery()
+ *     .bind("lastName", "Smith")
+ *     .getExtractor(Person.class)
+ *     .extractAll()
+ *     .forEach(System.out::print);
  *
  * }</pre></blockquote>
  *
