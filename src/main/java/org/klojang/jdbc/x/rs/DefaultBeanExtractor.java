@@ -1,9 +1,9 @@
-package org.klojang.jdbc;
+package org.klojang.jdbc.x.rs;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.BeanExtractor;
 import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.rs.PropertyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +14,10 @@ import java.util.function.Supplier;
 import static org.klojang.check.CommonChecks.gt;
 import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
-import static org.klojang.jdbc.x.Strings.*;
+import static org.klojang.jdbc.x.Strings.LIMIT;
+import static org.klojang.jdbc.x.Strings.SIZE_ESTIMATE;
 
-final class DefaultBeanExtractor<T> implements BeanExtractor<T> {
+public final class DefaultBeanExtractor<T> implements BeanExtractor<T> {
 
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(DefaultBeanExtractor.class);

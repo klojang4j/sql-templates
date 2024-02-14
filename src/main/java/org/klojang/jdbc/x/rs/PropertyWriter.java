@@ -23,12 +23,12 @@ import static org.klojang.util.CollectionMethods.implode;
  * @param <COLUMN_TYPE>
  * @param <FIELD_TYPE>
  */
-public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
+final class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PropertyWriter.class);
 
   @SuppressWarnings("rawtypes")
-  public static <U> U writeAll(ResultSet rs,
+  static <U> U writeAll(ResultSet rs,
         Supplier<U> beanSupplier,
         PropertyWriter[] writers) throws Throwable {
     U bean = beanSupplier.get();
@@ -39,7 +39,7 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
   }
 
   @SuppressWarnings("rawtypes")
-  public static PropertyWriter[] createWriters(
+  static PropertyWriter[] createWriters(
         ResultSet rs,
         Class<?> beanClass,
         SessionConfig config) {
@@ -60,9 +60,8 @@ public class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
         Setter setter = setters.get(property);
         if (setter == null) {
           if (LOG.isTraceEnabled()) {
-            String s = beanClass.isRecord() ? "component" : "property";
-            String fmt = "Ignoring column \"{}\" (cannot be mapped to {} of {})";
-            LOG.trace(fmt, label, s, beanClass.getSimpleName());
+            String fmt = "Column {} cannot be mapped to a property of {}";
+            LOG.warn(fmt, label, beanClass.getSimpleName());
           }
           continue;
         }

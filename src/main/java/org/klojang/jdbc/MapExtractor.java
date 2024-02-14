@@ -1,5 +1,7 @@
 package org.klojang.jdbc;
 
+import org.klojang.jdbc.x.rs.DefaultMapExtractor;
+
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;

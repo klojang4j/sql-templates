@@ -2,19 +2,14 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.rs.PropertyWriter;
-import org.klojang.jdbc.x.rs.RecordFactory;
+import org.klojang.jdbc.x.rs.BeanExtractorCache;
 import org.klojang.util.InvokeMethods;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import static org.klojang.jdbc.x.Strings.*;
-import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 import static org.klojang.util.ClassMethods.className;
 
 /**
@@ -49,17 +44,7 @@ import static org.klojang.util.ClassMethods.className;
 @SuppressWarnings("rawtypes")
 public final class BeanExtractorFactory<T> {
 
-  private record ExtractorID(Class clazz, Supplier supplier, SessionConfig config) {
-    public int hashCode() {
-      return Objects.hash(clazz, supplier, config);
-    }
-
-    public boolean equals(Object obj) {
-      return this == obj || (obj instanceof ExtractorID e && clazz == e.clazz && supplier == e.supplier && config == e.config);
-    }
-  }
-
-  private static final Map<ExtractorID, BeanExtractor> cache = new HashMap<>();
+  private static final BeanExtractorCache cache = new BeanExtractorCache();
 
   private static final String RECORDS_NOT_ALLOWED = "bean supplier not supported for record type ${0}";
 
@@ -76,7 +61,7 @@ public final class BeanExtractorFactory<T> {
    */
   public BeanExtractorFactory(Class<T> clazz) {
     Check.notNull(clazz);
-    this.clazz = clazz;
+    this.clazz = Check.notNull(clazz, BEAN_CLASS).ok();
     this.supplier = clazz.isRecord() ? null : () -> newInstance(clazz);
     this.config = Utils.DEFAULT_CONFIG;
   }
@@ -147,27 +132,12 @@ public final class BeanExtractorFactory<T> {
    */
   @SuppressWarnings("unchecked")
   public BeanExtractor<T> getExtractor(ResultSet rs) throws SQLException {
-    if (!rs.next()) {
-      return NoopBeanExtractor.INSTANCE;
+    if (rs.next()) {
+      return clazz.isRecord()
+            ? cache.getRecordExtractor(clazz, config, rs)
+            : cache.getBeanExtractor(clazz, config, rs, supplier);
     }
-    ExtractorID key = new ExtractorID(clazz, supplier, config);
-    BeanExtractor extractor = cache.get(key);
-    if (extractor == null) {
-      extractor = clazz.isRecord() ? recordExtractor(rs) : defaultExtractor(rs);
-      cache.put(key, extractor);
-    }
-    return extractor;
-  }
-
-  private DefaultBeanExtractor<T> defaultExtractor(ResultSet rs) {
-    PropertyWriter[] writers = createWriters(rs, clazz, config);
-    return new DefaultBeanExtractor<>(rs, writers, supplier);
-  }
-
-  @SuppressWarnings("unchecked")
-  private RecordExtractor recordExtractor(ResultSet rs) {
-    RecordFactory factory = new RecordFactory<>((Class) clazz, rs, config);
-    return new RecordExtractor<>(rs, factory);
+    return NoopBeanExtractor.INSTANCE;
   }
 
   private static <U> U newInstance(Class<U> clazz) {

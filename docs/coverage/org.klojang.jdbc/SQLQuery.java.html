@@ -317,8 +317,8 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
 
   private void executeSQL() throws Throwable {
 <span class="pc bpc" id="L319" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
-<span class="fc" id="L320">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
-<span class="fc" id="L321">      applyBindings(ps);</span>
+<span class="fc" id="L320">      applyBindings(ps);</span>
+<span class="fc" id="L321">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
 <span class="fc" id="L322">      resultSet = ps.executeQuery();</span>
     }
 <span class="fc" id="L324">  }</span>

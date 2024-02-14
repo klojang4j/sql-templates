@@ -2,13 +2,10 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
+import org.klojang.jdbc.x.rs.MapExtractorCache;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
 
 /**
  * <p>A factory for {@link MapExtractor} instances. This class behaves analogously
@@ -18,7 +15,7 @@ import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
  */
 public final class MapExtractorFactory {
 
-  private static final Map<SessionConfig, MapExtractor> cache = new HashMap<>();
+  private static final MapExtractorCache cache = new MapExtractorCache();
 
   private final SessionConfig config;
 
@@ -49,10 +46,9 @@ public final class MapExtractorFactory {
    * @throws SQLException if a database error occurs
    */
   public MapExtractor getExtractor(ResultSet rs) throws SQLException {
-    if (!rs.next()) {
-      return NoopMapExtractor.INSTANCE;
-    }
-    return cache.computeIfAbsent(config,
-          k -> new DefaultMapExtractor(rs, createWriters(rs, k)));
+    return rs.next()
+          ? cache.getExtractor(config, rs)
+          : NoopMapExtractor.INSTANCE;
   }
+
 }

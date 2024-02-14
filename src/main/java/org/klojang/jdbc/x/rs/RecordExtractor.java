@@ -1,9 +1,9 @@
-package org.klojang.jdbc;
+package org.klojang.jdbc.x.rs;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.BeanExtractor;
 import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.rs.RecordFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,7 @@ import static org.klojang.check.CommonChecks.yes;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 
-final class RecordExtractor<T extends Record> implements BeanExtractor<T> {
+public final class RecordExtractor<T extends Record> implements BeanExtractor<T> {
 
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(RecordExtractor.class);
@@ -44,7 +44,7 @@ final class RecordExtractor<T extends Record> implements BeanExtractor<T> {
   private final ResultSet rs;
   private final RecordFactory<T> factory;
 
-  RecordExtractor(ResultSet rs, RecordFactory<T> factory) {
+  public RecordExtractor(ResultSet rs, RecordFactory<T> factory) {
     this.rs = rs;
     this.factory = factory;
   }

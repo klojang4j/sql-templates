@@ -317,8 +317,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   private void executeSQL() throws Throwable {
     if (resultSet == null) {
-      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
       applyBindings(ps);
+      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
       resultSet = ps.executeQuery();
     }
   }

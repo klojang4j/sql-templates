@@ -1,5 +1,8 @@
 package org.klojang.jdbc;
 
+import org.klojang.jdbc.x.rs.DefaultBeanExtractor;
+import org.klojang.jdbc.x.rs.RecordExtractor;
+
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Optional;

@@ -1,9 +1,9 @@
-package org.klojang.jdbc;
+package org.klojang.jdbc.x.rs;
 
 import org.klojang.check.Check;
+import org.klojang.jdbc.MapExtractor;
 import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.rs.KeyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 import static org.klojang.jdbc.x.rs.KeyWriter.toMap;
 
-final class DefaultMapExtractor implements MapExtractor {
+public final class DefaultMapExtractor implements MapExtractor {
 
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(DefaultMapExtractor.class);

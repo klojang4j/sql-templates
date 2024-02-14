@@ -120,6 +120,22 @@ public class SQLQueryTest {
   }
 
   @Test
+  public void nullTest00() {
+    SQL.simpleUpdate(MY_CON.get(), "TRUNCATE TABLE PERSON").execute();
+    SQL.simpleInsert(MY_CON.get(),
+                "INSERT INTO PERSON(FIRST_NAME,LAST_NAME,BIRTH_DATE)VALUES(NULL,NULL,NULL)")
+          .execute();
+    Person person = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM PERSON")
+          .getExtractor(Person.class)
+          .extract()
+          .get();
+    assertNull(person.getFirstName());
+    assertNull(person.getLastName());
+    assertNull(person.getBirthDate());
+  }
+
+
+  @Test
   public void test00() {
     String sql = """
           SELECT * FROM PERSON
@@ -202,20 +218,4 @@ public class SQLQueryTest {
       assertEquals(List.of("Bear", "Bester"), l);
     }
   }
-
-  @Test
-  public void nullTest00() {
-    SQL.simpleUpdate(MY_CON.get(), "TRUNCATE TABLE PERSON").execute();
-    SQL.simpleInsert(MY_CON.get(),
-                "INSERT INTO PERSON(FIRST_NAME,LAST_NAME,BIRTH_DATE)VALUES(NULL,NULL,NULL)")
-          .execute();
-    Person person = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM PERSON")
-          .getExtractor(Person.class)
-          .extract()
-          .get();
-    assertNull(person.getFirstName());
-    assertNull(person.getLastName());
-    assertNull(person.getBirthDate());
-  }
-
 }

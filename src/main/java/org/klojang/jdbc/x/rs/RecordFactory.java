@@ -20,7 +20,7 @@ import static org.klojang.util.CollectionMethods.implode;
 
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public final class RecordFactory<T extends Record> {
+final class RecordFactory<T extends Record> {
 
   private record WriteConfig(MethodHandle constructor, ComponentWriter[] writers) { }
 
@@ -29,14 +29,14 @@ public final class RecordFactory<T extends Record> {
   private final MethodHandle constructor;
   private final ComponentWriter[] writers;
 
-  public RecordFactory(Class<T> recordClass, ResultSet resultset, SessionConfig config) {
+  RecordFactory(Class<T> recordClass, ResultSet resultset, SessionConfig config) {
     WriteConfig cfg = createWriters(recordClass, resultset, config);
     constructor = cfg.constructor();
     writers = cfg.writers();
   }
 
   @SuppressWarnings("unchecked")
-  public T createRecord(ResultSet rs) throws Throwable {
+  T createRecord(ResultSet rs) throws Throwable {
     Object[] args = new Object[writers.length];
     for (int i = 0; i < writers.length; ++i) {
       args[i] = writers[i].readValue(rs);
@@ -65,8 +65,10 @@ public final class RecordFactory<T extends Record> {
         String componentName = config.getColumnToPropertyMapper().map(label);
         RecordComponent component = components.get(componentName);
         if (component == null) {
-          String fmt = "Column {} cannot be mapped to a component of {}";
-          LOG.warn(fmt, label, recordClass.getSimpleName());
+          if (LOG.isTraceEnabled()) {
+            String fmt = "Column {} cannot be mapped to a component of {}";
+            LOG.warn(fmt, label, recordClass.getSimpleName());
+          }
           continue;
         }
         Class<?> type = component.getType();

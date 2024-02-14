@@ -1,3 +1,4 @@
 module:org.klojang.jdbc
 org.klojang.jdbc
 org.klojang.jdbc.util
+org.klojang.jdbc.x.rs

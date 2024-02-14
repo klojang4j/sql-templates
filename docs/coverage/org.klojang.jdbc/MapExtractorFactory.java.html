@@ -2,13 +2,10 @@
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
+import org.klojang.jdbc.x.rs.MapExtractorCache;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
 
 /**
  * &lt;p&gt;A factory for {@link MapExtractor} instances. This class behaves analogously
@@ -18,7 +15,7 @@ import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
  */
 public final class MapExtractorFactory {
 
-<span class="nc" id="L21">  private static final Map&lt;SessionConfig, MapExtractor&gt; cache = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L18">  private static final MapExtractorCache cache = new MapExtractorCache();</span>
 
   private final SessionConfig config;
 
@@ -26,8 +23,8 @@ public final class MapExtractorFactory {
    * Creates a new {@code MapExtractorFactory}.
    */
   public MapExtractorFactory() {
-<span class="nc" id="L29">    this(Utils.DEFAULT_CONFIG);</span>
-<span class="nc" id="L30">  }</span>
+<span class="nc" id="L26">    this(Utils.DEFAULT_CONFIG);</span>
+<span class="nc" id="L27">  }</span>
 
   /**
    * Creates a new {@code MapExtractorFactory} using the specified configuration object
@@ -35,9 +32,9 @@ public final class MapExtractorFactory {
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
    *       behaviour of the {@code MapExtractor}
    */
-<span class="nc" id="L38">  public MapExtractorFactory(SessionConfig config) {</span>
-<span class="nc" id="L39">    this.config = Check.notNull(config).ok();</span>
-<span class="nc" id="L40">  }</span>
+<span class="nc" id="L35">  public MapExtractorFactory(SessionConfig config) {</span>
+<span class="nc" id="L36">    this.config = Check.notNull(config).ok();</span>
+<span class="nc" id="L37">  }</span>
 
   /**
    * Returns a {@code MapExtractor} that will convert the rows in the specified
@@ -49,11 +46,10 @@ public final class MapExtractorFactory {
    * @throws SQLException if a database error occurs
    */
   public MapExtractor getExtractor(ResultSet rs) throws SQLException {
-<span class="nc bnc" id="L52" title="All 2 branches missed.">    if (!rs.next()) {</span>
-<span class="nc" id="L53">      return NoopMapExtractor.INSTANCE;</span>
-    }
-<span class="nc" id="L55">    return cache.computeIfAbsent(config,</span>
-<span class="nc" id="L56">          k -&gt; new DefaultMapExtractor(rs, createWriters(rs, k)));</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">    return rs.next()</span>
+<span class="nc" id="L50">          ? cache.getExtractor(config, rs)</span>
+<span class="nc" id="L51">          : NoopMapExtractor.INSTANCE;</span>
   }
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
