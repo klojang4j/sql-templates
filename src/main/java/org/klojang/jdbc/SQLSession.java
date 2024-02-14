@@ -81,7 +81,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *   List<Airport> airports =  sql.session(con)
    *       .setArray("names", "London Heathrow", "Chicago O'Hare")
    *       .prepareQuery()
-   *       .getBeanifier()
+   *       .getExtractor()
    *       .extractAll();
    * }
    * }</pre></blockquote>
@@ -352,7 +352,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       .session(con)
    *       .setOrderBy("LAST_NAME")
    *       .prepareQuery(con)
-   *       .getBeanifier(Person.class)
+   *       .getExtractor(Person.class)
    *       .extractAll();
    * }
    * }</pre></blockquote>

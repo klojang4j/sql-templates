@@ -27,29 +27,29 @@ import java.util.function.Supplier;
  * try(Connection con = ...) {
  *   try(SQLQuery query = sql.session(con).prepareQuery()) {
  *     query.bind("firstName", "John");
+ *     // Collect all values in the first column of the ResultSet into a List
  *     List<String> lastNames = query.firstColumn();
  *   }
  * }
  * }</pre></blockquote>
  *
  * <p>Here is an example of a query that that contains both named parameters and template
- * variables (see the {@linkplain SQL SQL interface} for more information):
+ * variables (see the {@linkplain SQL comments for the SQL interface} for the difference
+ * between the two):
  *
  * <blockquote><pre>{@code
- * String query = """
+ * SQL sql = SQL.template("""
  *  SELECT LAST_NAME
  *    FROM PERSON
  *   WHERE FIRST_NAME = :firstName
  *   ORDER BY ~%sortColumn%
- *  """;
- * SQL sql = SQL.template(query);
+ *  """);
  * try(Connection con = ...) {
- *   SQLSession session = sql.session(con);
- *   session.setIdentifier("sortColumn", "SALARY");
- *   try(SQLQuery query = session.prepareQuery()) {
- *     query.bind("firstName", "John");
- *     List<String> lastNames = query.firstColumn();
- *   }
+ *   return sql.session(con)
+ *       .setIdentifier("sortColumn", "SALARY")
+ *       .prepareQuery()
+ *       .bind("firstName", "John")
+ *       .firstColumn();
  * }
  * }</pre></blockquote>
  */
@@ -257,21 +257,21 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   /**
    * Executes the query and returns a {@code BeanExtractor} that you can use to convert
-   * the rows in the {@link ResultSet} into JavaBeans or record. If the query had already
+   * the rows in the {@link ResultSet} into JavaBeans or records. If the query had already
    * been executed, it will not be executed again. Call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
-   * @param <T> the type of the JavaBeans (may be a {@code record} type)
-   * @param beanClass the class of the JavaBeans
+   * @param <T> the type of the JavaBeans or records
+   * @param clazz the class of the JavaBeans or records
    * @return a {@code BeanExtractor} that you can use to convert the rows in the
    *       {@link ResultSet} into JavaBeans or records.
    */
-  public <T> BeanExtractor<T> getExtractor(Class<T> beanClass) {
+  public <T> BeanExtractor<T> getExtractor(Class<T> clazz) {
     try {
       executeSQL();
       return session
             .getSQL()
-            .getBeanExtractorFactory(beanClass)
+            .getBeanExtractorFactory(clazz)
             .getExtractor(resultSet);
     } catch (Throwable t) {
       throw Utils.wrap(t);
@@ -280,24 +280,26 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   /**
    * Executes the query and returns a {@code BeanExtractor} that you can use to convert
-   * the rows in the {@link ResultSet} into JavaBeans. If the query had already been
-   * executed, it will not be executed again. Call {@link SQLStatement#reset() reset()} to
-   * force the query to be re-executed.
+   * the rows in the {@link ResultSet} into JavaBeans. The provided class must <i>not</i>
+   * be a {@code record} type. If the query had already been executed, it will not be
+   * executed again. Call {@link SQLStatement#reset() reset()} to force the query to be
+   * re-executed.
    *
-   * @param <T> the type of the JavaBeans (may be a {@code record} type)
-   * @param beanClass the class of the JavaBeans
+   * @param <T> the type of the JavaBeans (must <i>not</i> be a {@code record}
+   *       type)
+   * @param clazz the class of the JavaBeans
    * @param beanSupplier the supplier of the JavaBean instances. This would
    *       ordinarily be a method reference to the constructor of the JavaBean (like
    *       {@code Person::new})
    * @return a {@code BeanExtractor} that you can use to convert the rows in the
    *       {@link ResultSet} into JavaBeans.
    */
-  public <T> BeanExtractor<T> getExtractor(Class<T> beanClass, Supplier<T> beanSupplier) {
+  public <T> BeanExtractor<T> getExtractor(Class<T> clazz, Supplier<T> beanSupplier) {
     try {
       executeSQL();
       return session
             .getSQL()
-            .getBeanExtractorFactory(beanClass, beanSupplier)
+            .getBeanExtractorFactory(clazz, beanSupplier)
             .getExtractor(resultSet);
     } catch (Throwable t) {
       throw Utils.wrap(t);

@@ -27,29 +27,29 @@ import java.util.function.Supplier;
  * try(Connection con = ...) {
  *   try(SQLQuery query = sql.session(con).prepareQuery()) {
  *     query.bind(&quot;firstName&quot;, &quot;John&quot;);
+ *     // Collect all values in the first column of the ResultSet into a List
  *     List&lt;String&gt; lastNames = query.firstColumn();
  *   }
  * }
  * }&lt;/pre&gt;&lt;/blockquote&gt;
  *
  * &lt;p&gt;Here is an example of a query that that contains both named parameters and template
- * variables (see the {@linkplain SQL SQL interface} for more information):
+ * variables (see the {@linkplain SQL comments for the SQL interface} for the difference
+ * between the two):
  *
  * &lt;blockquote&gt;&lt;pre&gt;{@code
- * String query = &quot;&quot;&quot;
+ * SQL sql = SQL.template(&quot;&quot;&quot;
  *  SELECT LAST_NAME
  *    FROM PERSON
  *   WHERE FIRST_NAME = :firstName
  *   ORDER BY ~%sortColumn%
- *  &quot;&quot;&quot;;
- * SQL sql = SQL.template(query);
+ *  &quot;&quot;&quot;);
  * try(Connection con = ...) {
- *   SQLSession session = sql.session(con);
- *   session.setIdentifier(&quot;sortColumn&quot;, &quot;SALARY&quot;);
- *   try(SQLQuery query = session.prepareQuery()) {
- *     query.bind(&quot;firstName&quot;, &quot;John&quot;);
- *     List&lt;String&gt; lastNames = query.firstColumn();
- *   }
+ *   return sql.session(con)
+ *       .setIdentifier(&quot;sortColumn&quot;, &quot;SALARY&quot;)
+ *       .prepareQuery()
+ *       .bind(&quot;firstName&quot;, &quot;John&quot;)
+ *       .firstColumn();
  * }
  * }&lt;/pre&gt;&lt;/blockquote&gt;
  */
@@ -257,21 +257,21 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
 
   /**
    * Executes the query and returns a {@code BeanExtractor} that you can use to convert
-   * the rows in the {@link ResultSet} into JavaBeans or record. If the query had already
+   * the rows in the {@link ResultSet} into JavaBeans or records. If the query had already
    * been executed, it will not be executed again. Call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
-   * @param &lt;T&gt; the type of the JavaBeans (may be a {@code record} type)
-   * @param beanClass the class of the JavaBeans
+   * @param &lt;T&gt; the type of the JavaBeans or records
+   * @param clazz the class of the JavaBeans or records
    * @return a {@code BeanExtractor} that you can use to convert the rows in the
    *       {@link ResultSet} into JavaBeans or records.
    */
-  public &lt;T&gt; BeanExtractor&lt;T&gt; getExtractor(Class&lt;T&gt; beanClass) {
+  public &lt;T&gt; BeanExtractor&lt;T&gt; getExtractor(Class&lt;T&gt; clazz) {
     try {
 <span class="fc" id="L271">      executeSQL();</span>
 <span class="fc" id="L272">      return session</span>
 <span class="fc" id="L273">            .getSQL()</span>
-<span class="fc" id="L274">            .getBeanExtractorFactory(beanClass)</span>
+<span class="fc" id="L274">            .getBeanExtractorFactory(clazz)</span>
 <span class="fc" id="L275">            .getExtractor(resultSet);</span>
 <span class="nc" id="L276">    } catch (Throwable t) {</span>
 <span class="nc" id="L277">      throw Utils.wrap(t);</span>
@@ -280,50 +280,52 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
 
   /**
    * Executes the query and returns a {@code BeanExtractor} that you can use to convert
-   * the rows in the {@link ResultSet} into JavaBeans. If the query had already been
-   * executed, it will not be executed again. Call {@link SQLStatement#reset() reset()} to
-   * force the query to be re-executed.
+   * the rows in the {@link ResultSet} into JavaBeans. The provided class must &lt;i&gt;not&lt;/i&gt;
+   * be a {@code record} type. If the query had already been executed, it will not be
+   * executed again. Call {@link SQLStatement#reset() reset()} to force the query to be
+   * re-executed.
    *
-   * @param &lt;T&gt; the type of the JavaBeans (may be a {@code record} type)
-   * @param beanClass the class of the JavaBeans
+   * @param &lt;T&gt; the type of the JavaBeans (must &lt;i&gt;not&lt;/i&gt; be a {@code record}
+   *       type)
+   * @param clazz the class of the JavaBeans
    * @param beanSupplier the supplier of the JavaBean instances. This would
    *       ordinarily be a method reference to the constructor of the JavaBean (like
    *       {@code Person::new})
    * @return a {@code BeanExtractor} that you can use to convert the rows in the
    *       {@link ResultSet} into JavaBeans.
    */
-  public &lt;T&gt; BeanExtractor&lt;T&gt; getExtractor(Class&lt;T&gt; beanClass, Supplier&lt;T&gt; beanSupplier) {
+  public &lt;T&gt; BeanExtractor&lt;T&gt; getExtractor(Class&lt;T&gt; clazz, Supplier&lt;T&gt; beanSupplier) {
     try {
-<span class="nc" id="L297">      executeSQL();</span>
-<span class="nc" id="L298">      return session</span>
-<span class="nc" id="L299">            .getSQL()</span>
-<span class="nc" id="L300">            .getBeanExtractorFactory(beanClass, beanSupplier)</span>
-<span class="nc" id="L301">            .getExtractor(resultSet);</span>
-<span class="nc" id="L302">    } catch (Throwable t) {</span>
-<span class="nc" id="L303">      throw Utils.wrap(t);</span>
+<span class="nc" id="L299">      executeSQL();</span>
+<span class="nc" id="L300">      return session</span>
+<span class="nc" id="L301">            .getSQL()</span>
+<span class="nc" id="L302">            .getBeanExtractorFactory(clazz, beanSupplier)</span>
+<span class="nc" id="L303">            .getExtractor(resultSet);</span>
+<span class="nc" id="L304">    } catch (Throwable t) {</span>
+<span class="nc" id="L305">      throw Utils.wrap(t);</span>
     }
   }
 
   @Override
   void initialize() {
     try {
-<span class="nc bnc" id="L310" title="All 2 branches missed.">      if (resultSet != null) {</span>
-<span class="nc" id="L311">        resultSet.close();</span>
-<span class="nc" id="L312">        resultSet = null;</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">      if (resultSet != null) {</span>
+<span class="nc" id="L313">        resultSet.close();</span>
+<span class="nc" id="L314">        resultSet = null;</span>
       }
-<span class="nc" id="L314">      ps.clearParameters();</span>
-<span class="nc" id="L315">    } catch (SQLException e) {</span>
-<span class="nc" id="L316">      throw Utils.wrap(e);</span>
-<span class="nc" id="L317">    }</span>
-<span class="nc" id="L318">  }</span>
+<span class="nc" id="L316">      ps.clearParameters();</span>
+<span class="nc" id="L317">    } catch (SQLException e) {</span>
+<span class="nc" id="L318">      throw Utils.wrap(e);</span>
+<span class="nc" id="L319">    }</span>
+<span class="nc" id="L320">  }</span>
 
   private void executeSQL() throws Throwable {
-<span class="pc bpc" id="L321" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
-<span class="fc" id="L322">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
-<span class="fc" id="L323">      applyBindings(ps);</span>
-<span class="fc" id="L324">      resultSet = ps.executeQuery();</span>
+<span class="pc bpc" id="L323" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
+<span class="fc" id="L324">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L325">      applyBindings(ps);</span>
+<span class="fc" id="L326">      resultSet = ps.executeQuery();</span>
     }
-<span class="fc" id="L326">  }</span>
+<span class="fc" id="L328">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

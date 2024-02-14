@@ -7,7 +7,7 @@ import java.util.Optional;
 /**
  * <p>Converts the rows in a JDBC {@link ResultSet} into JavaBeans or records. Instances
  * are obtained via
- * {@link BeanExtractorFactory#getExtractor(ResultSet) BeanExtractorFactory.getBeanifier()}. A
+ * {@link BeanExtractorFactory#getExtractor(ResultSet) BeanExtractorFactory.getExtractor()}. A
  * {@code BeanExtractor} is agnostic about, and has no opinion on how the
  * {@link ResultSet} was obtained. It may have been produced using regular JDBC calls. It
  * does not aim to be an ORM-like class. It just converts result sets into (flat)
@@ -21,7 +21,7 @@ import java.util.Optional;
  * <blockquote><pre>{@code
  * ResultSet rs = ...;
  * BeanExtractorFactory factory = new BeanExtractorFactory(Employee.class);
- * for(Employee emp : factory.getBeanifier(rs)) {
+ * for(Employee emp : factory.getExtractor(rs)) {
  *   // do stuff ...
  * }
  * }</pre></blockquote>

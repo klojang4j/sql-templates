@@ -106,7 +106,7 @@ import static org.klojang.jdbc.x.Strings.*;
  *     if(departmentName != null) {
  *       query.bind(&quot;dept&quot;, departmentName);
  *     }
- *     List&lt;Employee&gt; emps = query.getBeanifier(Employee.class).extractAll();
+ *     List&lt;Employee&gt; emps = query.getExtractor(Employee.class).extractAll();
  *   }
  * }
  * }&lt;/pre&gt;&lt;/blockquote&gt;

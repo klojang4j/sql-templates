@@ -21,15 +21,15 @@ import static org.klojang.util.ClassMethods.className;
  * {@code BeanExtractorFactory} per SQL query. If multiple types of beans are extracted
  * from the query result, you would create more than one {@code BeanExtractorFactory} per
  * SQL query. The very first {@link ResultSet} passed to
- * {@link #getExtractor(ResultSet) BeanExtractorFactory.getBeanifier()} is used to
- * configure the extraction process. Subsequent calls to {@code getBeanifier()} will use
+ * {@link #getExtractor(ResultSet) BeanExtractorFactory.getExtractor()} is used to
+ * configure the extraction process. Subsequent calls to {@code getExtractor()} will use
  * the same configuration. Therefore, although multiple {@code BeanExtractorFactory}
  * instances may be instantiated for a single SQL query, a single
  * {@code BeanExtractorFactory} should not be used to process result sets from different
  * SQL queries.
  *
  * <p><i>(More precisely: all result sets subsequently passed to
- * {@link #getExtractor(ResultSet) getBeanifier()} must have the same number of columns,
+ * {@link #getExtractor(ResultSet) getExtractor()} must have the same number of columns,
  * and they must have the same column types in the same order. Column names do not matter.
  * Thus, you <b>could</b>, in fact, use a single {@code BeanExtractorFactory} for multiple
  * SQL queries &#8212; for example if they all select a primary key column and (say) a
