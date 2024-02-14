@@ -24,9 +24,9 @@ final class ResultSetId {
   @Override
   public int hashCode() {
     int hash = 1;
-    for (int i = 0; i < types.length; ++i) {
-      hash = (hash * 31) + types[i];
+    for (int i = 0; i < columns.length; ++i) {
       hash = (hash * 31) + columns[i].hashCode();
+      hash = (hash * 31) + types[i];
     }
     return hash;
   }

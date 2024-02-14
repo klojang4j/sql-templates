@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class BeanExtractorCache {
 
   private final Map<BeanExtractorId, PropertyWriter[]> cache0 = new HashMap<>();

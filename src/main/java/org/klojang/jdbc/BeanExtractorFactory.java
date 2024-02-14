@@ -15,9 +15,9 @@ import static org.klojang.util.ClassMethods.className;
 /**
  * <p>A factory for {@link BeanExtractor} instances. Generally you would create one
  * {@code BeanExtractorFactory} per SQL query. If multiple types of beans are extracted
- * from the query result (with different sets of columns feeding into different types of
- * beans), you would create more than one {@code BeanExtractorFactory} per SQL query. The
- * very first {@link ResultSet} passed to
+ * from the query result (different columns feeding into different types of beans), you
+ * would create more than one {@code BeanExtractorFactory} per SQL query. The very first
+ * {@link ResultSet} passed to
  * {@link #getExtractor(ResultSet) BeanExtractorFactory.getExtractor()} is used to
  * configure the extraction process. {@code ResultSet} objects passed subsequently to
  * {@code getExtractor()} will be processed identically. Therefore, passing a
@@ -28,20 +28,21 @@ import static org.klojang.util.ClassMethods.className;
  *
  * <p><i>(More precisely: all {@code ResultSet} objects subsequently passed to
  * {@link #getExtractor(ResultSet) getExtractor()} must have the same number of columns,
- * and they must have the same column types in the same order. Column names do not matter.
- * Thus, you <b>could</b>, in fact, use a single {@code BeanExtractorFactory} for multiple
- * SQL queries &#8212; for example if they all select the primary key column and, say, a
- * {@code VARCHAR} column from different tables. This might be the case for web
- * applications that need to fill multiple {@code <select>}) boxes.)</i>
+ * and they must have the same column types in the same order. Column names do not matter
+ * any longer. Thus, in principle, you <b>could</b> use a single
+ * {@code BeanExtractorFactory} for multiple SQL queries; for example if they all
+ * select the primary key column and, say, a {@code VARCHAR} column from different tables.
+ * This might be the case for web applications that need to fill multiple
+ * {@code <select>}) boxes. However, this is a micro-optimization that may decrease the
+ * readability of your code.)</i>
  *
  * <p>It is not necessary to cache {@code BeanExtractorFactory} objects or
- * {@code BeanExtractor} objects. <i>Klojang JDBC</i> already caches the relevant data,
+ * {@code BeanExtractor} objects. <i>Klojang JDBC</i> already caches the expensive parts,
  * making both essentially light-weight objects. Create them when you need them.
  *
  * @param <T> the type of JavaBeans or records produced by the extractor
  * @author Ayco Holleman
  */
-@SuppressWarnings("rawtypes")
 public final class BeanExtractorFactory<T> {
 
   private static final BeanExtractorCache cache = new BeanExtractorCache();

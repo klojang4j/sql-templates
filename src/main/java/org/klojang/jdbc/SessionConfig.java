@@ -35,6 +35,11 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
  * SessionConfig config = SessionConfig.getDefaultConfig().withSaveAllEnumsAsStrings();
  * }</pre></blockquote>
  *
+ * <p>It does pay, however, to store your final {@code SessionConfig} object in a
+ * {@code public static final} field, and use it wherever appropriate. Otherwise, do
+ * implement {@code SessionConfig} using a regular class and make sure to override the
+ * {@code equals()} and {@code hashCode()} methods.
+ *
  * @author Ayco Holleman
  */
 public interface SessionConfig {
@@ -140,8 +145,8 @@ public interface SessionConfig {
    *       {@code CustomReader}. Note that when writing to a {@code Map} (using a
    *       {@link MapExtractor}), this argument will always be {@code Object.class}
    *       because we don't know the runtime type yet of the values when the
-   *       {@code MapExtractor} is configured, and Java's type erase feature
-   *       prevents us from being any more specific beforehand.
+   *       {@code MapExtractor} is configured, and Java's type erase feature prevents us
+   *       from being any more specific beforehand.
    * @param sqlType the SQL datatype of the column for which to specify a
    *       {@code CustomReader}. Must be one of the constants of the
    *       {@link java.sql.Types java.sql.Types}, like
