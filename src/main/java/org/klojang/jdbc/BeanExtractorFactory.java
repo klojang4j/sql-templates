@@ -9,7 +9,6 @@ import org.klojang.util.InvokeMethods;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
@@ -24,45 +23,35 @@ import static org.klojang.util.ClassMethods.className;
  * would create more than one {@code BeanExtractorFactory} per SQL query. The very first
  * {@link ResultSet} passed to
  * {@link #getExtractor(ResultSet) BeanExtractorFactory.getExtractor()} is used to
- * configure the extraction process. {@code ResultSet} objects passed subsequently to
- * {@code getExtractor()} will be processed identically. Therefore, passing a
- * {@code ResultSet} that came from a completely different query will almost certainly
- * lead to unexpected outcomes or exceptions. In short: Multiple
- * {@code BeanExtractorFactory} instances may be created for a single SQL query, but a
- * single {@code BeanExtractorFactory} should not be used to handle multiple SQL queries.
+ * configure the extraction process. {@code ResultSet} objects subsequently passed to
+ * {@code getExtractor()} will be processed identically. It will be assumed they have the
+ * same number of columns and the same column types in the same order. Therefore, passing
+ * a {@code ResultSet} that came from a completely different query will almost certainly
+ * lead to unexpected outcomes or exceptions.
  *
- * <p><i>(More precisely: all {@code ResultSet} objects subsequently passed to
- * {@link #getExtractor(ResultSet) getExtractor()} must have the same number of columns,
- * and they must have the same column types in the same order. Column names do not matter
- * any longer. Thus, in principle, you <b>could</b> use a single
- * {@code BeanExtractorFactory} for multiple SQL queries; for example if they all select
- * the primary key column and, say, a {@code VARCHAR} column from different tables. This
- * might be the case for web applications that need to fill multiple {@code <select>})
- * boxes. However, this is a micro-optimization that may decrease the readability of your
- * code.)</i>
- *
- * <p>It is not necessary to cache {@code BeanExtractorFactory} objects or
- * {@code BeanExtractor} objects. <i>Klojang JDBC</i> already caches the expensive parts,
- * making both essentially light-weight objects. Create them when you need them.
+ * <p>Because the configuration of the extraction process is somewhat expensive, it
+ * is recommended that you store {@code BeanExtractorFactory} instances in
+ * {@code private static final} fields or use some sort of caching mechanism.
  *
  * @param <T> the type of JavaBeans or records produced by the extractor
  * @author Ayco Holleman
  */
 public final class BeanExtractorFactory<T> {
 
-  private static final String RECORDS_NOT_ALLOWED = "bean supplier not supported for record type ${0}";
+  private static final String RECORDS_NOT_ALLOWED
+        = "bean supplier not supported for immutable type ${0}";
 
-  /**
-   * The object held by the AtomicReference will either be a RecordFactory in case clazz
-   * is a record type or a PropertyWriter[] array in case it is a JavaBean type.
-   */
-  private final AtomicReference<Object> ref = new AtomicReference<>();
   private final ReentrantLock lock = new ReentrantLock();
-
 
   private final Class<T> clazz;
   private final Supplier<T> supplier;
   private final SessionConfig config;
+
+  /**
+   * Will either be a RecordFactory in case clazz is a record type or a PropertyWriter[]
+   * array in case it is a JavaBean type.
+   */
+  private Object payload;
 
   /**
    * Creates a new {@code BeanExtractorFactory}.
@@ -148,14 +137,14 @@ public final class BeanExtractorFactory<T> {
           : NoopBeanExtractor.INSTANCE;
   }
 
-  @SuppressWarnings("rawtypes")
   private DefaultBeanExtractor<T> defaultExtractor(ResultSet rs) {
-    PropertyWriter[] writers;
-    if ((writers = (PropertyWriter[]) ref.getPlain()) == null) {
+    PropertyWriter<?, ?>[] writers;
+    if ((writers = (PropertyWriter<?, ?>[]) payload) == null) {
       lock.lock();
       try {
-        if (ref.get() == null) {
-          ref.set(writers = createWriters(rs, clazz, config));
+        // Check again, but now we know for sure the only one in here
+        if (payload == null) {
+          payload = writers = createWriters(rs, clazz, config);
         }
       } finally {
         lock.unlock();
@@ -167,11 +156,11 @@ public final class BeanExtractorFactory<T> {
   @SuppressWarnings({"unchecked", "rawtypes"})
   private RecordExtractor recordExtractor(ResultSet rs) {
     RecordFactory recordFactory;
-    if ((recordFactory = (RecordFactory) ref.getPlain()) == null) {
+    if ((recordFactory = (RecordFactory) payload) == null) {
       lock.lock();
       try {
-        if (ref.get() == null) {
-          ref.set(recordFactory = new RecordFactory<>((Class) clazz, rs, config));
+        if (payload == null) {
+          payload = recordFactory = new RecordFactory<>((Class) clazz, rs, config);
         }
       } finally {
         lock.unlock();

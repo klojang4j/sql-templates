@@ -23,63 +23,63 @@ final class ResultSetMethodLookup {
   private static ResultSetMethodLookup INSTANCE;
 
   static ResultSetMethodLookup getInstance() {
-<span class="nc bnc" id="L26" title="All 2 branches missed.">    if (INSTANCE == null) {</span>
-<span class="nc" id="L27">      INSTANCE = new ResultSetMethodLookup();</span>
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">    if (INSTANCE == null) {</span>
+<span class="fc" id="L27">      INSTANCE = new ResultSetMethodLookup();</span>
     }
-<span class="nc" id="L29">    return INSTANCE;</span>
+<span class="fc" id="L29">    return INSTANCE;</span>
   }
 
   private final Map&lt;Integer, ResultSetMethod&lt;?&gt;&gt; cache;
 
-<span class="nc" id="L34">  private ResultSetMethodLookup() {</span>
-<span class="nc" id="L35">    cache = createCache();</span>
-<span class="nc" id="L36">  }</span>
+<span class="fc" id="L34">  private ResultSetMethodLookup() {</span>
+<span class="fc" id="L35">    cache = createCache();</span>
+<span class="fc" id="L36">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
   &lt;T&gt; ResultSetMethod&lt;T&gt; getMethod(int sqlType) {
-<span class="nc" id="L40">    Check.that(sqlType).has(box(), keyIn(), cache,</span>
+<span class="fc" id="L40">    Check.that(sqlType).has(box(), keyIn(), cache,</span>
 <span class="nc" id="L41">          () -&gt; new DatabaseException(&quot;unsupported SQL type: &quot; + getTypeName(sqlType)));</span>
-<span class="nc" id="L42">    return (ResultSetMethod&lt;T&gt;) cache.get(sqlType);</span>
+<span class="fc" id="L42">    return (ResultSetMethod&lt;T&gt;) cache.get(sqlType);</span>
   }
 
   private static Map&lt;Integer, ResultSetMethod&lt;?&gt;&gt; createCache() {
 
-<span class="nc" id="L47">    Map&lt;Integer, ResultSetMethod&lt;?&gt;&gt; tmp = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L47">    Map&lt;Integer, ResultSetMethod&lt;?&gt;&gt; tmp = new HashMap&lt;&gt;();</span>
 
-<span class="nc" id="L49">    tmp.put(VARCHAR, ResultSetMethod.GET_STRING);</span>
-<span class="nc" id="L50">    tmp.put(LONGVARCHAR, ResultSetMethod.GET_STRING);</span>
-<span class="nc" id="L51">    tmp.put(NVARCHAR, ResultSetMethod.GET_STRING);</span>
-<span class="nc" id="L52">    tmp.put(LONGNVARCHAR, ResultSetMethod.GET_STRING);</span>
-<span class="nc" id="L53">    tmp.put(CHAR, ResultSetMethod.GET_STRING);</span>
-<span class="nc" id="L54">    tmp.put(CLOB, ResultSetMethod.GET_STRING);</span>
+<span class="fc" id="L49">    tmp.put(VARCHAR, ResultSetMethod.GET_STRING);</span>
+<span class="fc" id="L50">    tmp.put(LONGVARCHAR, ResultSetMethod.GET_STRING);</span>
+<span class="fc" id="L51">    tmp.put(NVARCHAR, ResultSetMethod.GET_STRING);</span>
+<span class="fc" id="L52">    tmp.put(LONGNVARCHAR, ResultSetMethod.GET_STRING);</span>
+<span class="fc" id="L53">    tmp.put(CHAR, ResultSetMethod.GET_STRING);</span>
+<span class="fc" id="L54">    tmp.put(CLOB, ResultSetMethod.GET_STRING);</span>
 
-<span class="nc" id="L56">    tmp.put(INTEGER, ResultSetMethod.GET_INT);</span>
-<span class="nc" id="L57">    tmp.put(SMALLINT, ResultSetMethod.GET_SHORT);</span>
-<span class="nc" id="L58">    tmp.put(TINYINT, ResultSetMethod.GET_BYTE);</span>
+<span class="fc" id="L56">    tmp.put(INTEGER, ResultSetMethod.GET_INT);</span>
+<span class="fc" id="L57">    tmp.put(SMALLINT, ResultSetMethod.GET_SHORT);</span>
+<span class="fc" id="L58">    tmp.put(TINYINT, ResultSetMethod.GET_BYTE);</span>
     // Confusingly, Types.REAL corresponds to the Java float type while both
     // Types.DOUBLE and Types.FLOAT correspond to the Java double type.
-<span class="nc" id="L61">    tmp.put(DOUBLE, ResultSetMethod.GET_DOUBLE);</span>
-<span class="nc" id="L62">    tmp.put(FLOAT, ResultSetMethod.GET_DOUBLE);</span>
-<span class="nc" id="L63">    tmp.put(REAL, ResultSetMethod.GET_FLOAT);</span>
-<span class="nc" id="L64">    tmp.put(BIGINT, ResultSetMethod.GET_LONG);</span>
+<span class="fc" id="L61">    tmp.put(DOUBLE, ResultSetMethod.GET_DOUBLE);</span>
+<span class="fc" id="L62">    tmp.put(FLOAT, ResultSetMethod.GET_DOUBLE);</span>
+<span class="fc" id="L63">    tmp.put(REAL, ResultSetMethod.GET_FLOAT);</span>
+<span class="fc" id="L64">    tmp.put(BIGINT, ResultSetMethod.GET_LONG);</span>
 
-<span class="nc" id="L66">    tmp.put(BOOLEAN, ResultSetMethod.GET_BOOLEAN);</span>
+<span class="fc" id="L66">    tmp.put(BOOLEAN, ResultSetMethod.GET_BOOLEAN);</span>
 
-<span class="nc" id="L68">    tmp.put(DATE, ResultSetMethod.GET_DATE);</span>
-<span class="nc" id="L69">    tmp.put(TIME, ResultSetMethod.GET_TIME);</span>
+<span class="fc" id="L68">    tmp.put(DATE, ResultSetMethod.GET_DATE);</span>
+<span class="fc" id="L69">    tmp.put(TIME, ResultSetMethod.GET_TIME);</span>
 
-<span class="nc" id="L71">    tmp.put(TIMESTAMP, ResultSetMethod.getObjectGetter(LocalDateTime.class));</span>
-<span class="nc" id="L72">    tmp.put(TIMESTAMP_WITH_TIMEZONE,</span>
-<span class="nc" id="L73">          ResultSetMethod.getObjectGetter(OffsetDateTime.class));</span>
+<span class="fc" id="L71">    tmp.put(TIMESTAMP, ResultSetMethod.getObjectGetter(LocalDateTime.class));</span>
+<span class="fc" id="L72">    tmp.put(TIMESTAMP_WITH_TIMEZONE,</span>
+<span class="fc" id="L73">          ResultSetMethod.getObjectGetter(OffsetDateTime.class));</span>
 
-<span class="nc" id="L75">    tmp.put(NUMERIC, ResultSetMethod.GET_BIG_DECIMAL);</span>
-<span class="nc" id="L76">    tmp.put(DECIMAL, ResultSetMethod.GET_BIG_DECIMAL);</span>
+<span class="fc" id="L75">    tmp.put(NUMERIC, ResultSetMethod.GET_BIG_DECIMAL);</span>
+<span class="fc" id="L76">    tmp.put(DECIMAL, ResultSetMethod.GET_BIG_DECIMAL);</span>
 
-<span class="nc" id="L78">    tmp.put(BINARY, ResultSetMethod.GET_BYTES);</span>
+<span class="fc" id="L78">    tmp.put(BINARY, ResultSetMethod.GET_BYTES);</span>
 
-<span class="nc" id="L80">    tmp.put(ARRAY, ResultSetMethod.getObjectGetter(Object[].class));</span>
+<span class="fc" id="L80">    tmp.put(ARRAY, ResultSetMethod.getObjectGetter(Object[].class));</span>
 
-<span class="nc" id="L82">    return Map.copyOf(tmp);</span>
+<span class="fc" id="L82">    return Map.copyOf(tmp);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

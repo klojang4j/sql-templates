@@ -73,8 +73,8 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public ResultSet execute() {
     try {
-<span class="nc" id="L76">      executeSQL();</span>
-<span class="nc" id="L77">      return resultSet;</span>
+<span class="fc" id="L76">      executeSQL();</span>
+<span class="fc" id="L77">      return resultSet;</span>
 <span class="nc" id="L78">    } catch (Throwable t) {</span>
 <span class="nc" id="L79">      throw Utils.wrap(t);</span>
     }

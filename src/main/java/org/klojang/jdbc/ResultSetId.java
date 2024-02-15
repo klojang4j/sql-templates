@@ -23,12 +23,8 @@ final class ResultSetId {
 
   @Override
   public int hashCode() {
-    int hash = 1;
-    for (int i = 0; i < columns.length; ++i) {
-      hash = (hash * 31) + columns[i].hashCode();
-      hash = (hash * 31) + types[i];
-    }
-    return hash;
+    int hash = Arrays.hashCode(columns);
+    return (hash * 31) + Arrays.hashCode(types);
   }
 
   @Override
@@ -37,19 +33,6 @@ final class ResultSetId {
       return true;
     }
     ResultSetId other = (ResultSetId) obj;
-    return Arrays.equals(types, other.types) && equals(columns, other.columns);
+    return Arrays.equals(types, other.types) && Arrays.equals(columns, other.columns);
   }
-
-  private static boolean equals(String[] a, String[] b) {
-    if (a.length == b.length) {
-      for (int i = 0; i < a.length; ++i) {
-        if (!a[i].equals(b[i])) {
-          return false;
-        }
-      }
-      return true;
-    }
-    return false;
-  }
-
 }

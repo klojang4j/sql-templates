@@ -24,6 +24,8 @@ abstract sealed class AbstractSQL implements SQL
   @SuppressWarnings("rawtypes")
   private final Map<Class, BeanExtractorFactory> factories;
 
+  private MapExtractorFactory mapExtractorFactory;
+
   AbstractSQL(String sql, SessionConfig config) {
     this.unparsed = sql;
     this.config = config;
@@ -68,7 +70,10 @@ abstract sealed class AbstractSQL implements SQL
   }
 
   MapExtractorFactory getMapExtractorFactory() {
-    return new MapExtractorFactory(config);
+    if (mapExtractorFactory == null) {
+      mapExtractorFactory = new MapExtractorFactory(config);
+    }
+    return mapExtractorFactory;
   }
 
 }

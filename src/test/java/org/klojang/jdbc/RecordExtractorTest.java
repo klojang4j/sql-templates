@@ -1,5 +1,6 @@
 package org.klojang.jdbc;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,8 +16,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
-public class RecordBeanifierTest {
-  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-db-query-test";
+public class RecordExtractorTest {
+  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-jdbc-tests/RecordExtractorTest";
   private static final ThreadLocal<Connection> MY_CON = new ThreadLocal<>();
 
   public record Person(
@@ -36,6 +37,7 @@ public class RecordBeanifierTest {
     IOMethods.rm(DB_DIR);
     Files.createDirectories(Path.of(DB_DIR));
     Connection con = DriverManager.getConnection("jdbc:h2:" + DB_DIR + "/test");
+    MY_CON.set(con);
     String sql = """
           CREATE TABLE PERSON(
             PERSON_ID INT AUTO_INCREMENT, 
@@ -63,11 +65,18 @@ public class RecordBeanifierTest {
           .withNameMapper(new CamelCaseToSnakeUpperCase())
           .prepare(con);
     bi.insertBatch(persons);
-    MY_CON.set(con);
-  }
+   }
 
   @AfterEach
   public void after() throws SQLException, IOException {
+    if (MY_CON.get() != null) {
+      MY_CON.get().close();
+    }
+    IOMethods.rm(DB_DIR);
+  }
+
+  @AfterAll
+  public static void afterAll() throws SQLException, IOException {
     if (MY_CON.get() != null) {
       MY_CON.get().close();
     }

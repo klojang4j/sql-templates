@@ -23,34 +23,17 @@ final class ResultSetId {
 
   @Override
   public int hashCode() {
-<span class="nc" id="L26">    int hash = 1;</span>
-<span class="nc bnc" id="L27" title="All 2 branches missed.">    for (int i = 0; i &lt; columns.length; ++i) {</span>
-<span class="nc" id="L28">      hash = (hash * 31) + columns[i].hashCode();</span>
-<span class="nc" id="L29">      hash = (hash * 31) + types[i];</span>
-    }
-<span class="nc" id="L31">    return hash;</span>
+<span class="nc" id="L26">    int hash = Arrays.hashCode(columns);</span>
+<span class="nc" id="L27">    return (hash * 31) + Arrays.hashCode(types);</span>
   }
 
   @Override
   public boolean equals(Object obj) {
-<span class="nc bnc" id="L36" title="All 2 branches missed.">    if (this == obj) {</span>
-<span class="nc" id="L37">      return true;</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">    if (this == obj) {</span>
+<span class="nc" id="L33">      return true;</span>
     }
-<span class="nc" id="L39">    ResultSetId other = (ResultSetId) obj;</span>
-<span class="nc bnc" id="L40" title="All 4 branches missed.">    return Arrays.equals(types, other.types) &amp;&amp; equals(columns, other.columns);</span>
+<span class="nc" id="L35">    ResultSetId other = (ResultSetId) obj;</span>
+<span class="nc bnc" id="L36" title="All 4 branches missed.">    return Arrays.equals(types, other.types) &amp;&amp; Arrays.equals(columns, other.columns);</span>
   }
-
-  private static boolean equals(String[] a, String[] b) {
-<span class="nc bnc" id="L44" title="All 2 branches missed.">    if (a.length == b.length) {</span>
-<span class="nc bnc" id="L45" title="All 2 branches missed.">      for (int i = 0; i &lt; a.length; ++i) {</span>
-<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (!a[i].equals(b[i])) {</span>
-<span class="nc" id="L47">          return false;</span>
-        }
-      }
-<span class="nc" id="L50">      return true;</span>
-    }
-<span class="nc" id="L52">    return false;</span>
-  }
-
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

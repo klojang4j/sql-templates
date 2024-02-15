@@ -35,11 +35,6 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
  * SessionConfig config = SessionConfig.getDefaultConfig().withSaveAllEnumsAsStrings();
  * }</pre></blockquote>
  *
- * <p>It does pay, however, to store your final {@code SessionConfig} object in a
- * {@code public static final} field, and use it wherever appropriate. Otherwise, do
- * implement {@code SessionConfig} using a regular class and make sure to override the
- * {@code equals()} and {@code hashCode()} methods.
- *
  * @author Ayco Holleman
  */
 public interface SessionConfig {
@@ -219,12 +214,12 @@ public interface SessionConfig {
 
   /**
    * Specifies the {@link NameMapper} to be used for mapping bean properties, record
-   * components, or map keys to column names. The default implementation returns an
-   * instance of {@link CamelCaseToSnakeUpperCase}, which would map
-   * {@code "camelCaseToSnakeUpperCase"} to {@code "CAMEL_CASE_TO_SNAKE_UPPER_CASE"}. (It
-   * would also map {@code "WordCase"} a.k.a. {@code "PascalCase"} to {@code "WORD_CASE"}
-   * and {@code "PASCAL_CASE"}, respectively, since all characters end up in upper case
-   * anyway.)
+   * components, or map keys to column names. The default implementation returns
+   * {@link CamelCaseToSnakeUpperCase#camelCaseToSnakeUpperCase()
+   * camelCaseToSnakeUpperCase()}, which would map {@code "camelCaseToSnakeUpperCase"} to
+   * {@code "CAMEL_CASE_TO_SNAKE_UPPER_CASE"}. (It would also map {@code "WordCase"}
+   * a.k.a. {@code "PascalCase"} to {@code "WORD_CASE"} and {@code "PASCAL_CASE"},
+   * respectively, since all characters end up in upper case anyway.)
    *
    * @return the {@link NameMapper} to be used for mapping bean properties, record
    *       components, or map keys to column names
@@ -235,11 +230,12 @@ public interface SessionConfig {
 
   /**
    * Specifies the {@link NameMapper} to be used for mapping column names to bean
-   * properties, record components, or map keys. The default implementation returns an
-   * instance of {@link SnakeCaseToCamelCase}, which would map
-   * {@code "SNAKE_CASE_TO_CAMEL_CASE}" to {@code "snakeCaseToCamelCase"}. (It would also
-   * map {@code "snake_case_to_camel_case"} to {@code "SNAKE_CASE_TO_CAMEL_CASE}" because
-   * the casing of the input string is irrelevant for this {@code NameMapper}.)
+   * properties, record components, or map keys. The default implementation returns
+   * {@link SnakeCaseToCamelCase#snakeCaseToCamelCase() snakeCaseToCamelCase()}, which
+   * would map {@code "SNAKE_CASE_TO_CAMEL_CASE}" to {@code "snakeCaseToCamelCase"}. (It
+   * would also map {@code "snake_case_to_camel_case"} to
+   * {@code "SNAKE_CASE_TO_CAMEL_CASE}" because the casing of the input string is
+   * irrelevant for this {@code NameMapper}.)
    *
    * @return the {@link NameMapper} to be used for mapping column names to bean
    *       properties, record components, or map keys
@@ -280,10 +276,10 @@ public interface SessionConfig {
 
   /**
    * Returns a new instance that is equal to this instance except that <i>all</i> enums
-   * will be persisted by calling {@code toString()} on them.
+   * will be saved by calling {@code toString()} on them.
    *
    * @return a new instance that is equal to this instance except that <i>all</i> enums
-   *       will be persisted by calling {@code toString()} on them.
+   *       will be saved by calling {@code toString()} on them.
    */
   default SessionConfig withSaveAllEnumsAsStrings() {
     return new SessionConfig() {

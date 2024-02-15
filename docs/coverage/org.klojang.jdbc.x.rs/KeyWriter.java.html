@@ -22,41 +22,41 @@ import static org.klojang.jdbc.SessionConfig.CustomReader;
 @SuppressWarnings(&quot;rawtypes&quot;)
 public final class KeyWriter&lt;COLUMN_TYPE&gt; {
 
-<span class="nc" id="L25">  private static final Logger LOG = LoggerFactory.getLogger(KeyWriter.class);</span>
+<span class="fc" id="L25">  private static final Logger LOG = LoggerFactory.getLogger(KeyWriter.class);</span>
 
   public static Map&lt;String, Object&gt; toMap(ResultSet resultset, KeyWriter[] writers)
         throws Throwable {
     // Allow for some extra data to be inserted into the map by the user
-<span class="nc" id="L30">    Map&lt;String, Object&gt; map = HashMap.newHashMap(writers.length + 4);</span>
-<span class="nc bnc" id="L31" title="All 2 branches missed.">    for (KeyWriter channel : writers) {</span>
-<span class="nc" id="L32">      channel.write(resultset, map);</span>
+<span class="fc" id="L30">    Map&lt;String, Object&gt; map = HashMap.newHashMap(writers.length + 4);</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">    for (KeyWriter channel : writers) {</span>
+<span class="fc" id="L32">      channel.write(resultset, map);</span>
     }
-<span class="nc" id="L34">    return map;</span>
+<span class="fc" id="L34">    return map;</span>
   }
 
   public static KeyWriter[] createWriters(ResultSet resultset, SessionConfig config) {
-<span class="nc" id="L38">    ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();</span>
+<span class="fc" id="L38">    ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();</span>
     try {
-<span class="nc" id="L40">      ResultSetMetaData rsmd = resultset.getMetaData();</span>
-<span class="nc" id="L41">      int sz = rsmd.getColumnCount();</span>
-<span class="nc" id="L42">      KeyWriter[] writers = new KeyWriter[sz];</span>
-<span class="nc bnc" id="L43" title="All 2 branches missed.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
-<span class="nc" id="L44">        int columnIndex = idx + 1; // JDBC is one-based</span>
-<span class="nc" id="L45">        int sqlType = rsmd.getColumnType(columnIndex);</span>
-<span class="nc" id="L46">        ResultSetMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
-<span class="nc" id="L47">        String label = rsmd.getColumnLabel(columnIndex);</span>
-<span class="nc" id="L48">        String key = config.getColumnToPropertyMapper().map(label);</span>
-<span class="nc" id="L49">        CustomReader custom = config.getCustomReader(HashMap.class,</span>
+<span class="fc" id="L40">      ResultSetMetaData rsmd = resultset.getMetaData();</span>
+<span class="fc" id="L41">      int sz = rsmd.getColumnCount();</span>
+<span class="fc" id="L42">      KeyWriter[] writers = new KeyWriter[sz];</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
+<span class="fc" id="L44">        int columnIndex = idx + 1; // JDBC is one-based</span>
+<span class="fc" id="L45">        int sqlType = rsmd.getColumnType(columnIndex);</span>
+<span class="fc" id="L46">        ResultSetMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
+<span class="fc" id="L47">        String label = rsmd.getColumnLabel(columnIndex);</span>
+<span class="fc" id="L48">        String key = config.getColumnToPropertyMapper().map(label);</span>
+<span class="fc" id="L49">        CustomReader custom = config.getCustomReader(HashMap.class,</span>
               key,
               Object.class,
               sqlType);
-<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (custom == null) {</span>
-<span class="nc" id="L54">          writers[idx] = new KeyWriter&lt;&gt;(method, columnIndex, key);</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if (custom == null) {</span>
+<span class="fc" id="L54">          writers[idx] = new KeyWriter&lt;&gt;(method, columnIndex, key);</span>
         } else {
 <span class="nc" id="L56">          writers[idx] = new KeyWriter&lt;&gt;(custom, columnIndex, key);</span>
         }
       }
-<span class="nc" id="L59">      return writers;</span>
+<span class="fc" id="L59">      return writers;</span>
 <span class="nc" id="L60">    } catch (SQLException e) {</span>
 <span class="nc" id="L61">      throw new DatabaseException(e);</span>
     }
@@ -67,12 +67,12 @@ public final class KeyWriter&lt;COLUMN_TYPE&gt; {
   private final int columnIndex;
   private final String key;
 
-<span class="nc" id="L70">  private KeyWriter(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int columnIndex, String key) {</span>
-<span class="nc" id="L71">    this.method = method;</span>
-<span class="nc" id="L72">    this.columnIndex = columnIndex;</span>
-<span class="nc" id="L73">    this.key = key;</span>
-<span class="nc" id="L74">    this.custom = null;</span>
-<span class="nc" id="L75">  }</span>
+<span class="fc" id="L70">  private KeyWriter(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int columnIndex, String key) {</span>
+<span class="fc" id="L71">    this.method = method;</span>
+<span class="fc" id="L72">    this.columnIndex = columnIndex;</span>
+<span class="fc" id="L73">    this.key = key;</span>
+<span class="fc" id="L74">    this.custom = null;</span>
+<span class="fc" id="L75">  }</span>
 
 <span class="nc" id="L77">  private KeyWriter(CustomReader custom, int columnIndex, String key) {</span>
 <span class="nc" id="L78">    this.custom = custom;</span>
@@ -83,15 +83,15 @@ public final class KeyWriter&lt;COLUMN_TYPE&gt; {
 
   void write(ResultSet resultset, Map&lt;String, Object&gt; map) throws SQLException {
     final Object val;
-<span class="nc bnc" id="L86" title="All 2 branches missed.">    if (custom == null) {</span>
-<span class="nc" id="L87">      val = method.invoke(resultset, columnIndex);</span>
-<span class="nc" id="L88">      LOG.trace(&quot;==&gt; {}: {}&quot;, key, val);</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">    if (custom == null) {</span>
+<span class="fc" id="L87">      val = method.invoke(resultset, columnIndex);</span>
+<span class="fc" id="L88">      LOG.trace(&quot;==&gt; {}: {}&quot;, key, val);</span>
     } else {
 <span class="nc" id="L90">      val = custom.getValue(resultset, columnIndex);</span>
 <span class="nc" id="L91">      LOG.trace(&quot;==&gt; {}: {} (using custom reader)&quot;, key, val);</span>
     }
-<span class="nc" id="L93">    map.put(key, val);</span>
-<span class="nc" id="L94">  }</span>
+<span class="fc" id="L93">    map.put(key, val);</span>
+<span class="fc" id="L94">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

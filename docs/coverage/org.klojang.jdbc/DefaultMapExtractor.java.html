@@ -19,7 +19,7 @@ import static org.klojang.jdbc.x.rs.KeyWriter.toMap;
 public final class DefaultMapExtractor implements MapExtractor {
 
   @SuppressWarnings(&quot;unused&quot;)
-<span class="nc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(DefaultMapExtractor.class);</span>
+<span class="fc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(DefaultMapExtractor.class);</span>
 
   private static class MapIterator implements Iterator&lt;Map&lt;String, Object&gt;&gt; {
 
@@ -46,10 +46,10 @@ public final class DefaultMapExtractor implements MapExtractor {
 
   private boolean empty;
 
-<span class="nc" id="L49">  DefaultMapExtractor(ResultSet rs, KeyWriter&lt;?&gt;[] writers) {</span>
-<span class="nc" id="L50">    this.rs = rs;</span>
-<span class="nc" id="L51">    this.writers = writers;</span>
-<span class="nc" id="L52">  }</span>
+<span class="fc" id="L49">  DefaultMapExtractor(ResultSet rs, KeyWriter&lt;?&gt;[] writers) {</span>
+<span class="fc" id="L50">    this.rs = rs;</span>
+<span class="fc" id="L51">    this.writers = writers;</span>
+<span class="fc" id="L52">  }</span>
 
   @Override
   public Optional&lt;Map&lt;String, Object&gt;&gt; extract() {
@@ -85,25 +85,25 @@ public final class DefaultMapExtractor implements MapExtractor {
 
   @Override
   public List&lt;Map&lt;String, Object&gt;&gt; extractAll() {
-<span class="nc" id="L88">    return extractAll(10);</span>
+<span class="fc" id="L88">    return extractAll(10);</span>
   }
 
   @Override
   public List&lt;Map&lt;String, Object&gt;&gt; extractAll(int sizeEstimate) {
-<span class="nc" id="L93">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
-<span class="nc bnc" id="L94" title="All 2 branches missed.">    if (empty) {</span>
+<span class="fc" id="L93">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">    if (empty) {</span>
 <span class="nc" id="L95">      return Collections.emptyList();</span>
     }
-<span class="nc" id="L97">    List&lt;Map&lt;String, Object&gt;&gt; all = new ArrayList&lt;&gt;(sizeEstimate);</span>
+<span class="fc" id="L97">    List&lt;Map&lt;String, Object&gt;&gt; all = new ArrayList&lt;&gt;(sizeEstimate);</span>
     try {
       do {
-<span class="nc" id="L100">        all.add(toMap(rs, writers));</span>
-<span class="nc bnc" id="L101" title="All 2 branches missed.">      } while (rs.next());</span>
+<span class="fc" id="L100">        all.add(toMap(rs, writers));</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">      } while (rs.next());</span>
 <span class="nc" id="L102">    } catch (Throwable t) {</span>
 <span class="nc" id="L103">      throw Utils.wrap(t);</span>
-<span class="nc" id="L104">    }</span>
-<span class="nc" id="L105">    empty = true;</span>
-<span class="nc" id="L106">    return all;</span>
+<span class="fc" id="L104">    }</span>
+<span class="fc" id="L105">    empty = true;</span>
+<span class="fc" id="L106">    return all;</span>
   }
 
   @Override
