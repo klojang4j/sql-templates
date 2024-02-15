@@ -20,11 +20,11 @@ import static org.klojang.jdbc.SessionConfig.CustomReader;
  * @param <COLUMN_TYPE>
  */
 @SuppressWarnings("rawtypes")
-final class KeyWriter<COLUMN_TYPE> {
+public final class KeyWriter<COLUMN_TYPE> {
 
   private static final Logger LOG = LoggerFactory.getLogger(KeyWriter.class);
 
-  static Map<String, Object> toMap(ResultSet resultset, KeyWriter[] writers)
+  public static Map<String, Object> toMap(ResultSet resultset, KeyWriter[] writers)
         throws Throwable {
     // Allow for some extra data to be inserted into the map by the user
     Map<String, Object> map = HashMap.newHashMap(writers.length + 4);
@@ -34,7 +34,7 @@ final class KeyWriter<COLUMN_TYPE> {
     return map;
   }
 
-  static KeyWriter[] createWriters(ResultSet resultset, SessionConfig config) {
+  public static KeyWriter[] createWriters(ResultSet resultset, SessionConfig config) {
     ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();
     try {
       ResultSetMetaData rsmd = resultset.getMetaData();

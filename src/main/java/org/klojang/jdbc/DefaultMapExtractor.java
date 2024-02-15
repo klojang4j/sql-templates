@@ -1,9 +1,9 @@
-package org.klojang.jdbc.x.rs;
+package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.MapExtractor;
 import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Utils;
+import org.klojang.jdbc.x.rs.KeyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -20,7 +20,7 @@ import static org.klojang.util.CollectionMethods.implode;
 
 
 @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
-final class RecordFactory&lt;T extends Record&gt; {
+public final class RecordFactory&lt;T extends Record&gt; {
 
 <span class="fc" id="L25">  private record WriteConfig(MethodHandle constructor, ComponentWriter[] writers) { }</span>
 
@@ -29,7 +29,7 @@ final class RecordFactory&lt;T extends Record&gt; {
   private final MethodHandle constructor;
   private final ComponentWriter[] writers;
 
-<span class="fc" id="L32">  RecordFactory(Class&lt;T&gt; recordClass, ResultSet resultset, SessionConfig config) {</span>
+<span class="fc" id="L32">  public RecordFactory(Class&lt;T&gt; recordClass, ResultSet resultset, SessionConfig config) {</span>
 <span class="fc" id="L33">    WriteConfig cfg = createWriters(recordClass, resultset, config);</span>
 <span class="fc" id="L34">    constructor = cfg.constructor();</span>
 <span class="fc" id="L35">    writers = cfg.writers();</span>

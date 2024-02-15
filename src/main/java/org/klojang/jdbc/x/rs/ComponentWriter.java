@@ -13,7 +13,7 @@ import static org.klojang.jdbc.SessionConfig.CustomReader;
  * @param <COLUMN_TYPE>
  * @param <COMPONENT_TYPE>
  */
-final class ComponentWriter<COLUMN_TYPE, COMPONENT_TYPE> {
+public final class ComponentWriter<COLUMN_TYPE, COMPONENT_TYPE> {
 
   private static final Logger LOG = LoggerFactory.getLogger(ComponentWriter.class);
 

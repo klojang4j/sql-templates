@@ -2,10 +2,14 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.rs.MapExtractorCache;
+import org.klojang.jdbc.x.rs.KeyWriter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
 
 /**
  * <p>A factory for {@link MapExtractor} instances. This class behaves analogously
@@ -15,7 +19,8 @@ import java.sql.SQLException;
  */
 public final class MapExtractorFactory {
 
-  private static final MapExtractorCache cache = new MapExtractorCache();
+  private final AtomicReference<KeyWriter<?>[]> ref = new AtomicReference<>();
+  private final ReentrantLock lock = new ReentrantLock();
 
   private final SessionConfig config;
 
@@ -46,9 +51,20 @@ public final class MapExtractorFactory {
    * @throws SQLException if a database error occurs
    */
   public MapExtractor getExtractor(ResultSet rs) throws SQLException {
-    return rs.next()
-          ? cache.getExtractor(config, rs)
-          : NoopMapExtractor.INSTANCE;
+    if (!rs.next()) {
+      return NoopMapExtractor.INSTANCE;
+    }
+    KeyWriter<?>[] writers;
+    if ((writers = ref.getPlain()) == null) {
+      lock.lock();
+      try {
+        if (ref.get() == null) {
+          ref.set(writers = createWriters(rs, config));
+        }
+      } finally {
+        lock.unlock();
+      }
+    }
+    return new DefaultMapExtractor(rs, writers);
   }
-
 }

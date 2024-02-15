@@ -23,12 +23,12 @@ import static org.klojang.util.CollectionMethods.implode;
  * @param <COLUMN_TYPE>
  * @param <FIELD_TYPE>
  */
-final class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
+public final class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PropertyWriter.class);
 
   @SuppressWarnings("rawtypes")
-  static <U> U writeAll(ResultSet rs,
+  public static <U> U writeAll(ResultSet rs,
         Supplier<U> beanSupplier,
         PropertyWriter[] writers) throws Throwable {
     U bean = beanSupplier.get();
@@ -39,7 +39,7 @@ final class PropertyWriter<COLUMN_TYPE, FIELD_TYPE> {
   }
 
   @SuppressWarnings("rawtypes")
-  static PropertyWriter[] createWriters(
+  public static PropertyWriter[] createWriters(
         ResultSet rs,
         Class<?> beanClass,
         SessionConfig config) {

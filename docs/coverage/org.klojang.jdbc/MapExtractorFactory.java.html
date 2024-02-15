@@ -2,10 +2,14 @@
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.rs.MapExtractorCache;
+import org.klojang.jdbc.x.rs.KeyWriter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
 
 /**
  * &lt;p&gt;A factory for {@link MapExtractor} instances. This class behaves analogously
@@ -15,7 +19,8 @@ import java.sql.SQLException;
  */
 public final class MapExtractorFactory {
 
-<span class="nc" id="L18">  private static final MapExtractorCache cache = new MapExtractorCache();</span>
+<span class="nc" id="L22">  private final AtomicReference&lt;KeyWriter&lt;?&gt;[]&gt; ref = new AtomicReference&lt;&gt;();</span>
+<span class="nc" id="L23">  private final ReentrantLock lock = new ReentrantLock();</span>
 
   private final SessionConfig config;
 
@@ -23,8 +28,8 @@ public final class MapExtractorFactory {
    * Creates a new {@code MapExtractorFactory}.
    */
   public MapExtractorFactory() {
-<span class="nc" id="L26">    this(Utils.DEFAULT_CONFIG);</span>
-<span class="nc" id="L27">  }</span>
+<span class="nc" id="L31">    this(Utils.DEFAULT_CONFIG);</span>
+<span class="nc" id="L32">  }</span>
 
   /**
    * Creates a new {@code MapExtractorFactory} using the specified configuration object
@@ -32,9 +37,9 @@ public final class MapExtractorFactory {
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
    *       behaviour of the {@code MapExtractor}
    */
-<span class="nc" id="L35">  public MapExtractorFactory(SessionConfig config) {</span>
-<span class="nc" id="L36">    this.config = Check.notNull(config).ok();</span>
-<span class="nc" id="L37">  }</span>
+<span class="nc" id="L40">  public MapExtractorFactory(SessionConfig config) {</span>
+<span class="nc" id="L41">    this.config = Check.notNull(config).ok();</span>
+<span class="nc" id="L42">  }</span>
 
   /**
    * Returns a {@code MapExtractor} that will convert the rows in the specified
@@ -46,10 +51,21 @@ public final class MapExtractorFactory {
    * @throws SQLException if a database error occurs
    */
   public MapExtractor getExtractor(ResultSet rs) throws SQLException {
-<span class="nc bnc" id="L49" title="All 2 branches missed.">    return rs.next()</span>
-<span class="nc" id="L50">          ? cache.getExtractor(config, rs)</span>
-<span class="nc" id="L51">          : NoopMapExtractor.INSTANCE;</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">    if (!rs.next()) {</span>
+<span class="nc" id="L55">      return NoopMapExtractor.INSTANCE;</span>
+    }
+    KeyWriter&lt;?&gt;[] writers;
+<span class="nc bnc" id="L58" title="All 2 branches missed.">    if ((writers = ref.getPlain()) == null) {</span>
+<span class="nc" id="L59">      lock.lock();</span>
+      try {
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        if (ref.get() == null) {</span>
+<span class="nc" id="L62">          ref.set(writers = createWriters(rs, config));</span>
+        }
+      } finally {
+<span class="nc" id="L65">        lock.unlock();</span>
+      }
+    }
+<span class="nc" id="L68">    return new DefaultMapExtractor(rs, writers);</span>
   }
-
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

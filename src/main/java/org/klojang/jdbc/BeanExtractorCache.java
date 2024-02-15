@@ -1,7 +1,8 @@
-package org.klojang.jdbc.x.rs;
+package org.klojang.jdbc;
 
-import org.klojang.jdbc.BeanExtractor;
-import org.klojang.jdbc.SessionConfig;
+import org.klojang.jdbc.x.rs.PropertyWriter;
+import org.klojang.jdbc.x.rs.RecordExtractor;
+import org.klojang.jdbc.x.rs.RecordFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,13 +12,17 @@ import java.util.function.Supplier;
 
 import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
-public final class BeanExtractorCache {
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
+final class BeanExtractorCache {
+
+  private record BeanExtractorId(Class<?> clazz,
+        SessionConfig config,
+        ResultSetId resultSetId) { }
 
   private final Map<BeanExtractorId, PropertyWriter[]> cache0 = new HashMap<>();
   private final Map<BeanExtractorId, RecordFactory> cache1 = new HashMap<>();
 
-  public <T> BeanExtractor<T> getBeanExtractor(Class<T> clazz,
+  <T> BeanExtractor<T> getBeanExtractor(Class<T> clazz,
         SessionConfig config,
         ResultSet rs,
         Supplier<T> supplier) throws SQLException {
@@ -31,7 +36,7 @@ public final class BeanExtractorCache {
     return new DefaultBeanExtractor<>(rs, writers, supplier);
   }
 
-  public <T> BeanExtractor<T> getRecordExtractor(Class<T> clazz,
+  <T> BeanExtractor<T> getRecordExtractor(Class<T> clazz,
         SessionConfig config,
         ResultSet rs) throws SQLException {
     ResultSetId resultSetId = new ResultSetId(rs);
@@ -43,6 +48,5 @@ public final class BeanExtractorCache {
     }
     return new RecordExtractor(rs, factory);
   }
-
 
 }

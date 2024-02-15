@@ -1,4 +1,4 @@
-package org.klojang.jdbc.x.rs;
+package org.klojang.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

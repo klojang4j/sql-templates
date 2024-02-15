@@ -2,14 +2,19 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.rs.BeanExtractorCache;
+import org.klojang.jdbc.x.rs.PropertyWriter;
+import org.klojang.jdbc.x.rs.RecordExtractor;
+import org.klojang.jdbc.x.rs.RecordFactory;
 import org.klojang.util.InvokeMethods;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import static org.klojang.jdbc.x.Strings.*;
+import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 import static org.klojang.util.ClassMethods.className;
 
 /**
@@ -30,11 +35,11 @@ import static org.klojang.util.ClassMethods.className;
  * {@link #getExtractor(ResultSet) getExtractor()} must have the same number of columns,
  * and they must have the same column types in the same order. Column names do not matter
  * any longer. Thus, in principle, you <b>could</b> use a single
- * {@code BeanExtractorFactory} for multiple SQL queries; for example if they all
- * select the primary key column and, say, a {@code VARCHAR} column from different tables.
- * This might be the case for web applications that need to fill multiple
- * {@code <select>}) boxes. However, this is a micro-optimization that may decrease the
- * readability of your code.)</i>
+ * {@code BeanExtractorFactory} for multiple SQL queries; for example if they all select
+ * the primary key column and, say, a {@code VARCHAR} column from different tables. This
+ * might be the case for web applications that need to fill multiple {@code <select>})
+ * boxes. However, this is a micro-optimization that may decrease the readability of your
+ * code.)</i>
  *
  * <p>It is not necessary to cache {@code BeanExtractorFactory} objects or
  * {@code BeanExtractor} objects. <i>Klojang JDBC</i> already caches the expensive parts,
@@ -45,9 +50,15 @@ import static org.klojang.util.ClassMethods.className;
  */
 public final class BeanExtractorFactory<T> {
 
-  private static final BeanExtractorCache cache = new BeanExtractorCache();
-
   private static final String RECORDS_NOT_ALLOWED = "bean supplier not supported for record type ${0}";
+
+  /**
+   * The object held by the AtomicReference will either be a RecordFactory in case clazz
+   * is a record type or a PropertyWriter[] array in case it is a JavaBean type.
+   */
+  private final AtomicReference<Object> ref = new AtomicReference<>();
+  private final ReentrantLock lock = new ReentrantLock();
+
 
   private final Class<T> clazz;
   private final Supplier<T> supplier;
@@ -61,8 +72,7 @@ public final class BeanExtractorFactory<T> {
    *       {@code BeanExtractorFactory}
    */
   public BeanExtractorFactory(Class<T> clazz) {
-    Check.notNull(clazz);
-    this.clazz = Check.notNull(clazz, BEAN_CLASS).ok();
+    this.clazz = Check.notNull(clazz).ok();
     this.supplier = clazz.isRecord() ? null : () -> newInstance(clazz);
     this.config = Utils.DEFAULT_CONFIG;
   }
@@ -133,13 +143,43 @@ public final class BeanExtractorFactory<T> {
    */
   @SuppressWarnings("unchecked")
   public BeanExtractor<T> getExtractor(ResultSet rs) throws SQLException {
-    if (rs.next()) {
-      return clazz.isRecord()
-            ? cache.getRecordExtractor(clazz, config, rs)
-            : cache.getBeanExtractor(clazz, config, rs, supplier);
-    }
-    return NoopBeanExtractor.INSTANCE;
+    return rs.next() ? clazz.isRecord()
+          ? recordExtractor(rs) : defaultExtractor(rs)
+          : NoopBeanExtractor.INSTANCE;
   }
+
+  @SuppressWarnings("rawtypes")
+  private DefaultBeanExtractor<T> defaultExtractor(ResultSet rs) {
+    PropertyWriter[] writers;
+    if ((writers = (PropertyWriter[]) ref.getPlain()) == null) {
+      lock.lock();
+      try {
+        if (ref.get() == null) {
+          ref.set(writers = createWriters(rs, clazz, config));
+        }
+      } finally {
+        lock.unlock();
+      }
+    }
+    return new DefaultBeanExtractor<>(rs, writers, supplier);
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private RecordExtractor recordExtractor(ResultSet rs) {
+    RecordFactory recordFactory;
+    if ((recordFactory = (RecordFactory) ref.getPlain()) == null) {
+      lock.lock();
+      try {
+        if (ref.get() == null) {
+          ref.set(recordFactory = new RecordFactory<>((Class) clazz, rs, config));
+        }
+      } finally {
+        lock.unlock();
+      }
+    }
+    return new RecordExtractor<>(rs, recordFactory);
+  }
+
 
   private static <U> U newInstance(Class<U> clazz) {
     try {
