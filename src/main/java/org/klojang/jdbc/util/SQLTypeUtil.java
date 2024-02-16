@@ -26,7 +26,7 @@ public final class SQLTypeUtil {
   /**
    * Returns the name of the constant with the specified value. Throws an
    * {@link IllegalArgumentException} if there is no constant with the specified value in
-   * the {@link Types} class.
+   * the {@link java.sql.Types} class.
    *
    * @param sqlType the value of the constant whose name you want to retrieve
    * @return the name of the constant with the specified value
@@ -38,7 +38,7 @@ public final class SQLTypeUtil {
 
   /**
    * Returns {@code true} if the specified integer is the value of one of the constants in
-   * {@code java.sql.Types}, {@code false} otherwise.
+   * the {@link java.sql.Types} class, {@code false} otherwise.
    *
    * @param sqlType the integer value to check
    * @return {@code true} if the integer is the value of one of the constants in the
@@ -51,7 +51,7 @@ public final class SQLTypeUtil {
   /**
    * Returns the value of the constant with the specified name. Throws an
    * {@link IllegalArgumentException} if there is no constant with the specified name in
-   * the {@code Types} class.
+   * the {@link java.sql.Types} class.
    *
    * @param name the name of the constant (e&#46;g&#46; "VARCHAR" or "TIMESTAMP")
    * @return the value of the constant with the specified name
@@ -62,7 +62,7 @@ public final class SQLTypeUtil {
 
   /**
    * Returns {@code true} if the specified string is the name of one of the constants in
-   * the {@link Types} class, {@code false} otherwise.
+   * the {@link java.sql.Types} class, {@code false} otherwise.
    *
    * @param name the string value to check
    * @return {@code true} if the specified string is the name of one of the constants in
@@ -114,8 +114,8 @@ public final class SQLTypeUtil {
 
   /**
    * Returns an {@code int} value that is guaranteed <i>not</i> to be the value of any of
-   * the constants in the {@link Types java.sql.Types} class. Could be used as an
-   * initialization value or as a pseudo-null value.
+   * the constants in the {@link java.sql.Types} class. Could be used as an initialization
+   * value or as a pseudo-null value.
    *
    * @return an {@code int} value that is guaranteed <i>not</i> to be the value of any of
    *       the constants in the {@code Types java.sql.Types} class

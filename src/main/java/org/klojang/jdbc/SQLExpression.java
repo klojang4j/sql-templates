@@ -1,7 +1,7 @@
 package org.klojang.jdbc;
 
 /**
- * A special string wrapper object whose type signals to <i>Klojang JDBC</i> that the
+ * <p>A special string wrapper object whose type signals to <i>Klojang JDBC</i> that the
  * wrapped string must be treated as a native SQL expression and hence must not be escaped
  * or quoted. The SQL expression could be, for example:
  * <ul>
@@ -11,9 +11,13 @@ package org.klojang.jdbc;
  *   <li>an already properly escaped and quoted string literal like
  *       <b>{@code 'Chicago O''Hare International Airport'}</b>
  * </ul>
- * SQL expressions will be injected as-is into SQL statements. Use a {@link Quoter} or the
- * various {@code quote} methods in {@link SQLSession} to escape and quote the individual
- * components of the expression if necessary.
+ * <p>SQL expressions will be injected as-is into SQL statements. Use a {@link Quoter} or
+ * the various {@code quote} methods in {@link SQLSession} to escape and quote the
+ * individual components of the expression if necessary.
+ *
+ * <p><i>Although you could, it is unnecessary to wrap a plain number into an
+ * {@code SQLExpression}. Numbers (primitive numbers or instances of {@link Number})
+ * will anyhow not be quoted by Klojang JDBC.</i>
  */
 public final class SQLExpression {
 

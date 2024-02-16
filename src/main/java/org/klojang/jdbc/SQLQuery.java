@@ -70,8 +70,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed. Since the
    * returned {@code ResultSet} is the same one that underpins this instance, bad
    * behaviour will lead to bad outcomes. For example, if you {@code close} the
-   * {@code ResultSet}, but then continue to use this instance, an exception guaranteed to
-   * follow. <i>Klojang JDBC</i> does not protect itself against such behaviour.
+   * {@code ResultSet}, but then continue to use this instance, an exception is almost
+   * guaranteed to follow. <i>Klojang JDBC</i> will not be resistant against such
+   * behaviour.
    *
    * @return the {@code ResultSet} produced by the JDBC driver
    */

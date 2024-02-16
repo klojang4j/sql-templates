@@ -20,7 +20,7 @@ import static org.klojang.util.StringMethods.append;
  * to dynamically generate and inject a {@link SQLExpression SQL expression} in the SQL to
  * be executed. For example, suppose (somewhat unrealistically) you have a variable
  * {@code firstName} in your program, and you want to embed the following expression in
- * your SQL: <b>{@code "SUBSTRING(" + firstName + ", 1, 3)"}</b>. If the value of
+ * your SQL: <b>{@code "SUBSTRING('" + firstName + "', 1, 3)"}</b>. If the value of
  * {@code firstName} comes from outside your program, you expose yourself to the risk of
  * SQL injection. In this case you should use a {@code Quoter} to eliminate the risk:
  * <b>{@code "SUBSTRING(" + quoter.quoteValue(firstName) + ", 1, 3)"}</b>. For SQL
@@ -49,8 +49,8 @@ public final class Quoter {
    * <p>Returns a properly escaped and quoted string. More precisely:
    *
    * <ul>
-   *     <li>If the value is {@code null}, the literal string "NULL"
-   *         (<i>without</i> quotes) is returned.
+   *     <li>If the value is {@code null}, the literal string "NULL" (<i>without</i>
+   *         quotes) is returned.
    *     <li>If the value is a {@link Number}, a {@link Boolean}, or a
    *         {@link SQLExpression}, the value is returned as-is. That is,
    *         {@code toString()} will be called on the value, but the resulting string
