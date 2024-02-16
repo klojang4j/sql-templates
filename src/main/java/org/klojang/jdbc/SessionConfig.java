@@ -51,18 +51,17 @@ public interface SessionConfig {
   static SessionConfig getDefaultConfig() { return Utils.DEFAULT_CONFIG; }
 
   /**
-   * A {@code CustomBinder} gives you full control over how values are bound to a
+   * A {@code CustomBinder} gives you full control over how a value is bound to a
    * {@link PreparedStatement}. It hands you the underlying {@link PreparedStatement} and
    * lets you do the binding yourself. Of course, since you are now in control of the
    * {@code PreparedStatement}, you can do anything you like with it, including closing
    * it. <i>Klojang JDBC</i> will not be resistant against such behaviour. A
    * {@code CustomBinder} can be used, for example, to apply last-minute transformations
-   * to the value that is about to be bound, or to serialize it in a bespoke way, or to
-   * map it to a non-standard SQL datatype. When binding {@code Map} values using
-   * {@link SQLStatement#bind(Map)}, custom binders will only kick in for non-{@code null}
-   * values, because Java's type erase feature prevents the type of the values from being
-   * established beforehand. When binding values in a JavaBean or {@code record}, custom
-   * binders will kick in even for {@code null} values.
+   * to the value, or to serialize it in a bespoke way, or to map it to a non-standard SQL
+   * datatype. When binding {@code Map} values using {@link SQLStatement#bind(Map)},
+   * custom binders will only kick in for non-{@code null} values. When binding values in
+   * a JavaBean or {@code record}, custom binders will kick in even for {@code null}
+   * values.
    */
   @FunctionalInterface
   interface CustomBinder {
@@ -80,12 +79,12 @@ public interface SessionConfig {
   }
 
   /**
-   * A {@code CustomReader} gives you full control over how values are extracted from a
+   * A {@code CustomReader} gives you full control over how a value is extracted from a
    * {@link ResultSet}. It hands you the underlying {@code ResultSet} and lets you extract
-   * values from it yourself. If the destination of the values is a JavaBean or
-   * {@code record}, it is your responsibility to ensure that the value returned from
-   * {@link #getValue(ResultSet, int)} can be assigned to the bean property or record
-   * component for which it is destined, or a {@link ClassCastException} will ensue.
+   * the value yourself. If the value is to be assigned to a JavaBean property or
+   * {@code record} component, it is your responsibility to ensure the value is
+   * type-compatible with the property or component, or a {@link ClassCastException} will
+   * ensue.
    */
   @FunctionalInterface
   interface CustomReader {
