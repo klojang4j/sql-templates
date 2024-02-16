@@ -34,7 +34,7 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
  * JDBC</i> operates:
  *
  * <blockquote><pre>{@code
- * SessionConfig config = SessionConfig.getDefaultConfig().withSaveAllEnumsAsStrings();
+ * SessionConfig config = SessionConfig.getDefaultConfig().withEnumsSavedAsStrings();
  * }</pre></blockquote>
  *
  * @author Ayco Holleman

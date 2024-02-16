@@ -82,25 +82,28 @@ public final class MapExtractorFactory {
    * @param rs the {@code ResultSet}
    * @return a {@code MapExtractor} that will convert the rows in the specified
    *       {@code ResultSet} into {@code Map&lt;String, Object&gt;} pseudo-objects.
-   * @throws SQLException if a database error occurs
    */
-  public MapExtractor getExtractor(ResultSet rs) throws SQLException {
-<span class="pc bpc" id="L88" title="1 of 2 branches missed.">    if (!rs.next()) {</span>
-<span class="nc" id="L89">      return NoopMapExtractor.INSTANCE;</span>
-    }
+  public MapExtractor getExtractor(ResultSet rs) {
+    try {
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">      if (!rs.next()) {</span>
+<span class="nc" id="L89">        return NoopMapExtractor.INSTANCE;</span>
+      }
+<span class="nc" id="L91">    } catch (SQLException e) {</span>
+<span class="nc" id="L92">      throw Utils.wrap(e);</span>
+<span class="fc" id="L93">    }</span>
     KeyWriter&lt;?&gt;[] writers;
-<span class="fc bfc" id="L92" title="All 2 branches covered.">    if ((writers = payload) == null) {</span>
-<span class="fc" id="L93">      lock.lock();</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">    if ((writers = payload) == null) {</span>
+<span class="fc" id="L96">      lock.lock();</span>
       try {
         // Check again, but now we know for sure the only one in here
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (payload == null) {</span>
-<span class="fc" id="L97">          payload = writers = createWriters(rs, config);</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if (payload == null) {</span>
+<span class="fc" id="L100">          payload = writers = createWriters(rs, config);</span>
         }
       } finally {
-<span class="fc" id="L100">        lock.unlock();</span>
+<span class="fc" id="L103">        lock.unlock();</span>
       }
     }
-<span class="fc" id="L103">    return new DefaultMapExtractor(rs, writers);</span>
+<span class="fc" id="L106">    return new DefaultMapExtractor(rs, writers);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

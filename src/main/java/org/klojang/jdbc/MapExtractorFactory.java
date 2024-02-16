@@ -82,11 +82,14 @@ public final class MapExtractorFactory {
    * @param rs the {@code ResultSet}
    * @return a {@code MapExtractor} that will convert the rows in the specified
    *       {@code ResultSet} into {@code Map<String, Object>} pseudo-objects.
-   * @throws SQLException if a database error occurs
    */
-  public MapExtractor getExtractor(ResultSet rs) throws SQLException {
-    if (!rs.next()) {
-      return NoopMapExtractor.INSTANCE;
+  public MapExtractor getExtractor(ResultSet rs) {
+    try {
+      if (!rs.next()) {
+        return NoopMapExtractor.INSTANCE;
+      }
+    } catch (SQLException e) {
+      throw Utils.wrap(e);
     }
     KeyWriter<?>[] writers;
     if ((writers = payload) == null) {
