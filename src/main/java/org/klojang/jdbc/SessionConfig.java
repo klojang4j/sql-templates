@@ -2,6 +2,7 @@ package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.Utils;
 import org.klojang.templates.NameMapper;
+import org.klojang.templates.name.CamelCaseToSnakeLowerCase;
 import org.klojang.templates.name.CamelCaseToSnakeUpperCase;
 import org.klojang.templates.name.SnakeCaseToCamelCase;
 
@@ -10,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
+import static org.klojang.templates.name.CamelCaseToSnakeLowerCase.camelCaseToSnakeLowerCase;
 import static org.klojang.templates.name.CamelCaseToSnakeUpperCase.camelCaseToSnakeUpperCase;
 import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCase;
 
@@ -193,7 +195,7 @@ public interface SessionConfig {
    * {@code enum} types using {@code preparedStatement.setInt(myEnum.ordinal())}. The
    * target column could still be a VARCHAR column. Whichever option you choose, the
    * reverse process &#8212; converting {@code ResultSet} values to enums &#8212; will
-   * always work correctly. It will never require extra configuration. You may ignore any
+   * always work correctly, without requiring additional configuration. You may ignore any
    * argument that you don't need in order to determine the storage type for enums. To
    * save <i>all</i> enums in your application as strings, ignore all arguments and simply
    * return {@code true} straight away.
@@ -217,9 +219,9 @@ public interface SessionConfig {
    * components, or map keys to column names. The default implementation returns
    * {@link CamelCaseToSnakeUpperCase#camelCaseToSnakeUpperCase()
    * camelCaseToSnakeUpperCase()}, which would map {@code "camelCaseToSnakeUpperCase"} to
-   * {@code "CAMEL_CASE_TO_SNAKE_UPPER_CASE"}. (It would also map {@code "WordCase"}
-   * a.k.a. {@code "PascalCase"} to {@code "WORD_CASE"} and {@code "PASCAL_CASE"},
-   * respectively, since all characters end up in upper case anyway.)
+   * {@code "CAMEL_CASE_TO_SNAKE_UPPER_CASE"}. It would also map {@code "WordCase"} a.k.a.
+   * {@code "PascalCase"} to {@code "WORD_CASE"} and {@code "PASCAL_CASE"}, respectively,
+   * since all characters end up in upper case anyhow.
    *
    * @return the {@link NameMapper} to be used for mapping bean properties, record
    *       components, or map keys to column names
@@ -275,13 +277,53 @@ public interface SessionConfig {
   }
 
   /**
+   * Returns a new instance that is equal to this instance except that property names are
+   * mapped <i>as-is</i> to column names and vice versa.
+   *
+   * @return a new instance that is equal to this instance except that property names are
+   *       mapped <i>as-is</i> to column names and vice versa
+   * @see NameMapper#AS_IS
+   */
+  default SessionConfig withNameMappingDisabled() {
+    return new SessionConfig() {
+      public NameMapper getPropertyToColumnMapper() { return NameMapper.AS_IS; }
+
+      public NameMapper getColumnToPropertyMapper() { return NameMapper.AS_IS; }
+    };
+  }
+
+  /**
+   * Returns a new instance that is equal to this instance except that property names are
+   * mapped to column names using the
+   * {@link CamelCaseToSnakeLowerCase#camelCaseToSnakeLowerCase()
+   * camelCaseToSnakeLowerCase()} name mapper. This {@code NameMapper} would map
+   * {@code "camelCaseToSnakeLowerCase"} to {@code "camel_case_to_snake_lower_case"}. It
+   * would also map {@code "WordCase"} a.k.a. {@code "PascalCase"} to {@code "word_case"}
+   * and {@code "pascal_case"}, respectively, since all characters end up in lower case
+   * anyhow. The reverse (column-to-property) mapper remains at its default value
+   * ({@link SnakeCaseToCamelCase#snakeCaseToCamelCase() snakeCaseToCamelCase()}). When
+   * mapping snake case names to camel case names, the casing of the input string is
+   * irrelevant.
+   *
+   * @return a new instance that is equal to this instance except that property names are
+   *       mapped to column names using the
+   *       {@link CamelCaseToSnakeLowerCase#camelCaseToSnakeLowerCase()
+   *       camelCaseToSnakeLowerCase()} name mapper
+   */
+  default SessionConfig withLowerCaseColumnNames() {
+    return new SessionConfig() {
+      public NameMapper getPropertyToColumnMapper() { return camelCaseToSnakeLowerCase(); }
+    };
+  }
+
+  /**
    * Returns a new instance that is equal to this instance except that <i>all</i> enums
    * will be saved by calling {@code toString()} on them.
    *
    * @return a new instance that is equal to this instance except that <i>all</i> enums
    *       will be saved by calling {@code toString()} on them.
    */
-  default SessionConfig withSaveAllEnumsAsStrings() {
+  default SessionConfig withEnumsSavedAsStrings() {
     return new SessionConfig() {
       public boolean saveEnumAsString(Class<?> beanType,
             String enumProperty,

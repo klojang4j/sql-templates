@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * &lt;p&gt;An {@code SQLSession} allows you to provide values for &lt;i&gt;template variables&lt;/i&gt;
+ * &lt;p&gt;A {@code SQLSession} allows you to provide values for &lt;i&gt;template variables&lt;/i&gt;
  * within an SQL template. Once you have set all template variables, you can obtain a
  * {@link SQLStatement} from the {@code SQLSession} and use it to set (a.k.a. &quot;bind&quot;) the
  * &lt;i&gt;named parameters&lt;/i&gt; within the SQL. The difference between template variables and
@@ -15,8 +15,7 @@ import java.util.List;
  * {@link SQL#simple(String) SQL.simple()}) does not allow for template variables, you
  * have no choice but to retrieve a {@code SQLStatement} from it straight away. If the SQL
  * does not contain any named parameters, you may also call {@link #execute()} on the
- * {@code SQLSession} straight away, without going through the creation of an
- * {@code SQLStatement}.
+ * {@code SQLSession}, without going through the creation of a {@code SQLStatement}.
  *
  * &lt;p&gt;{@code SQLSession} instances are meant to be throw-away objects that should, in
  * principle, not survive the method in which they are created.
@@ -47,7 +46,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession set(String varName, Object value)
         throws UnsupportedOperationException {
-<span class="nc" id="L50">    throw notSupported(&quot;set&quot;);</span>
+<span class="nc" id="L49">    throw notSupported(&quot;set&quot;);</span>
   }
 
   /**
@@ -68,7 +67,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setValue(String varName, Object value)
         throws UnsupportedOperationException {
-<span class="nc" id="L71">    throw notSupported(&quot;setValue&quot;);</span>
+<span class="nc" id="L70">    throw notSupported(&quot;setValue&quot;);</span>
   }
 
   /**
@@ -104,7 +103,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setArray(String varName, Object... values)
         throws UnsupportedOperationException {
-<span class="nc" id="L107">    throw notSupported(&quot;setArray&quot;);</span>
+<span class="nc" id="L106">    throw notSupported(&quot;setArray&quot;);</span>
   }
 
   /**
@@ -119,7 +118,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setArray(String varName, int... values)
         throws UnsupportedOperationException {
-<span class="nc" id="L122">    throw notSupported(&quot;setArray&quot;);</span>
+<span class="nc" id="L121">    throw notSupported(&quot;setArray&quot;);</span>
   }
 
   /**
@@ -135,7 +134,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setIdentifier(String varName, String identifier)
         throws UnsupportedOperationException {
-<span class="nc" id="L138">    throw notSupported(&quot;setIdentifier&quot;);</span>
+<span class="nc" id="L137">    throw notSupported(&quot;setIdentifier&quot;);</span>
   }
 
   /**
@@ -154,7 +153,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   default &lt;T&gt; SQLSession setValues(T... beans) throws UnsupportedOperationException {
-<span class="nc" id="L157">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L156">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -203,7 +202,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       {@link SQL#template(String) SQL.template()} method
    */
   default &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans) throws UnsupportedOperationException {
-<span class="nc" id="L206">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L205">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -290,7 +289,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans, BeanValueProcessor&lt;T&gt; processor)
         throws UnsupportedOperationException {
-<span class="nc" id="L293">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L292">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -312,7 +311,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default &lt;T&gt; long[] setValuesAndExecute(List&lt;T&gt; beans)
         throws UnsupportedOperationException {
-<span class="nc" id="L315">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L314">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -336,7 +335,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default &lt;T&gt; long[] setValuesAndExecute(List&lt;T&gt; beans, BeanValueProcessor&lt;T&gt; processor)
         throws UnsupportedOperationException {
-<span class="nc" id="L339">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
+<span class="nc" id="L338">    throw new UnsupportedOperationException(sqlSkeletonsOnly());</span>
   }
 
   /**
@@ -363,7 +362,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLSession setOrderBy(String sortColumn) throws UnsupportedOperationException {
-<span class="nc" id="L366">    throw notSupported(&quot;setOrderBy&quot;);</span>
+<span class="nc" id="L365">    throw notSupported(&quot;setOrderBy&quot;);</span>
   }
 
   /**
@@ -389,7 +388,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLSession setOrderBy(String sortColumn, boolean isDescending)
         throws UnsupportedOperationException {
-<span class="nc" id="L392">    throw notSupported(&quot;setOrderBy&quot;);</span>
+<span class="nc" id="L391">    throw notSupported(&quot;setOrderBy&quot;);</span>
   }
 
   /**
@@ -415,7 +414,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @see Quoter#quoteValue(Object)
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
-<span class="nc" id="L418">    throw notSupported(&quot;quoteValue&quot;);</span>
+<span class="nc" id="L417">    throw notSupported(&quot;quoteValue&quot;);</span>
   }
 
   /**
@@ -431,7 +430,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    */
   default SQLExpression sqlFunction(String name, Object... args)
         throws UnsupportedOperationException {
-<span class="nc" id="L434">    throw notSupported(&quot;sqlFunction&quot;);</span>
+<span class="nc" id="L433">    throw notSupported(&quot;sqlFunction&quot;);</span>
   }
 
   /**
@@ -447,7 +446,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @see Quoter#quoteIdentifier(String)
    */
   default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
-<span class="nc" id="L450">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
+<span class="nc" id="L449">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
   }
 
   /**
@@ -476,7 +475,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @return a {@code SQLInsert} instance
    */
   default SQLInsert prepareInsert() {
-<span class="fc" id="L479">    return prepareInsert(true);</span>
+<span class="fc" id="L478">    return prepareInsert(true);</span>
   }
 
   /**
@@ -498,12 +497,12 @@ public sealed interface SQLSession permits AbstractSQLSession {
   SQLUpdate prepareUpdate();
 
   private static UnsupportedOperationException notSupported(String method) {
-<span class="nc" id="L501">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
-<span class="nc" id="L502">    return new UnsupportedOperationException(String.format(fmt, method));</span>
+<span class="nc" id="L500">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
+<span class="nc" id="L501">    return new UnsupportedOperationException(String.format(fmt, method));</span>
   }
 
   private static String sqlSkeletonsOnly() {
-<span class="nc" id="L506">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
+<span class="nc" id="L505">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
   }
 
 }

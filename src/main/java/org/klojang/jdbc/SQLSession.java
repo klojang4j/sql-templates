@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * <p>An {@code SQLSession} allows you to provide values for <i>template variables</i>
+ * <p>A {@code SQLSession} allows you to provide values for <i>template variables</i>
  * within an SQL template. Once you have set all template variables, you can obtain a
  * {@link SQLStatement} from the {@code SQLSession} and use it to set (a.k.a. "bind") the
  * <i>named parameters</i> within the SQL. The difference between template variables and
@@ -15,8 +15,7 @@ import java.util.List;
  * {@link SQL#simple(String) SQL.simple()}) does not allow for template variables, you
  * have no choice but to retrieve a {@code SQLStatement} from it straight away. If the SQL
  * does not contain any named parameters, you may also call {@link #execute()} on the
- * {@code SQLSession} straight away, without going through the creation of an
- * {@code SQLStatement}.
+ * {@code SQLSession}, without going through the creation of a {@code SQLStatement}.
  *
  * <p>{@code SQLSession} instances are meant to be throw-away objects that should, in
  * principle, not survive the method in which they are created.
