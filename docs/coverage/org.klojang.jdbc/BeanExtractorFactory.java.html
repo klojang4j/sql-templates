@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import static org.klojang.check.Tag.CLASS;
 import static org.klojang.jdbc.x.Strings.*;
 import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 import static org.klojang.util.ClassMethods.className;
@@ -31,7 +32,7 @@ import static org.klojang.util.ClassMethods.className;
  *
  * &lt;p&gt;Because the configuration of the extraction process is somewhat expensive, it
  * is recommended that you store {@code BeanExtractorFactory} instances in
- * {@code private static final} fields or use some sort of caching mechanism.
+ * {@code static final} fields or use some sort of caching mechanism.
  *
  * @param &lt;T&gt; the type of JavaBeans or records produced by the extractor
  * @author Ayco Holleman
@@ -41,7 +42,7 @@ public final class BeanExtractorFactory&lt;T&gt; {
   private static final String RECORDS_NOT_ALLOWED
         = &quot;bean supplier not supported for immutable type ${0}&quot;;
 
-<span class="pc" id="L44">  private final ReentrantLock lock = new ReentrantLock();</span>
+<span class="pc" id="L45">  private final ReentrantLock lock = new ReentrantLock();</span>
 
   private final Class&lt;T&gt; clazz;
   private final Supplier&lt;T&gt; supplier;
@@ -60,11 +61,11 @@ public final class BeanExtractorFactory&lt;T&gt; {
    *       the {@code BeanExtractor} instances obtained from this
    *       {@code BeanExtractorFactory}
    */
-<span class="nc" id="L63">  public BeanExtractorFactory(Class&lt;T&gt; clazz) {</span>
-<span class="nc" id="L64">    this.clazz = Check.notNull(clazz).ok();</span>
-<span class="nc bnc" id="L65" title="All 2 branches missed.">    this.supplier = clazz.isRecord() ? null : () -&gt; newInstance(clazz);</span>
-<span class="nc" id="L66">    this.config = Utils.DEFAULT_CONFIG;</span>
-<span class="nc" id="L67">  }</span>
+<span class="nc" id="L64">  public BeanExtractorFactory(Class&lt;T&gt; clazz) {</span>
+<span class="nc" id="L65">    this.clazz = Check.notNull(clazz).ok();</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">    this.supplier = clazz.isRecord() ? null : () -&gt; newInstance(clazz);</span>
+<span class="nc" id="L67">    this.config = Utils.DEFAULT_CONFIG;</span>
+<span class="nc" id="L68">  }</span>
 
   /**
    * Creates a new {@code BeanExtractorFactory}.
@@ -75,11 +76,11 @@ public final class BeanExtractorFactory&lt;T&gt; {
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
    *       behaviour of the {@code BeanExtractor}
    */
-<span class="fc" id="L78">  public BeanExtractorFactory(Class&lt;T&gt; clazz, SessionConfig config) {</span>
-<span class="fc" id="L79">    this.clazz = Check.notNull(clazz, BEAN_CLASS).ok();</span>
-<span class="fc bfc" id="L80" title="All 2 branches covered.">    this.supplier = clazz.isRecord() ? null : () -&gt; newInstance(clazz);</span>
-<span class="fc" id="L81">    this.config = Check.notNull(config, CONFIG).ok();</span>
-<span class="fc" id="L82">  }</span>
+<span class="fc" id="L79">  public BeanExtractorFactory(Class&lt;T&gt; clazz, SessionConfig config) {</span>
+<span class="fc" id="L80">    this.clazz = Check.notNull(clazz, CLASS).ok();</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">    this.supplier = clazz.isRecord() ? null : () -&gt; newInstance(clazz);</span>
+<span class="fc" id="L82">    this.config = Check.notNull(config, CONFIG).ok();</span>
+<span class="fc" id="L83">  }</span>
 
   /**
    * Creates a new {@code BeanExtractorFactory}. The provided class must &lt;i&gt;not&lt;/i&gt; be a
@@ -92,13 +93,13 @@ public final class BeanExtractorFactory&lt;T&gt; {
    *       method reference to the constructor of the JavaBean (e.g.
    *       {@code Employee::new}).
    */
-<span class="nc" id="L95">  public BeanExtractorFactory(Class&lt;T&gt; clazz, Supplier&lt;T&gt; beanSupplier) {</span>
-<span class="nc" id="L96">    this.clazz = Check.notNull(clazz, BEAN_CLASS)</span>
-<span class="nc" id="L97">          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(clazz))</span>
-<span class="nc" id="L98">          .ok();</span>
-<span class="nc" id="L99">    this.supplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();</span>
-<span class="nc" id="L100">    this.config = Utils.DEFAULT_CONFIG;</span>
-<span class="nc" id="L101">  }</span>
+<span class="nc" id="L96">  public BeanExtractorFactory(Class&lt;T&gt; clazz, Supplier&lt;T&gt; beanSupplier) {</span>
+<span class="nc" id="L97">    this.clazz = Check.notNull(clazz, CLASS)</span>
+<span class="nc" id="L98">          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(clazz))</span>
+<span class="nc" id="L99">          .ok();</span>
+<span class="nc" id="L100">    this.supplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();</span>
+<span class="nc" id="L101">    this.config = Utils.DEFAULT_CONFIG;</span>
+<span class="nc" id="L102">  }</span>
 
   /**
    * Creates a new {@code BeanExtractorFactory}. The provided class must &lt;i&gt;not&lt;/i&gt; be a
@@ -113,13 +114,13 @@ public final class BeanExtractorFactory&lt;T&gt; {
    */
   public BeanExtractorFactory(Class&lt;T&gt; clazz,
         Supplier&lt;T&gt; beanSupplier,
-<span class="nc" id="L116">        SessionConfig config) {</span>
-<span class="nc" id="L117">    this.clazz = Check.notNull(clazz, BEAN_CLASS)</span>
-<span class="nc" id="L118">          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(clazz))</span>
-<span class="nc" id="L119">          .ok();</span>
-<span class="nc" id="L120">    this.supplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();</span>
-<span class="nc" id="L121">    this.config = Check.notNull(config, CONFIG).ok();</span>
-<span class="nc" id="L122">  }</span>
+<span class="nc" id="L117">        SessionConfig config) {</span>
+<span class="nc" id="L118">    this.clazz = Check.notNull(clazz, CLASS)</span>
+<span class="nc" id="L119">          .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(clazz))</span>
+<span class="nc" id="L120">          .ok();</span>
+<span class="nc" id="L121">    this.supplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();</span>
+<span class="nc" id="L122">    this.config = Check.notNull(config, CONFIG).ok();</span>
+<span class="nc" id="L123">  }</span>
 
   /**
    * Returns a {@code BeanExtractor} that will convert the rows in the specified
@@ -132,49 +133,49 @@ public final class BeanExtractorFactory&lt;T&gt; {
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public BeanExtractor&lt;T&gt; getExtractor(ResultSet rs) throws SQLException {
-<span class="pc bpc" id="L135" title="1 of 4 branches missed.">    return rs.next() ? clazz.isRecord()</span>
-<span class="fc" id="L136">          ? recordExtractor(rs) : defaultExtractor(rs)</span>
-<span class="nc" id="L137">          : NoopBeanExtractor.INSTANCE;</span>
+<span class="pc bpc" id="L136" title="1 of 4 branches missed.">    return rs.next() ? clazz.isRecord()</span>
+<span class="fc" id="L137">          ? recordExtractor(rs) : defaultExtractor(rs)</span>
+<span class="nc" id="L138">          : NoopBeanExtractor.INSTANCE;</span>
   }
 
   private DefaultBeanExtractor&lt;T&gt; defaultExtractor(ResultSet rs) {
     PropertyWriter&lt;?, ?&gt;[] writers;
-<span class="pc bpc" id="L142" title="1 of 2 branches missed.">    if ((writers = (PropertyWriter&lt;?, ?&gt;[]) payload) == null) {</span>
-<span class="fc" id="L143">      lock.lock();</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">    if ((writers = (PropertyWriter&lt;?, ?&gt;[]) payload) == null) {</span>
+<span class="fc" id="L144">      lock.lock();</span>
       try {
         // Check again, but now we know for sure the only one in here
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (payload == null) {</span>
-<span class="fc" id="L147">          payload = writers = createWriters(rs, clazz, config);</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if (payload == null) {</span>
+<span class="fc" id="L148">          payload = writers = createWriters(rs, clazz, config);</span>
         }
       } finally {
-<span class="fc" id="L150">        lock.unlock();</span>
+<span class="fc" id="L151">        lock.unlock();</span>
       }
     }
-<span class="fc" id="L153">    return new DefaultBeanExtractor&lt;&gt;(rs, writers, supplier);</span>
+<span class="fc" id="L154">    return new DefaultBeanExtractor&lt;&gt;(rs, writers, supplier);</span>
   }
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   private RecordExtractor recordExtractor(ResultSet rs) {
     RecordFactory recordFactory;
-<span class="pc bpc" id="L159" title="1 of 2 branches missed.">    if ((recordFactory = (RecordFactory) payload) == null) {</span>
-<span class="fc" id="L160">      lock.lock();</span>
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">    if ((recordFactory = (RecordFactory) payload) == null) {</span>
+<span class="fc" id="L161">      lock.lock();</span>
       try {
-<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        if (payload == null) {</span>
-<span class="fc" id="L163">          payload = recordFactory = new RecordFactory&lt;&gt;((Class) clazz, rs, config);</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">        if (payload == null) {</span>
+<span class="fc" id="L164">          payload = recordFactory = new RecordFactory&lt;&gt;((Class) clazz, rs, config);</span>
         }
       } finally {
-<span class="fc" id="L166">        lock.unlock();</span>
+<span class="fc" id="L167">        lock.unlock();</span>
       }
     }
-<span class="fc" id="L169">    return new RecordExtractor&lt;&gt;(rs, recordFactory);</span>
+<span class="fc" id="L170">    return new RecordExtractor&lt;&gt;(rs, recordFactory);</span>
   }
 
 
   private static &lt;U&gt; U newInstance(Class&lt;U&gt; clazz) {
     try {
-<span class="fc" id="L175">      return InvokeMethods.newInstance(clazz);</span>
-<span class="nc" id="L176">    } catch (Exception e) {</span>
-<span class="nc" id="L177">      throw Utils.wrap(e);</span>
+<span class="fc" id="L176">      return InvokeMethods.newInstance(clazz);</span>
+<span class="nc" id="L177">    } catch (Exception e) {</span>
+<span class="nc" id="L178">      throw Utils.wrap(e);</span>
     }
   }
 }

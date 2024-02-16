@@ -16,7 +16,7 @@ import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 import static org.klojang.jdbc.x.rs.KeyWriter.toMap;
 
-public final class DefaultMapExtractor implements MapExtractor {
+final class DefaultMapExtractor implements MapExtractor {
 
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(DefaultMapExtractor.class);

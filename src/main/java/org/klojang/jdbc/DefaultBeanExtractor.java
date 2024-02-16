@@ -17,7 +17,7 @@ import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 import static org.klojang.jdbc.x.Strings.SIZE_ESTIMATE;
 
-public final class DefaultBeanExtractor<T> implements BeanExtractor<T> {
+final class DefaultBeanExtractor<T> implements BeanExtractor<T> {
 
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(DefaultBeanExtractor.class);

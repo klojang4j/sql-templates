@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import static org.klojang.check.Tag.CLASS;
 import static org.klojang.jdbc.x.Strings.*;
 import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 import static org.klojang.util.ClassMethods.className;
@@ -31,7 +32,7 @@ import static org.klojang.util.ClassMethods.className;
  *
  * <p>Because the configuration of the extraction process is somewhat expensive, it
  * is recommended that you store {@code BeanExtractorFactory} instances in
- * {@code private static final} fields or use some sort of caching mechanism.
+ * {@code static final} fields or use some sort of caching mechanism.
  *
  * @param <T> the type of JavaBeans or records produced by the extractor
  * @author Ayco Holleman
@@ -76,7 +77,7 @@ public final class BeanExtractorFactory<T> {
    *       behaviour of the {@code BeanExtractor}
    */
   public BeanExtractorFactory(Class<T> clazz, SessionConfig config) {
-    this.clazz = Check.notNull(clazz, BEAN_CLASS).ok();
+    this.clazz = Check.notNull(clazz, CLASS).ok();
     this.supplier = clazz.isRecord() ? null : () -> newInstance(clazz);
     this.config = Check.notNull(config, CONFIG).ok();
   }
@@ -93,7 +94,7 @@ public final class BeanExtractorFactory<T> {
    *       {@code Employee::new}).
    */
   public BeanExtractorFactory(Class<T> clazz, Supplier<T> beanSupplier) {
-    this.clazz = Check.notNull(clazz, BEAN_CLASS)
+    this.clazz = Check.notNull(clazz, CLASS)
           .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(clazz))
           .ok();
     this.supplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();
@@ -114,7 +115,7 @@ public final class BeanExtractorFactory<T> {
   public BeanExtractorFactory(Class<T> clazz,
         Supplier<T> beanSupplier,
         SessionConfig config) {
-    this.clazz = Check.notNull(clazz, BEAN_CLASS)
+    this.clazz = Check.notNull(clazz, CLASS)
           .isNot(Class::isRecord, RECORDS_NOT_ALLOWED, className(clazz))
           .ok();
     this.supplier = Check.notNull(beanSupplier, BEAN_SUPPLIER).ok();

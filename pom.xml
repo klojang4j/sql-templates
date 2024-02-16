@@ -86,12 +86,12 @@
         <!-- *** Check for updates: mvn versions:display-dependency-updates   *** -->
         <!-- *** Check dependencies: mvn dependency:analyze                   *** -->
         <!-- ==================================================================== -->
-        <klojang-check.version>3.0.2-jdk21</klojang-check.version>
-        <klojang-util.version>1.1.7</klojang-util.version>
-        <klojang-collections.version>2.0.8</klojang-collections.version>
-        <klojang-convert.version>1.0.7</klojang-convert.version>
-        <klojang-invoke.version>2.0.3</klojang-invoke.version>
-        <klojang-templates.version>1.0.9</klojang-templates.version>
+        <klojang-check.version>3.0.3-jdk21</klojang-check.version>
+        <klojang-util.version>1.1.8</klojang-util.version>
+        <klojang-collections.version>2.0.9</klojang-collections.version>
+        <klojang-convert.version>1.0.8</klojang-convert.version>
+        <klojang-invoke.version>2.0.4</klojang-invoke.version>
+        <klojang-templates.version>1.0.10</klojang-templates.version>
 
         <commons-text.version>1.11.0</commons-text.version>
         <apache-httpclient.version>4.5.14</apache-httpclient.version>
