@@ -392,17 +392,19 @@ public sealed interface SQLSession permits AbstractSQLSession {
   }
 
   /**
-   * <p>Escapes and quotes the specified value. More precisely:
+   * <p>Returns a properly escaped and quoted string. More precisely:
+   *
    * <ul>
-   *     <li>If the value is {@code null}, the literal string "NULL"
-   *         (<i>without</i> quotes) is returned.
+   *     <li>If the value is {@code null}, the literal string {@code "NULL"} (without the
+   *         quotes) is returned.
    *     <li>If the value is a {@link Number}, a {@link Boolean}, or a
    *         {@link SQLExpression}, the value is returned as-is. That is,
    *         {@code toString()} will be called on the value, but the resulting string
    *         will <i>not</i> be quoted.
-   *     <li>Otherwise the value is escaped and quoted according to the quoting rules of
-   *         the target database.
+   *     <li>Otherwise {@code toString()} is called on the value, and the resulting string
+   *         is escaped and quoted according to the quoting rules of the target database.
    * </ul>
+   *
    * <p>Use this method if you do not know or trust the origin of the value to prevent
    * SQL injection.
    *
@@ -421,9 +423,12 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * Generates a SQL function call in which each of the function arguments is escaped and
    * quoted using the {@link #quoteValue(Object) quoteValue()} method.
    *
-   * @param name the name of the function
-   * @param args the function arguments. Each of the provided arguments will be
-   *       escaped and quoted using {@link #quoteValue(Object)}.
+   * @param name the name of the function, like {@code "SUBSTRING"} or
+   *       {@code "CONCAT"}. Note that this argument is not processed or checked in any
+   *       way. Therefore, with SQL injection in mind, be wary of this being a dynamically
+   *       generated value.
+   * @param args the function arguments. Each of the provided arguments will pass
+   *       through {@link #quoteValue(Object)}.
    * @return an {@code SQLExpression} representing a SQL function call
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method

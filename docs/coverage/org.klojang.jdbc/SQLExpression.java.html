@@ -3,7 +3,8 @@
 /**
  * &lt;p&gt;A special string wrapper object whose type signals to &lt;i&gt;Klojang JDBC&lt;/i&gt; that the
  * wrapped string must be treated as a native SQL expression and hence must not be escaped
- * or quoted. The SQL expression could be, for example:
+ * or quoted. An instance of {@code SQLExpression} is obtained through
+ * {@link SQL#expression(String)}. An SQL expression could be, for example:
  * &lt;ul&gt;
  *   &lt;li&gt;a SQL function call like &lt;b&gt;{@code CONCAT(FIRST_NAME, ' ' , LAST_NAME)}&lt;/b&gt;
  *   &lt;li&gt;an operation like &lt;b&gt;{@code (SALARY * 1.05)}&lt;/b&gt;
@@ -15,17 +16,17 @@
  * the various {@code quote} methods in {@link SQLSession} to escape and quote the
  * individual components of the expression if necessary.
  *
- * &lt;p&gt;&lt;i&gt;Although you could, it is unnecessary to wrap a plain number into an
- * {@code SQLExpression}. Numbers (primitive numbers or instances of {@link Number})
- * will anyhow not be quoted by Klojang JDBC.&lt;/i&gt;
+ * &lt;p&gt;&lt;i&gt;(Although you could, it would be overblown to wrap a plain number into a
+ * {@code SQLExpression}. Numbers &amp;#8212; the primitive number types and instances of
+ * {@link Number} &amp;#8212; will anyhow not be quoted by Klojang JDBC.)&lt;/i&gt;
  */
 public final class SQLExpression {
 
   private final String expression;
 
-<span class="fc" id="L26">  SQLExpression(String expression) {</span>
-<span class="fc" id="L27">    this.expression = expression;</span>
-<span class="fc" id="L28">  }</span>
+<span class="fc" id="L27">  SQLExpression(String expression) {</span>
+<span class="fc" id="L28">    this.expression = expression;</span>
+<span class="fc" id="L29">  }</span>
 
   /**
    * Returns the SQL expression.
@@ -33,6 +34,6 @@ public final class SQLExpression {
    * @return the SQL expression
    */
   @Override
-<span class="fc" id="L36">  public String toString() { return expression; }</span>
+<span class="fc" id="L37">  public String toString() { return expression; }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

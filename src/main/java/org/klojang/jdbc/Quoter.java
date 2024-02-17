@@ -26,16 +26,16 @@ import static org.klojang.util.StringMethods.append;
  * <b>{@code "SUBSTRING(" + quoter.quoteValue(firstName) + ", 1, 3)"}</b>. For SQL
  * function calls in particular, you can also use
  * {@link #sqlFunction(String, Object...) Quoter.sqlFunction()}:
- * <b>{@code quoter.sqlFunction("SUBSTRING", 1, 3)}</b>.
+ * <b>{@code quoter.sqlFunction("SUBSTRING", firstName, 1, 3)}</b>.
  *
  * <p>Only use a {@code Quoter} to escape and quote strings <b>within</b> the SQL
  * expression. In any other case escaping and quoting is taken care of by <i>Klojang
  * JDBC</i>.
  *
  * @see SQLExpression
- * @see SQLSession#setValues(List, BeanValueProcessor)
  * @see SQLSession#quoteValue(Object)
  * @see Statement#enquoteLiteral(String)
+ * @see Statement#enquoteIdentifier(String, boolean)
  */
 public final class Quoter {
 
@@ -49,14 +49,14 @@ public final class Quoter {
    * <p>Returns a properly escaped and quoted string. More precisely:
    *
    * <ul>
-   *     <li>If the value is {@code null}, the literal string "NULL" (<i>without</i>
+   *     <li>If the value is {@code null}, the literal string {@code "NULL"} (without the
    *         quotes) is returned.
    *     <li>If the value is a {@link Number}, a {@link Boolean}, or a
    *         {@link SQLExpression}, the value is returned as-is. That is,
    *         {@code toString()} will be called on the value, but the resulting string
    *         will <i>not</i> be quoted.
-   *     <li>Otherwise the value is escaped and quoted according to the quoting rules of
-   *         the target database.
+   *     <li>Otherwise {@code toString()} is called on the value, and the resulting string
+   *         is escaped and quoted according to the quoting rules of the target database.
    * </ul>
    *
    * @param value the value to quote
@@ -94,9 +94,12 @@ public final class Quoter {
    * Generates a SQL function call in which each of the function arguments is escaped and
    * quoted using the {@link #quoteValue(Object) quoteValue()} method.
    *
-   * @param name the name of the function
-   * @param args the function arguments. Each of the provided arguments will be
-   *       escaped and quoted using {@link #quoteValue(Object)}.
+   * @param name the name of the function, like {@code "SUBSTRING"} or
+   *       {@code "CONCAT"}. Note that this argument is not processed or checked in any
+   *       way. Therefore, with SQL injection in mind, be wary of this being a dynamically
+   *       generated value.
+   * @param args the function arguments. Each of the provided arguments will pass
+   *       through {@link #quoteValue(Object)}.
    * @return an {@code SQLExpression} representing a SQL function call
    */
   public SQLExpression sqlFunction(String name, Object... args) {

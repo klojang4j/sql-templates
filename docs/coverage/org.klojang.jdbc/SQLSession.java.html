@@ -392,17 +392,19 @@ public sealed interface SQLSession permits AbstractSQLSession {
   }
 
   /**
-   * &lt;p&gt;Escapes and quotes the specified value. More precisely:
+   * &lt;p&gt;Returns a properly escaped and quoted string. More precisely:
+   *
    * &lt;ul&gt;
-   *     &lt;li&gt;If the value is {@code null}, the literal string &quot;NULL&quot;
-   *         (&lt;i&gt;without&lt;/i&gt; quotes) is returned.
+   *     &lt;li&gt;If the value is {@code null}, the literal string {@code &quot;NULL&quot;} (without the
+   *         quotes) is returned.
    *     &lt;li&gt;If the value is a {@link Number}, a {@link Boolean}, or a
    *         {@link SQLExpression}, the value is returned as-is. That is,
    *         {@code toString()} will be called on the value, but the resulting string
    *         will &lt;i&gt;not&lt;/i&gt; be quoted.
-   *     &lt;li&gt;Otherwise the value is escaped and quoted according to the quoting rules of
-   *         the target database.
+   *     &lt;li&gt;Otherwise {@code toString()} is called on the value, and the resulting string
+   *         is escaped and quoted according to the quoting rules of the target database.
    * &lt;/ul&gt;
+   *
    * &lt;p&gt;Use this method if you do not know or trust the origin of the value to prevent
    * SQL injection.
    *
@@ -414,23 +416,26 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @see Quoter#quoteValue(Object)
    */
   default String quoteValue(Object value) throws UnsupportedOperationException {
-<span class="nc" id="L417">    throw notSupported(&quot;quoteValue&quot;);</span>
+<span class="nc" id="L419">    throw notSupported(&quot;quoteValue&quot;);</span>
   }
 
   /**
    * Generates a SQL function call in which each of the function arguments is escaped and
    * quoted using the {@link #quoteValue(Object) quoteValue()} method.
    *
-   * @param name the name of the function
-   * @param args the function arguments. Each of the provided arguments will be
-   *       escaped and quoted using {@link #quoteValue(Object)}.
+   * @param name the name of the function, like {@code &quot;SUBSTRING&quot;} or
+   *       {@code &quot;CONCAT&quot;}. Note that this argument is not processed or checked in any
+   *       way. Therefore, with SQL injection in mind, be wary of this being a dynamically
+   *       generated value.
+   * @param args the function arguments. Each of the provided arguments will pass
+   *       through {@link #quoteValue(Object)}.
    * @return an {@code SQLExpression} representing a SQL function call
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */
   default SQLExpression sqlFunction(String name, Object... args)
         throws UnsupportedOperationException {
-<span class="nc" id="L433">    throw notSupported(&quot;sqlFunction&quot;);</span>
+<span class="nc" id="L438">    throw notSupported(&quot;sqlFunction&quot;);</span>
   }
 
   /**
@@ -446,7 +451,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @see Quoter#quoteIdentifier(String)
    */
   default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
-<span class="nc" id="L449">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
+<span class="nc" id="L454">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
   }
 
   /**
@@ -475,7 +480,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * @return a {@code SQLInsert} instance
    */
   default SQLInsert prepareInsert() {
-<span class="fc" id="L478">    return prepareInsert(true);</span>
+<span class="fc" id="L483">    return prepareInsert(true);</span>
   }
 
   /**
@@ -497,12 +502,12 @@ public sealed interface SQLSession permits AbstractSQLSession {
   SQLUpdate prepareUpdate();
 
   private static UnsupportedOperationException notSupported(String method) {
-<span class="nc" id="L500">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
-<span class="nc" id="L501">    return new UnsupportedOperationException(String.format(fmt, method));</span>
+<span class="nc" id="L505">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
+<span class="nc" id="L506">    return new UnsupportedOperationException(String.format(fmt, method));</span>
   }
 
   private static String sqlSkeletonsOnly() {
-<span class="nc" id="L505">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
+<span class="nc" id="L510">    return &quot;setValues() only supported for SQL skeletons&quot;;</span>
   }
 
 }

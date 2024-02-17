@@ -26,16 +26,16 @@ import static org.klojang.util.StringMethods.append;
  * &lt;b&gt;{@code &quot;SUBSTRING(&quot; + quoter.quoteValue(firstName) + &quot;, 1, 3)&quot;}&lt;/b&gt;. For SQL
  * function calls in particular, you can also use
  * {@link #sqlFunction(String, Object...) Quoter.sqlFunction()}:
- * &lt;b&gt;{@code quoter.sqlFunction(&quot;SUBSTRING&quot;, 1, 3)}&lt;/b&gt;.
+ * &lt;b&gt;{@code quoter.sqlFunction(&quot;SUBSTRING&quot;, firstName, 1, 3)}&lt;/b&gt;.
  *
  * &lt;p&gt;Only use a {@code Quoter} to escape and quote strings &lt;b&gt;within&lt;/b&gt; the SQL
  * expression. In any other case escaping and quoting is taken care of by &lt;i&gt;Klojang
  * JDBC&lt;/i&gt;.
  *
  * @see SQLExpression
- * @see SQLSession#setValues(List, BeanValueProcessor)
  * @see SQLSession#quoteValue(Object)
  * @see Statement#enquoteLiteral(String)
+ * @see Statement#enquoteIdentifier(String, boolean)
  */
 public final class Quoter {
 
@@ -49,14 +49,14 @@ public final class Quoter {
    * &lt;p&gt;Returns a properly escaped and quoted string. More precisely:
    *
    * &lt;ul&gt;
-   *     &lt;li&gt;If the value is {@code null}, the literal string &quot;NULL&quot; (&lt;i&gt;without&lt;/i&gt;
+   *     &lt;li&gt;If the value is {@code null}, the literal string {@code &quot;NULL&quot;} (without the
    *         quotes) is returned.
    *     &lt;li&gt;If the value is a {@link Number}, a {@link Boolean}, or a
    *         {@link SQLExpression}, the value is returned as-is. That is,
    *         {@code toString()} will be called on the value, but the resulting string
    *         will &lt;i&gt;not&lt;/i&gt; be quoted.
-   *     &lt;li&gt;Otherwise the value is escaped and quoted according to the quoting rules of
-   *         the target database.
+   *     &lt;li&gt;Otherwise {@code toString()} is called on the value, and the resulting string
+   *         is escaped and quoted according to the quoting rules of the target database.
    * &lt;/ul&gt;
    *
    * @param value the value to quote
@@ -94,17 +94,20 @@ public final class Quoter {
    * Generates a SQL function call in which each of the function arguments is escaped and
    * quoted using the {@link #quoteValue(Object) quoteValue()} method.
    *
-   * @param name the name of the function
-   * @param args the function arguments. Each of the provided arguments will be
-   *       escaped and quoted using {@link #quoteValue(Object)}.
+   * @param name the name of the function, like {@code &quot;SUBSTRING&quot;} or
+   *       {@code &quot;CONCAT&quot;}. Note that this argument is not processed or checked in any
+   *       way. Therefore, with SQL injection in mind, be wary of this being a dynamically
+   *       generated value.
+   * @param args the function arguments. Each of the provided arguments will pass
+   *       through {@link #quoteValue(Object)}.
    * @return an {@code SQLExpression} representing a SQL function call
    */
   public SQLExpression sqlFunction(String name, Object... args) {
-<span class="fc" id="L103">    Check.notNull(name, FUNCTION_NAME);</span>
-<span class="fc" id="L104">    Check.notNull(args, VARARGS);</span>
-<span class="fc" id="L105">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
-<span class="fc" id="L106">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
-<span class="fc" id="L107">    return new SQLExpression(expr);</span>
+<span class="fc" id="L106">    Check.notNull(name, FUNCTION_NAME);</span>
+<span class="fc" id="L107">    Check.notNull(args, VARARGS);</span>
+<span class="fc" id="L108">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
+<span class="fc" id="L109">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
+<span class="fc" id="L110">    return new SQLExpression(expr);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
