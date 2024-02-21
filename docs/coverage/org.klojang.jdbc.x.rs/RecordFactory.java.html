@@ -36,7 +36,7 @@ public final class RecordFactory&lt;T extends Record&gt; {
 <span class="fc" id="L36">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
-  T createRecord(ResultSet rs) throws Throwable {
+  public T createRecord(ResultSet rs) throws Throwable {
 <span class="fc" id="L40">    Object[] args = new Object[writers.length];</span>
 <span class="fc bfc" id="L41" title="All 2 branches covered.">    for (int i = 0; i &lt; writers.length; ++i) {</span>
 <span class="fc" id="L42">      args[i] = writers[i].readValue(rs);</span>

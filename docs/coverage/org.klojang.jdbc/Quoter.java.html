@@ -7,7 +7,6 @@ import org.klojang.util.ArrayMethods;
 
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 import static org.klojang.check.Tag.VARARGS;
 import static org.klojang.jdbc.x.Strings.FUNCTION_NAME;
@@ -41,9 +40,9 @@ public final class Quoter {
 
   private final Statement stmt;
 
-<span class="fc" id="L44">  Quoter(Statement stmt) {</span>
-<span class="fc" id="L45">    this.stmt = stmt;</span>
-<span class="fc" id="L46">  }</span>
+<span class="fc" id="L43">  Quoter(Statement stmt) {</span>
+<span class="fc" id="L44">    this.stmt = stmt;</span>
+<span class="fc" id="L45">  }</span>
 
   /**
    * &lt;p&gt;Returns a properly escaped and quoted string. More precisely:
@@ -65,9 +64,9 @@ public final class Quoter {
    */
   public String quoteValue(Object value) {
     try {
-<span class="fc" id="L68">      return JDBC.quote(stmt, value);</span>
-<span class="nc" id="L69">    } catch (SQLException e) {</span>
-<span class="nc" id="L70">      throw Utils.wrap(e);</span>
+<span class="fc" id="L67">      return JDBC.quote(stmt, value);</span>
+<span class="nc" id="L68">    } catch (SQLException e) {</span>
+<span class="nc" id="L69">      throw Utils.wrap(e);</span>
     }
   }
 
@@ -81,11 +80,11 @@ public final class Quoter {
    * @see java.sql.Statement#enquoteIdentifier(String, boolean)
    */
   public String quoteIdentifier(String identifier) {
-<span class="nc" id="L84">    Check.notNull(identifier, IDENTIFIER);</span>
+<span class="nc" id="L83">    Check.notNull(identifier, IDENTIFIER);</span>
     try {
-<span class="nc" id="L86">      return stmt.enquoteIdentifier(identifier, false);</span>
-<span class="nc" id="L87">    } catch (SQLException e) {</span>
-<span class="nc" id="L88">      throw Utils.wrap(e);</span>
+<span class="nc" id="L85">      return stmt.enquoteIdentifier(identifier, false);</span>
+<span class="nc" id="L86">    } catch (SQLException e) {</span>
+<span class="nc" id="L87">      throw Utils.wrap(e);</span>
     }
   }
 
@@ -103,11 +102,11 @@ public final class Quoter {
    * @return an {@code SQLExpression} representing a SQL function call
    */
   public SQLExpression sqlFunction(String name, Object... args) {
-<span class="fc" id="L106">    Check.notNull(name, FUNCTION_NAME);</span>
-<span class="fc" id="L107">    Check.notNull(args, VARARGS);</span>
-<span class="fc" id="L108">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
-<span class="fc" id="L109">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
-<span class="fc" id="L110">    return new SQLExpression(expr);</span>
+<span class="fc" id="L105">    Check.notNull(name, FUNCTION_NAME);</span>
+<span class="fc" id="L106">    Check.notNull(args, VARARGS);</span>
+<span class="fc" id="L107">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
+<span class="fc" id="L108">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
+<span class="fc" id="L109">    return new SQLExpression(expr);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,17 +1,16 @@
-package org.klojang.jdbc.x.rs;
+package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.BeanExtractor;
 import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Utils;
+import org.klojang.jdbc.x.rs.RecordFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.util.*;
 
-import static org.klojang.check.CommonChecks.gt;
-import static org.klojang.check.CommonChecks.yes;
+import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 
@@ -35,7 +34,7 @@ public final class RecordExtractor<T extends Record> implements BeanExtractor<T>
 
     @Override
     public T next() {
-      Check.on(STATE, extractor.empty).is(yes(), Err.NO_MORE_ROWS);
+      Check.on(STATE, extractor.empty).is(no(), Err.NO_MORE_ROWS);
       return extractor.extract().get();
     }
   }

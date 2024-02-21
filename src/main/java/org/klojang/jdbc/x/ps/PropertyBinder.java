@@ -9,11 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.klojang.jdbc.SessionConfig.CustomBinder;
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_BYTES;
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
 import static org.klojang.util.ClassMethods.isSubtype;
 
 
@@ -56,26 +61,44 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
       Class type = getter.getReturnType();
       CustomBinder custom = config.getCustomBinder(beanClass, property, type);
       if (custom != null) {
-        PropertyBinder pb = new PropertyBinder(getter, param, custom);
-        readers.add(pb);
-      } else {
-        final ValueBinder vb;
-        Integer sqlType = config.getSqlType(beanClass, property, type);
-        if (sqlType == null) {
-          if (isSubtype(type, Enum.class)) {
-            if (config.saveEnumAsString(beanClass, property, type)) {
-              vb = ValueBinder.ANY_TO_STRING;
-            } else {
-              vb = EnumBinderLookup.DEFAULT;
-            }
-          } else {
-            vb = factory.getDefaultBinder(type);
-          }
-        } else {
-          vb = factory.getBinder(type, sqlType);
-        }
-        readers.add(new PropertyBinder(getter, param, vb));
+        readers.add(new PropertyBinder(getter, param, custom));
+        continue;
       }
+      Integer sqlType = config.getSQLType(beanClass, property, type);
+      if (sqlType != null) {
+        ValueBinder vb = factory.getBinder(type, sqlType);
+        readers.add(new PropertyBinder(getter, param, vb));
+        continue;
+      }
+      if (isSubtype(type, Enum.class)) {
+        ValueBinder vb = config.saveEnumAsString(beanClass, property, type)
+              ? ValueBinder.ANY_TO_STRING
+              : EnumBinderLookup.DEFAULT;
+        readers.add(new PropertyBinder(getter, param, vb));
+        continue;
+      }
+      if (isSubtype(type, TemporalAccessor.class)) {
+        DateTimeFormatter dtf = config.getDateTimeFormatter(beanClass, property, type);
+        if (dtf != null) {
+          ValueBinder vb = ValueBinder.dateTimeToString(dtf);
+          readers.add(new PropertyBinder(getter, param, vb));
+          continue;
+        }
+      }
+      Function<Object, String> ser0 = config.getSerializer(beanClass, property, type);
+      if (ser0 != null) {
+        ValueBinder vb = new ValueBinder<>(SET_STRING, ser0);
+        readers.add(new PropertyBinder(getter, param, vb));
+        continue;
+      }
+      Function<Object, byte[]> ser1 = config.getBinarySerializer(beanClass, property, type);
+      if (ser1 != null) {
+        ValueBinder vb = new ValueBinder<>(SET_BYTES, ser1);
+        readers.add(new PropertyBinder(getter, param, vb));
+        continue;
+      }
+      ValueBinder vb = factory.getDefaultBinder(type);
+      readers.add(new PropertyBinder(getter, param, vb));
     }
     return readers.toArray(PropertyBinder[]::new);
   }

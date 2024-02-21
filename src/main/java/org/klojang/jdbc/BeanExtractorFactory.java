@@ -3,7 +3,6 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.PropertyWriter;
-import org.klojang.jdbc.x.rs.RecordExtractor;
 import org.klojang.jdbc.x.rs.RecordFactory;
 import org.klojang.util.InvokeMethods;
 

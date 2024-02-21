@@ -46,6 +46,10 @@ public abstract sealed class PreparedStatementMethod<PARAM_TYPE> {
     SetByte() { super(byte.class); }
     void invoke(PreparedStatement ps, int idx, Byte val) throws SQLException { ps.setByte(idx, val); }
   }
+  private static final class SetBytes extends PreparedStatementMethod<byte[]> {
+    SetBytes() { super(byte[].class); }
+    void invoke(PreparedStatement ps, int idx, byte[] val) throws SQLException { ps.setBytes(idx, val); }
+  }
   private static final class SetBoolean extends PreparedStatementMethod<Boolean> {
     SetBoolean() { super(boolean.class); }
     void invoke(PreparedStatement ps, int idx, Boolean val) throws SQLException { ps.setBoolean(idx, val); }
@@ -97,6 +101,7 @@ public abstract sealed class PreparedStatementMethod<PARAM_TYPE> {
   public static final PreparedStatementMethod<Float> SET_FLOAT = new SetFloat();
   public static final PreparedStatementMethod<Short> SET_SHORT = new SetShort();
   public static final PreparedStatementMethod<Byte> SET_BYTE = new SetByte();
+  public static final PreparedStatementMethod<byte[]> SET_BYTES= new SetBytes();
   public static final PreparedStatementMethod<Boolean> SET_BOOLEAN = new SetBoolean();
   public static final PreparedStatementMethod<BigDecimal> SET_BIG_DECIMAL = new SetBD();
   public static final PreparedStatementMethod<Date> SET_DATE = new SetDate();

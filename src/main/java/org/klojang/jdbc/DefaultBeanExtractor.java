@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import static org.klojang.check.CommonChecks.gt;
-import static org.klojang.check.CommonChecks.yes;
+import static org.klojang.check.CommonChecks.no;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 import static org.klojang.jdbc.x.Strings.SIZE_ESTIMATE;
@@ -37,7 +37,7 @@ final class DefaultBeanExtractor<T> implements BeanExtractor<T> {
 
     @Override
     public T next() {
-      Check.on(STATE, extractor.empty).is(yes(), Err.NO_MORE_ROWS);
+      Check.on(STATE, extractor.empty).is(no(), Err.NO_MORE_ROWS);
       return extractor.extract().get();
     }
   }

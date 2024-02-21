@@ -9,7 +9,10 @@ import org.klojang.templates.name.SnakeCaseToCamelCase;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.klojang.templates.name.CamelCaseToSnakeLowerCase.camelCaseToSnakeLowerCase;
 import static org.klojang.templates.name.CamelCaseToSnakeUpperCase.camelCaseToSnakeUpperCase;
@@ -102,10 +105,11 @@ public interface SessionConfig {
   }
 
   /**
-   * Allows you to specify a {@code CustomBinder} for a given Java type. The default
-   * implementation returns {@code null}, meaning you leave it to <i>Klojang JDBC</i> to
-   * bind values to the underlying {@link PreparedStatement}. You may ignore any argument
-   * that you don't need in order to determine whether to use a {@code CustomBinder}.
+   * Returns a {@code CustomBinder} for the provided combination of arguments, or
+   * {@code null} if no {@code CustomBinder} is required for the provided combination of
+   * arguments. The default implementation returns {@code null}. You may ignore any or all
+   * arguments that you don't need in order to determine whether to use a
+   * {@code CustomBinder}.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
    *       containing the values for which to specify a {@code CustomBinder}
@@ -113,9 +117,7 @@ public interface SessionConfig {
    *       for which to specify a {@code CustomBinder}
    * @param propertyType the type of the values for which to specify a
    *       {@code CustomBinder}
-   * @return a {@code CustomBinder} for any combination of the provided arguments, or
-   *       {@code null} if you do not require a {@code CustomBinder} for any combination
-   *       of the provided arguments
+   * @return a {@code CustomBinder} for the provided combination of arguments
    */
   default CustomBinder getCustomBinder(Class<?> beanType,
         String propertyName,
@@ -124,10 +126,10 @@ public interface SessionConfig {
   }
 
   /**
-   * Allows you to specify a {@code CustomReader} for a given Java type and/or SQL
-   * datatype. The default implementation returns {@code null}, meaning you leave it to
-   * <i>Klojang JDBC</i> to extract values to the underlying {@link ResultSet}. You may
-   * ignore any argument that you don't need in order to determine whether to use a
+   * Returns a {@code CustomReader} for the provided combination of arguments, or
+   * {@code null} if no {@code CustomReader} is required for the provided combination of
+   * arguments. The default implementation returns {@code null}. You may ignore any or all
+   * arguments that you don't need in order to determine whether to use a
    * {@code CustomReader}.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map} that
@@ -148,9 +150,7 @@ public interface SessionConfig {
    *       {@link java.sql.Types java.sql.Types}, like
    *       {@link java.sql.Types#VARCHAR Types.VARCHAR} or
    *       {@link java.sql.Types#TIMESTAMP Types.TIMESTAMP}}
-   * @return a {@code CustomReader} for any combination of the provided arguments, or
-   *       {@code null} if you do not require a {@code CustomReader} for any combination
-   *       of the provided arguments
+   * @return a {@code CustomReader} for the provided combination of arguments
    */
   default CustomReader getCustomReader(Class<?> beanType,
         String propertyName,
@@ -160,15 +160,15 @@ public interface SessionConfig {
   }
 
   /**
-   * Specifies the storage type (the SQL datatype) for a value. This method will only be
-   * evaluated if {@link #getCustomBinder(Class, String, Class) getCustomBinder()}
-   * returned {@code null}. The return value must either be one of the constants in the
-   * {@link java.sql.Types java.sql.Types} class (like
-   * {@link java.sql.Types#VARCHAR Types.VARCHAR}) or {@code null}. Returning {@code null}
-   * means you leave it to <i>Klojang JDBC</i> to figure out the SQL datatype. The default
-   * implementation returns {@code null}. You may ignore any argument that you don't need
-   * in order to determine the SQL datatype. For example, in many cases the type of the
-   * value (provided via the {@code propertyType} argument) is all you need to know in
+   * Returns the SQL datatype for the provided combination of arguments, or {@code null}
+   * if want you leave it to <i>Klojang JDBC</i> to determine the SQL datatype. The
+   * default implementation returns {@code null}. If not {@code null}, the return value
+   * must be one of the constants in the {@link java.sql.Types java.sql.Types} class (like
+   * {@link java.sql.Types#VARCHAR Types.VARCHAR}). This method will only be evaluated if
+   * {@link #getCustomBinder(Class, String, Class) getCustomBinder()} returned
+   * {@code null}. You may ignore any or all arguments that you don't need in order to
+   * determine the return value. For example, in many cases the type of the value
+   * (provided via the {@code propertyType} argument) will be all you need to know in
    * order to determine the corresponding SQL datatype.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
@@ -179,30 +179,34 @@ public interface SessionConfig {
    * @return one of the class constants of the {@link java.sql.Types java.sql.Types} class
    *       or {@code null}
    */
-  default Integer getSqlType(Class<?> beanType,
+  default Integer getSQLType(Class<?> beanType,
         String propertyName,
         Class<?> propertyType) {
     return null;
   }
 
   /**
-   * Whether to save enums as strings (by calling their {@code toString()} method) or as
-   * ints (by calling their {@code ordinal()} method). This method will only be evaluated
-   * if {@link #getSqlType(Class, String, Class) getSqlType()} returned {@code null}. The
-   * default implementation returns {@code false}, meaning that by default <i>Klojang
-   * JDBC</i> will save enums as ints. More precisely: <i>Klojang JDBC</i> will bind
-   * {@code enum} types using {@code preparedStatement.setInt(myEnum.ordinal())}. The
-   * target column could still be a VARCHAR column. Whichever option you choose, the
-   * reverse process &#8212; converting {@code ResultSet} values to enums &#8212; will
-   * always work correctly, without requiring additional configuration. You may ignore any
-   * argument that you don't need in order to determine the storage type for enums. To
-   * save <i>all</i> enums in your application as strings, ignore all arguments and simply
+   * <p>Whether to save enums as strings (by calling their {@code toString()} method) or
+   * as ints (by calling their {@code ordinal()} method). The default implementation
+   * returns {@code false}, meaning that by default <i>Klojang JDBC</i> will save enums as
+   * ints. More precisely: enums will be <i>bound</i> using
+   * {@code preparedStatement.setInt(paramIndex, myEnum.ordinal())}. The target column
+   * may
+   * <i>still</i> be a {@code VARCHAR} column since most databases will easily convert
+   * integers to strings when needed. Whichever option you choose, the reverse process
+   * &#8212; converting {@code ResultSet} values to enums &#8212; will always work
+   * correctly, without requiring additional configuration. You may ignore any or all
+   * arguments that you don't need in order to determine the return value. To save
+   * <i>all</i> enums in your application as strings, ignore all arguments and simply
    * return {@code true} straight away.
+   *
+   * <p>This method will only be evaluated if
+   * {@link #getSQLType(Class, String, Class) getSqlType()} returned {@code null}.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
    *       containing the value
    * @param enumProperty the name of the bean property, record component, or map key
-   *       for which to specify the SQL datatype.
+   *       for which to specify the SQL datatype
    * @param enumType the type of the {@code enum} value whose SQL datatype to
    *       determine
    * @return whether to bind enums as strings ({@code true}) or as ints ({@code false})
@@ -214,13 +218,115 @@ public interface SessionConfig {
   }
 
   /**
+   * Returns the {@code DateTimeFormatter} to be used for date/time values, or
+   * {@code null} if the provided combination of arguments does not require the use of a
+   * {@code DateTimeFormatter}. The default implementation returns {@code null}. If a
+   * non-{@code null} value is returned, date/time objects will be saved as a string
+   * rather than as a SQL {@link java.sql.Types#DATE} or {@link java.sql.Types#TIMESTAMP}.
+   * More precisely: they will be <i>bound</i> using
+   * {@code preparedStatement.setString(paramIndex, formatter.format(value))}. The target
+   * column may <i>still</i> be a {@code DATE} or {@code TIMESTAMP} column since most
+   * databases will easily convert a (properly formatted) string to a {@code DATE} or
+   * {@code TIMESTAMP}. You may ignore any or all arguments that you don't need in order
+   * to determine the return value.
+   *
+   * <p>This method will only be evaluated if
+   * {@link #getSQLType(Class, String, Class) getSqlType()} returned {@code null}.
+   *
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the value
+   * @param dateTimeProperty the name of the bean property, record component, or map
+   *       key for which to use the {@code DateTimeFormatter}
+   * @param dateTimeType the exact date/time type for which to use the
+   *       {@code DateTimeFormatter}
+   * @return the {@code DateTimeFormatter} to be used for a date/time values, or
+   *       {@code null} if the provided combination of arguments does not require the use
+   *       of a {@code DateTimeFormatter}.
+   */
+  default DateTimeFormatter getDateTimeFormatter(Class<?> beanType,
+        String dateTimeProperty,
+        Class<? extends TemporalAccessor> dateTimeType) {
+    return null;
+  }
+
+  /**
+   * Returns the serialization function to be used for the provided combination of
+   * arguments, or {@code null} if no special serialization is required for the provided
+   * combination of arguments. The default implementation returns {@code null}. If a
+   * non-{@code null} value is returned, objects will be bound using
+   * {@code preparedStatement.setString(paramIndex, function.apply(object))}. You may
+   * ignore any or all arguments that you don't need in order to determine the return
+   * value.
+   *
+   * <p>This method can be used to save complex types for which no default java-to-SQL
+   * type mapping exists. In that case, it pays if the type contains a static factory
+   * method that takes a {@code String} and returns an instance of that type. <i>Klojang
+   * JDBC</i> will detect the factory method and use it for the reverse process:
+   * deserializing {@link ResultSet} values into instances of that type. Alternatively, if
+   * the type contains a constructor that takes a single {@code String} argument, then
+   * that constructor will be used as the deserialization mechanism. Otherwise specify a
+   * {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
+   * deserialize the values.
+   *
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the value to be bound
+   * @param propertyName the name of the bean property, record component, or map key
+   *       for which to specify the serializer function
+   * @param propertyType the type of the value for which to specify the serializer
+   *       function
+   * @return the serialization function to be used for the provided combination of
+   *       arguments, or {@code null} if no special serialization is required for the
+   *       provided combination of arguments
+   */
+  default Function<Object, String> getSerializer(Class<?> beanType,
+        String propertyName,
+        Class<?> propertyType) {
+    return null;
+  }
+
+  /**
+   * Returns the serialization function to be used for the provided combination of
+   * arguments, or {@code null} if no special serialization is required for the provided
+   * combination of arguments. The default implementation returns {@code null}. If a
+   * non-{@code null} value is returned, objects will be bound using
+   * {@code preparedStatement.setBytes(paramIndex, function.apply(object))}. You may
+   * ignore any or all arguments that you don't need in order to determine the return
+   * value.
+   *
+   * <p>This method can be used to save complex types for which no default java-to-SQL
+   * type mapping exists. In that case, it pays if the type contains a static factory
+   * method that takes a {@code byte[]} array and returns an instance of that type.
+   * <i>Klojang JDBC</i> will detect the factory method and use it for the reverse
+   * process: deserializing {@link ResultSet} values into instances of that type.
+   * Alternatively, if the type contains a constructor that takes a single {@code byte[]}
+   * argument, then that constructor will be used as the deserialization mechanism.
+   * Otherwise specify a {@link #getCustomReader(Class, String, Class, int) CustomReader}
+   * that will deserialize the values.
+   *
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the value to be bound
+   * @param propertyName the name of the bean property, record component, or map key
+   *       for which to specify the serializer function
+   * @param propertyType the type of the value for which to specify the serializer
+   *       function
+   * @return the serialization function to be used for the provided combination of
+   *       arguments, or {@code null} if no special serialization is required for the
+   *       provided combination of arguments
+   */
+  default Function<Object, byte[]> getBinarySerializer(Class<?> beanType,
+        String propertyName,
+        Class<?> propertyType) {
+    return null;
+  }
+
+  /**
    * Specifies the {@link NameMapper} to be used for mapping bean properties, record
    * components, or map keys to column names. The default implementation returns
    * {@link CamelCaseToSnakeUpperCase#camelCaseToSnakeUpperCase()
    * camelCaseToSnakeUpperCase()}, which would map {@code "camelCaseToSnakeUpperCase"} to
-   * {@code "CAMEL_CASE_TO_SNAKE_UPPER_CASE"}. It would also map {@code "WordCase"} a.k.a.
-   * {@code "PascalCase"} to {@code "WORD_CASE"} and {@code "PASCAL_CASE"}, respectively,
-   * since all characters end up in upper case anyhow.
+   * {@code "CAMEL_CASE_TO_SNAKE_UPPER_CASE"}. (It would also map {@code "WordCase"}
+   * a.k.a. {@code "PascalCase"} to {@code "WORD_CASE"} and {@code "PASCAL_CASE"},
+   * respectively, since all characters end up in upper case anyhow.)
    *
    * @return the {@link NameMapper} to be used for mapping bean properties, record
    *       components, or map keys to column names

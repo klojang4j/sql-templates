@@ -143,6 +143,9 @@ public class ColumnReaderFactory {
       }
     } else if (columnType == VARBINARY || columnType == BINARY || columnType == LONGVARBINARY) {
       MethodHandle mh = findFactoryMethod(targetType, byte[].class);
+      if (mh == null) {
+        mh = findConstructor(targetType, byte[].class);
+      }
       if (mh != null) {
         reader = new ColumnReader(GET_BYTES, createAdapter(mh));
       }
@@ -181,13 +184,6 @@ public class ColumnReaderFactory {
     }
   }
 
-  /*
-   * This method will currently only be used to find a constructor that takes a single
-   * String argument (fromType will always be String.class). It seems a bit outlandish to
-   * assume that, just because we have a value from an int column in our hands, and we
-   * have a constructor that happens to take a single int argument, we can use the int
-   * value to resurrect the entire target type. But we might change our minds.
-   */
   private static MethodHandle findConstructor(Class forType, Class fromType) {
     MethodHandles.Lookup lookup = MethodHandles.publicLookup();
     try {

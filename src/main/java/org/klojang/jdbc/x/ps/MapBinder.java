@@ -2,17 +2,23 @@ package org.klojang.jdbc.x.ps;
 
 import org.klojang.jdbc.SessionConfig;
 import org.klojang.jdbc.x.ps.writer.EnumBinderLookup;
-import org.klojang.jdbc.x.ps.writer.StringBinderLookup;
 import org.klojang.jdbc.x.sql.NamedParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
+import java.sql.Types;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import static org.klojang.jdbc.SessionConfig.CustomBinder;
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_BYTES;
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
+import static org.klojang.util.ClassMethods.isSubtype;
 
 /**
  * Binds the values within in a Map to a PreparedStatement.
@@ -39,47 +45,74 @@ public final class MapBinder {
       }
       bound.add(param);
       Object val = map.get(key);
-      CustomBinder cb = val == null
-            ? null
-            : config.getCustomBinder(map.getClass(), key, val.getClass());
-      if (cb != null) {
-        if (LOG.isTraceEnabled()) {
-          LOG.trace("==> Parameter \"{}\": {} (using custom binder)", key, val);
-        }
-        param.positions().forEachThrowing(i -> cb.bind(ps, i, val));
-      } else {
-        ValueBinder vb = findBinder(map, key, val);
-        Object output = vb.getParamValue(val);
-        if (LOG.isTraceEnabled()) {
-          if (vb.isAdaptive() && output != val) {
-            LOG.trace("==> Parameter \"{}\": {} (original value: {})", key, output, val);
-          } else {
-            LOG.trace("==> Parameter \"{}\": {}", key, output);
-          }
-        }
-        param.positions().forEachThrowing(i -> vb.bind(ps, i, output));
+      if (val == null) {
+        LOG.trace("==> Parameter \"{}\": null", key);
+        param.positions().forEachThrowing(i -> ps.setNull(i, Types.OTHER));
+        continue;
       }
+      Class mapType = map.getClass();
+      Class valType = val.getClass();
+      CustomBinder cb = config.getCustomBinder(mapType, key, valType);
+      if (cb != null) {
+        LOG.trace("==> Parameter \"{}\": {} (using custom binder)", key, val);
+        param.positions().forEachThrowing(i -> cb.bind(ps, i, val));
+        continue;
+      }
+      Integer sqlType = config.getSQLType(mapType, key, valType);
+      if (sqlType != null) {
+        ValueBinderFactory factory = ValueBinderFactory.getInstance();
+        ValueBinder vb = factory.getBinder(valType, sqlType);
+        bind(ps, param, vb, val);
+        continue;
+      }
+      if (isSubtype(valType, Enum.class)) {
+        ValueBinder vb = config.saveEnumAsString(mapType, key, valType)
+              ? ValueBinder.ANY_TO_STRING
+              : EnumBinderLookup.DEFAULT;
+        bind(ps, param, vb, val);
+        continue;
+      }
+      if (isSubtype(valType, TemporalAccessor.class)) {
+        DateTimeFormatter dtf = config.getDateTimeFormatter(mapType, key, valType);
+        if (dtf != null) {
+          ValueBinder vb = ValueBinder.dateTimeToString(dtf);
+          bind(ps, param, vb, val);
+          continue;
+        }
+      }
+      Function<Object, String> ser0 = config.getSerializer(mapType, key, valType);
+      if (ser0 != null) {
+        ValueBinder vb = new ValueBinder<>(SET_STRING, ser0);
+        bind(ps, param, vb, val);
+        continue;
+      }
+      Function<Object, byte[]> ser1 = config.getBinarySerializer(mapType, key, valType);
+      if (ser1 != null) {
+        ValueBinder vb = new ValueBinder<>(SET_BYTES, ser1);
+        bind(ps, param, vb, val);
+        continue;
+      }
+      ValueBinderFactory factory = ValueBinderFactory.getInstance();
+      ValueBinder vb = factory.getDefaultBinder(valType);
+      bind(ps, param, vb, val);
     }
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  ValueBinder findBinder(Map<String, Object> map, String key, Object val) {
-    if (val == null) {
-      // Return any ValueBinder. For null values *all* binders will just call
-      // PreparedStatement.setString(paramIndex, null);
-      return StringBinderLookup.DEFAULT;
-    } else {
-      Integer sqlType = config.getSqlType(map.getClass(), key, val.getClass());
-      if (sqlType == null) {
-        if (val instanceof Enum) {
-          if (config.saveEnumAsString(map.getClass(), key, (Class) val.getClass())) {
-            return ValueBinder.ANY_TO_STRING;
-          }
-          return EnumBinderLookup.DEFAULT;
-        }
-        return ValueBinderFactory.getInstance().getDefaultBinder(val.getClass());
+  private static void bind(PreparedStatement ps,
+        NamedParameter param,
+        ValueBinder vb,
+        Object val) throws Throwable {
+    Object output = vb.getParamValue(val);
+    if (LOG.isTraceEnabled()) {
+      String key = param.name();
+      if (vb.isAdaptive() && output != val) {
+        LOG.trace("==> Parameter \"{}\": {} (original value: {})", key, output, val);
+      } else {
+        LOG.trace("==> Parameter \"{}\": {}", key, output);
       }
-      return ValueBinderFactory.getInstance().getBinder(val.getClass(), sqlType);
     }
+    param.positions().forEachThrowing(i -> vb.bind(ps, i, output));
   }
+
 }

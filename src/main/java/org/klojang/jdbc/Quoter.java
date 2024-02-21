@@ -7,7 +7,6 @@ import org.klojang.util.ArrayMethods;
 
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 import static org.klojang.check.Tag.VARARGS;
 import static org.klojang.jdbc.x.Strings.FUNCTION_NAME;

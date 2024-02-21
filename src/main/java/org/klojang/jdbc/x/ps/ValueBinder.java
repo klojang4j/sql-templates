@@ -1,6 +1,8 @@
 package org.klojang.jdbc.x.ps;
 
 import java.sql.PreparedStatement;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.function.Function;
 
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
@@ -17,9 +19,13 @@ import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
  */
 public final class ValueBinder<INPUT_TYPE, PARAM_TYPE> {
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
   public static final ValueBinder ANY_TO_STRING
-        = new ValueBinder(SET_STRING, Object::toString);
+        = new ValueBinder<>(SET_STRING, Object::toString);
+
+  public static ValueBinder<? extends TemporalAccessor, String> dateTimeToString(
+        DateTimeFormatter dtf) {
+    return new ValueBinder<>(SET_STRING, dtf::format);
+  }
 
   private final PreparedStatementMethod<PARAM_TYPE> setter;
   private final Adapter<INPUT_TYPE, PARAM_TYPE> adapter;
@@ -45,9 +51,8 @@ public final class ValueBinder<INPUT_TYPE, PARAM_TYPE> {
 
   @SuppressWarnings("unchecked")
   PARAM_TYPE getParamValue(INPUT_TYPE beanValue) {
-    return adapter == null
-          ? (PARAM_TYPE) beanValue
-          : adapter.adapt(beanValue, setter.getParamType());
+    return adapter == null ? (PARAM_TYPE) beanValue : adapter.adapt(beanValue,
+          setter.getParamType());
   }
 
   void bind(PreparedStatement ps, int paramIndex, PARAM_TYPE value) throws Throwable {

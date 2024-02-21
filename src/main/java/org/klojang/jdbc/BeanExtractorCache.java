@@ -1,7 +1,6 @@
 package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.rs.PropertyWriter;
-import org.klojang.jdbc.x.rs.RecordExtractor;
 import org.klojang.jdbc.x.rs.RecordFactory;
 
 import java.sql.ResultSet;

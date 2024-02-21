@@ -1,7 +1,6 @@
 package org.klojang.jdbc;
 
 import org.junit.jupiter.api.Test;
-import org.klojang.jdbc.x.Utils;
 import org.klojang.templates.NameMapper;
 
 import java.time.DayOfWeek;
@@ -20,7 +19,7 @@ public class SessionConfigTest {
     assertSame(mapper, config.getPropertyToColumnMapper());
     assertNull(config.getCustomBinder(null, null, null));
     assertNull(config.getCustomReader(null, null, null, 0));
-    assertNull(config.getSqlType(null, null, null));
+    assertNull(config.getSQLType(null, null, null));
     assertSame(snakeCaseToCamelCase().getClass(),
           config.getColumnToPropertyMapper().getClass());
   }

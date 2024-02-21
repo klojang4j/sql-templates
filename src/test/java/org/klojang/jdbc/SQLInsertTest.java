@@ -122,7 +122,7 @@ public class SQLInsertTest {
     String s = "INSERT INTO TEST(NAME) VALUES(:name)";
     Person person = new Person("John");
     SQLSession sql = SQL.simple(s).session(MY_CON.get());
-    long id = Long.MIN_VALUE;
+    long id;
     try (SQLInsert insert = sql.prepareInsert()) {
       insert.bind(person);
       id = insert.execute();

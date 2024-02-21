@@ -36,7 +36,7 @@ public final class RecordFactory<T extends Record> {
   }
 
   @SuppressWarnings("unchecked")
-  T createRecord(ResultSet rs) throws Throwable {
+  public T createRecord(ResultSet rs) throws Throwable {
     Object[] args = new Object[writers.length];
     for (int i = 0; i < writers.length; ++i) {
       args[i] = writers[i].readValue(rs);
