@@ -27,7 +27,7 @@ Klojang JDBC,org.klojang.jdbc.x.sql,SQLInfo,0,29,0,0,0,7,0,3,0,3
 Klojang JDBC,org.klojang.jdbc.x.sql,ParamExtractor,20,210,3,25,2,54,3,20,0,9
 Klojang JDBC,org.klojang.jdbc.x.sql,NamedParameter,0,9,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetDouble,6,4,0,0,1,1,1,1,1,1
-Klojang JDBC,org.klojang.jdbc.x.ps,ValueBinderFactory,84,105,10,0,21,24,6,6,1,6
+Klojang JDBC,org.klojang.jdbc.x.ps,ValueBinderFactory,91,111,12,0,22,25,7,6,1,6
 Klojang JDBC,org.klojang.jdbc.x.ps,ValueBinderLookup,0,17,0,0,0,3,0,3,0,3
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetLong,6,4,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetFloat,6,4,0,0,1,1,1,1,1,1
@@ -43,7 +43,7 @@ Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetString,0,9,0,0,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetByte,6,4,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetTime,5,4,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetBD,5,4,0,0,1,1,1,1,1,1
-Klojang JDBC,org.klojang.jdbc.x.ps,DefaultBinders,7,68,1,1,2,23,1,3,0,3
+Klojang JDBC,org.klojang.jdbc.x.ps,DefaultBinders,12,66,3,1,3,23,2,3,0,3
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetTimestamp,5,4,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc.x.ps,BeanBinder,0,26,0,0,0,7,0,3,0,3
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetInt,0,10,0,0,0,2,0,2,0,2
@@ -99,6 +99,7 @@ Klojang JDBC,org.klojang.jdbc.x.ps.writer,ShortBinderLookup,0,96,0,0,0,14,0,4,0,
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,FloatBinderLookup,0,99,0,0,0,15,0,7,0,7
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,DoubleBinderLookup,0,109,0,0,0,18,0,9,0,9
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,StringBinderLookup,0,132,0,0,0,20,0,10,0,10
+Klojang JDBC,org.klojang.jdbc.x.ps.writer,ByteArrayBinderLookup,0,26,0,0,0,4,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,LongBinderLookup,0,76,0,0,0,13,0,6,0,6
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,IntBinderLookup,0,64,0,0,0,11,0,5,0,5
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,ByteBinderLookup,0,88,0,0,0,12,0,2,0,2

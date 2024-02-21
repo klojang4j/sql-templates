@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultBinders.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.ps</a> &gt; <span class="el_source">DefaultBinders.java</span></div><h1>DefaultBinders.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.ps;
 
 import org.klojang.collections.TypeMap;
-import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.ps.writer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,15 +10,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_OBJECT;
+import static org.klojang.jdbc.x.Msg.NO_PREDEFINED_BINDER;
+import static org.klojang.util.ClassMethods.className;
+import static org.klojang.util.ClassMethods.simpleClassName;
 
 @SuppressWarnings(&quot;rawtypes&quot;)
 final class DefaultBinders {
 
-<span class="fc" id="L19">  static final DefaultBinders INSTANCE = new DefaultBinders();</span>
+<span class="fc" id="L20">  static final DefaultBinders INSTANCE = new DefaultBinders();</span>
 
-<span class="fc" id="L21">  private static final Logger LOG = LoggerFactory.getLogger(DefaultBinders.class);</span>
-<span class="fc" id="L22">  private static final ValueBinder LAST_RESORT = new ValueBinder&lt;&gt;(SET_OBJECT);</span>
+<span class="fc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(DefaultBinders.class);</span>
 
   private final Map&lt;Class&lt;?&gt;, ValueBinder&gt; defaults;
 
@@ -35,19 +35,22 @@ final class DefaultBinders {
 <span class="fc" id="L35">          .add(BigDecimal.class, BigDecimalBinderLookup.DEFAULT)</span>
 <span class="fc" id="L36">          .add(LocalDateTime.class, LocalDateTimeBinderLookup.DEFAULT)</span>
 <span class="fc" id="L37">          .add(LocalDate.class, LocalDateBinderLookup.DEFAULT)</span>
-<span class="fc" id="L38">          .add(Float.class, FloatBinderLookup.DEFAULT)</span>
-<span class="fc" id="L39">          .add(Short.class, ShortBinderLookup.DEFAULT)</span>
-<span class="fc" id="L40">          .add(Byte.class, ByteBinderLookup.DEFAULT)</span>
-<span class="fc" id="L41">          .freeze();</span>
-<span class="fc" id="L42">  }</span>
+<span class="fc" id="L38">          .add(byte[].class, ByteArrayBinderLookup.DEFAULT)</span>
+<span class="fc" id="L39">          .add(Float.class, FloatBinderLookup.DEFAULT)</span>
+<span class="fc" id="L40">          .add(Short.class, ShortBinderLookup.DEFAULT)</span>
+<span class="fc" id="L41">          .add(Byte.class, ByteBinderLookup.DEFAULT)</span>
+<span class="fc" id="L42">          .freeze();</span>
+<span class="fc" id="L43">  }</span>
 
   ValueBinder getDefaultBinder(Class forType) {
-<span class="fc" id="L45">    ValueBinder binder = defaults.get(forType);</span>
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">    if (binder == null) {</span>
-<span class="nc" id="L47">      LOG.trace(Msg.NO_PREDEFINED_BINDER, forType.getName());</span>
-<span class="nc" id="L48">      return LAST_RESORT;</span>
+<span class="fc" id="L46">    ValueBinder binder = defaults.get(forType);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">    if (binder == null) {</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
+<span class="nc" id="L49">        LOG.trace(NO_PREDEFINED_BINDER, className(forType), simpleClassName(forType));</span>
+      }
+<span class="nc" id="L51">      return ValueBinder.ANY_TO_STRING;</span>
     }
-<span class="fc" id="L50">    return binder;</span>
+<span class="fc" id="L53">    return binder;</span>
   }
 
 }

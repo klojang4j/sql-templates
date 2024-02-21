@@ -9,6 +9,7 @@ public abstract sealed class ValueBinderLookup&lt;T&gt;
       extends HashMap&lt;Integer, ValueBinder&lt;?, ?&gt;&gt;
       permits BigDecimalBinderLookup,
       BooleanBinderLookup,
+      ByteArrayBinderLookup,
       ByteBinderLookup,
       DoubleBinderLookup,
       EnumBinderLookup,
@@ -20,11 +21,11 @@ public abstract sealed class ValueBinderLookup&lt;T&gt;
       ShortBinderLookup,
       StringBinderLookup {
 
-<span class="fc" id="L23">  public ValueBinderLookup() { }</span>
+<span class="fc" id="L24">  public ValueBinderLookup() { }</span>
 
   public &lt;U&gt; void addMultiple(ValueBinder&lt;T, U&gt; writer, int... sqlTypes) {
-<span class="fc" id="L26">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, writer));</span>
-<span class="fc" id="L27">  }</span>
+<span class="fc" id="L27">    IntStream.of(sqlTypes).forEach(i -&gt; put(i, writer));</span>
+<span class="fc" id="L28">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

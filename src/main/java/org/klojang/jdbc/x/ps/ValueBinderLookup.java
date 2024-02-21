@@ -9,6 +9,7 @@ public abstract sealed class ValueBinderLookup<T>
       extends HashMap<Integer, ValueBinder<?, ?>>
       permits BigDecimalBinderLookup,
       BooleanBinderLookup,
+      ByteArrayBinderLookup,
       ByteBinderLookup,
       DoubleBinderLookup,
       EnumBinderLookup,

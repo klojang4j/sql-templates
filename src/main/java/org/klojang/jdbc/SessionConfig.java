@@ -268,6 +268,12 @@ public interface SessionConfig {
    * {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
    * deserialize the values.
    *
+   * <p>Note that if the type's {@code toString()} method delivers adequate
+   * serialization, you don't need to explicitly specify a serializer for it, because
+   * <i>Klojang JDBC</i> will already ultimately resort to calling {@code toString()} on
+   * (non-{@code null}) values of an unknown type:
+   * {@code preparedStatement.setString(paramIndex, value.toString())}.
+   *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
    *       containing the value to be bound
    * @param propertyName the name of the bean property, record component, or map key

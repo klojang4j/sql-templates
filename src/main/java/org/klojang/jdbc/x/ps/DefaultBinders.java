@@ -1,7 +1,6 @@
 package org.klojang.jdbc.x.ps;
 
 import org.klojang.collections.TypeMap;
-import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.ps.writer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_OBJECT;
+import static org.klojang.jdbc.x.Msg.NO_PREDEFINED_BINDER;
+import static org.klojang.util.ClassMethods.className;
+import static org.klojang.util.ClassMethods.simpleClassName;
 
 @SuppressWarnings("rawtypes")
 final class DefaultBinders {
@@ -19,7 +20,6 @@ final class DefaultBinders {
   static final DefaultBinders INSTANCE = new DefaultBinders();
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultBinders.class);
-  private static final ValueBinder LAST_RESORT = new ValueBinder<>(SET_OBJECT);
 
   private final Map<Class<?>, ValueBinder> defaults;
 
@@ -35,6 +35,7 @@ final class DefaultBinders {
           .add(BigDecimal.class, BigDecimalBinderLookup.DEFAULT)
           .add(LocalDateTime.class, LocalDateTimeBinderLookup.DEFAULT)
           .add(LocalDate.class, LocalDateBinderLookup.DEFAULT)
+          .add(byte[].class, ByteArrayBinderLookup.DEFAULT)
           .add(Float.class, FloatBinderLookup.DEFAULT)
           .add(Short.class, ShortBinderLookup.DEFAULT)
           .add(Byte.class, ByteBinderLookup.DEFAULT)
@@ -44,8 +45,10 @@ final class DefaultBinders {
   ValueBinder getDefaultBinder(Class forType) {
     ValueBinder binder = defaults.get(forType);
     if (binder == null) {
-      LOG.trace(Msg.NO_PREDEFINED_BINDER, forType.getName());
-      return LAST_RESORT;
+      if (LOG.isTraceEnabled()) {
+        LOG.trace(NO_PREDEFINED_BINDER, className(forType), simpleClassName(forType));
+      }
+      return ValueBinder.ANY_TO_STRING;
     }
     return binder;
   }

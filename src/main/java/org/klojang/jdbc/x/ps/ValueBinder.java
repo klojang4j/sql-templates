@@ -1,6 +1,7 @@
 package org.klojang.jdbc.x.ps;
 
 import java.sql.PreparedStatement;
+import java.sql.Types;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.function.Function;
@@ -57,7 +58,7 @@ public final class ValueBinder<INPUT_TYPE, PARAM_TYPE> {
 
   void bind(PreparedStatement ps, int paramIndex, PARAM_TYPE value) throws Throwable {
     if (value == null) {
-      ps.setString(paramIndex, null);
+      ps.setNull(paramIndex, Types.OTHER);
     } else {
       setter.invoke(ps, paramIndex, value);
     }

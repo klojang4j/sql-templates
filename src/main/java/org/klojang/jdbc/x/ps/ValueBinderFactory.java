@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.ps;
 
 import org.klojang.collections.TypeMap;
-import org.klojang.jdbc.x.Msg;
+import org.klojang.jdbc.util.SQLTypeUtil;
 import org.klojang.jdbc.x.ps.writer.*;
 import org.klojang.util.Tuple2;
 import org.slf4j.Logger;
@@ -13,17 +13,19 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.klojang.jdbc.util.SQLTypeUtil.getTypeName;
+import static org.klojang.jdbc.x.Msg.NO_PREDEFINED_BINDER;
+import static org.klojang.jdbc.x.Msg.NO_PREDEFINED_TYPE_MAPPING;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.getObjectSetter;
+import static org.klojang.util.ClassMethods.className;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class ValueBinderFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(ValueBinderFactory.class);
-
   private static final ValueBinderFactory INSTANCE = new ValueBinderFactory();
 
   static ValueBinderFactory getInstance() { return INSTANCE; }
+
 
   private final Map<Class, Map<Integer, ValueBinder>> predefined;
   private final Map<Tuple2<Class, Integer>, ValueBinder> custom = new HashMap();
@@ -43,7 +45,9 @@ final class ValueBinderFactory {
       Tuple2<Class, Integer> key = Tuple2.of(inputType, targetSqlType);
       binder = custom.get(key);
       if (binder == null) {
-        LOG.trace(Msg.NO_PREDEFINED_BINDER, inputType.getName());
+        if (LOG.isTraceEnabled()) {
+          LOG.trace(NO_PREDEFINED_BINDER, className(inputType));
+        }
         binder = new ValueBinder<>(getObjectSetter(targetSqlType));
         custom.put(key, binder);
       }
@@ -54,9 +58,9 @@ final class ValueBinderFactory {
         binder = custom.get(key);
         if (binder == null) {
           if (LOG.isTraceEnabled()) {
-            LOG.trace(Msg.NO_PREDEFINED_TYPE_MAPPING,
-                  inputType.getName(),
-                  getTypeName(targetSqlType));
+            String javaTypeName = className(inputType);
+            String sqlTypeName = SQLTypeUtil.getTypeName(targetSqlType);
+            LOG.trace(NO_PREDEFINED_TYPE_MAPPING, javaTypeName, sqlTypeName);
           }
           binder = new ValueBinder<>(getObjectSetter(targetSqlType));
           custom.put(key, binder);
@@ -78,6 +82,7 @@ final class ValueBinderFactory {
           .add(BigDecimal.class, immutable(new BigDecimalBinderLookup()))
           .add(LocalDate.class, immutable(new LocalDateBinderLookup()))
           .add(LocalDateTime.class, immutable(new LocalDateTimeBinderLookup()))
+          .add(byte[].class, immutable(new ByteArrayBinderLookup()))
           .add(Float.class, immutable(new FloatBinderLookup()))
           .add(Byte.class, immutable(new ByteBinderLookup()))
           .add(Short.class, immutable(new ShortBinderLookup()))
