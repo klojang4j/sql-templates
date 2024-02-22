@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //@Disabled
 public class SQLBatchInsertTest {
 
-  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-db-batch-insert-test";
+  private static final String DB_DIR = System.getProperty("user.home") + "/SQLBatchInsertTest/h2";
   private static final ThreadLocal<Connection> MY_CON = new ThreadLocal<>();
 
   public static class Person {
