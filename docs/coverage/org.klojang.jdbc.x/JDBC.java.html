@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JDBC.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x</a> &gt; <span class="el_source">JDBC.java</span></div><h1>JDBC.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x;
+
+import org.klojang.check.Check;
+import org.klojang.invoke.Setter;
+import org.klojang.invoke.SetterFactory;
+import org.klojang.jdbc.SQLExpression;
+import org.klojang.jdbc.x.sql.SQLInfo;
+
+import java.sql.*;
+import java.util.Map;
+
+import static java.sql.Statement.NO_GENERATED_KEYS;
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import static org.klojang.check.CommonChecks.keyIn;
+import static org.klojang.convert.NumberMethods.convert;
+import static org.klojang.invoke.NoSuchPropertyException.noSuchProperty;
+import static org.klojang.util.ClassMethods.box;
+
+public final class JDBC {
+
+<span class="nc" id="L21">  private JDBC() { throw new UnsupportedOperationException(); }</span>
+
+  public static String[] getColumnNames(ResultSet rs) {
+    try {
+<span class="fc" id="L25">      ResultSetMetaData rsmd = rs.getMetaData();</span>
+<span class="fc" id="L26">      int sz = rsmd.getColumnCount();</span>
+<span class="fc" id="L27">      String[] colNames = new String[sz];</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">      for (int i = 0; i &lt; rsmd.getColumnCount(); ++i) {</span>
+<span class="fc" id="L29">        colNames[i] = rsmd.getColumnLabel(i + 1);</span>
+      }
+<span class="fc" id="L31">      return colNames;</span>
+<span class="nc" id="L32">    } catch (SQLException e) {</span>
+<span class="nc" id="L33">      throw Utils.wrap(e);</span>
+    }
+  }
+
+  public static PreparedStatement getPreparedStatement(Connection con, SQLInfo sqlInfo) {
+    try {
+<span class="fc" id="L39">      return con.prepareStatement(sqlInfo.sql());</span>
+<span class="nc" id="L40">    } catch (SQLException e) {</span>
+<span class="nc" id="L41">      throw Utils.wrap(e, sqlInfo);</span>
+    }
+  }
+
+  public static PreparedStatement getPreparedStatement(Connection con,
+        SQLInfo sqlInfo,
+        boolean retrieveKeys) {
+<span class="fc bfc" id="L48" title="All 2 branches covered.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
+    try {
+<span class="fc" id="L50">      return con.prepareStatement(sqlInfo.sql(), x);</span>
+<span class="nc" id="L51">    } catch (SQLException e) {</span>
+<span class="nc" id="L52">      throw Utils.wrap(e, sqlInfo);</span>
+    }
+  }
+
+  public static long[] getGeneratedKeys(Statement stmt, int expected)
+        throws SQLException {
+<span class="fc" id="L58">    long[] keys = new long[expected];</span>
+<span class="fc" id="L59">    try (ResultSet rs = stmt.getGeneratedKeys()) {</span>
+<span class="fc" id="L60">      int i = 0;</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">      while (rs.next()) {</span>
+<span class="fc" id="L62">        keys[i++] = rs.getLong(1);</span>
+      }
+    }
+<span class="fc" id="L65">    return keys;</span>
+  }
+
+  public static String quote(Statement stmt, Object value) throws SQLException {
+<span class="pc bpc" id="L69" title="2 of 5 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L70">      case null -&gt; &quot;NULL&quot;;</span>
+<span class="fc" id="L71">      case Number x -&gt; x.toString();</span>
+<span class="nc" id="L72">      case Boolean x -&gt; x.toString();</span>
+<span class="fc" id="L73">      case SQLExpression x -&gt; x.toString();</span>
+<span class="fc" id="L74">      default -&gt; stmt.enquoteLiteral(value.toString());</span>
+    };
+  }
+
+  @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
+  public static void setID(Object bean, String idProperty, long value)
+        throws Throwable {
+<span class="fc" id="L81">    SetterFactory sf = SetterFactory.INSTANCE;</span>
+<span class="fc" id="L82">    Map&lt;String, Setter&gt; setters = sf.getSetters(bean.getClass());</span>
+<span class="pc" id="L83">    Check.that(idProperty).is(keyIn(), setters, () -&gt; noSuchProperty(bean, idProperty));</span>
+<span class="fc" id="L84">    Setter setter = setters.get(idProperty);</span>
+    // make sure we're OK if the ID property is not a long
+<span class="fc" id="L86">    Number id = convert(value, (Class) box(setter.getParamType()));</span>
+<span class="fc" id="L87">    setter.write(bean, id);</span>
+<span class="fc" id="L88">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

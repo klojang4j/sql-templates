@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Quoter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">Quoter.java</span></div><h1>Quoter.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.check.Check;
+import org.klojang.jdbc.x.JDBC;
+import org.klojang.jdbc.x.Utils;
+import org.klojang.util.ArrayMethods;
+
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import static org.klojang.check.Tag.VARARGS;
+import static org.klojang.jdbc.x.Strings.FUNCTION_NAME;
+import static org.klojang.jdbc.x.Strings.IDENTIFIER;
+import static org.klojang.util.StringMethods.append;
+
+/**
+ * &lt;p&gt;Escapes and quotes values according to the quoting rules of the target database.
+ * You do not normally need to concern yourself with quoting and escaping unless you want
+ * to dynamically generate and inject a {@link SQLExpression SQL expression} in the SQL to
+ * be executed. For example, suppose (somewhat unrealistically) you have a variable
+ * {@code firstName} in your program, and you want to embed the following expression in
+ * your SQL: &lt;b&gt;{@code &quot;SUBSTRING('&quot; + firstName + &quot;', 1, 3)&quot;}&lt;/b&gt;. If the value of
+ * {@code firstName} comes from outside your program, you expose yourself to the risk of
+ * SQL injection. In this case you should use a {@code Quoter} to eliminate the risk:
+ * &lt;b&gt;{@code &quot;SUBSTRING(&quot; + quoter.quoteValue(firstName) + &quot;, 1, 3)&quot;}&lt;/b&gt;. For SQL
+ * function calls in particular, you can also use
+ * {@link #sqlFunction(String, Object...) Quoter.sqlFunction()}:
+ * &lt;b&gt;{@code quoter.sqlFunction(&quot;SUBSTRING&quot;, firstName, 1, 3)}&lt;/b&gt;.
+ *
+ * &lt;p&gt;Only use a {@code Quoter} to escape and quote strings &lt;b&gt;within&lt;/b&gt; the SQL
+ * expression. In any other case escaping and quoting is taken care of by &lt;i&gt;Klojang
+ * JDBC&lt;/i&gt;.
+ *
+ * @see SQLExpression
+ * @see SQLSession#quoteValue(Object)
+ * @see Statement#enquoteLiteral(String)
+ * @see Statement#enquoteIdentifier(String, boolean)
+ */
+public final class Quoter {
+
+  private final Statement stmt;
+
+<span class="fc" id="L43">  Quoter(Statement stmt) {</span>
+<span class="fc" id="L44">    this.stmt = stmt;</span>
+<span class="fc" id="L45">  }</span>
+
+  /**
+   * &lt;p&gt;Returns a properly escaped and quoted string. More precisely:
+   *
+   * &lt;ul&gt;
+   *     &lt;li&gt;If the value is {@code null}, the literal string {@code &quot;NULL&quot;} (without the
+   *         quotes) is returned.
+   *     &lt;li&gt;If the value is a {@link Number}, a {@link Boolean}, or a
+   *         {@link SQLExpression}, the value is returned as-is. That is,
+   *         {@code toString()} will be called on the value, but the resulting string
+   *         will &lt;i&gt;not&lt;/i&gt; be quoted.
+   *     &lt;li&gt;Otherwise {@code toString()} is called on the value, and the resulting string
+   *         is escaped and quoted according to the quoting rules of the target database.
+   * &lt;/ul&gt;
+   *
+   * @param value the value to quote
+   * @return a properly escaped and quoted string
+   * @see Statement#enquoteLiteral(String)
+   */
+  public String quoteValue(Object value) {
+    try {
+<span class="fc" id="L67">      return JDBC.quote(stmt, value);</span>
+<span class="nc" id="L68">    } catch (SQLException e) {</span>
+<span class="nc" id="L69">      throw Utils.wrap(e);</span>
+    }
+  }
+
+  /**
+   * If necessary, quotes the specified identifier (e&amp;#46;g&amp;#46; a column name or table
+   * name) according to the quoting rules of the target database. Use this method if the
+   * identifier is passed in from outside your program to prevent SQL injection.
+   *
+   * @param identifier the identifier to quote
+   * @return the quoted identifier
+   * @see java.sql.Statement#enquoteIdentifier(String, boolean)
+   */
+  public String quoteIdentifier(String identifier) {
+<span class="nc" id="L83">    Check.notNull(identifier, IDENTIFIER);</span>
+    try {
+<span class="nc" id="L85">      return stmt.enquoteIdentifier(identifier, false);</span>
+<span class="nc" id="L86">    } catch (SQLException e) {</span>
+<span class="nc" id="L87">      throw Utils.wrap(e);</span>
+    }
+  }
+
+
+  /**
+   * Generates a SQL function call in which each of the function arguments is escaped and
+   * quoted using the {@link #quoteValue(Object) quoteValue()} method.
+   *
+   * @param name the name of the function, like {@code &quot;SUBSTRING&quot;} or
+   *       {@code &quot;CONCAT&quot;}. Note that this argument is not processed or checked in any
+   *       way. Therefore, with SQL injection in mind, be wary of this being a dynamically
+   *       generated value.
+   * @param args the function arguments. Each of the provided arguments will pass
+   *       through {@link #quoteValue(Object)}.
+   * @return an {@code SQLExpression} representing a SQL function call
+   */
+  public SQLExpression sqlFunction(String name, Object... args) {
+<span class="fc" id="L105">    Check.notNull(name, FUNCTION_NAME);</span>
+<span class="fc" id="L106">    Check.notNull(args, VARARGS);</span>
+<span class="fc" id="L107">    String str = ArrayMethods.implode(args, this::quoteValue, &quot;,&quot;);</span>
+<span class="fc" id="L108">    String expr = append(new StringBuilder(), name, '(', str, ')').toString();</span>
+<span class="fc" id="L109">    return new SQLExpression(expr);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

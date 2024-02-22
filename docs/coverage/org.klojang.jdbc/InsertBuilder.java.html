@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InsertBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">InsertBuilder.java</span></div><h1>InsertBuilder.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.check.Check;
+import org.klojang.check.ObjectCheck;
+import org.klojang.invoke.Getter;
+import org.klojang.invoke.GetterFactory;
+import org.klojang.jdbc.x.Utils;
+import org.klojang.templates.NameMapper;
+
+import java.sql.Connection;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static org.klojang.check.CommonChecks.*;
+import static org.klojang.check.CommonExceptions.STATE;
+import static org.klojang.check.CommonExceptions.illegalState;
+import static org.klojang.check.Tag.PROPERTIES;
+import static org.klojang.jdbc.x.Strings.BEAN_CLASS;
+import static org.klojang.util.CollectionMethods.implode;
+import static org.klojang.util.ObjectMethods.ifNull;
+import static org.klojang.util.ObjectMethods.isEmpty;
+import static org.klojang.util.StringMethods.append;
+
+/**
+ * A {@code Builder} class for {@link SQLInsert} instances.
+ */
+public final class InsertBuilder {
+
+  static final String PROPERTIES_ALREADY_SET = &quot;properties to include/exclude can only be set once&quot;;
+  static final String EMPTY_PROPERTY_NAME = &quot;empty property name not allowed&quot;;
+  static final String NO_SUCH_PROPERTY = &quot;no such property in ${0}: ${arg}&quot;;
+
+  private Class&lt;?&gt; clazz;
+  private String tableName;
+  private String[] properties;
+  private boolean exclude;
+
+<span class="fc" id="L39">  private SessionConfig config = Utils.DEFAULT_CONFIG;</span>
+<span class="fc" id="L40">  private boolean returnKeys = true;</span>
+
+<span class="fc" id="L42">  InsertBuilder() { }</span>
+
+  /**
+   * Sets the type of the beans to be persisted. May be a {@code record} type.
+   *
+   * @param clazz the type of the beans to be persisted
+   * @return this {@code SQLInsertBuilder}
+   */
+  public InsertBuilder of(Class&lt;?&gt; clazz) {
+<span class="fc" id="L51">    this.clazz = Check.notNull(clazz).ok();</span>
+<span class="fc" id="L52">    return this;</span>
+  }
+
+  /**
+   * Sets the table name to insert the data into. If not specified, this defaults to the
+   * simple name of the bean or {@code record} class, mapped using
+   * {@link SessionConfig#getPropertyToColumnMapper()}.
+   *
+   * @param tableName the table name to insert the data into
+   * @return this {@code SQLInsertBuilder}
+   */
+  public InsertBuilder into(String tableName) {
+<span class="fc" id="L64">    this.tableName = Check.that(tableName).isNot(empty()).ok();</span>
+<span class="fc" id="L65">    return this;</span>
+  }
+
+  /**
+   * Sets the properties (and corresponding columns) to exclude from the INSERT statement.
+   * You would most likely at least want to exclude the property corresponding to the
+   * auto-generated key column. It is not allowed to call this method more than once, or
+   * to call both this method and the {@link #including(String...)} method.
+   *
+   * @param properties the properties (and corresponding columns) to exclude from
+   *       the INSERT statement
+   * @return this {@code SQLInsertBuilder}
+   */
+  public InsertBuilder excluding(String... properties) {
+<span class="fc" id="L79">    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));</span>
+<span class="fc" id="L80">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
+<span class="fc" id="L81">    this.exclude = true;</span>
+<span class="fc" id="L82">    return this;</span>
+  }
+
+  /**
+   * Sets the properties (and corresponding columns) to include in the INSERT statement.
+   * It is not allowed to call this method more than once, or to call both this method and
+   * the {@link #excluding(String...)} method.
+   *
+   * @param properties the properties (and corresponding columns) to include in the
+   *       INSERT statement
+   * @return this {@code SQLInsertBuilder}
+   */
+  public InsertBuilder including(String... properties) {
+<span class="nc" id="L95">    Check.that(this.properties).is(NULL(), illegalState(PROPERTIES_ALREADY_SET));</span>
+<span class="nc" id="L96">    this.properties = Check.notNull(properties, PROPERTIES).ok();</span>
+<span class="nc" id="L97">    this.exclude = false;</span>
+<span class="nc" id="L98">    return this;</span>
+  }
+
+  /**
+   * Specifies whether auto-generated keys should be retrieved from the database. By
+   * default this is the case. Therefore, if the INSERT statement does not cause any keys
+   * to be generated by the database, &lt;i&gt;do&lt;/i&gt; call this method to disable this feature.
+   * Otherwise the JDBC driver may throw an {@link java.sql.SQLException SQLException}.
+   *
+   * @param b whether auto-generated keys should be retrieved from the database
+   * @return this {@code SQLInsertBuilder}
+   */
+  public InsertBuilder retrieveKeys(boolean b) {
+<span class="fc" id="L111">    this.returnKeys = b;</span>
+<span class="fc" id="L112">    return this;</span>
+  }
+
+  /**
+   * Sets the {@link SessionConfig} object to be used to fine-tune the INSERT. Defaults to
+   * {@link SessionConfig#getDefaultConfig()}.
+   *
+   * @param config the {@code SessionConfig} object to be used to fine-tune the INSERT
+   * @return this {@code SQLInsertBuilder}
+   */
+  public InsertBuilder withConfig(SessionConfig config) {
+<span class="fc" id="L123">    this.config = Check.notNull(config).ok();</span>
+<span class="fc" id="L124">    return this;</span>
+  }
+
+  /**
+   * Returns an {@code SQLInsert} instance that allows you to execute the INSERT
+   * statement.
+   *
+   * @param con the JDBC {@code Connection} to use for the INSERT statement
+   * @return a {@code SQLInsert} instance that allows you to execute the INSERT statement
+   */
+  public SQLInsert prepare(Connection con) {
+<span class="fc" id="L135">    Check.notNull(con);</span>
+<span class="fc" id="L136">    Check.on(STATE, clazz, BEAN_CLASS).is(notNull());</span>
+<span class="fc" id="L137">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(clazz, true);</span>
+<span class="fc" id="L138">    Set&lt;String&gt; props = getters.keySet();</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">    if (!isEmpty(properties)) {</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">      if (exclude) {</span>
+<span class="fc" id="L141">        props = new LinkedHashSet&lt;&gt;(props);</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        for (String prop : properties) {</span>
+<span class="fc" id="L143">          checkProperty(props, prop).then(props::remove);</span>
+        }
+      } else {
+<span class="nc" id="L146">        Set&lt;String&gt; tmp = new LinkedHashSet&lt;&gt;(properties.length);</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        for (String prop : properties) {</span>
+<span class="nc" id="L148">          checkProperty(props, prop).then(tmp::add);</span>
+        }
+<span class="nc" id="L150">        props = tmp;</span>
+      }
+    }
+<span class="fc" id="L153">    NameMapper mapper = config.getPropertyToColumnMapper();</span>
+<span class="fc" id="L154">    String table = ifNull(tableName, mapper.map(clazz.getSimpleName()));</span>
+<span class="fc" id="L155">    String cols = implode(props, mapper::map, &quot;,&quot;);</span>
+<span class="fc" id="L156">    String params = implode(props, s -&gt; &quot;:&quot; + s, &quot;,&quot;);</span>
+<span class="fc" id="L157">    StringBuilder sb = new StringBuilder(100);</span>
+<span class="fc" id="L158">    append(sb, &quot;INSERT INTO &quot;, table, &quot; (&quot;, cols, &quot;) VALUES(&quot;, params, &quot;)&quot;);</span>
+<span class="fc" id="L159">    SQLSession sql = SQL.simple(sb.toString(), config).session(con);</span>
+<span class="fc" id="L160">    return sql.prepareInsert(returnKeys);</span>
+  }
+
+  private ObjectCheck&lt;String, IllegalStateException&gt; checkProperty(Set&lt;String&gt; props,
+        String prop) {
+<span class="fc" id="L165">    return Check.on(STATE, prop)</span>
+<span class="fc" id="L166">          .isNot(emptyString(), EMPTY_PROPERTY_NAME)</span>
+<span class="fc" id="L167">          .is(in(), props, NO_SUCH_PROPERTY, clazz.getSimpleName());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

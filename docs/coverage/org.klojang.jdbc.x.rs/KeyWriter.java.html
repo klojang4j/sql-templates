@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KeyWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">KeyWriter.java</span></div><h1>KeyWriter.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
+
+import org.klojang.jdbc.DatabaseException;
+import org.klojang.jdbc.SessionConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.klojang.jdbc.SessionConfig.CustomReader;
+
+
+/**
+ * Reads a single column in a ResultSet as the value for a Map key.
+ *
+ * @param &lt;COLUMN_TYPE&gt;
+ */
+@SuppressWarnings(&quot;rawtypes&quot;)
+public final class KeyWriter&lt;COLUMN_TYPE&gt; {
+
+<span class="fc" id="L25">  private static final Logger LOG = LoggerFactory.getLogger(KeyWriter.class);</span>
+
+  public static Map&lt;String, Object&gt; toMap(ResultSet resultset, KeyWriter[] writers)
+        throws Throwable {
+    // Allow for some extra data to be inserted into the map by the user
+<span class="fc" id="L30">    Map&lt;String, Object&gt; map = HashMap.newHashMap(writers.length + 4);</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">    for (KeyWriter channel : writers) {</span>
+<span class="fc" id="L32">      channel.write(resultset, map);</span>
+    }
+<span class="fc" id="L34">    return map;</span>
+  }
+
+  public static KeyWriter[] createWriters(ResultSet resultset, SessionConfig config) {
+<span class="fc" id="L38">    ResultSetMethodLookup methods = ResultSetMethodLookup.getInstance();</span>
+    try {
+<span class="fc" id="L40">      ResultSetMetaData rsmd = resultset.getMetaData();</span>
+<span class="fc" id="L41">      int sz = rsmd.getColumnCount();</span>
+<span class="fc" id="L42">      KeyWriter[] writers = new KeyWriter[sz];</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
+<span class="fc" id="L44">        int columnIndex = idx + 1; // JDBC is one-based</span>
+<span class="fc" id="L45">        int sqlType = rsmd.getColumnType(columnIndex);</span>
+<span class="fc" id="L46">        ResultSetMethod&lt;?&gt; method = methods.getMethod(sqlType);</span>
+<span class="fc" id="L47">        String label = rsmd.getColumnLabel(columnIndex);</span>
+<span class="fc" id="L48">        String key = config.getColumnToPropertyMapper().map(label);</span>
+<span class="fc" id="L49">        CustomReader custom = config.getCustomReader(HashMap.class,</span>
+              key,
+              Object.class,
+              sqlType);
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if (custom == null) {</span>
+<span class="fc" id="L54">          writers[idx] = new KeyWriter&lt;&gt;(method, columnIndex, key);</span>
+        } else {
+<span class="nc" id="L56">          writers[idx] = new KeyWriter&lt;&gt;(custom, columnIndex, key);</span>
+        }
+      }
+<span class="fc" id="L59">      return writers;</span>
+<span class="nc" id="L60">    } catch (SQLException e) {</span>
+<span class="nc" id="L61">      throw new DatabaseException(e);</span>
+    }
+  }
+
+  private final ResultSetMethod&lt;COLUMN_TYPE&gt; method;
+  private final CustomReader custom;
+  private final int columnIndex;
+  private final String key;
+
+<span class="fc" id="L70">  private KeyWriter(ResultSetMethod&lt;COLUMN_TYPE&gt; method, int columnIndex, String key) {</span>
+<span class="fc" id="L71">    this.method = method;</span>
+<span class="fc" id="L72">    this.columnIndex = columnIndex;</span>
+<span class="fc" id="L73">    this.key = key;</span>
+<span class="fc" id="L74">    this.custom = null;</span>
+<span class="fc" id="L75">  }</span>
+
+<span class="nc" id="L77">  private KeyWriter(CustomReader custom, int columnIndex, String key) {</span>
+<span class="nc" id="L78">    this.custom = custom;</span>
+<span class="nc" id="L79">    this.columnIndex = columnIndex;</span>
+<span class="nc" id="L80">    this.key = key;</span>
+<span class="nc" id="L81">    this.method = null;</span>
+<span class="nc" id="L82">  }</span>
+
+  void write(ResultSet resultset, Map&lt;String, Object&gt; map) throws SQLException {
+    final Object val;
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">    if (custom == null) {</span>
+<span class="fc" id="L87">      val = method.invoke(resultset, columnIndex);</span>
+<span class="fc" id="L88">      LOG.trace(&quot;==&gt; {}: {}&quot;, key, val);</span>
+    } else {
+<span class="nc" id="L90">      val = custom.getValue(resultset, columnIndex);</span>
+<span class="nc" id="L91">      LOG.trace(&quot;==&gt; {}: {} (using custom reader)&quot;, key, val);</span>
+    }
+<span class="fc" id="L93">    map.put(key, val);</span>
+<span class="fc" id="L94">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

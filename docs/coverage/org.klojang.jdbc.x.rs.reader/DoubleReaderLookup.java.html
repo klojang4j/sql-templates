@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DoubleReaderLookup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs.reader</a> &gt; <span class="el_source">DoubleReaderLookup.java</span></div><h1>DoubleReaderLookup.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs.reader;
+
+import org.klojang.convert.NumberMethods;
+import org.klojang.jdbc.x.rs.ColumnReader;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+import static java.sql.Types.*;
+import static java.util.Map.Entry;
+import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
+
+<span class="fc" id="L15">public final class DoubleReaderLookup extends AbstractColumnReaderLookup&lt;Double&gt; {</span>
+
+  @Override
+  List&lt;Entry&lt;Integer, ColumnReader&lt;?, Double&gt;&gt;&gt; getColumnReaders() {
+<span class="fc" id="L19">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, Double&gt;&gt;&gt; entries = new ArrayList&lt;&gt;(16);</span>
+<span class="fc" id="L20">    entries.add(entry(GET_BOOLEAN, boolToDouble(), BOOLEAN));</span>
+<span class="fc" id="L21">    entries.addAll(entries(GET_DOUBLE,</span>
+          DOUBLE,
+          FLOAT,
+          REAL,
+          BIGINT,
+          INTEGER,
+          SMALLINT,
+          TINYINT));
+<span class="fc" id="L29">    entries.addAll(entries(GET_BIG_DECIMAL, bigDecimalToDouble(), NUMERIC, DECIMAL));</span>
+<span class="fc" id="L30">    entries.addAll(entries(GET_STRING, stringToDouble(), VARCHAR, CHAR));</span>
+<span class="fc" id="L31">    return entries;</span>
+  }
+
+  private Function&lt;Boolean, Double&gt; boolToDouble() {
+<span class="pc bnc" id="L35" title="All 2 branches missed.">    return x -&gt; x ? 1D : 0D;</span>
+  }
+
+  private static Function&lt;BigDecimal, Double&gt; bigDecimalToDouble() {
+<span class="pc" id="L39">    return x -&gt; NumberMethods.convert(x, Double.class);</span>
+  }
+
+  private static Function&lt;String, Double&gt; stringToDouble() {
+<span class="pc" id="L43">    return x -&gt; NumberMethods.parse(x, Double.class);</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

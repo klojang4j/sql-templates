@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PropertyWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs</a> &gt; <span class="el_source">PropertyWriter.java</span></div><h1>PropertyWriter.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs;
+
+import org.klojang.invoke.Setter;
+import org.klojang.invoke.SetterFactory;
+import org.klojang.jdbc.DatabaseException;
+import org.klojang.jdbc.SessionConfig;
+import org.klojang.jdbc.x.JDBC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.function.Supplier;
+
+import static org.klojang.jdbc.SessionConfig.CustomReader;
+import static org.klojang.util.CollectionMethods.implode;
+
+/**
+ * Reads a single column in a ResultSet as the value for a bean property.
+ *
+ * @param &lt;COLUMN_TYPE&gt;
+ * @param &lt;FIELD_TYPE&gt;
+ */
+public final class PropertyWriter&lt;COLUMN_TYPE, FIELD_TYPE&gt; {
+
+<span class="fc" id="L28">  private static final Logger LOG = LoggerFactory.getLogger(PropertyWriter.class);</span>
+
+  @SuppressWarnings(&quot;rawtypes&quot;)
+  public static &lt;U&gt; U writeAll(ResultSet rs,
+        Supplier&lt;U&gt; beanSupplier,
+        PropertyWriter[] writers) throws Throwable {
+<span class="fc" id="L34">    U bean = beanSupplier.get();</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">    for (PropertyWriter channel : writers) {</span>
+<span class="fc" id="L36">      channel.write(rs, bean);</span>
+    }
+<span class="fc" id="L38">    return bean;</span>
+  }
+
+  @SuppressWarnings(&quot;rawtypes&quot;)
+  public static PropertyWriter[] createWriters(
+        ResultSet rs,
+        Class&lt;?&gt; beanClass,
+        SessionConfig config) {
+<span class="fc" id="L46">    Map&lt;String, Setter&gt; setters = SetterFactory.INSTANCE.getSetters(beanClass);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
+<span class="fc" id="L48">      log(beanClass, rs, setters);</span>
+    }
+<span class="fc" id="L50">    ColumnReaderFactory factory = ColumnReaderFactory.getInstance();</span>
+    try {
+<span class="fc" id="L52">      ResultSetMetaData rsmd = rs.getMetaData();</span>
+<span class="fc" id="L53">      int sz = rsmd.getColumnCount();</span>
+<span class="fc" id="L54">      List&lt;PropertyWriter&lt;?, ?&gt;&gt; writers = new ArrayList&lt;&gt;(sz);</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">      for (int idx = 0; idx &lt; sz; ++idx) {</span>
+<span class="fc" id="L56">        int columnIndex = idx + 1; // JDBC is one-based</span>
+<span class="fc" id="L57">        int sqlType = rsmd.getColumnType(columnIndex);</span>
+<span class="fc" id="L58">        String label = rsmd.getColumnLabel(columnIndex);</span>
+<span class="fc" id="L59">        String property = config.getColumnToPropertyMapper().map(label);</span>
+<span class="fc" id="L60">        Setter setter = setters.get(property);</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (setter == null) {</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">          if (LOG.isTraceEnabled()) {</span>
+<span class="fc" id="L63">            String fmt = &quot;Column {} cannot be mapped to a property of {}&quot;;</span>
+<span class="fc" id="L64">            LOG.warn(fmt, label, beanClass.getSimpleName());</span>
+<span class="fc" id="L65">          }</span>
+          continue;
+        }
+<span class="fc" id="L68">        Class&lt;?&gt; javaType = setter.getParamType();</span>
+<span class="fc" id="L69">        CustomReader customReader = config.getCustomReader(beanClass,</span>
+              property,
+              javaType,
+              sqlType);
+        PropertyWriter pw;
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if (customReader == null) {</span>
+<span class="fc" id="L75">          ColumnReader&lt;?, ?&gt; columnReader = factory.getReader(javaType, sqlType);</span>
+<span class="fc" id="L76">          pw = new PropertyWriter&lt;&gt;(setter, columnIndex, columnReader);</span>
+<span class="fc" id="L77">        } else {</span>
+<span class="nc" id="L78">          pw = new PropertyWriter(setter, columnIndex, customReader);</span>
+        }
+<span class="fc" id="L80">        writers.add(pw);</span>
+      }
+<span class="fc" id="L82">      return writers.toArray(PropertyWriter[]::new);</span>
+<span class="nc" id="L83">    } catch (SQLException e) {</span>
+<span class="nc" id="L84">      throw new DatabaseException(e);</span>
+    }
+  }
+
+  private final Setter setter;
+  private final int columnIndex;
+  private final ColumnReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; reader;
+  private final CustomReader custom;
+
+  private PropertyWriter(Setter setter,
+        int columnIndex,
+<span class="fc" id="L95">        ColumnReader&lt;COLUMN_TYPE, FIELD_TYPE&gt; reader) {</span>
+<span class="fc" id="L96">    this.setter = setter;</span>
+<span class="fc" id="L97">    this.columnIndex = columnIndex;</span>
+<span class="fc" id="L98">    this.reader = reader;</span>
+<span class="fc" id="L99">    this.custom = null;</span>
+<span class="fc" id="L100">  }</span>
+
+<span class="nc" id="L102">  private PropertyWriter(Setter setter, int columnIndex, CustomReader custom) {</span>
+<span class="nc" id="L103">    this.setter = setter;</span>
+<span class="nc" id="L104">    this.columnIndex = columnIndex;</span>
+<span class="nc" id="L105">    this.custom = custom;</span>
+<span class="nc" id="L106">    this.reader = null;</span>
+<span class="nc" id="L107">  }</span>
+
+  @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
+  public void write(ResultSet resultset, Object bean) throws Throwable {
+    final Object val;
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">    if (custom == null) {</span>
+<span class="fc" id="L113">      Class cls = setter.getParamType();</span>
+<span class="fc" id="L114">      val = reader.getValue(resultset, columnIndex, cls);</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
+<span class="fc" id="L116">        LOG.trace(&quot;==&gt; {}: {}&quot;, setter.getProperty(), val);</span>
+      }
+<span class="fc" id="L118">    } else {</span>
+<span class="nc" id="L119">      val = custom.getValue(resultset, columnIndex);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
+<span class="nc" id="L121">        LOG.trace(&quot;==&gt; {}: {} (using custom reader)&quot;, setter.getProperty(), val);</span>
+      }
+    }
+<span class="fc" id="L124">    setter.write(bean, val);</span>
+<span class="fc" id="L125">  }</span>
+
+  private static void log(
+        Class&lt;?&gt; beanClass,
+        ResultSet resultset,
+        Map&lt;String, Setter&gt; setters) {
+<span class="fc" id="L131">    LOG.trace(&quot;Mapping ResultSet to {}&quot;, beanClass.getSimpleName());</span>
+<span class="fc" id="L132">    Comparator&lt;String&gt; cmp = Comparator.comparing(String::toLowerCase);</span>
+<span class="fc" id="L133">    Set&lt;String&gt; cols = new TreeSet&lt;&gt;(cmp);</span>
+<span class="fc" id="L134">    cols.addAll(Arrays.asList(JDBC.getColumnNames(resultset)));</span>
+<span class="fc" id="L135">    Set&lt;String&gt; props = new TreeSet&lt;&gt;(cmp);</span>
+<span class="fc" id="L136">    props.addAll(setters.keySet());</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
+<span class="fc" id="L138">      LOG.trace(&quot;Columns ......: {}&quot;, implode(cols));</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">      if (beanClass.isRecord()) {</span>
+<span class="nc" id="L140">        LOG.trace(&quot;Components ...: {}&quot;, implode(props));</span>
+      } else {
+<span class="fc" id="L142">        LOG.trace(&quot;Properties ...: {}&quot;, implode(props));</span>
+      }
+    }
+<span class="fc" id="L145">  }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
