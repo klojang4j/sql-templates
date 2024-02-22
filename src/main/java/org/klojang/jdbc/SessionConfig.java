@@ -258,20 +258,20 @@ public interface SessionConfig {
    * ignore any or all arguments that you don't need in order to determine the return
    * value.
    *
-   * <p>This method can be used to save complex types for which no default java-to-SQL
+   * <p>This method can be used to save types for which no default java-to-SQL
    * type mapping exists. In that case, it pays if the type contains a static factory
    * method that takes a {@code String} and returns an instance of that type. <i>Klojang
-   * JDBC</i> will detect the factory method and use it for the reverse process:
+   * JDBC</i> will detect the factory method and use it for the reverse process &#8212;
    * deserializing {@link ResultSet} values into instances of that type. Alternatively, if
    * the type contains a constructor that takes a single {@code String} argument, then
    * that constructor will be used as the deserialization mechanism. Otherwise specify a
    * {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
    * deserialize the values.
    *
-   * <p>Note that if the type's {@code toString()} method delivers adequate
-   * serialization, you don't need to explicitly specify a serializer for it, because
-   * <i>Klojang JDBC</i> will already ultimately resort to calling {@code toString()} on
-   * (non-{@code null}) values of an unknown type:
+   * <p>Note that if the type is serialized through its {@code toString()} method, you
+   * don't need to specify a serializer for it. <i>Klojang JDBC</i> will already, as a
+   * last resort, call {@code toString()} on (non-{@code null}) values with an unknown
+   * type. More precisely, it will bind them using
    * {@code preparedStatement.setString(paramIndex, value.toString())}.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
