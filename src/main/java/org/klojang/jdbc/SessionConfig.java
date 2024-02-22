@@ -260,18 +260,20 @@ public interface SessionConfig {
    *
    * <p>This method can be used to save types for which no default java-to-SQL
    * type mapping exists. In that case, it pays if the type contains a static factory
-   * method that takes a {@code String} and returns an instance of that type. <i>Klojang
-   * JDBC</i> will detect the factory method and use it for the reverse process &#8212;
-   * deserializing {@link ResultSet} values into instances of that type. Alternatively, if
-   * the type contains a constructor that takes a single {@code String} argument, then
-   * that constructor will be used as the deserialization mechanism. Otherwise specify a
+   * method that takes a {@code String} and returns an instance of that type. If there is
+   * exactly one such method, <i>Klojang JDBC</i> will use it for the reverse process
+   * &#8212; deserializing {@link ResultSet} values into instances of that type.
+   * Alternatively, if the type contains a constructor that takes a single {@code String}
+   * argument, then that constructor will be used as the deserialization mechanism. That
+   * works for classes like {@link StringBuilder}, but it may be assuming a bit too much
+   * for other classes. In that case, specify a
    * {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
    * deserialize the values.
    *
-   * <p>Note that if the type is serialized through its {@code toString()} method, you
-   * don't need to specify a serializer for it. <i>Klojang JDBC</i> will already, as a
-   * last resort, call {@code toString()} on (non-{@code null}) values with an unknown
-   * type. More precisely, it will bind them using
+   * <p>Note that if the type is properly serialized through its {@code toString()}
+   * method, you don't need to specify a serializer for it. <i>Klojang JDBC</i> will
+   * already, as a last resort, call {@code toString()} on (non-{@code null}) values with
+   * an unknown type. More precisely, it will bind them using
    * {@code preparedStatement.setString(paramIndex, value.toString())}.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
@@ -299,15 +301,17 @@ public interface SessionConfig {
    * ignore any or all arguments that you don't need in order to determine the return
    * value.
    *
-   * <p>This method can be used to save complex types for which no default java-to-SQL
+   * <p>This method can be used to save types for which no default java-to-SQL
    * type mapping exists. In that case, it pays if the type contains a static factory
-   * method that takes a {@code byte[]} array and returns an instance of that type.
-   * <i>Klojang JDBC</i> will detect the factory method and use it for the reverse
-   * process: deserializing {@link ResultSet} values into instances of that type.
+   * method that takes a {@code byte[]} array and returns an instance of that type. If
+   * there is exactly one such method, <i>Klojang JDBC</i> will use it for the reverse
+   * process &#8212; deserializing {@link ResultSet} values into instances of that type.
    * Alternatively, if the type contains a constructor that takes a single {@code byte[]}
-   * argument, then that constructor will be used as the deserialization mechanism.
-   * Otherwise specify a {@link #getCustomReader(Class, String, Class, int) CustomReader}
-   * that will deserialize the values.
+   * array argument, then that constructor will be used as the deserialization mechanism.
+   * That may work for some classes, but it may be assuming a bit too much for other
+   * classes. In that case, specify a
+   * {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
+   * deserialize the values.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
    *       containing the value to be bound

@@ -260,18 +260,20 @@ public interface SessionConfig {
    *
    * &lt;p&gt;This method can be used to save types for which no default java-to-SQL
    * type mapping exists. In that case, it pays if the type contains a static factory
-   * method that takes a {@code String} and returns an instance of that type. &lt;i&gt;Klojang
-   * JDBC&lt;/i&gt; will detect the factory method and use it for the reverse process &amp;#8212;
-   * deserializing {@link ResultSet} values into instances of that type. Alternatively, if
-   * the type contains a constructor that takes a single {@code String} argument, then
-   * that constructor will be used as the deserialization mechanism. Otherwise specify a
+   * method that takes a {@code String} and returns an instance of that type. If there is
+   * exactly one such method, &lt;i&gt;Klojang JDBC&lt;/i&gt; will use it for the reverse process
+   * &amp;#8212; deserializing {@link ResultSet} values into instances of that type.
+   * Alternatively, if the type contains a constructor that takes a single {@code String}
+   * argument, then that constructor will be used as the deserialization mechanism. That
+   * works for classes like {@link StringBuilder}, but it may be assuming a bit too much
+   * for other classes. In that case, specify a
    * {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
    * deserialize the values.
    *
-   * &lt;p&gt;Note that if the type is serialized through its {@code toString()} method, you
-   * don't need to specify a serializer for it. &lt;i&gt;Klojang JDBC&lt;/i&gt; will already, as a
-   * last resort, call {@code toString()} on (non-{@code null}) values with an unknown
-   * type. More precisely, it will bind them using
+   * &lt;p&gt;Note that if the type is properly serialized through its {@code toString()}
+   * method, you don't need to specify a serializer for it. &lt;i&gt;Klojang JDBC&lt;/i&gt; will
+   * already, as a last resort, call {@code toString()} on (non-{@code null}) values with
+   * an unknown type. More precisely, it will bind them using
    * {@code preparedStatement.setString(paramIndex, value.toString())}.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
@@ -287,7 +289,7 @@ public interface SessionConfig {
   default Function&lt;Object, String&gt; getSerializer(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L290">    return null;</span>
+<span class="fc" id="L292">    return null;</span>
   }
 
   /**
@@ -299,15 +301,17 @@ public interface SessionConfig {
    * ignore any or all arguments that you don't need in order to determine the return
    * value.
    *
-   * &lt;p&gt;This method can be used to save complex types for which no default java-to-SQL
+   * &lt;p&gt;This method can be used to save types for which no default java-to-SQL
    * type mapping exists. In that case, it pays if the type contains a static factory
-   * method that takes a {@code byte[]} array and returns an instance of that type.
-   * &lt;i&gt;Klojang JDBC&lt;/i&gt; will detect the factory method and use it for the reverse
-   * process: deserializing {@link ResultSet} values into instances of that type.
+   * method that takes a {@code byte[]} array and returns an instance of that type. If
+   * there is exactly one such method, &lt;i&gt;Klojang JDBC&lt;/i&gt; will use it for the reverse
+   * process &amp;#8212; deserializing {@link ResultSet} values into instances of that type.
    * Alternatively, if the type contains a constructor that takes a single {@code byte[]}
-   * argument, then that constructor will be used as the deserialization mechanism.
-   * Otherwise specify a {@link #getCustomReader(Class, String, Class, int) CustomReader}
-   * that will deserialize the values.
+   * array argument, then that constructor will be used as the deserialization mechanism.
+   * That may work for some classes, but it may be assuming a bit too much for other
+   * classes. In that case, specify a
+   * {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
+   * deserialize the values.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
    *       containing the value to be bound
@@ -322,7 +326,7 @@ public interface SessionConfig {
   default Function&lt;Object, byte[]&gt; getBinarySerializer(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L325">    return null;</span>
+<span class="fc" id="L329">    return null;</span>
   }
 
   /**
@@ -338,7 +342,7 @@ public interface SessionConfig {
    *       components, or map keys to column names
    */
   default NameMapper getPropertyToColumnMapper() {
-<span class="fc" id="L341">    return camelCaseToSnakeUpperCase();</span>
+<span class="fc" id="L345">    return camelCaseToSnakeUpperCase();</span>
   }
 
   /**
@@ -354,7 +358,7 @@ public interface SessionConfig {
    *       properties, record components, or map keys
    */
   default NameMapper getColumnToPropertyMapper() {
-<span class="fc" id="L357">    return snakeCaseToCamelCase();</span>
+<span class="fc" id="L361">    return snakeCaseToCamelCase();</span>
   }
 
   /**
@@ -367,8 +371,8 @@ public interface SessionConfig {
    *       property-to-column mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withPropertyToColumnMapper(NameMapper mapper) {
-<span class="fc" id="L370">    return new SessionConfig() {</span>
-<span class="fc" id="L371">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
+<span class="fc" id="L374">    return new SessionConfig() {</span>
+<span class="fc" id="L375">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
     };
   }
 
@@ -382,8 +386,8 @@ public interface SessionConfig {
    *       column-to-property mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withColumnToPropertyMapper(NameMapper mapper) {
-<span class="nc" id="L385">    return new SessionConfig() {</span>
-<span class="nc" id="L386">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
+<span class="nc" id="L389">    return new SessionConfig() {</span>
+<span class="nc" id="L390">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
     };
   }
 
@@ -396,10 +400,10 @@ public interface SessionConfig {
    * @see NameMapper#AS_IS
    */
   default SessionConfig withNameMappingDisabled() {
-<span class="nc" id="L399">    return new SessionConfig() {</span>
-<span class="nc" id="L400">      public NameMapper getPropertyToColumnMapper() { return NameMapper.AS_IS; }</span>
+<span class="nc" id="L403">    return new SessionConfig() {</span>
+<span class="nc" id="L404">      public NameMapper getPropertyToColumnMapper() { return NameMapper.AS_IS; }</span>
 
-<span class="nc" id="L402">      public NameMapper getColumnToPropertyMapper() { return NameMapper.AS_IS; }</span>
+<span class="nc" id="L406">      public NameMapper getColumnToPropertyMapper() { return NameMapper.AS_IS; }</span>
     };
   }
 
@@ -422,8 +426,8 @@ public interface SessionConfig {
    *       camelCaseToSnakeLowerCase()} name mapper
    */
   default SessionConfig withLowerCaseColumnNames() {
-<span class="nc" id="L425">    return new SessionConfig() {</span>
-<span class="nc" id="L426">      public NameMapper getPropertyToColumnMapper() { return camelCaseToSnakeLowerCase(); }</span>
+<span class="nc" id="L429">    return new SessionConfig() {</span>
+<span class="nc" id="L430">      public NameMapper getPropertyToColumnMapper() { return camelCaseToSnakeLowerCase(); }</span>
     };
   }
 
@@ -435,11 +439,11 @@ public interface SessionConfig {
    *       will be saved by calling {@code toString()} on them.
    */
   default SessionConfig withEnumsSavedAsStrings() {
-<span class="fc" id="L438">    return new SessionConfig() {</span>
+<span class="fc" id="L442">    return new SessionConfig() {</span>
       public boolean saveEnumAsString(Class&lt;?&gt; beanType,
             String enumProperty,
             Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="fc" id="L442">        return true;</span>
+<span class="fc" id="L446">        return true;</span>
       }
     };
   }
