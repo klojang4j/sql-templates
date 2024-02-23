@@ -34,11 +34,11 @@ public final class SQLCache {
   public static SQL get(Class<?> clazz,
         String path,
         SessionConfig config,
-        BiFunction<String, SessionConfig, SQL> factory) {
+        BiFunction<SessionConfig, String, SQL> factory) {
     return cache.computeIfAbsent(Tuple2.of(clazz, path), k -> {
       try {
         String sql = IOMethods.getContents(clazz, path);
-        return factory.apply(sql, config);
+        return factory.apply(config, sql);
       } catch (Throwable t) {
         throw Utils.wrap(t);
       }

@@ -87,7 +87,7 @@ public class DeserializeWithCustomReaderTest {
         return null;
       }
     };
-    Emp emp1 = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM EMP", config)
+    Emp emp1 = SQL.simpleQuery(MY_CON.get(), config, "SELECT * FROM EMP")
           .getExtractor(Emp.class)
           .extract()
           .get();
@@ -133,7 +133,7 @@ public class DeserializeWithCustomReaderTest {
           .prepare(MY_CON.get());
     insert.bind(emp0).execute();
     insert.close();
-    Emp emp1 = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM EMP", config)
+    Emp emp1 = SQL.simpleQuery(MY_CON.get(), config, "SELECT * FROM EMP")
           .getExtractor(Emp.class)
           .extract()
           .get();
@@ -175,7 +175,7 @@ public class DeserializeWithCustomReaderTest {
           .prepare(MY_CON.get());
     insert.bind(emp0).execute();
     insert.close();
-    Emp emp1 = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM EMP", config)
+    Emp emp1 = SQL.simpleQuery(MY_CON.get(), config, "SELECT * FROM EMP")
           .getExtractor(Emp.class)
           .extract()
           .get();

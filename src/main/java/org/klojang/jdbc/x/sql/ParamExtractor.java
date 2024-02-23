@@ -37,7 +37,7 @@ public final class ParamExtractor {
   private final List<NamedParameter> params;
 
   // For static SQL - containing no named parameters
-  public ParamExtractor(String sql, int foo) {
+  public ParamExtractor(String sql, int dummy) {
     this.normalized = sql;
     this.positions = Map.of();
     this.params = List.of();

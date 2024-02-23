@@ -156,7 +156,7 @@ public final class InsertBuilder {
 <span class="fc" id="L156">    String params = implode(props, s -&gt; &quot;:&quot; + s, &quot;,&quot;);</span>
 <span class="fc" id="L157">    StringBuilder sb = new StringBuilder(100);</span>
 <span class="fc" id="L158">    append(sb, &quot;INSERT INTO &quot;, table, &quot; (&quot;, cols, &quot;) VALUES(&quot;, params, &quot;)&quot;);</span>
-<span class="fc" id="L159">    SQLSession sql = SQL.simple(sb.toString(), config).session(con);</span>
+<span class="fc" id="L159">    SQLSession sql = SQL.simple(config, sb.toString()).session(con);</span>
 <span class="fc" id="L160">    return sql.prepareInsert(returnKeys);</span>
   }
 

@@ -156,7 +156,7 @@ public final class InsertBuilder {
     String params = implode(props, s -> ":" + s, ",");
     StringBuilder sb = new StringBuilder(100);
     append(sb, "INSERT INTO ", table, " (", cols, ") VALUES(", params, ")");
-    SQLSession sql = SQL.simple(sb.toString(), config).session(con);
+    SQLSession sql = SQL.simple(config, sb.toString()).session(con);
     return sql.prepareInsert(returnKeys);
   }
 

@@ -2,11 +2,11 @@ package org.klojang.jdbc;
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.SQLCache;
-import org.klojang.jdbc.x.Utils;
 
 import java.sql.Connection;
 
 import static org.klojang.jdbc.x.Strings.*;
+import static org.klojang.jdbc.x.Utils.DEFAULT_CONFIG;
 
 /**
  * <p>Encapsulates a user-provided SQL statement. <i>Klojang JDBC</i> provides three
@@ -119,10 +119,10 @@ public sealed interface SQL permits AbstractSQL {
   /**
    * Returns a {@code SQL} implementation that supports neither named parameters nor
    * <i>Klojang Templates</i> variables. In other words, it only supports completely
-   * static SQL. This method returns the same {@code SQL} implementation as the one
-   * returned by {@link #simple(String) SQL.simple()}, but does so under the
-   * <i>assumption</i> that the SQL does not contain any named parameters, thus saving on
-   * the cost of parsing the SQL in order to extract the named parameters.
+   * static SQL. This method actually returns the same {@code SQL} implementation as the
+   * one returned by {@link #simple(String) SQL.simple()}, but simply <i>assumes</i> that
+   * the SQL does not contain named parameters, thus saving on the cost of parsing the SQL
+   * in order to extract them.
    *
    * @param sql the SQL statement
    * @return a {@code SQL} implementation that supports neither named parameters nor
@@ -130,7 +130,27 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL staticSQL(String sql) {
     Check.notNull(sql, SQL_ARGUMENT);
-    return new SimpleSQL(sql, true, noSessionConfig());
+    return new SimpleSQL(sql, DEFAULT_CONFIG, true);
+  }
+
+  /**
+   * Returns a {@code SQL} implementation that supports neither named parameters nor
+   * <i>Klojang Templates</i> variables. In other words, it only supports completely
+   * static SQL. This method actually returns the same {@code SQL} implementation as the
+   * one returned by {@link #simple(String) SQL.simple()}, but simply <i>assumes</i> that
+   * the SQL does not contain named parameters, thus saving on the cost of parsing the SQL
+   * in order to extract them.
+   *
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
+   *       <i>Klojang JDBC</i> operates
+   * @param sql the SQL statement
+   * @return a {@code SQL} implementation that supports neither named parameters nor
+   *       <i>Klojang Templates</i> variables
+   */
+  static SQL staticSQL(SessionConfig config, String sql) {
+    Check.notNull(config, CONFIG);
+    Check.notNull(sql, SQL_ARGUMENT);
+    return new SimpleSQL(sql, config, true);
   }
 
   /**
@@ -138,19 +158,23 @@ public sealed interface SQL permits AbstractSQL {
    * <i>Klojang Templates</i> variables. In other words, it only supports completely
    * static SQL. The SQL is read from the specified classpath resource. The resulting
    * {@code SQL} instance is cached and returned upon every subsequent call with the same
-   * {@code clazz} and {@code path} arguments. This method returns the same {@code SQL}
+   * {@code clazz} and {@code sqlFile} arguments. This method returns the same {@code SQL}
    * implementation as the one returned by {@link #simple(String) SQL.simple()}, but does
    * so under the <i>assumption</i> that the SQL does not contain any named parameters,
    * thus saving on the cost of parsing the SQL in order to extract the named parameters.
    *
    * @param clazz a {@code Class} object that provides access to the SQL file by
-   *       calling {@code getResourceAsStream} on it
-   * @param path the location of the SQL file
+   *       calling {@code clazz.getResourceAsStream(sqlFile)}
+   * @param sqlFile the location of the SQL file
    * @return a {@code SQL} implementation that supports neither named parameters nor
    *       <i>Klojang Templates</i> variables
    */
-  static SQL staticSQL(Class<?> clazz, String path) {
-    return SQLCache.get(clazz, path, SQL::staticSQL);
+  static SQL staticSQL(Class<?> clazz, String sqlFile) {
+    return SQLCache.get(clazz, sqlFile, SQL::staticSQL);
+  }
+
+  static SQL staticSQL(SessionConfig config, Class<?> clazz, String sqlFile) {
+    return SQLCache.get(clazz, sqlFile, config, SQL::staticSQL);
   }
 
   /**
@@ -163,56 +187,56 @@ public sealed interface SQL permits AbstractSQL {
    */
   static SQL simple(String sql) {
     Check.notNull(sql, SQL_ARGUMENT);
-    return simple(sql, noSessionConfig());
+    return simple(DEFAULT_CONFIG, sql);
   }
 
   /**
    * Returns a {@code SQL} implementation that allows for named parameters, but not for
    * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
    * resource. The resulting {@code SQL} instance is cached and returned upon every
-   * subsequent call with the same {@code clazz} and {@code path} arguments.
+   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
    *
    * @param clazz a {@code Class} object that provides access to the SQL file by
-   *       calling {@code getResourceAsStream} on it
-   * @param path the location of the SQL file
+   *       calling {@code clazz.getResourceAsStream(sqlFile)}
+   * @param sqlFile the location of the SQL file
    * @return a {@code SQL} implementation that allows for named parameters, but not for
    *       <i>Klojang Templates</i> variables
    */
-  static SQL simple(Class<?> clazz, String path) {
-    return SQLCache.get(clazz, path, SQL::simple);
+  static SQL simple(Class<?> clazz, String sqlFile) {
+    return SQLCache.get(clazz, sqlFile, SQL::simple);
   }
 
   /**
    * Returns a {@code SQL} implementation that allows for named parameters, but not for
    * <i>Klojang Templates</i> variables.
    *
-   * @param sql the SQL statement
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
-   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   *       <i>Klojang JDBC</i> operates
+   * @param sql the SQL statement
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
-  static SQL simple(String sql, SessionConfig config) {
-    Check.notNull(sql, SQL_ARGUMENT);
+  static SQL simple(SessionConfig config, String sql) {
     Check.notNull(config, CONFIG);
-    return new SimpleSQL(sql, false, config);
+    Check.notNull(sql, SQL_ARGUMENT);
+    return new SimpleSQL(sql, config, false);
   }
 
   /**
    * Returns a {@code SQL} implementation that allows for named parameters, but not for
    * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
    * resource. The resulting {@code SQL} instance is cached and returned upon every
-   * subsequent call with the same {@code clazz} and {@code path} arguments.
+   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
    *
-   * @param clazz a {@code Class} object that provides access to the SQL file by
-   *       calling {@code getResourceAsStream} on it
-   * @param path the location of the SQL file
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
-   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   *       <i>Klojang JDBC</i> operates
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code clazz.getResourceAsStream(sqlFile)}
+   * @param sqlFile the location of the SQL file
    * @return a {@code SQL} implementation that allows for named parameters, but not for
    *       <i>Klojang Templates</i> variables
    */
-  static SQL simple(Class<?> clazz, String path, SessionConfig config) {
-    return SQLCache.get(clazz, path, SQL::simple);
+  static SQL simple(SessionConfig config, Class<?> clazz, String sqlFile) {
+    return SQLCache.get(clazz, sqlFile, SQL::simple);
   }
 
   /**
@@ -220,17 +244,17 @@ public sealed interface SQL permits AbstractSQL {
    * Templates</i> variables. Equivalent to:
    *
    * <blockquote><pre>{@code
-   * SQL.simple(sql, SessionConfig.DEFAULT).session(con).prepareQuery();
+   * SQL.simple(SessionConfig.getDefaultConfig(), sql).session(con).prepareQuery();
    * }</pre></blockquote>
    *
    * @param con the JDBC connection to use
    * @param sql the SQL SELECT statement
-   * @return an {@code SQLQuery} instance that allows you to bind the named parameters in
+   * @return a {@code SQLQuery} instance that allows you to bind the named parameters in
    *       the SQL (if present) and then execute it
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql) {
-    return simpleQuery(con, sql, noSessionConfig());
+    return simpleQuery(con, DEFAULT_CONFIG, sql);
   }
 
   /**
@@ -238,22 +262,22 @@ public sealed interface SQL permits AbstractSQL {
    * Templates</i> variables. Equivalent to:
    *
    * <blockquote><pre>{@code
-   * SQL.simple(sql, config).session(con).prepareQuery();
+   * SQL.simple(config, sql).session(con).prepareQuery();
    * }</pre></blockquote>
    *
    * @param con the JDBC connection to use
-   * @param sql the SQL SELECT statement
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
-   *       values are bound into the underlying {@link java.sql.PreparedStatement}
-   * @return an {@code SQLQuery} instance that allows you to bind the named parameters in
+   *       <i>Klojang JDBC</i> operates
+   * @param sql the SQL SELECT statement
+   * @return a {@code SQLQuery} instance that allows you to bind the named parameters in
    *       the SQL (if present) and then execute it
    * @see SQLSession#prepareQuery()
    */
-  static SQLQuery simpleQuery(Connection con, String sql, SessionConfig config) {
+  static SQLQuery simpleQuery(Connection con, SessionConfig config, String sql) {
     Check.notNull(con, CONNECTION);
-    Check.notNull(sql, SQL_ARGUMENT);
     Check.notNull(config, CONFIG);
-    return simple(sql, config).session(con).prepareQuery();
+    Check.notNull(sql, SQL_ARGUMENT);
+    return simple(config, sql).session(con).prepareQuery();
   }
 
   /**
@@ -261,17 +285,17 @@ public sealed interface SQL permits AbstractSQL {
    * Templates</i> variables. Equivalent to:
    *
    * <blockquote><pre>{@code
-   * SQL.simple(sql, SessionConfig.DEFAULT).session(con).prepareInsert();
+   * SQL.simple(SessionConfig.getDefaultConfig(), sql).session(con).prepareInsert();
    * }</pre></blockquote>
    *
    * @param con the JDBC connection to use
    * @param sql the SQL INSERT statement
-   * @return an {@code SQLInsert} instance that allows you to bind the named parameters in
+   * @return a {@code SQLInsert} instance that allows you to bind the named parameters in
    *       the SQL (if present) and then execute it
    * @see SQLSession#prepareInsert()
    */
   static SQLInsert simpleInsert(Connection con, String sql) {
-    return simple(sql, noSessionConfig()).session(con).prepareInsert();
+    return simple(DEFAULT_CONFIG, sql).session(con).prepareInsert();
   }
 
   /**
@@ -279,27 +303,29 @@ public sealed interface SQL permits AbstractSQL {
    * Templates</i> variables. Equivalent to:
    *
    * <blockquote><pre>{@code
-   * SQL.simple(sql, config).session(con).prepareInsert();
+   * SQL.simple(config, sql).session(con).prepareInsert();
    * }</pre></blockquote>
    *
    * @param con the JDBC connection to use
-   * @param sql the SQL INSERT statement
-   * @param retrieveKeys whether to retrieve the keys that were generated by the
-   *       database
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
-   *       values are bound into the underlying {@link java.sql.PreparedStatement}
-   * @return an {@code SQLInsert} instance that allows you to bind the named parameters in
+   *       <i>Klojang JDBC</i> operates
+   * @param retrieveKeys whether to retrieve the keys that were generated by the
+   *       database. If the database does not generate any keys for the provided INSERT
+   *       statement, you <b>must</b> specify {@code false}, or an exception will follow
+   *       when executing the statement.
+   * @param sql the SQL INSERT statement
+   * @return a {@code SQLInsert} instance that allows you to bind the named parameters in
    *       the SQL (if present) and then execute it
    * @see SQLSession#prepareInsert(boolean)
    */
   static SQLInsert simpleInsert(Connection con,
-        String sql,
+        SessionConfig config,
         boolean retrieveKeys,
-        SessionConfig config) {
+        String sql) {
     Check.notNull(con, CONNECTION);
-    Check.notNull(sql, SQL_ARGUMENT);
     Check.notNull(config, CONFIG);
-    return simple(sql, config).session(con).prepareInsert(retrieveKeys);
+    Check.notNull(sql, SQL_ARGUMENT);
+    return simple(config, sql).session(con).prepareInsert(retrieveKeys);
   }
 
   /**
@@ -307,17 +333,17 @@ public sealed interface SQL permits AbstractSQL {
    * Templates</i> variables. Equivalent to:
    *
    * <blockquote><pre>{@code
-   * SQL.simple(sql, SessionConfig.DEFAULT).session(con).prepareUpdate();
+   * SQL.simple(SessionConfig.getDefaultConfig(), sql).session(con).prepareUpdate();
    * }</pre></blockquote>
    *
    * @param con the JDBC connection to use
    * @param sql the SQL UPDATE statement
-   * @return an {@code SQLUpdate} instance that allows you to bind the named parameters in
+   * @return a {@code SQLUpdate} instance that allows you to bind the named parameters in
    *       the SQL (if present) and then execute it
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql) {
-    return simpleUpdate(con, sql, noSessionConfig());
+    return simpleUpdate(con, DEFAULT_CONFIG, sql);
   }
 
   /**
@@ -325,22 +351,22 @@ public sealed interface SQL permits AbstractSQL {
    * Templates</i> variables. Equivalent to:
    *
    * <blockquote><pre>{@code
-   * SQL.simple(sql, config).session(con).prepareUpdate();
+   * SQL.simple(config, sql).session(con).prepareInsert();
    * }</pre></blockquote>
    *
    * @param con the JDBC connection to use
-   * @param sql the SQL UPDATE statement
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
-   *       values are bound into the underlying {@link java.sql.PreparedStatement}
-   * @return an {@code SQLUpdate} instance that allows you to bind the named parameters in
+   *       <i>Klojang JDBC</i> operates
+   * @param sql the SQL UPDATE statement
+   * @return a {@code SQLUpdate} instance that allows you to bind the named parameters in
    *       the SQL (if present) and then execute it
    * @see SQLSession#prepareUpdate()
    */
-  static SQLUpdate simpleUpdate(Connection con, String sql, SessionConfig config) {
+  static SQLUpdate simpleUpdate(Connection con, SessionConfig config, String sql) {
     Check.notNull(con, CONNECTION);
-    Check.notNull(sql, SQL_ARGUMENT);
     Check.notNull(config, CONFIG);
-    return simple(sql, config).session(con).prepareUpdate();
+    Check.notNull(sql, SQL_ARGUMENT);
+    return simple(config, sql).session(con).prepareUpdate();
   }
 
 
@@ -353,23 +379,23 @@ public sealed interface SQL permits AbstractSQL {
    *       <i>Klojang Templates</i> variables
    */
   static SQL template(String sql) {
-    return template(sql, noSessionConfig());
+    return template(DEFAULT_CONFIG, sql);
   }
 
   /**
    * Returns a {@code SQL} implementation that allows for named parameters and
    * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
    * resource. The resulting {@code SQL} instance is cached and returned upon every
-   * subsequent call with the same {@code clazz} and {@code path} arguments.
+   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
    *
    * @param clazz a {@code Class} object that provides access to the SQL file by
-   *       calling {@code getResourceAsStream} on it
-   * @param path the location of the SQL file
+   *       calling {@code clazz.getResourceAsStream(sqlFile)}
+   * @param sqlFile the location of the SQL file
    * @return a {@code SQL} implementation that allows for named parameters and
    *       <i>Klojang Templates</i> variables
    */
-  static SQL template(Class<?> clazz, String path) {
-    return SQLCache.get(clazz, path, SQL::template);
+  static SQL template(Class<?> clazz, String sqlFile) {
+    return SQLCache.get(clazz, sqlFile, SQL::template);
   }
 
 
@@ -377,15 +403,15 @@ public sealed interface SQL permits AbstractSQL {
    * Returns a {@code SQL} implementation that allows for named parameters and
    * <i>Klojang Templates</i> variables.
    *
-   * @param sql the SQL statement
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
-   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   *       <i>Klojang JDBC</i> operates
+   * @param sql the SQL statement
    * @return a {@code SQL} implementation that allows for named parameters and
    *       <i>Klojang Templates</i> variables
    */
-  static SQL template(String sql, SessionConfig config) {
-    Check.notNull(sql, SQL_ARGUMENT);
+  static SQL template(SessionConfig config, String sql) {
     Check.notNull(config, CONFIG);
+    Check.notNull(sql, SQL_ARGUMENT);
     return new SQLTemplate(sql, config);
   }
 
@@ -393,18 +419,18 @@ public sealed interface SQL permits AbstractSQL {
    * Returns a {@code SQL} implementation that allows for named parameters and
    * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
    * resource. The resulting {@code SQL} instance is cached and returned upon every
-   * subsequent call with the same {@code clazz} and {@code path} arguments.
+   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
    *
-   * @param clazz a {@code Class} object that provides access to the SQL file by
-   *       calling {@code getResourceAsStream} on it
-   * @param path the location of the SQL file
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
-   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   *       <i>Klojang JDBC</i> operates
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code clazz.getResourceAsStream(sqlFile)}
+   * @param sqlFile the location of the SQL file
    * @return a {@code SQL} implementation that allows for named parameters and
    *       <i>Klojang Templates</i> variables
    */
-  static SQL template(Class<?> clazz, String path, SessionConfig config) {
-    return SQLCache.get(clazz, path, config, SQL::template);
+  static SQL template(SessionConfig config, Class<?> clazz, String sqlFile) {
+    return SQLCache.get(clazz, sqlFile, config, SQL::template);
   }
 
 
@@ -418,7 +444,7 @@ public sealed interface SQL permits AbstractSQL {
    *       <i>Klojang Templates</i> variables
    */
   static SQL skeleton(String sql) {
-    return skeleton(sql, noSessionConfig());
+    return skeleton(DEFAULT_CONFIG, sql);
   }
 
 
@@ -427,16 +453,16 @@ public sealed interface SQL permits AbstractSQL {
    * <i>Klojang Templates</i> variables. The template variables may be set to SQL
    * fragments that again contain named parameters. The SQL is read from the specified
    * classpath resource. The resulting {@code SQL} instance is cached and returned upon
-   * every subsequent call with the same {@code clazz} and {@code path} arguments.
+   * every subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
    *
    * @param clazz a {@code Class} object that provides access to the SQL file by
-   *       calling {@code getResourceAsStream} on it
-   * @param path the location of the SQL file
+   *       calling {@code clazz.getResourceAsStream(sqlFile)}
+   * @param sqlFile the location of the SQL file
    * @return a {@code SQL} implementation that allows for named parameters and
    *       <i>Klojang Templates</i> variables
    */
-  static SQL skeleton(Class<?> clazz, String path) {
-    return SQLCache.get(clazz, path, SQL::skeleton);
+  static SQL skeleton(Class<?> clazz, String sqlFile) {
+    return SQLCache.get(clazz, sqlFile, SQL::skeleton);
   }
 
 
@@ -445,15 +471,15 @@ public sealed interface SQL permits AbstractSQL {
    * <i>Klojang Templates</i> variables. The template variables may be set to SQL
    * fragments that again contain named parameters.
    *
-   * @param sql the SQL statement
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
-   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   *       <i>Klojang JDBC</i> operates
+   * @param sql the SQL statement
    * @return a {@code SQL} implementation that allows for named parameters and
    *       <i>Klojang Templates</i> variables
    */
-  static SQL skeleton(String sql, SessionConfig config) {
-    Check.notNull(sql, SQL_ARGUMENT);
+  static SQL skeleton(SessionConfig config, String sql) {
     Check.notNull(config, CONFIG);
+    Check.notNull(sql, SQL_ARGUMENT);
     return new SQLSkeleton(sql, config);
   }
 
@@ -462,18 +488,18 @@ public sealed interface SQL permits AbstractSQL {
    * <i>Klojang Templates</i> variables. The template variables may be set to SQL
    * fragments that again contain named parameters. The SQL is read from the specified
    * classpath resource. The resulting {@code SQL} instance is cached and returned upon
-   * every subsequent call with the same {@code clazz} and {@code path} arguments.
+   * every subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
    *
-   * @param clazz a {@code Class} object that provides access to the SQL file by
-   *       calling {@code getResourceAsStream} on it
-   * @param path the location of the SQL file
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
-   *       values are bound into the underlying {@link java.sql.PreparedStatement}
+   *       <i>Klojang JDBC</i> operates
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code clazz.getResourceAsStream(sqlFile)}
+   * @param sqlFile the location of the SQL file
    * @return a {@code SQL} implementation that allows for named parameters and
    *       <i>Klojang Templates</i> variables
    */
-  static SQL skeleton(Class<?> clazz, String path, SessionConfig config) {
-    return SQLCache.get(clazz, path, config, SQL::skeleton);
+  static SQL skeleton(SessionConfig config, Class<?> clazz, String sqlFile) {
+    return SQLCache.get(clazz, sqlFile, config, SQL::skeleton);
   }
 
 
@@ -522,10 +548,6 @@ public sealed interface SQL permits AbstractSQL {
    * @return a {@code SQLSession} that allows you to execute the SQL query
    */
   SQLSession session(Connection con);
-
-  private static SessionConfig noSessionConfig() {
-    return Utils.DEFAULT_CONFIG;
-  }
 
 
 }
