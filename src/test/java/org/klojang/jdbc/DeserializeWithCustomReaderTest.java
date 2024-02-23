@@ -15,17 +15,13 @@ import java.sql.SQLException;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.klojang.jdbc.SessionConfig.CustomReader;
 
-public class DeserializeWithFactoryMethodTest {
-  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-jdbc-tests/DeserializeWithFactoryMethodTest/h2";
+public class DeserializeWithCustomReaderTest {
+  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-jdbc-tests/DeserializeWithCustomReaderTest/h2";
   private static final ThreadLocal<Connection> MY_CON = new ThreadLocal<>();
 
   public record Dept(int id, String name) {
-    public static Dept from(String serialized) {
-      String[] data = serialized.split(";");
-      return new Dept(Integer.parseInt(data[0]), data[1]);
-    }
-
     public String toString() {
       return id + ";" + name;
     }
@@ -64,6 +60,12 @@ public class DeserializeWithFactoryMethodTest {
     IOMethods.rm(DB_DIR);
   }
 
+  private static final CustomReader reader = (rs, idx) -> {
+    String serialized = rs.getString(idx);
+    String[] parts = serialized.split(";");
+    return new Dept(Integer.parseInt(parts[0]), parts[1]);
+  };
+
   @Test
   public void serializeWithToString00() {
     Emp emp0 = new Emp(1, "foo", new Dept(42, "bar"));
@@ -73,7 +75,19 @@ public class DeserializeWithFactoryMethodTest {
           .prepare(MY_CON.get());
     insert.bind(emp0).execute();
     insert.close();
-    Emp emp1 = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM EMP")
+    SessionConfig config = new SessionConfig() {
+      @Override
+      public CustomReader getCustomReader(Class<?> beanType,
+            String propertyName,
+            Class<?> propertyType,
+            int sqlType) {
+        if (propertyName.equals("dept")) {
+          return reader;
+        }
+        return null;
+      }
+    };
+    Emp emp1 = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM EMP", config)
           .getExtractor(Emp.class)
           .extract()
           .get();
@@ -84,6 +98,17 @@ public class DeserializeWithFactoryMethodTest {
   @Test
   public void serializeWithSerializer00() {
     SessionConfig config = new SessionConfig() {
+      @Override
+      public CustomReader getCustomReader(Class<?> beanType,
+            String propertyName,
+            Class<?> propertyType,
+            int sqlType) {
+        if (propertyName.equals("dept")) {
+          return reader;
+        }
+        return null;
+      }
+
       @Override
       public Function<Object, String> getSerializer(Class<?> beanType,
             String propertyName,
@@ -108,7 +133,7 @@ public class DeserializeWithFactoryMethodTest {
           .prepare(MY_CON.get());
     insert.bind(emp0).execute();
     insert.close();
-    Emp emp1 = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM EMP")
+    Emp emp1 = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM EMP", config)
           .getExtractor(Emp.class)
           .extract()
           .get();
@@ -119,6 +144,17 @@ public class DeserializeWithFactoryMethodTest {
   @Test
   public void serializeWithCustomBinder00() {
     SessionConfig config = new SessionConfig() {
+      @Override
+      public CustomReader getCustomReader(Class<?> beanType,
+            String propertyName,
+            Class<?> propertyType,
+            int sqlType) {
+        if (propertyName.equals("dept")) {
+          return reader;
+        }
+        return null;
+      }
+
       @Override
       public CustomBinder getCustomBinder(Class<?> beanType,
             String propertyName,
@@ -139,11 +175,12 @@ public class DeserializeWithFactoryMethodTest {
           .prepare(MY_CON.get());
     insert.bind(emp0).execute();
     insert.close();
-    Emp emp1 = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM EMP")
+    Emp emp1 = SQL.simpleQuery(MY_CON.get(), "SELECT * FROM EMP", config)
           .getExtractor(Emp.class)
           .extract()
           .get();
     assertEquals(77, emp1.dept().id());
     assertEquals("bar", emp1.dept().name());
   }
+
 }

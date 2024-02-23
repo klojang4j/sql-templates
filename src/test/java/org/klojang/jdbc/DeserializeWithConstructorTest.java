@@ -16,14 +16,21 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DeserializeWithFactoryMethodTest {
-  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-jdbc-tests/DeserializeWithFactoryMethodTest/h2";
+public class DeserializeWithConstructorTest {
+  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-jdbc-tests/DeserializeWithConstructorTest/h2";
   private static final ThreadLocal<Connection> MY_CON = new ThreadLocal<>();
 
   public record Dept(int id, String name) {
-    public static Dept from(String serialized) {
-      String[] data = serialized.split(";");
-      return new Dept(Integer.parseInt(data[0]), data[1]);
+    private static int getId(String serialized) {
+      return Integer.parseInt(serialized.split(";")[0]);
+    }
+
+    private static String getName(String serialized) {
+      return serialized.split(";")[1];
+    }
+
+    public Dept(String serialized) {
+      this(getId(serialized),getName(serialized));
     }
 
     public String toString() {
@@ -146,4 +153,5 @@ public class DeserializeWithFactoryMethodTest {
     assertEquals(77, emp1.dept().id());
     assertEquals("bar", emp1.dept().name());
   }
+
 }

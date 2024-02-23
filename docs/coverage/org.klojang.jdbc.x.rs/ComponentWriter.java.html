@@ -35,23 +35,23 @@ public final class ComponentWriter&lt;COLUMN_TYPE, COMPONENT_TYPE&gt; {
 <span class="fc" id="L35">    this.custom = null;</span>
 <span class="fc" id="L36">  }</span>
 
-<span class="nc" id="L38">  ComponentWriter(CustomReader custom, String component, int columnIndex) {</span>
-<span class="nc" id="L39">    this.custom = custom;</span>
-<span class="nc" id="L40">    this.component = component;</span>
-<span class="nc" id="L41">    this.columnIndex = columnIndex;</span>
-<span class="nc" id="L42">    this.componentType = null;</span>
-<span class="nc" id="L43">    this.reader = null;</span>
-<span class="nc" id="L44">  }</span>
+<span class="fc" id="L38">  ComponentWriter(CustomReader custom, String component, int columnIndex) {</span>
+<span class="fc" id="L39">    this.custom = custom;</span>
+<span class="fc" id="L40">    this.component = component;</span>
+<span class="fc" id="L41">    this.columnIndex = columnIndex;</span>
+<span class="fc" id="L42">    this.componentType = null;</span>
+<span class="fc" id="L43">    this.reader = null;</span>
+<span class="fc" id="L44">  }</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
   COMPONENT_TYPE readValue(ResultSet resultset) throws Throwable {
     COMPONENT_TYPE val;
-<span class="pc bpc" id="L49" title="1 of 2 branches missed.">    if (custom == null) {</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">    if (custom == null) {</span>
 <span class="fc" id="L50">      val = reader.getValue(resultset, columnIndex, componentType);</span>
 <span class="fc" id="L51">      LOG.trace(&quot;==&gt; {}: {}&quot;, component, val);</span>
     } else {
-<span class="nc" id="L53">      val = (COMPONENT_TYPE) custom.getValue(resultset, columnIndex);</span>
-<span class="nc" id="L54">      LOG.trace(&quot;==&gt; {}: {} (using custom reader)&quot;, component, val);</span>
+<span class="fc" id="L53">      val = (COMPONENT_TYPE) custom.getValue(resultset, columnIndex);</span>
+<span class="fc" id="L54">      LOG.trace(&quot;==&gt; {}: {} (using custom reader)&quot;, component, val);</span>
     }
 <span class="fc" id="L56">    return val;</span>
   }

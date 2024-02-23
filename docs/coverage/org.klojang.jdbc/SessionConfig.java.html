@@ -399,7 +399,7 @@ public interface SessionConfig {
    *       mapped &lt;i&gt;as-is&lt;/i&gt; to column names and vice versa
    * @see NameMapper#AS_IS
    */
-  default SessionConfig withNameMappingDisabled() {
+  default SessionConfig withNamesMappedAsIs() {
 <span class="nc" id="L403">    return new SessionConfig() {</span>
 <span class="nc" id="L404">      public NameMapper getPropertyToColumnMapper() { return NameMapper.AS_IS; }</span>
 
