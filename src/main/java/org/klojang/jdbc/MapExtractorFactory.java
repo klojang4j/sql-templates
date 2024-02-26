@@ -28,13 +28,13 @@ import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
  * String sql = "SELECT EMP_ID AS ID, EMP_NAME AS NAME FROM EMPLOYEE";
  * try(ResultSet rs = ...) { // execute SQL and get ResultSet
  *   sharedExtractor = factory.getExtractor(rs);
- *   Map<String, Object> emp = sharedExtractor.extract();
+ *   Map<String, Object> emp = sharedExtractor.extract().get();
  *   assertEquals("John Smith", emp.get("name"));
  * }
  *
  * String sql = "SELECT DEPT_ID AS ID, DEPT_NAME AS NAME FROM DEPARTMENT;
  * try(ResultSet rs = ...) {
- *   // Can still use the same MapExtractor because column names
+ *   // Can still use the same MapExtractor because column labels
  *   // and column types are the same
  *   Map<String, Object> dept = sharedExtractor.extract().get();
  *   assertEquals("Sales", dept.get("name"));
