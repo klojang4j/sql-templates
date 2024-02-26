@@ -19,10 +19,14 @@ import java.util.Optional;
  * enabling you to extract the JavaBeans in a {@code forEach} loop:
  *
  * <blockquote><pre>{@code
- * ResultSet rs = ...;
- * BeanExtractorFactory factory = new BeanExtractorFactory(Employee.class);
- * for(Employee emp : factory.getExtractor(rs)) {
- *   // do stuff ...
+ * static final BeanExtractorFactory FACTORY = new BeanExtractorFactory(Employee.class);
+ *
+ * // ...
+ *
+ * try(ResultSet rs = ...) {
+ *   for(Employee emp : FACTORY.getExtractor(rs)) {
+ *     // do stuff ...
+ *   }
  * }
  * }</pre></blockquote>
  *

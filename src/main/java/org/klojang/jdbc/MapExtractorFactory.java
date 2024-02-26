@@ -11,42 +11,39 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
 
 /**
- * <p>A factory for {@link MapExtractor} instances. This class behaves analogously
- * to the {@link BeanExtractorFactory} class. See the comments for that class for more
- * details.
+ * <p>A factory for {@link MapExtractor} instances. This class behaves similarly to the
+ * {@link BeanExtractorFactory} class. See the comments for that class for more details.
  *
- * <p>Note that a single {@code MapExtractor} can more easily be used for multiple
- * queries than a {@link BeanExtractor} (again, see the comments for the
- * {@link BeanExtractorFactory} class):
+ * <p>A single {@code MapExtractor} can more easily be used for multiple queries than a
+ * {@link BeanExtractor} (again, see the comments for the {@link BeanExtractorFactory}
+ * class):
  *
  * <blockquote><pre>{@code
- * import static org.klojang.jdbc.SQL.simpleQuery;
- * import static org.klojang.jdbc.SQL.staticSQL;
+ * static final MapExtractorFactory FACTORY = new MapExtractorFactory();
  *
- * // ...
+ *  // ...
  *
- * Connection con = ...
+ *  MapExtractor sharedExtractor;
  *
- * String sql = "CREATE TABLE EMPLOYEE(EMP_ID INT AUTO_INCREMENT, EMP_NAME VARCHAR(32))";
- * staticSQL(sql).session(con).execute();
- * sql = "CREATE TABLE DEPARTMENT(DEPT_ID INT AUTO_INCREMENT, DEPT_NAME VARCHAR(32))";
- * staticSQL(sql).session(con).execute();
+ * String sql = "SELECT EMP_ID AS ID, EMP_NAME AS NAME FROM EMPLOYEE";
+ * try(ResultSet rs = ...) { // execute SQL and get ResultSet
+ *   sharedExtractor = factory.getExtractor(rs);
+ *   Map<String, Object> emp = sharedExtractor.extract();
+ *   assertEquals("John Smith", emp.get("name"));
+ * }
  *
- * staticSQL("INSERT INTO EMPLOYEE(EMP_NAME) VALUES('Foo')").session(con).execute();
- * staticSQL("INSERT INTO DEPARTMENT(DEPT_NAME) VALUES('Bar')").session(con).execute();
- *
- * MapExtractorFactory factory = new MapExtractorFactory();
- *
- * ResultSet rs = simpleQuery(con,"SELECT EMP_ID AS ID, EMP_NAME AS NAME FROM EMPLOYEE").execute();
- * MapExtractor sharedExtractor = factory.getExtractor(rs);
- * List<Map<String, Object>> emps = sharedExtractor.extractAll();
- * assertEquals("Foo", emps.get(0).get("name"));
- *
- * rs = simpleQuery(con, "SELECT DEPT_ID AS ID, DEPT_NAME AS NAME FROM DEPARTMENT").execute();
- * sharedExtractor = factory.getExtractor(rs);
- * List<Map<String, Object>> depts = sharedExtractor.extractAll();
- * assertEquals("Bar", depts.get(0).get("name"));
+ * String sql = "SELECT DEPT_ID AS ID, DEPT_NAME AS NAME FROM DEPARTMENT;
+ * try(ResultSet rs = ...) {
+ *   // Can still use the same MapExtractor because column names
+ *   // and column types are the same
+ *   Map<String, Object> dept = sharedExtractor.extract();
+ *   assertEquals("Sales", dept.get("name"));
+ * }
  * }</pre></blockquote>
+ *
+ * <p>However, you don't gain much in terms of performance, because, once a
+ * {@code MapExtractorFactory} has configured itself using the very first
+ * {@code ResultSet} passed to it, it does not impose any further overhead.
  *
  * @author Ayco Holleman
  */

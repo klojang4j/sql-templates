@@ -24,12 +24,11 @@ import static org.klojang.util.ClassMethods.className;
  * {@link ResultSet} passed to
  * {@link #getExtractor(ResultSet) BeanExtractorFactory.getExtractor()} is used to
  * configure the extraction process. {@code ResultSet} objects subsequently passed to
- * {@code getExtractor()} will be processed identically. It will be assumed they have the
- * same number of columns and the same column types in the same order. Therefore, passing
- * a {@code ResultSet} that came from a completely different query will almost certainly
+ * {@code getExtractor()} will be processed identically. Therefore, passing a
+ * {@code ResultSet} that came from a completely different query will almost certainly
  * lead to unexpected outcomes or exceptions.
  *
- * <p>Because the configuration of the extraction process is somewhat expensive, it
+ * <p>The configuration of the extraction process may be somewhat expensive. Therefore it
  * is recommended that you store {@code BeanExtractorFactory} instances in
  * {@code static final} fields or use some sort of caching mechanism.
  *

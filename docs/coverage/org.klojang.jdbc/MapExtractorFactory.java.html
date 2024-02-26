@@ -11,48 +11,45 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
 
 /**
- * &lt;p&gt;A factory for {@link MapExtractor} instances. This class behaves analogously
- * to the {@link BeanExtractorFactory} class. See the comments for that class for more
- * details.
+ * &lt;p&gt;A factory for {@link MapExtractor} instances. This class behaves similarly to the
+ * {@link BeanExtractorFactory} class. See the comments for that class for more details.
  *
- * &lt;p&gt;Note that a single {@code MapExtractor} can more easily be used for multiple
- * queries than a {@link BeanExtractor} (again, see the comments for the
- * {@link BeanExtractorFactory} class):
+ * &lt;p&gt;A single {@code MapExtractor} can more easily be used for multiple queries than a
+ * {@link BeanExtractor} (again, see the comments for the {@link BeanExtractorFactory}
+ * class):
  *
  * &lt;blockquote&gt;&lt;pre&gt;{@code
- * import static org.klojang.jdbc.SQL.simpleQuery;
- * import static org.klojang.jdbc.SQL.staticSQL;
+ * static final MapExtractorFactory FACTORY = new MapExtractorFactory();
  *
- * // ...
+ *  // ...
  *
- * Connection con = ...
+ *  MapExtractor sharedExtractor;
  *
- * String sql = &quot;CREATE TABLE EMPLOYEE(EMP_ID INT AUTO_INCREMENT, EMP_NAME VARCHAR(32))&quot;;
- * staticSQL(sql).session(con).execute();
- * sql = &quot;CREATE TABLE DEPARTMENT(DEPT_ID INT AUTO_INCREMENT, DEPT_NAME VARCHAR(32))&quot;;
- * staticSQL(sql).session(con).execute();
+ * String sql = &quot;SELECT EMP_ID AS ID, EMP_NAME AS NAME FROM EMPLOYEE&quot;;
+ * try(ResultSet rs = ...) { // execute SQL and get ResultSet
+ *   sharedExtractor = factory.getExtractor(rs);
+ *   Map&lt;String, Object&gt; emp = sharedExtractor.extract();
+ *   assertEquals(&quot;John Smith&quot;, emp.get(&quot;name&quot;));
+ * }
  *
- * staticSQL(&quot;INSERT INTO EMPLOYEE(EMP_NAME) VALUES('Foo')&quot;).session(con).execute();
- * staticSQL(&quot;INSERT INTO DEPARTMENT(DEPT_NAME) VALUES('Bar')&quot;).session(con).execute();
- *
- * MapExtractorFactory factory = new MapExtractorFactory();
- *
- * ResultSet rs = simpleQuery(con,&quot;SELECT EMP_ID AS ID, EMP_NAME AS NAME FROM EMPLOYEE&quot;).execute();
- * MapExtractor sharedExtractor = factory.getExtractor(rs);
- * List&lt;Map&lt;String, Object&gt;&gt; emps = sharedExtractor.extractAll();
- * assertEquals(&quot;Foo&quot;, emps.get(0).get(&quot;name&quot;));
- *
- * rs = simpleQuery(con, &quot;SELECT DEPT_ID AS ID, DEPT_NAME AS NAME FROM DEPARTMENT&quot;).execute();
- * sharedExtractor = factory.getExtractor(rs);
- * List&lt;Map&lt;String, Object&gt;&gt; depts = sharedExtractor.extractAll();
- * assertEquals(&quot;Bar&quot;, depts.get(0).get(&quot;name&quot;));
+ * String sql = &quot;SELECT DEPT_ID AS ID, DEPT_NAME AS NAME FROM DEPARTMENT;
+ * try(ResultSet rs = ...) {
+ *   // Can still use the same MapExtractor because column names
+ *   // and column types are the same
+ *   Map&lt;String, Object&gt; dept = sharedExtractor.extract();
+ *   assertEquals(&quot;Sales&quot;, dept.get(&quot;name&quot;));
+ * }
  * }&lt;/pre&gt;&lt;/blockquote&gt;
+ *
+ * &lt;p&gt;However, you don't gain much in terms of performance, because, once a
+ * {@code MapExtractorFactory} has configured itself using the very first
+ * {@code ResultSet} passed to it, it does not impose any further overhead.
  *
  * @author Ayco Holleman
  */
 public final class MapExtractorFactory {
 
-<span class="fc" id="L55">  private final ReentrantLock lock = new ReentrantLock();</span>
+<span class="fc" id="L52">  private final ReentrantLock lock = new ReentrantLock();</span>
 
   private final SessionConfig config;
 
@@ -62,8 +59,8 @@ public final class MapExtractorFactory {
    * Creates a new {@code MapExtractorFactory}.
    */
   public MapExtractorFactory() {
-<span class="fc" id="L65">    this(Utils.DEFAULT_CONFIG);</span>
-<span class="fc" id="L66">  }</span>
+<span class="fc" id="L62">    this(Utils.DEFAULT_CONFIG);</span>
+<span class="fc" id="L63">  }</span>
 
   /**
    * Creates a new {@code MapExtractorFactory} using the specified configuration object
@@ -71,9 +68,9 @@ public final class MapExtractorFactory {
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
    *       behaviour of the {@code MapExtractor}
    */
-<span class="fc" id="L74">  public MapExtractorFactory(SessionConfig config) {</span>
-<span class="fc" id="L75">    this.config = Check.notNull(config).ok();</span>
-<span class="fc" id="L76">  }</span>
+<span class="fc" id="L71">  public MapExtractorFactory(SessionConfig config) {</span>
+<span class="fc" id="L72">    this.config = Check.notNull(config).ok();</span>
+<span class="fc" id="L73">  }</span>
 
   /**
    * Returns a {@code MapExtractor} that will convert the rows in the specified
@@ -85,25 +82,25 @@ public final class MapExtractorFactory {
    */
   public MapExtractor getExtractor(ResultSet rs) {
     try {
-<span class="pc bpc" id="L88" title="1 of 2 branches missed.">      if (!rs.next()) {</span>
-<span class="nc" id="L89">        return NoopMapExtractor.INSTANCE;</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">      if (!rs.next()) {</span>
+<span class="nc" id="L86">        return NoopMapExtractor.INSTANCE;</span>
       }
-<span class="nc" id="L91">    } catch (SQLException e) {</span>
-<span class="nc" id="L92">      throw Utils.wrap(e);</span>
-<span class="fc" id="L93">    }</span>
+<span class="nc" id="L88">    } catch (SQLException e) {</span>
+<span class="nc" id="L89">      throw Utils.wrap(e);</span>
+<span class="fc" id="L90">    }</span>
     KeyWriter&lt;?&gt;[] writers;
-<span class="fc bfc" id="L95" title="All 2 branches covered.">    if ((writers = payload) == null) {</span>
-<span class="fc" id="L96">      lock.lock();</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">    if ((writers = payload) == null) {</span>
+<span class="fc" id="L93">      lock.lock();</span>
       try {
         // Check again, but now we know for sure the only one in here
-<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if (payload == null) {</span>
-<span class="fc" id="L100">          payload = writers = createWriters(rs, config);</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (payload == null) {</span>
+<span class="fc" id="L97">          payload = writers = createWriters(rs, config);</span>
         }
       } finally {
-<span class="fc" id="L103">        lock.unlock();</span>
+<span class="fc" id="L100">        lock.unlock();</span>
       }
     }
-<span class="fc" id="L106">    return new DefaultMapExtractor(rs, writers);</span>
+<span class="fc" id="L103">    return new DefaultMapExtractor(rs, writers);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
