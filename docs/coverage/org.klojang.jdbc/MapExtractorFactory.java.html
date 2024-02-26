@@ -36,7 +36,7 @@ import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
  * try(ResultSet rs = ...) {
  *   // Can still use the same MapExtractor because column names
  *   // and column types are the same
- *   Map&lt;String, Object&gt; dept = sharedExtractor.extract();
+ *   Map&lt;String, Object&gt; dept = sharedExtractor.extract().get();
  *   assertEquals(&quot;Sales&quot;, dept.get(&quot;name&quot;));
  * }
  * }&lt;/pre&gt;&lt;/blockquote&gt;
