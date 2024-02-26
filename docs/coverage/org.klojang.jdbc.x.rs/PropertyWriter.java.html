@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static org.klojang.jdbc.SessionConfig.CustomReader;
+import org.klojang.jdbc.CustomReader;
 import static org.klojang.util.CollectionMethods.implode;
 
 /**

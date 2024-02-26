@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.klojang.jdbc.SessionConfig.CustomReader;
 
 public class DeserializeWithCustomReaderTest {
   private static final String DB_DIR = System.getProperty("user.home") + "/klojang-jdbc-tests/DeserializeWithCustomReaderTest/h2";

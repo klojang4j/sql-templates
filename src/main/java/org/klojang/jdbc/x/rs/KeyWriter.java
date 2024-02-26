@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.klojang.jdbc.SessionConfig.CustomReader;
+import org.klojang.jdbc.CustomReader;
 
 
 /**

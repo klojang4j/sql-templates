@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 
-import static org.klojang.jdbc.SessionConfig.CustomReader;
+import org.klojang.jdbc.CustomReader;
 
 /**
  * Reads a single column in a ResultSet as the value for a record component.

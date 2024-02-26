@@ -15,7 +15,8 @@ import java.util.*;
 
 import static java.lang.invoke.MethodHandles.publicLookup;
 import static java.lang.invoke.MethodType.methodType;
-import static org.klojang.jdbc.SessionConfig.CustomReader;
+
+import org.klojang.jdbc.CustomReader;
 import static org.klojang.util.CollectionMethods.implode;
 
 

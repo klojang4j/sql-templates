@@ -6,12 +6,9 @@ import org.klojang.templates.name.CamelCaseToSnakeLowerCase;
 import org.klojang.templates.name.CamelCaseToSnakeUpperCase;
 import org.klojang.templates.name.SnakeCaseToCamelCase;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.Map;
 import java.util.function.Function;
 
 import static org.klojang.templates.name.CamelCaseToSnakeLowerCase.camelCaseToSnakeLowerCase;
@@ -52,57 +49,6 @@ public interface SessionConfig {
    *       provided by the {@code SessionConfig} instance
    */
   static SessionConfig getDefaultConfig() { return Utils.DEFAULT_CONFIG; }
-
-  /**
-   * A {@code CustomBinder} gives you full control over how a value is bound to a
-   * {@link PreparedStatement}. It hands you the underlying {@link PreparedStatement} and
-   * lets you do the binding yourself. Of course, since you are now in control of the
-   * {@code PreparedStatement}, you can do anything you like with it, including closing
-   * it. <i>Klojang JDBC</i> will not be resistant against such behaviour. A
-   * {@code CustomBinder} can be used, for example, to apply last-minute transformations
-   * to the value, or to serialize it in a bespoke way, or to map it to a non-standard SQL
-   * datatype. When binding {@code Map} values using {@link SQLStatement#bind(Map)},
-   * custom binders will only kick in for non-{@code null} values. When binding values in
-   * a JavaBean or {@code record}, custom binders will kick in even for {@code null}
-   * values.
-   */
-  @FunctionalInterface
-  interface CustomBinder {
-    /**
-     * Sets the value of the designated parameter using the given value.
-     *
-     * @param preparedStatement the {@code PreparedStatement} to bind the value to
-     * @param paramIndex the first parameter is 1, the second is 2, ...
-     * @param value the value to be bound
-     * @throws SQLException if parameterIndex does not correspond to a parameter
-     *       marker in the SQL statement, or if a database access error occurs
-     */
-    void bind(PreparedStatement preparedStatement, int paramIndex, Object value)
-          throws SQLException;
-  }
-
-  /**
-   * A {@code CustomReader} gives you full control over how a value is extracted from a
-   * {@link ResultSet}. It hands you the underlying {@code ResultSet} and lets you extract
-   * the value yourself. If the value is to be assigned to a JavaBean property or
-   * {@code record} component, it is your responsibility to ensure the value is
-   * type-compatible with the property or component, or a {@link ClassCastException} will
-   * ensue.
-   */
-  @FunctionalInterface
-  interface CustomReader {
-    /**
-     * Retrieves the value of the designated column in the current row of the specified
-     * {@link ResultSet}.
-     *
-     * @param resultSet the {@code ResultSet}
-     * @param columnIndex the first column is 1, the second is 2, ...
-     * @return the column value
-     * @throws SQLException if the columnIndex is not valid or if a database access
-     *       error occurs
-     */
-    Object getValue(ResultSet resultSet, int columnIndex) throws SQLException;
-  }
 
   /**
    * Returns a {@code CustomBinder} for the provided combination of arguments, or
@@ -250,7 +196,7 @@ public interface SessionConfig {
   }
 
   /**
-   * Returns the serialization function to be used for the provided combination of
+   * <p>Returns the serialization function to be used for the provided combination of
    * arguments, or {@code null} if no special serialization is required for the provided
    * combination of arguments. The default implementation returns {@code null}. If a
    * non-{@code null} value is returned, objects will be bound using
@@ -259,14 +205,15 @@ public interface SessionConfig {
    * value.
    *
    * <p>This method can be used to save types for which no default java-to-SQL
-   * type mapping exists. In that case, it pays if the type contains a static factory
-   * method that takes a {@code String} and returns an instance of that type. If there is
-   * exactly one such method, <i>Klojang JDBC</i> will use it for the reverse process
-   * &#8212; deserializing {@link ResultSet} values into instances of that type.
-   * Alternatively, if the type contains a constructor that takes a single {@code String}
-   * argument, then that constructor will be used as the deserialization mechanism. That
-   * works for classes like {@link StringBuilder}, but it may be assuming a bit too much
-   * for other classes. In that case, specify a
+   * type mapping exists. If you specify a serializer for such a type, it pays if the type
+   * also contains a static factory method that takes a {@code String} and returns an
+   * instance of that type (in other words, a deserializer). If there is exactly one such
+   * method, <i>Klojang JDBC</i> will use it for the reverse process: deserializing
+   * {@link ResultSet} values into instances of that type. Alternatively, if the type
+   * contains a constructor that takes a single {@code String} argument, then that
+   * constructor will be used as the deserialization mechanism. This works for classes
+   * like {@link StringBuilder}, but it may be assuming a bit too much for other classes.
+   * In that case, specify a
    * {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
    * deserialize the values.
    *
@@ -293,7 +240,7 @@ public interface SessionConfig {
   }
 
   /**
-   * Returns the serialization function to be used for the provided combination of
+   * <p>Returns the serialization function to be used for the provided combination of
    * arguments, or {@code null} if no special serialization is required for the provided
    * combination of arguments. The default implementation returns {@code null}. If a
    * non-{@code null} value is returned, objects will be bound using
@@ -302,15 +249,15 @@ public interface SessionConfig {
    * value.
    *
    * <p>This method can be used to save types for which no default java-to-SQL
-   * type mapping exists. In that case, it pays if the type contains a static factory
-   * method that takes a {@code byte[]} array and returns an instance of that type. If
-   * there is exactly one such method, <i>Klojang JDBC</i> will use it for the reverse
-   * process &#8212; deserializing {@link ResultSet} values into instances of that type.
-   * Alternatively, if the type contains a constructor that takes a single {@code byte[]}
-   * array argument, then that constructor will be used as the deserialization mechanism.
-   * That may work for some classes, but it may be assuming a bit too much for other
-   * classes. In that case, specify a
-   * {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
+   * type mapping exists. If you specify a serializer for such a type, it pays if the type
+   * also contains a static factory method that takes a {@code String} and returns an
+   * instance of that type (in other words, a deserializer). If there is exactly one such
+   * method, <i>Klojang JDBC</i> will use it for the reverse process: deserializing
+   * {@link ResultSet} values into instances of that type. Alternatively, if the type
+   * contains a constructor that takes a single {@code byte[]} array argument, then that
+   * constructor will be used as the deserialization mechanism. That may work for some
+   * classes, but it may be assuming a bit too much for other classes. In that case,
+   * specify a {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
    * deserialize the values.
    *
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map}

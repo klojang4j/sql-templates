@@ -14,7 +14,7 @@ import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 
-public final class RecordExtractor<T extends Record> implements BeanExtractor<T> {
+final class RecordExtractor<T extends Record> implements BeanExtractor<T> {
 
   @SuppressWarnings("unused")
   private static final Logger LOG = LoggerFactory.getLogger(RecordExtractor.class);
@@ -43,7 +43,7 @@ public final class RecordExtractor<T extends Record> implements BeanExtractor<T>
   private final ResultSet rs;
   private final RecordFactory<T> factory;
 
-  public RecordExtractor(ResultSet rs, RecordFactory<T> factory) {
+  RecordExtractor(ResultSet rs, RecordFactory<T> factory) {
     this.rs = rs;
     this.factory = factory;
   }

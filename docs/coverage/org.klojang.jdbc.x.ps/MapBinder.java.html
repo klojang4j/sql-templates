@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static org.klojang.jdbc.SessionConfig.CustomBinder;
+import org.klojang.jdbc.CustomBinder;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_BYTES;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
 import static org.klojang.util.ClassMethods.isSubtype;
