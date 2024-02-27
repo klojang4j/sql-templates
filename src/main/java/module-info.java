@@ -46,31 +46,18 @@
  *    .of(Person.class)
  *    .excluding("personId")
  *    .prepare(con);
- * // Save the beans to the database and put the database-generated keys
- * // back onto the beans
+ * // Save the beans and set their personId property to the database-generated key
  * batchInsert.insertBatchAndSetIDs("personId", persons);
  *
  * sql = "SELECT * FROM PERSON WHERE LAST_NAME = :lastName ORDER BY ~%orderBy%";
- *
  * SQLSession session = SQL.template(sql).session(con);
  * session.setOrderBy("SALARY");
  * try (SQLQuery query = session.prepareQuery()) {
  *   query.bind("lastName", "Smith");
- *   BeanExtractor<Person> extractor = query.getExtractor();
+ *   BeanExtractor<Person> extractor = query.getExtractor(Person.class);
  *   List<Person> persons = extractor.extractAll();
  *   persons.forEach(System.out::print);
  * }
- *
- * // Or, more concisely:
- * SQL.template(sql)
- *     .session(con)
- *     .setOrderBy("SALARY")
- *     .prepareQuery()
- *     .bind("lastName", "Smith")
- *     .getExtractor(Person.class)
- *     .extractAll()
- *     .forEach(System.out::print);
- *
  * }</pre></blockquote>
  *
  * @see org.klojang.templates.name.SnakeCaseToCamelCase
