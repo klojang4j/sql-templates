@@ -173,8 +173,26 @@ public sealed interface SQL permits AbstractSQL {
 <span class="fc" id="L173">    return SQLCache.get(clazz, sqlFile, SQL::staticSQL);</span>
   }
 
+  /**
+   * Returns a {@code SQL} implementation that supports neither named parameters nor
+   * &lt;i&gt;Klojang Templates&lt;/i&gt; variables. In other words, it only supports completely
+   * static SQL. The SQL is read from the specified classpath resource. The resulting
+   * {@code SQL} instance is cached and returned upon every subsequent call with the same
+   * {@code clazz} and {@code sqlFile} arguments. This method returns the same {@code SQL}
+   * implementation as the one returned by {@link #simple(String) SQL.simple()}, but does
+   * so under the &lt;i&gt;assumption&lt;/i&gt; that the SQL does not contain any named parameters,
+   * thus saving on the cost of parsing the SQL in order to extract the named parameters.
+   *
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
+   *       &lt;i&gt;Klojang JDBC&lt;/i&gt; operates
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code clazz.getResourceAsStream(sqlFile)}
+   * @param sqlFile the location of the SQL file
+   * @return a {@code SQL} implementation that supports neither named parameters nor
+   *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
+   */
   static SQL staticSQL(SessionConfig config, Class&lt;?&gt; clazz, String sqlFile) {
-<span class="nc" id="L177">    return SQLCache.get(clazz, sqlFile, config, SQL::staticSQL);</span>
+<span class="nc" id="L195">    return SQLCache.get(clazz, sqlFile, config, SQL::staticSQL);</span>
   }
 
   /**
@@ -186,8 +204,8 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL simple(String sql) {
-<span class="fc" id="L189">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L190">    return simple(DEFAULT_CONFIG, sql);</span>
+<span class="fc" id="L207">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L208">    return simple(DEFAULT_CONFIG, sql);</span>
   }
 
   /**
@@ -203,7 +221,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL simple(Class&lt;?&gt; clazz, String sqlFile) {
-<span class="nc" id="L206">    return SQLCache.get(clazz, sqlFile, SQL::simple);</span>
+<span class="nc" id="L224">    return SQLCache.get(clazz, sqlFile, SQL::simple);</span>
   }
 
   /**
@@ -216,9 +234,9 @@ public sealed interface SQL permits AbstractSQL {
    * @return an instance of an {@code SQL} implementation that behaves as described above
    */
   static SQL simple(SessionConfig config, String sql) {
-<span class="fc" id="L219">    Check.notNull(config, CONFIG);</span>
-<span class="fc" id="L220">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L221">    return new SimpleSQL(sql, config, false);</span>
+<span class="fc" id="L237">    Check.notNull(config, CONFIG);</span>
+<span class="fc" id="L238">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L239">    return new SimpleSQL(sql, config, false);</span>
   }
 
   /**
@@ -236,7 +254,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL simple(SessionConfig config, Class&lt;?&gt; clazz, String sqlFile) {
-<span class="nc" id="L239">    return SQLCache.get(clazz, sqlFile, SQL::simple);</span>
+<span class="nc" id="L257">    return SQLCache.get(clazz, sqlFile, SQL::simple);</span>
   }
 
   /**
@@ -254,7 +272,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, String sql) {
-<span class="fc" id="L257">    return simpleQuery(con, DEFAULT_CONFIG, sql);</span>
+<span class="fc" id="L275">    return simpleQuery(con, DEFAULT_CONFIG, sql);</span>
   }
 
   /**
@@ -274,10 +292,10 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareQuery()
    */
   static SQLQuery simpleQuery(Connection con, SessionConfig config, String sql) {
-<span class="fc" id="L277">    Check.notNull(con, CONNECTION);</span>
-<span class="fc" id="L278">    Check.notNull(config, CONFIG);</span>
-<span class="fc" id="L279">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L280">    return simple(config, sql).session(con).prepareQuery();</span>
+<span class="fc" id="L295">    Check.notNull(con, CONNECTION);</span>
+<span class="fc" id="L296">    Check.notNull(config, CONFIG);</span>
+<span class="fc" id="L297">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L298">    return simple(config, sql).session(con).prepareQuery();</span>
   }
 
   /**
@@ -295,7 +313,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareInsert()
    */
   static SQLInsert simpleInsert(Connection con, String sql) {
-<span class="fc" id="L298">    return simple(DEFAULT_CONFIG, sql).session(con).prepareInsert();</span>
+<span class="fc" id="L316">    return simple(DEFAULT_CONFIG, sql).session(con).prepareInsert();</span>
   }
 
   /**
@@ -322,10 +340,10 @@ public sealed interface SQL permits AbstractSQL {
         SessionConfig config,
         boolean retrieveKeys,
         String sql) {
-<span class="nc" id="L325">    Check.notNull(con, CONNECTION);</span>
-<span class="nc" id="L326">    Check.notNull(config, CONFIG);</span>
-<span class="nc" id="L327">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="nc" id="L328">    return simple(config, sql).session(con).prepareInsert(retrieveKeys);</span>
+<span class="nc" id="L343">    Check.notNull(con, CONNECTION);</span>
+<span class="nc" id="L344">    Check.notNull(config, CONFIG);</span>
+<span class="nc" id="L345">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="nc" id="L346">    return simple(config, sql).session(con).prepareInsert(retrieveKeys);</span>
   }
 
   /**
@@ -343,7 +361,7 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, String sql) {
-<span class="fc" id="L346">    return simpleUpdate(con, DEFAULT_CONFIG, sql);</span>
+<span class="fc" id="L364">    return simpleUpdate(con, DEFAULT_CONFIG, sql);</span>
   }
 
   /**
@@ -363,10 +381,10 @@ public sealed interface SQL permits AbstractSQL {
    * @see SQLSession#prepareUpdate()
    */
   static SQLUpdate simpleUpdate(Connection con, SessionConfig config, String sql) {
-<span class="fc" id="L366">    Check.notNull(con, CONNECTION);</span>
-<span class="fc" id="L367">    Check.notNull(config, CONFIG);</span>
-<span class="fc" id="L368">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L369">    return simple(config, sql).session(con).prepareUpdate();</span>
+<span class="fc" id="L384">    Check.notNull(con, CONNECTION);</span>
+<span class="fc" id="L385">    Check.notNull(config, CONFIG);</span>
+<span class="fc" id="L386">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L387">    return simple(config, sql).session(con).prepareUpdate();</span>
   }
 
 
@@ -379,7 +397,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(String sql) {
-<span class="fc" id="L382">    return template(DEFAULT_CONFIG, sql);</span>
+<span class="fc" id="L400">    return template(DEFAULT_CONFIG, sql);</span>
   }
 
   /**
@@ -395,7 +413,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(Class&lt;?&gt; clazz, String sqlFile) {
-<span class="nc" id="L398">    return SQLCache.get(clazz, sqlFile, SQL::template);</span>
+<span class="nc" id="L416">    return SQLCache.get(clazz, sqlFile, SQL::template);</span>
   }
 
 
@@ -410,9 +428,9 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(SessionConfig config, String sql) {
-<span class="fc" id="L413">    Check.notNull(config, CONFIG);</span>
-<span class="fc" id="L414">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L415">    return new SQLTemplate(sql, config);</span>
+<span class="fc" id="L431">    Check.notNull(config, CONFIG);</span>
+<span class="fc" id="L432">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L433">    return new SQLTemplate(sql, config);</span>
   }
 
   /**
@@ -430,7 +448,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL template(SessionConfig config, Class&lt;?&gt; clazz, String sqlFile) {
-<span class="nc" id="L433">    return SQLCache.get(clazz, sqlFile, config, SQL::template);</span>
+<span class="nc" id="L451">    return SQLCache.get(clazz, sqlFile, config, SQL::template);</span>
   }
 
 
@@ -444,7 +462,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(String sql) {
-<span class="fc" id="L447">    return skeleton(DEFAULT_CONFIG, sql);</span>
+<span class="fc" id="L465">    return skeleton(DEFAULT_CONFIG, sql);</span>
   }
 
 
@@ -462,7 +480,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(Class&lt;?&gt; clazz, String sqlFile) {
-<span class="nc" id="L465">    return SQLCache.get(clazz, sqlFile, SQL::skeleton);</span>
+<span class="nc" id="L483">    return SQLCache.get(clazz, sqlFile, SQL::skeleton);</span>
   }
 
 
@@ -478,9 +496,9 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(SessionConfig config, String sql) {
-<span class="fc" id="L481">    Check.notNull(config, CONFIG);</span>
-<span class="fc" id="L482">    Check.notNull(sql, SQL_ARGUMENT);</span>
-<span class="fc" id="L483">    return new SQLSkeleton(sql, config);</span>
+<span class="fc" id="L499">    Check.notNull(config, CONFIG);</span>
+<span class="fc" id="L500">    Check.notNull(sql, SQL_ARGUMENT);</span>
+<span class="fc" id="L501">    return new SQLSkeleton(sql, config);</span>
   }
 
   /**
@@ -499,7 +517,7 @@ public sealed interface SQL permits AbstractSQL {
    *       &lt;i&gt;Klojang Templates&lt;/i&gt; variables
    */
   static SQL skeleton(SessionConfig config, Class&lt;?&gt; clazz, String sqlFile) {
-<span class="nc" id="L502">    return SQLCache.get(clazz, sqlFile, config, SQL::skeleton);</span>
+<span class="nc" id="L520">    return SQLCache.get(clazz, sqlFile, config, SQL::skeleton);</span>
   }
 
 
@@ -511,7 +529,7 @@ public sealed interface SQL permits AbstractSQL {
    *       INSERT statement
    */
   static InsertBuilder insert() {
-<span class="fc" id="L514">    return new InsertBuilder();</span>
+<span class="fc" id="L532">    return new InsertBuilder();</span>
   }
 
   /**
@@ -522,7 +540,7 @@ public sealed interface SQL permits AbstractSQL {
    *       batch inserts.
    */
   static BatchInsertBuilder insertBatch() {
-<span class="fc" id="L525">    return new BatchInsertBuilder();</span>
+<span class="fc" id="L543">    return new BatchInsertBuilder();</span>
   }
 
   /**
@@ -537,8 +555,8 @@ public sealed interface SQL permits AbstractSQL {
    * @see Quoter
    */
   static SQLExpression expression(String expression) {
-<span class="nc" id="L540">    Check.notNull(expression);</span>
-<span class="nc" id="L541">    return new SQLExpression(expression);</span>
+<span class="nc" id="L558">    Check.notNull(expression);</span>
+<span class="nc" id="L559">    return new SQLExpression(expression);</span>
   }
 
   /**

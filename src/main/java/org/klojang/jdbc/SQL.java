@@ -173,6 +173,24 @@ public sealed interface SQL permits AbstractSQL {
     return SQLCache.get(clazz, sqlFile, SQL::staticSQL);
   }
 
+  /**
+   * Returns a {@code SQL} implementation that supports neither named parameters nor
+   * <i>Klojang Templates</i> variables. In other words, it only supports completely
+   * static SQL. The SQL is read from the specified classpath resource. The resulting
+   * {@code SQL} instance is cached and returned upon every subsequent call with the same
+   * {@code clazz} and {@code sqlFile} arguments. This method returns the same {@code SQL}
+   * implementation as the one returned by {@link #simple(String) SQL.simple()}, but does
+   * so under the <i>assumption</i> that the SQL does not contain any named parameters,
+   * thus saving on the cost of parsing the SQL in order to extract the named parameters.
+   *
+   * @param config a {@code SessionConfig} object that allows you to fine-tune how
+   *       <i>Klojang JDBC</i> operates
+   * @param clazz a {@code Class} object that provides access to the SQL file by
+   *       calling {@code clazz.getResourceAsStream(sqlFile)}
+   * @param sqlFile the location of the SQL file
+   * @return a {@code SQL} implementation that supports neither named parameters nor
+   *       <i>Klojang Templates</i> variables
+   */
   static SQL staticSQL(SessionConfig config, Class<?> clazz, String sqlFile) {
     return SQLCache.get(clazz, sqlFile, config, SQL::staticSQL);
   }
