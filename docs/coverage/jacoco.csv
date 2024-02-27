@@ -108,6 +108,7 @@ Klojang JDBC,org.klojang.jdbc.x.ps.writer,LocalDateTimeBinderLookup,23,55,0,0,2,
 Klojang JDBC,org.klojang.jdbc.x,Utils.new SessionConfig() {...},0,3,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc.x,Err,6,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x,Strings,6,0,0,0,1,0,1,0,1,0
+Klojang JDBC,org.klojang.jdbc.x,SQLCache.Key,7,19,0,0,1,2,1,2,1,2
 Klojang JDBC,org.klojang.jdbc.x,JDBC,32,123,2,9,9,26,4,11,2,6
 Klojang JDBC,org.klojang.jdbc.x,SQLCache,33,33,0,0,8,6,3,3,3,3
 Klojang JDBC,org.klojang.jdbc.x,Msg,6,0,0,0,1,0,1,0,1,0

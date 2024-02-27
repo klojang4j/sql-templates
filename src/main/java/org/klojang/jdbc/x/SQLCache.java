@@ -16,12 +16,23 @@ import static org.klojang.check.Tag.PATH;
 
 public final class SQLCache {
 
-  private static final Map<Tuple2<Class<?>, String>, SQL> cache = new HashMap<>();
+  private record Key(String path, Class<?> clazz, SessionConfig config) {
+    static Key of(String path, Class<?> clazz, SessionConfig config) {
+      return new Key(path, clazz, config);
+    }
+
+    static Key of(String path, Class<?> clazz) {
+      return new Key(path, clazz, Utils.DEFAULT_CONFIG);
+    }
+
+  }
+
+  private static final Map<Key, SQL> cache = new HashMap<>();
 
   public static SQL get(Class<?> clazz, String path, Function<String, SQL> factory) {
     Check.notNull(clazz, CLASS);
     Check.notNull(path, PATH);
-    return cache.computeIfAbsent(Tuple2.of(clazz, path), k -> {
+    return cache.computeIfAbsent(Key.of(path, clazz), k -> {
       try {
         String sql = IOMethods.getContents(clazz, path);
         return factory.apply(sql);
@@ -35,7 +46,7 @@ public final class SQLCache {
         String path,
         SessionConfig config,
         BiFunction<SessionConfig, String, SQL> factory) {
-    return cache.computeIfAbsent(Tuple2.of(clazz, path), k -> {
+    return cache.computeIfAbsent(Key.of(path, clazz), k -> {
       try {
         String sql = IOMethods.getContents(clazz, path);
         return factory.apply(config, sql);

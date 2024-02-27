@@ -29,8 +29,8 @@ abstract sealed class AbstractSQL implements SQL
   AbstractSQL(String sql, SessionConfig config) {
     this.unparsed = sql;
     this.config = config;
-    // These maps are unlikely to grow beyond one or two entries (you can't extract that
-    // many beans from a single row).
+    // These maps are unlikely to grow beyond one or two entries (you can't extract
+    // _that_ many beans from a single row).
     binders = new HashMap<>();
     factories = new HashMap<>();
   }
