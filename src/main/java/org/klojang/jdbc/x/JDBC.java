@@ -89,7 +89,6 @@ public final class JDBC {
     Map<String, Setter> setters = sf.getSetters(bean.getClass());
     Check.that(idProperty).is(keyIn(), setters, () -> noSuchProperty(bean, idProperty));
     Setter setter = setters.get(idProperty);
-    // make sure we're OK if the ID property is not a long
     Number id = convert(value, (Class) box(setter.getParamType()));
     setter.write(bean, id);
   }

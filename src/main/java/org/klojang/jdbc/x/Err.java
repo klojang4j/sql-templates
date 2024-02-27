@@ -21,10 +21,10 @@ public final class Err {
         = "cannot set ID on the provided object(s) because no keys were generated";
 
   public static final String TOO_MANY_KEYS
-        = "expected number of database-generated keys (${arg}) less than actual number";
+        = "actual number of database-generated keys exceeds expected number (${arg})";
 
   public static final String KEY_COUNT_MISMATCH
-        = "expected number of database-generated keys (${obj}) does not match actual number (${arg})";
+        = "actual number of database-generated keys (${arg}) does not match expected number (${obj})";
 
   private Err() { throw new UnsupportedOperationException(); }
 }

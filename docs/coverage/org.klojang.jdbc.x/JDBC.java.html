@@ -89,9 +89,8 @@ public final class JDBC {
 <span class="fc" id="L89">    Map&lt;String, Setter&gt; setters = sf.getSetters(bean.getClass());</span>
 <span class="pc" id="L90">    Check.that(idProperty).is(keyIn(), setters, () -&gt; noSuchProperty(bean, idProperty));</span>
 <span class="fc" id="L91">    Setter setter = setters.get(idProperty);</span>
-    // make sure we're OK if the ID property is not a long
-<span class="fc" id="L93">    Number id = convert(value, (Class) box(setter.getParamType()));</span>
-<span class="fc" id="L94">    setter.write(bean, id);</span>
-<span class="fc" id="L95">  }</span>
+<span class="fc" id="L92">    Number id = convert(value, (Class) box(setter.getParamType()));</span>
+<span class="fc" id="L93">    setter.write(bean, id);</span>
+<span class="fc" id="L94">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
