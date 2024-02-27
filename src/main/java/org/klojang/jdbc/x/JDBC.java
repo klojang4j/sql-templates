@@ -11,9 +11,11 @@ import java.util.Map;
 
 import static java.sql.Statement.NO_GENERATED_KEYS;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static org.klojang.check.CommonChecks.keyIn;
+import static org.klojang.check.CommonChecks.*;
 import static org.klojang.convert.NumberMethods.convert;
 import static org.klojang.invoke.NoSuchPropertyException.noSuchProperty;
+import static org.klojang.jdbc.x.Err.KEY_COUNT_MISMATCH;
+import static org.klojang.jdbc.x.Err.TOO_MANY_KEYS;
 import static org.klojang.util.ClassMethods.box;
 
 public final class JDBC {
@@ -55,14 +57,19 @@ public final class JDBC {
 
   public static long[] getGeneratedKeys(Statement stmt, int expected)
         throws SQLException {
-    long[] keys = new long[expected];
     try (ResultSet rs = stmt.getGeneratedKeys()) {
-      int i = 0;
-      while (rs.next()) {
-        keys[i++] = rs.getLong(1);
+      if (!rs.next()) {
+        return new long[0];
       }
+      long[] keys = new long[expected];
+      int i = 0;
+      do {
+        Utils.check(i).is(ne(), keys.length, TOO_MANY_KEYS);
+        keys[i++] = rs.getLong(1);
+      } while (rs.next());
+      Utils.check(i).is(eq(), expected, KEY_COUNT_MISMATCH);
+      return keys;
     }
-    return keys;
   }
 
   public static String quote(Statement stmt, Object value) throws SQLException {

@@ -13,8 +13,19 @@ public final class Err {
 
   public static final String NOT_MUTABLE
         = &quot;method not supported for immutable types ({})&quot;;
-  public static final String ILLEGAL_NULL_VALUE_IN_LIST = &quot;list must not contain null values&quot;;
 
-<span class="nc" id="L18">  private Err() { throw new UnsupportedOperationException(); }</span>
+  public static final String ILLEGAL_NULL_VALUE_IN_LIST
+        = &quot;list must not contain null values&quot;;
+
+  public static final String NO_KEYS_WERE_GENERATED
+        = &quot;cannot set ID on the provided object(s) because no keys were generated&quot;;
+
+  public static final String TOO_MANY_KEYS
+        = &quot;expected number of database-generated keys (${arg}) less than actual number&quot;;
+
+  public static final String KEY_COUNT_MISMATCH
+        = &quot;expected number of database-generated keys (${obj}) does not match actual number (${arg})&quot;;
+
+<span class="nc" id="L29">  private Err() { throw new UnsupportedOperationException(); }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

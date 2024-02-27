@@ -1,10 +1,9 @@
 package org.klojang.jdbc.x;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.SessionConfig;
 import org.klojang.jdbc.SQL;
+import org.klojang.jdbc.SessionConfig;
 import org.klojang.util.IOMethods;
-import org.klojang.util.Tuple2;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,18 +12,18 @@ import java.util.function.Function;
 
 import static org.klojang.check.Tag.CLASS;
 import static org.klojang.check.Tag.PATH;
+import static org.klojang.jdbc.x.Strings.CONFIG;
 
 public final class SQLCache {
 
   private record Key(String path, Class<?> clazz, SessionConfig config) {
-    static Key of(String path, Class<?> clazz, SessionConfig config) {
+    private static Key of(String path, Class<?> clazz, SessionConfig config) {
       return new Key(path, clazz, config);
     }
 
-    static Key of(String path, Class<?> clazz) {
+    private static Key of(String path, Class<?> clazz) {
       return new Key(path, clazz, Utils.DEFAULT_CONFIG);
     }
-
   }
 
   private static final Map<Key, SQL> cache = new HashMap<>();
@@ -46,7 +45,10 @@ public final class SQLCache {
         String path,
         SessionConfig config,
         BiFunction<SessionConfig, String, SQL> factory) {
-    return cache.computeIfAbsent(Key.of(path, clazz), k -> {
+    Check.notNull(clazz, CLASS);
+    Check.notNull(path, PATH);
+    Check.notNull(config, CONFIG);
+    return cache.computeIfAbsent(Key.of(path, clazz, config), k -> {
       try {
         String sql = IOMethods.getContents(clazz, path);
         return factory.apply(config, sql);

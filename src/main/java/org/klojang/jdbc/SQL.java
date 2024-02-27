@@ -118,11 +118,11 @@ public sealed interface SQL permits AbstractSQL {
 
   /**
    * Returns a {@code SQL} implementation that supports neither named parameters nor
-   * <i>Klojang Templates</i> variables. In other words, it only supports completely
-   * static SQL. This method actually returns the same {@code SQL} implementation as the
-   * one returned by {@link #simple(String) SQL.simple()}, but simply <i>assumes</i> that
-   * the SQL does not contain named parameters, thus saving on the cost of parsing the SQL
-   * in order to extract them.
+   * <i>Klojang Templates</i> variables. This method actually returns the same
+   * {@code SQL} implementation as the one returned by
+   * {@link #simple(String) SQL.simple()}, but simply <i>assumes</i> that the SQL does not
+   * contain named parameters, thus saving on the cost of parsing the SQL in order to
+   * extract them.
    *
    * @param sql the SQL statement
    * @return a {@code SQL} implementation that supports neither named parameters nor
@@ -135,11 +135,11 @@ public sealed interface SQL permits AbstractSQL {
 
   /**
    * Returns a {@code SQL} implementation that supports neither named parameters nor
-   * <i>Klojang Templates</i> variables. In other words, it only supports completely
-   * static SQL. This method actually returns the same {@code SQL} implementation as the
-   * one returned by {@link #simple(String) SQL.simple()}, but simply <i>assumes</i> that
-   * the SQL does not contain named parameters, thus saving on the cost of parsing the SQL
-   * in order to extract them.
+   * <i>Klojang Templates</i> variables. This method actually returns the same
+   * {@code SQL} implementation as the one returned by
+   * {@link #simple(String) SQL.simple()}, but simply <i>assumes</i> that the SQL does not
+   * contain named parameters, thus saving on the cost of parsing the SQL in order to
+   * extract them.
    *
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       <i>Klojang JDBC</i> operates
@@ -155,13 +155,13 @@ public sealed interface SQL permits AbstractSQL {
 
   /**
    * Returns a {@code SQL} implementation that supports neither named parameters nor
-   * <i>Klojang Templates</i> variables. In other words, it only supports completely
-   * static SQL. The SQL is read from the specified classpath resource. The resulting
-   * {@code SQL} instance is cached and returned upon every subsequent call with the same
-   * {@code clazz} and {@code sqlFile} arguments. This method returns the same {@code SQL}
-   * implementation as the one returned by {@link #simple(String) SQL.simple()}, but does
-   * so under the <i>assumption</i> that the SQL does not contain any named parameters,
-   * thus saving on the cost of parsing the SQL in order to extract the named parameters.
+   * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
+   * resource. The resulting {@code SQL} instance is cached and returned upon every
+   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments. This
+   * method returns the same {@code SQL} implementation as the one returned by
+   * {@link #simple(String) SQL.simple()}, but does so under the <i>assumption</i> that
+   * the SQL does not contain any named parameters, thus saving on the cost of parsing the
+   * SQL in order to extract the named parameters.
    *
    * @param clazz a {@code Class} object that provides access to the SQL file by
    *       calling {@code clazz.getResourceAsStream(sqlFile)}
@@ -175,13 +175,13 @@ public sealed interface SQL permits AbstractSQL {
 
   /**
    * Returns a {@code SQL} implementation that supports neither named parameters nor
-   * <i>Klojang Templates</i> variables. In other words, it only supports completely
-   * static SQL. The SQL is read from the specified classpath resource. The resulting
-   * {@code SQL} instance is cached and returned upon every subsequent call with the same
-   * {@code clazz} and {@code sqlFile} arguments. This method returns the same {@code SQL}
-   * implementation as the one returned by {@link #simple(String) SQL.simple()}, but does
-   * so under the <i>assumption</i> that the SQL does not contain any named parameters,
-   * thus saving on the cost of parsing the SQL in order to extract the named parameters.
+   * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
+   * resource. The resulting {@code SQL} instance is cached and returned upon every
+   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments. This
+   * method returns the same {@code SQL} implementation as the one returned by
+   * {@link #simple(String) SQL.simple()}, but does so under the <i>assumption</i> that
+   * the SQL does not contain any named parameters, thus saving on the cost of parsing the
+   * SQL in order to extract the named parameters.
    *
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       <i>Klojang JDBC</i> operates

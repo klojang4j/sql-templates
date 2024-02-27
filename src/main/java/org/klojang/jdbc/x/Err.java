@@ -13,7 +13,18 @@ public final class Err {
 
   public static final String NOT_MUTABLE
         = "method not supported for immutable types ({})";
-  public static final String ILLEGAL_NULL_VALUE_IN_LIST = "list must not contain null values";
+
+  public static final String ILLEGAL_NULL_VALUE_IN_LIST
+        = "list must not contain null values";
+
+  public static final String NO_KEYS_WERE_GENERATED
+        = "cannot set ID on the provided object(s) because no keys were generated";
+
+  public static final String TOO_MANY_KEYS
+        = "expected number of database-generated keys (${arg}) less than actual number";
+
+  public static final String KEY_COUNT_MISMATCH
+        = "expected number of database-generated keys (${obj}) does not match actual number (${arg})";
 
   private Err() { throw new UnsupportedOperationException(); }
 }

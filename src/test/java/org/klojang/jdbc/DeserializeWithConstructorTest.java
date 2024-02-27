@@ -30,7 +30,7 @@ public class DeserializeWithConstructorTest {
     }
 
     public Dept(String serialized) {
-      this(getId(serialized),getName(serialized));
+      this(getId(serialized), getName(serialized));
     }
 
     public String toString() {
@@ -56,17 +56,20 @@ public class DeserializeWithConstructorTest {
   }
 
   @AfterEach
-  public void after() throws SQLException {
-    if (MY_CON.get() != null) {
-      MY_CON.get().close();
-    }
-    IOMethods.rm(DB_DIR);
+  public void after() {
+    afterAll();
   }
 
   @AfterAll
-  public static void afterAll() throws SQLException, IOException {
+  public static void afterAll() {
     if (MY_CON.get() != null) {
-      MY_CON.get().close();
+      try {
+        MY_CON.get().close();
+      } catch (Throwable t) {
+        // ...
+      } finally {
+        MY_CON.set(null);
+      }
     }
     IOMethods.rm(DB_DIR);
   }

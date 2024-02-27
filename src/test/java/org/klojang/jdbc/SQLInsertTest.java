@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 //@Disabled
 public class SQLInsertTest {
 
-  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-db-insert-test";
+  private static final String DB_DIR = System.getProperty("user.home") + "/klojang-jdbc-tests/SQLInsertTest/h2";
   private static final ThreadLocal<Connection> MY_CON = new ThreadLocal<>();
 
   public static class Person {
@@ -58,7 +58,7 @@ public class SQLInsertTest {
   public void before() throws IOException, SQLException {
     IOMethods.rm(DB_DIR);
     Files.createDirectories(Path.of(DB_DIR));
-    Connection c = DriverManager.getConnection("jdbc:h2:" + DB_DIR + "/test");
+    Connection c = DriverManager.getConnection("jdbc:h2:" + DB_DIR);
     String sql = "CREATE LOCAL TEMPORARY TABLE TEST(ID INT AUTO_INCREMENT, NAME VARCHAR(255))";
     try (Statement stmt = c.createStatement()) {
       stmt.executeUpdate(sql);
@@ -79,11 +79,11 @@ public class SQLInsertTest {
     if (MY_CON.get() != null) {
       try {
         MY_CON.get().close();
-        IOMethods.rm(DB_DIR);
       } catch (SQLException e) {
         // ...
       }
     }
+    IOMethods.rm(DB_DIR);
   }
 
   /**

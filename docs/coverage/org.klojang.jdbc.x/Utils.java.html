@@ -19,7 +19,7 @@ public final class Utils {
   }
 
   public static IntCheck&lt;DatabaseException&gt; check(int arg) {
-<span class="nc" id="L22">    return Check.on(DatabaseException::new, arg);</span>
+<span class="fc" id="L22">    return Check.on(DatabaseException::new, arg);</span>
   }
 
   public static DatabaseException wrap(Throwable exc, SQLInfo sqlInfo) {
