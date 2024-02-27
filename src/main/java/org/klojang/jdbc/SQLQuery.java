@@ -297,7 +297,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * returned {@code ResultSet} is the same one that underpins this instance, be careful
    * what you do with it. For example, if you {@code close} the {@code ResultSet}, but
    * then continue to use this instance, an exception is almost guaranteed to follow.
-   * <i>Klojang JDBC</i> does not protect itself against such unintended
+   * <i>Klojang JDBC</i> does not protect itself against such unintended usage.
    *
    * @return the {@code ResultSet} produced by the JDBC driver
    */
