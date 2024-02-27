@@ -111,6 +111,8 @@ import static org.klojang.jdbc.x.Utils.DEFAULT_CONFIG;
  * }
  * }</pre></blockquote>
  *
+ * <p>(Note that <i>Klojang</i>
+ *
  * @see org.klojang.templates.Template
  * @see org.klojang.templates.RenderSession
  */
