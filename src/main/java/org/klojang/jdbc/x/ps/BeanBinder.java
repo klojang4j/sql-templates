@@ -26,7 +26,7 @@ public final class BeanBinder<T> {
     PropertyBinder.readAll(ps, bean, readers);
   }
 
-  // Returns all parameters in the query string that can be bound by this BeanBinder.
+  // Returns all parameters in the SQL that can be bound by this BeanBinder.
   public List<NamedParameter> getBoundParameters() {
     return List.copyOf(bound);
   }

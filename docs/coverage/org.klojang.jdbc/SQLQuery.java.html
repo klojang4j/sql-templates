@@ -156,8 +156,8 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public boolean exists() {
     try {
-<span class="nc" id="L159">      executeSQL();</span>
-<span class="nc" id="L160">      return resultSet.next();</span>
+<span class="fc" id="L159">      executeSQL();</span>
+<span class="fc" id="L160">      return resultSet.next();</span>
 <span class="nc" id="L161">    } catch (Throwable t) {</span>
 <span class="nc" id="L162">      throw Utils.wrap(t);</span>
     }

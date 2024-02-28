@@ -71,47 +71,29 @@ import static org.klojang.jdbc.x.Utils.DEFAULT_CONFIG;
  * to the provided identifier.
  *
  * <h2>SQL Skeletons</h2>
- * <p>The implementation obtained via the {@link #skeleton(String) SQL.skeleton()}
- * method allows for very dynamically generated SQL. As with SQL templates, the SQL is
- * provided in the form of a Klojang template (that is: it may contain <i>Klojang
- * Templates</i> variables). However, SQL skeletons explicitly allow you to set template
- * variables to SQL fragments that again contain named parameters. <i>Klojang JDBC</i>
- * will register them, and you can bind them just like the named parameters in the SQL
- * skeleton itself. This is not possible with the implementation returned by
- * {@code SQL.template()}, since this implementation will immediately (upon instantiation)
- * extract all parameters from the original SQL string &#8212; and leave it at that. With
- * SQL skeletons, parameter extraction is delayed to the very last moment, just before you
- * retrieve a {@link SQLStatement} from the {@code SQLSession}. This makes SQL skeletons
- * somewhat less efficient, but more dynamic than SQL templates.
+ * <p>The {@code SQL} implementation obtained via
+ * {@link #skeleton(String) SQL.skeleton()} allows for very dynamically generated SQL. As
+ * with SQL templates, the SQL is provided in the form of a Klojang template (that is: it
+ * may contain <i>Klojang Templates</i> variables). However, SQL skeletons explicitly
+ * allow you to set template variables to SQL fragments that again contain named
+ * parameters. <i>Klojang JDBC</i> will register them, and you can bind them just like the
+ * named parameters in the SQL skeleton itself. This is not possible with the
+ * implementation returned by {@code SQL.template()}, since this implementation will
+ * immediately (upon instantiation) extract all parameters from the original SQL string
+ * &#8212; and leave it at that. With SQL skeletons, parameter extraction is delayed to
+ * the very last moment, just before you retrieve a {@link SQLStatement} from the
+ * {@code SQLSession}. This makes SQL skeletons somewhat less efficient, but more dynamic
+ * than SQL templates. (More precisely, it could make it worthwhile to cache
+ * {@code SQL.template()} instances, while you gain nothing by caching
+ * {@code SQL.skeleton()} instances. Note that {@code SQL} instances created from a
+ * classpath resource will anyhow always be cached, but this is to reduce file I/O.)
  *
- *
- * <blockquote><pre>{@code
- * SQL sql = SQL.skeleton("""
- *     SELECT *
- *       FROM EMPLOYEE A
- *       ~%joinDepartment%
- *      ORDER BY ~%sortColumn%
- *      LIMIT :from, :batchSize
- *     """;
- *
- * try(Connection con = ...) {
- *   SQLSession session = sql.session(con);
- *   session.set("sortColumn", "A.SALARY");
- *   if(departmentName != null) {
- *     session.set("joinDepartment",
- *         "JOIN DEPARTMENT B ON (A.DEPARTMENT_ID = B.ID AND B.NAME = :dept)");
- *   }
- *   try(SQLQuery query = session.prepareQuery()) {
- *     query.bind("from", 0).bind("batchSize", 20);
- *     if(departmentName != null) {
- *       query.bind("dept", departmentName);
- *     }
- *     List<Employee> emps = query.getExtractor(Employee.class).extractAll();
- *   }
- * }
- * }</pre></blockquote>
- *
- * <p>(Note that <i>Klojang</i>
+ * <p>Also, SQL skeletons are allowed to contain <a
+ * href="https://github.com/klojang4j/klojang-templates?tab=readme-ov-file#nested-templates">nested
+ * templates</a> while regular SQL templates are not. Nested templates are a more advanced
+ * feature of <i>Klojang Templates</i> which allows for even more flexibility in sculpting
+ * your SQL at runtime. For an example, see
+ * {@link SQLSession#setNestedValue(String, Object) SQLSession.setNestedValue()}.
  *
  * @see org.klojang.templates.Template
  * @see org.klojang.templates.RenderSession
@@ -179,11 +161,11 @@ public sealed interface SQL permits AbstractSQL {
    * Returns a {@code SQL} implementation that supports neither named parameters nor
    * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
    * resource. The resulting {@code SQL} instance is cached and returned upon every
-   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments. This
-   * method returns the same {@code SQL} implementation as the one returned by
-   * {@link #simple(String) SQL.simple()}, but does so under the <i>assumption</i> that
-   * the SQL does not contain any named parameters, thus saving on the cost of parsing the
-   * SQL in order to extract the named parameters.
+   * subsequent call with the same {@code config}, {@code clazz}, and {@code sqlFile}
+   * arguments. This method returns the same {@code SQL} implementation as the one
+   * returned by {@link #simple(String) SQL.simple()}, but does so under the
+   * <i>assumption</i> that the SQL does not contain any named parameters, thus saving on
+   * the cost of parsing the SQL in order to extract the named parameters.
    *
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       <i>Klojang JDBC</i> operates
@@ -214,7 +196,8 @@ public sealed interface SQL permits AbstractSQL {
    * Returns a {@code SQL} implementation that allows for named parameters, but not for
    * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
    * resource. The resulting {@code SQL} instance is cached and returned upon every
-   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
+   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments. Thus, the
+   * file will be read just once.
    *
    * @param clazz a {@code Class} object that provides access to the SQL file by
    *       calling {@code clazz.getResourceAsStream(sqlFile)}
@@ -245,7 +228,8 @@ public sealed interface SQL permits AbstractSQL {
    * Returns a {@code SQL} implementation that allows for named parameters, but not for
    * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
    * resource. The resulting {@code SQL} instance is cached and returned upon every
-   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
+   * subsequent call with the same {@code config}, {@code clazz}, and {@code sqlFile}
+   * arguments. Thus, the file will be read just once.
    *
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       <i>Klojang JDBC</i> operates
@@ -406,7 +390,8 @@ public sealed interface SQL permits AbstractSQL {
    * Returns a {@code SQL} implementation that allows for named parameters and
    * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
    * resource. The resulting {@code SQL} instance is cached and returned upon every
-   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
+   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments. Thus, the
+   * file will be read just once.
    *
    * @param clazz a {@code Class} object that provides access to the SQL file by
    *       calling {@code clazz.getResourceAsStream(sqlFile)}
@@ -439,7 +424,8 @@ public sealed interface SQL permits AbstractSQL {
    * Returns a {@code SQL} implementation that allows for named parameters and
    * <i>Klojang Templates</i> variables. The SQL is read from the specified classpath
    * resource. The resulting {@code SQL} instance is cached and returned upon every
-   * subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
+   * subsequent call with the same {@code config}, {@code clazz}, and {@code sqlFile}
+   * arguments. Thus, the file will be read just once.
    *
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       <i>Klojang JDBC</i> operates
@@ -474,6 +460,7 @@ public sealed interface SQL permits AbstractSQL {
    * fragments that again contain named parameters. The SQL is read from the specified
    * classpath resource. The resulting {@code SQL} instance is cached and returned upon
    * every subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
+   * Thus, the file will be read just once.
    *
    * @param clazz a {@code Class} object that provides access to the SQL file by
    *       calling {@code clazz.getResourceAsStream(sqlFile)}
@@ -508,7 +495,8 @@ public sealed interface SQL permits AbstractSQL {
    * <i>Klojang Templates</i> variables. The template variables may be set to SQL
    * fragments that again contain named parameters. The SQL is read from the specified
    * classpath resource. The resulting {@code SQL} instance is cached and returned upon
-   * every subsequent call with the same {@code clazz} and {@code sqlFile} arguments.
+   * every subsequent call with the same {@code config}, {@code clazz}, and
+   * {@code sqlFile} arguments. Thus, the file will be read just once.
    *
    * @param config a {@code SessionConfig} object that allows you to fine-tune how
    *       <i>Klojang JDBC</i> operates

@@ -36,15 +36,14 @@ import static org.klojang.util.StringMethods.append;
  *
  * <h2>Batch Insert Variants</h2>
  *
- * <p><i>Klojang JDBC</i> provides three options for saving batches of beans:
+ * <p><i>Klojang JDBC</i> provides two options for saving batches of beans:
  *
  * <ol>
  *   <li>using this class
  *   <li>using {@link SQLInsert#insertBatch(List) SQLInsert.insertBatch()}
- *   <li>using {@link SQLSession#setValues(List) SQLSession.setValues()}
  * </ol>
  *
- * <p>Functionally these options are equivalent, but they all implement the batch insert
+ * <p>Functionally these options are equivalent, but they implement the batch insert
  * operation differently, so if performance is important, you should test which one works
  * best for your use case. Otherwise, which one you choose largely is a matter of taste.
  *

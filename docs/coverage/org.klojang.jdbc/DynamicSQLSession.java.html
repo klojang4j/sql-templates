@@ -145,10 +145,10 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   @Override
   public final int execute() {
     try {
-<span class="fc" id="L148">      Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());</span>
-<span class="fc" id="L149">      return execute(session.render());</span>
+<span class="nc" id="L148">      Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());</span>
+<span class="nc" id="L149">      return execute(session.render());</span>
     } finally {
-<span class="fc" id="L151">      close();</span>
+<span class="nc" id="L151">      close();</span>
     }
   }
 
@@ -177,8 +177,8 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
 <span class="fc" id="L177">  }</span>
 
   Supplier&lt;IllegalStateException&gt; rogueVariables() {
-<span class="fc" id="L180">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
-<span class="fc" id="L181">    return illegalState(&quot;unset variables in SQL template: &quot; + unset);</span>
+<span class="nc" id="L180">    String unset = CollectionMethods.implode(session.getAllUnsetVariables());</span>
+<span class="nc" id="L181">    return illegalState(&quot;unset variables in SQL template: &quot; + unset);</span>
   }
 
 

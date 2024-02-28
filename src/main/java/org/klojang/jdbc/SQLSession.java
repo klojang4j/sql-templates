@@ -1,9 +1,6 @@
 package org.klojang.jdbc;
 
-import org.klojang.invoke.BeanReader;
-
 import java.util.Collection;
-import java.util.List;
 
 /**
  * <p>A {@code SQLSession} allows you to provide values for <i>template variables</i>
@@ -35,7 +32,7 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * Templates</a>.
    *
    * @param varName the name of the template variable
-   * @param value the value to set the variable to.
+   * @param value the value to set the variable to
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
@@ -71,8 +68,9 @@ public sealed interface SQLSession permits AbstractSQLSession {
   }
 
   /**
-   * <p>Equivalent to {@link #setValue(String, Object) setValue(varName, values)}. Can be
-   * used to elegantly populate an SQL IN clause with an arbitrary number of values:
+   * <p>Convenience method, equivalent to
+   * {@link #setValue(String, Object) setValue(varName, values)}. Can be used to elegantly
+   * populate a SQL IN clause with an arbitrary number of values:
    *
    * <blockquote><pre>{@code
    * SQL sql = SQL.template("SELECT * FROM AIRPORT WHERE NAME IN(~%names%)";
@@ -107,7 +105,8 @@ public sealed interface SQLSession permits AbstractSQLSession {
   }
 
   /**
-   * Equivalent to {@link #setValue(String, Object) setValue(varName, values)}.
+   * Convenience method, equivalent to
+   * {@link #setValue(String, Object) setValue(varName, values)}.
    *
    * @param varName the name of the template variable
    * @param values an array, which will be "imploded" to a {@code String}, using a
@@ -138,205 +137,148 @@ public sealed interface SQLSession permits AbstractSQLSession {
   }
 
   /**
-   * <p>Sets the contents of the VALUES clause within an INSERT statement. This method is
-   * only supported by {@code SQL} instances obtained via
-   * {@link SQL#skeleton(String) SQL.skeleton()}. Equivalent to
-   * {@link #setValues(List, BeanValueProcessor) setValues(Arrays.asList(beans),
-   * BeanValueProcessor.identity())}.
-   *
-   * @param <T> the type of the beans or records to persist
-   * @param beans the beans or records to persist (at least one required)
-   * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#simple(String) SQL.simple()} or
-   *       {@link SQL#template(String) SQL.template()} method
-   */
-  @SuppressWarnings("unchecked")
-  default <T> SQLSession setValues(T... beans) throws UnsupportedOperationException {
-    throw new UnsupportedOperationException(sqlSkeletonsOnly());
-  }
-
-  /**
-   * <p>Sets the contents of the VALUES clause within an INSERT statement. This method is
-   * only supported by {@code SQL} instances obtained via
-   * {@link SQL#skeleton(String) SQL.skeleton()}. Equivalent to
-   * {@link #setValues(List, BeanValueProcessor) setValues(beans,
-   * BeanValueProcessor.identity())}.
-   *
-   * <blockquote><pre>{@code
-   * record Person(Integer id, String firstName, String lastName, int age) {}
-   *
-   * // ...
-   *
-   * List<Person> persons = List.of(
-   *    new Person(null, "John", "Smith", 34),
-   *    new Person(null, "Francis", "O'Donell", 27),
-   *    new Person(null, "Mary", "Bear", 52));
-   *
-   * SQL sql = SQL.skeleton("""
-   *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
-   *    ~%%begin:record%
-   *    (~%firstName%,~%lastName%,~%age%)
-   *    ~%%end:record%
-   *    """);
-   *
-   * try(Connection con = ...) {
-   *   sql.session(con).setValues(persons).execute();
-   * }
-   * }</pre></blockquote>
-   *
-   *
-   * <p>The above code snippet will execute the following SQL:
-   * <blockquote><pre>{@code
-   * INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
-   * ('John', 'Smith', 34),
-   * ('Francis', 'O''Donell', 27),
-   * ('Mary', 'Bear', 52)
-   * }</pre></blockquote>
-   *
-   * @param <T> the type of the beans or records to persist
-   * @param beans the beans or records to persist (at least one required).
-   * @return this {@code SQLSession} instance
-   * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#simple(String) SQL.simple()} or
-   *       {@link SQL#template(String) SQL.template()} method
-   */
-  default <T> SQLSession setValues(List<T> beans) throws UnsupportedOperationException {
-    throw new UnsupportedOperationException(sqlSkeletonsOnly());
-  }
-
-  /**
-   * <p>Sets the contents of the VALUES clause within an INSERT statement. This method is
-   * only supported by {@code SQL} instances obtained via
-   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a
-   * <a
+   * <p>Sets a variable in a <a
    * href="https://github.com/klojang4j/klojang-templates?tab=readme-ov-file#nested-templates">nested
-   * template</a> named "record". This template will be repeated for each of the beans or
-   * records in the provided list. This is best illustrated using an example:
+   * template</a> within the SQL skeleton to the specified value. If the value is an array
+   * or collection, it will be "imploded" to a string, using {@code "," } (comma) to
+   * separate the elements in the array or collection. This method is only supported for
+   * {@link SQL#skeleton(String) SQL skeletons}. When calling this method on a
+   * {@code SQLSession} obtained via {@link SQL#simple(String) SQL.simple()} or
+   * {@link SQL#template(String) SQL.template()}, this method will throw an
+   * {@code UnsupportedOperationException}.
+   *
+   * <p><b>NB Nested templates in general are <i>only</i> supported in SQL skeletons. The
+   * are <i>not</i> supported in regular SQL templates.</b>
+   *
+   * @param path the path to the variable within the SQL skeleton
+   * @param value the value to set the variable to
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       <i>not</i> obtained via {@link SQL#skeleton(String) SQL.skeleton()}
+   */
+  default SQLSession setNested(String path, Object value)
+        throws UnsupportedOperationException {
+    throw sqlSkeletonsOnly("setNested");
+  }
+
+  /**
+   * <p>Sets a variable in a <a
+   * href="https://github.com/klojang4j/klojang-templates?tab=readme-ov-file#nested-templates">nested
+   * template</a> within the SQL skeleton to the escaped and quoted version of the
+   * specified value. If the value is an array or collection, it will be "imploded" to a
+   * string, using {@code "," } (comma) to separate the elements in the array or
+   * collection, and using {@link #quoteValue(Object) quoteValue()} to escape and quote
+   * each element separately. This method is only supported for
+   * {@link SQL#skeleton(String) SQL skeletons}. When calling this method on a
+   * {@code SQLSession} obtained via {@link SQL#simple(String) SQL.simple()} or
+   * {@link SQL#template(String) SQL.template()}, this method will throw an
+   * {@code UnsupportedOperationException}.
+   *
+   * <p><b>NB Nested templates in general are <i>only</i> supported in SQL skeletons. The
+   * are <i>not</i> supported in regular SQL templates.</b>
    *
    * <blockquote><pre>{@code
-   * record Person(Integer id, String firstName, String lastName, int age) {}
-   *
-   * // ...
-   *
-   * List<Person> persons = List.of(
-   *    new Person(null, "John", "Smith", 34),
-   *    new Person(null, "Francis", "O'Donell", 27),
-   *    new Person(null, "Mary", "Bear", 52));
-   *
-   * SQL sql = SQL.skeleton("""
-   *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
-   *    ~%%begin:record%
-   *    (~%firstName%,~%lastName%,~%age%)
-   *    ~%%end:record%
-   *    """);
-   *
-   * BeanValueProcessor processor = (bean, prop, val, quoter) -> {
-   *     if(prop.equals("firstName") {
-   *       return quoter.sqlFunction("SUBSTRING", val, 1, 3);
-   *     }
-   *     return val;
-   * };
-   *
+   * String sql = """
+   *     SELECT * FROM EMPLOYEE
+   *     ~%%begin:whereClause%
+   *      WHERE FIRST_NAME LIKE ~%searchPhrase% OR LAST_NAME LIKE ~%searchPhrase%
+   *     ~%%end:whereClause%
+   *     """;
    * try(Connection con = ...) {
-   *   sql.session(con).setValues(persons, processor).execute();
-   *   String query = "SELECT FIRST_NAME FROM PERSON";
-   *   List<String> firstNames = SQL.simpleQuery(con, query).firstColumn();
-   *   assertEquals(List.of("Joh", "Fra", "Mar"), firstNames);
+   *   SQLSession session = SQL.skeleton(sql).session(con);
+   *   if(searchPhrase != null) {
+   *     session.setNestedValue("whereClause.searchPhrase", '%' + searchPhrase + '%');
+   *   }
+   *   try(SQLQuery query = session.prepareQuery()) {
+   *     return query.getExtractor(Employee.class).extractAll();
+   *   }
    * }
    * }</pre></blockquote>
    *
+   * <p>Note that, by default, nested templates are not rendered. They remain invisible
+   * unless you do something that makes them become visible. In this case, setting a
+   * variable within the nested template forces its entire contents to become visible.
+   * Alternatively, you can call {@link #enable(String)} to force the contents of a nested
+   * template to become visible.
    *
-   * <p>The above code snippet will execute the following SQL:
-   * <blockquote><pre>{@code
-   * INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
-   * (SUBSTRING('John', 1, 3), 'Smith', 34),
-   * (SUBSTRING('Francis', 1, 3), 'O''Donell', 27),
-   * (SUBSTRING('Mary', 1, 3), 'Bear', 52)
-   * }</pre></blockquote>
-   *
-   * <p>Beware of mixing multiple types of elements within the {@code List} of beans.
-   * Under the hood this method creates a {@link BeanReader} for the type of the first
-   * element in the {@code List}. The type of subsequent elements may be a subtype of that
-   * type, but not a supertype (unless you only read properties that belong to the
-   * supertype).
-   *
-   * <p>Also note that the above example is just for illustration purposes. It would
-   * have been much easier to use the following SQL template:
-   *
-   * <blockquote><pre>{@code
-   * SQL sql = SQL.skeleton("""
-   *    INSERT INTO PERSON(FIRST_NAME,LAST_NAME,AGE) VALUES
-   *    ~%%begin:record%
-   *    (SUBSTRING(~%firstName%, 1, 3),~%lastName%,~%age%)
-   *    ~%%end:record%
-   *    """);
-   * }</pre></blockquote>
-   *
-   * <p>And then simply call {@code session.setValues(persons)} (thus obviating the need
-   * to create and use a {@code BeanValueProcessor}).
-   *
-   * @param <T> the type of the beans or records to persist
-   * @param beans the beans or records to persist (at least one required)
-   * @param processor a {@code BeanValueProcessor} that allows you to selectively
-   *       convert values within the provided beans or records
+   * @param path the path to the variable within the SQL skeleton
+   * @param value the value to set the variable to
    * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#simple(String) SQL.simple()} or
-   *       {@link SQL#template(String) SQL.template()} method
-   * @see SQLInsert#insertBatch(List)
-   * @see SQLBatchInsert
+   *       <i>not</i> obtained via {@link SQL#skeleton(String) SQL.skeleton()}
    */
-  default <T> SQLSession setValues(List<T> beans, BeanValueProcessor<T> processor)
+  default SQLSession setNestedValue(String path, Object value)
         throws UnsupportedOperationException {
-    throw new UnsupportedOperationException(sqlSkeletonsOnly());
+    throw sqlSkeletonsOnly("setNestedValue");
   }
 
   /**
-   * <p>Sets the contents of the VALUES clause within an INSERT statement and then
-   * executes the SQL. This method is only supported by {@code SQL} instances obtained via
-   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
-   * template named "record". This template will be repeated for each of the beans or
-   * records in the provided list. The SQL statement must not contain named parameters,
-   * and any template variables outside the nested "record" template must be set first.
+   * <p>Sets a variable in a <a
+   * href="https://github.com/klojang4j/klojang-templates?tab=readme-ov-file#nested-templates">nested
+   * template</a> within the SQL skeleton to the escaped and quoted version of the
+   * specified identifier (e&#46;g&#46; a column name or table name). This method is only
+   * supported for {@link SQL#skeleton(String) SQL skeletons}. When calling this method on
+   * a {@code SQLSession} obtained via {@link SQL#simple(String) SQL.simple()} or
+   * {@link SQL#template(String) SQL.template()}, this method will throw an
+   * {@code UnsupportedOperationException}.
    *
-   * @param <T> the type of the beans or records to persist
-   * @param beans the beans or records to persist (at least one required)
-   * @return the keys generated by the database
+   * <p><b>NB Nested templates in general are <i>only</i> supported in SQL skeletons. The
+   * are <i>not</i> supported in regular SQL templates.</b>
+   *
+   * @param path the path to the variable within the SQL skeleton
+   * @param identifier the identifier to substitute the variable with
+   * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#simple(String) SQL.simple()} or
-   *       {@link SQL#template(String) SQL.template()} method
-   * @see SQLInsert#insertBatch(List)
-   * @see SQLBatchInsert
+   *       <i>not</i> obtained via {@link SQL#skeleton(String) SQL.skeleton()}
    */
-  default <T> long[] setValuesAndExecute(List<T> beans)
+  default SQLSession setNestedIdentifier(String path, String identifier)
         throws UnsupportedOperationException {
-    throw new UnsupportedOperationException(sqlSkeletonsOnly());
+    throw sqlSkeletonsOnly("setNestedIdentifier");
   }
 
   /**
-   * <p>Sets the contents of the VALUES clause within an INSERT statement and then
-   * executes the SQL. This method is only supported by {@code SQL} instances obtained via
-   * {@link SQL#skeleton(String) SQL.skeleton()}. The SQL template must contain a nested
-   * template named "record". This template will be repeated for each of the beans or
-   * records in the provided list. The SQL statement must not contain named parameters,
-   * and any template variables outside the nested "record" template must be set first.
+   * Enables the contents of the specified nested template. That is, the contents of the
+   * specified nested template will be rendered. By default, nested templates remain
+   * invisible unless you do something that makes them become visible. This method is only
+   * supported for {@link SQL#skeleton(String) SQL skeletons}. When calling this method on
+   * a {@code SQLSession} obtained via {@link SQL#simple(String) SQL.simple()} or
+   * {@link SQL#template(String) SQL.template()}, this method will throw an
+   * {@code UnsupportedOperationException}.
    *
-   * @param <T> the type of the beans or records to persist
-   * @param beans the beans or records to persist (at least one required)
-   * @param processor a {@code BeanValueProcessor} that allows you to selectively
-   *       convert values within the provided beans or records
-   * @return the keys generated by the database
+   * <p><b>NB Nested templates in general are <i>only</i> supported in SQL skeletons. The
+   * are <i>not</i> supported in regular SQL templates.</b>
+   *
+   * <blockquote><pre>{@code
+   * String sql = """
+   *     SELECT * FROM EMPLOYEE
+   *     ~%%begin:whereClause%
+   *      WHERE FIRST_NAME LIKE :searchPhrase OR LAST_NAME LIKE :searchPhrase
+   *     ~%%end:whereClause%
+   *     """;
+   * try(Connection con = ...) {
+   *   SQLSession session = SQL.skeleton(sql).session(con);
+   *   if(searchPhrase != null) {
+   *     session.enable("whereClause");
+   *   }
+   *   try(SQLQuery query = session.prepareQuery()) {
+   *     if(searchPhrase != null) {
+   *       query.bind("searchPhrase", searchPhrase);
+   *     }
+   *     return query.getExtractor(Employee.class).extractAll();
+   *   }
+   * }
+   * }</pre></blockquote>
+   *
+   * @param nestedTemplate the nested template within the SQL skeleton to enable
+   * @return this {@code SQLSession} instance
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
-   *       obtained via the {@link SQL#simple(String) SQL.simple()} or
-   *       {@link SQL#template(String) SQL.template()} method
-   * @see SQLInsert#insertBatch(List)
-   * @see SQLBatchInsert
+   *       <i>not</i> obtained via {@link SQL#skeleton(String) SQL.skeleton()}
+   * @see org.klojang.templates.RenderSession#enable(String...)
    */
-  default <T> long[] setValuesAndExecute(List<T> beans, BeanValueProcessor<T> processor)
-        throws UnsupportedOperationException {
-    throw new UnsupportedOperationException(sqlSkeletonsOnly());
+  default SQLSession enable(String nestedTemplate) throws UnsupportedOperationException {
+    throw sqlSkeletonsOnly("setNested");
   }
+
 
   /**
    * Sets the sort column of the ORDER BY clause within a SQL template. This presumes and
@@ -506,8 +448,9 @@ public sealed interface SQLSession permits AbstractSQLSession {
     return new UnsupportedOperationException(String.format(fmt, method));
   }
 
-  private static String sqlSkeletonsOnly() {
-    return "setValues() only supported for SQL skeletons";
+  private static UnsupportedOperationException sqlSkeletonsOnly(String method) {
+    String fmt = "method %s() only supported for SQL skeletons";
+    return new UnsupportedOperationException(String.format(fmt, method));
   }
 
 }

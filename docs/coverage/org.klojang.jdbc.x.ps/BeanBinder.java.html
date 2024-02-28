@@ -26,7 +26,7 @@ public final class BeanBinder&lt;T&gt; {
 <span class="fc" id="L26">    PropertyBinder.readAll(ps, bean, readers);</span>
 <span class="fc" id="L27">  }</span>
 
-  // Returns all parameters in the query string that can be bound by this BeanBinder.
+  // Returns all parameters in the SQL that can be bound by this BeanBinder.
   public List&lt;NamedParameter&gt; getBoundParameters() {
 <span class="fc" id="L31">    return List.copyOf(bound);</span>
   }

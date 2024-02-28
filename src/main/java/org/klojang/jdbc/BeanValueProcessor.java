@@ -21,7 +21,6 @@ import java.util.List;
  *
  * @param <T> the type of the bean containing the value to be processed
  * @see Quoter
- * @see SQLSession#setValues(List, BeanValueProcessor)
  * @see BatchInsertBuilder#withValueProcessor(BeanValueProcessor)
  */
 @FunctionalInterface

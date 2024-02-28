@@ -16,7 +16,8 @@ import static org.klojang.templates.name.CamelCaseToSnakeUpperCase.camelCaseToSn
 import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCase;
 
 /**
- * {@code SessionConfig} objects allow you to fine-tune or modify various aspects of how
+ * <p>{@code SessionConfig} objects allow you to fine-tune or modify various aspects of
+ * how
  * <i>Klojang JDBC</i> processes and executes SQL. {@code SessionConfig} is an interface
  * that provides default implementations for all its methods. The default implementations
  * specify <i>Klojang JDBC's</i> default behaviour. You might want to implement
@@ -36,6 +37,11 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
  * <blockquote><pre>{@code
  * SessionConfig config = SessionConfig.getDefaultConfig().withEnumsSavedAsStrings();
  * }</pre></blockquote>
+ *
+ * <p>Whichever option you choose, assuming you will need just one, or maybe two
+ * {@code org.klojang.templates.SessionConfig SessionConfig} objects in your entire
+ * application, it is recommended that you store them in {@code public static final}
+ * fields, and share them whenever and wherever possible.
  *
  * @author Ayco Holleman
  */

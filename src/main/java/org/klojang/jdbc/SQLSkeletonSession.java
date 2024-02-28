@@ -8,6 +8,8 @@ import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.ParamExtractor;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.RenderSession;
+import org.klojang.util.ArrayMethods;
+import org.klojang.util.CollectionMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +22,7 @@ import java.util.*;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static org.klojang.check.CommonChecks.deepNotNull;
 import static org.klojang.check.CommonChecks.empty;
+import static org.klojang.check.Tag.PATH;
 import static org.klojang.check.Tag.VARARGS;
 import static org.klojang.jdbc.x.Strings.*;
 
@@ -31,75 +34,49 @@ final class SQLSkeletonSession extends DynamicSQLSession {
     super(con, sql, session);
   }
 
-  @Override
-  @SafeVarargs
-  @SuppressWarnings({"unchecked"})
-  public final <T> SQLSession setValues(T... beans) {
-    Check.notNull(beans, VARARGS).is(deepNotNull()).isNot(empty());
-    Class<T> clazz = (Class<T>) beans.getClass().getComponentType();
-    BeanReader<T> reader = new BeanReader<>(clazz);
-    return setValues(Arrays.asList(beans), reader, BeanValueProcessor.identity());
-  }
-
-  @Override
-  public <T> SQLSession setValues(List<T> beans) {
-    return setValues(beans, BeanValueProcessor.identity());
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public <T> SQLSession setValues(List<T> beans, BeanValueProcessor<T> processor) {
-    Check.that(beans, BEANS).is(deepNotNull()).isNot(empty());
-    Check.notNull(processor, PROCESSOR);
-    Class<T> clazz = (Class<T>) beans.getFirst().getClass();
-    BeanReader<T> reader = new BeanReader<>(clazz);
-    return setValues(beans, reader, processor);
-  }
-
-  @Override
-  public <T> long[] setValuesAndExecute(List<T> beans) {
-    return setValuesAndExecute(beans, BeanValueProcessor.identity());
-  }
-
-  @Override
-  public <T> long[] setValuesAndExecute(List<T> beans, BeanValueProcessor<T> processor) {
-    String executable = sql.unparsed();
-    try (Statement stmt = con.createStatement()) {
-      setValues(beans, processor);
-      Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());
-      executable = session.render();
-      LOG.trace(Msg.EXECUTING_SQL, executable);
-      stmt.executeUpdate(executable, RETURN_GENERATED_KEYS);
-      return JDBC.getGeneratedKeys(stmt, beans.size());
-    } catch (SQLException e) {
-      throw Utils.wrap(e, executable);
-    } finally {
-      close();
+  public SQLSession setNested(String path, Object value) {
+    Check.notNull(path, PATH);
+    if (value instanceof Collection<?> c) {
+      session.setPath(path, i -> CollectionMethods.implode(c));
+    } else if (value.getClass().isArray()) {
+      session.setPath(path, i -> ArrayMethods.implodeAny(value));
+    } else {
+      session.setPath(path, i -> value);
     }
+    return this;
   }
 
-  private <T> SQLSession setValues(List<T> beans,
-        BeanReader<T> reader,
-        BeanValueProcessor<T> processor) {
-    if (!session.getTemplate().hasNestedTemplate(RECORD)) {
-      throw new DatabaseException("missing nested template \"record\"");
-    }
-    String[] vars = session.getTemplate()
-          .getNestedTemplate(RECORD)
-          .getVariables()
-          .toArray(String[]::new);
-    List<Map<String, String>> quoted = new ArrayList<>(beans.size());
-    Quoter quoter = new Quoter(statement());
-    for (T bean : beans) {
-      Map<String, String> map = HashMap.newHashMap(vars.length);
-      for (String var : vars) {
-        Object in = reader.read(bean, var);
-        String out = quoteValue(processor.process(bean, var, in, quoter));
-        map.put(var, out);
+  public SQLSession setNestedValue(String path, Object value) {
+    Check.notNull(path, PATH);
+    switch (value) {
+      case Collection<?> x -> {
+        String val = CollectionMethods.implode(x, this::quoteValue, ",");
+        session.setPath(path, i -> val);
       }
-      quoted.add(map);
+      case Object[] x -> {
+        String val = ArrayMethods.implode(x, this::quoteValue, ",");
+        session.setPath(path, i -> val);
+      }
+      case int[] x -> {
+        String val = ArrayMethods.implodeInts(x, ",");
+        session.setPath(path, i -> val);
+      }
+      default -> {
+        if (value.getClass().isArray()) {
+          String val = ArrayMethods.implodeAny(value, this::quoteValue, ",");
+          session.setPath(path, i -> val);
+        } else {
+          session.setPath(path, i -> quoteValue(value));
+        }
+      }
     }
-    session.populate(RECORD, quoted, ",");
+    return this;
+  }
+
+  public SQLSession setNestedIdentifier(String varName, String identifier) {
+    Check.notNull(varName, VAR_NAME);
+    Check.notNull(identifier, IDENTIFIER);
+    session.setPath(varName, i -> quoteIdentifier(identifier));
     return this;
   }
 

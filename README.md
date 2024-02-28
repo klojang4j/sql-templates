@@ -12,14 +12,14 @@ To use _Klojang JDBC_, add the following dependency to your Maven POM file:
 <dependency>
     <groupId>org.klojang</groupId>
     <artifactId>klojang-jdbc</artifactId>
-    <version>1.0.9</version>
+    <version>1.1.2</version>
 </dependency>
 ```
 
 or Gradle build script:
 
 ```
-implementation group: 'org.klojang', name: 'klojang-jdbc', version: '1.0.9'
+implementation group: 'org.klojang', name: 'klojang-jdbc', version: '1.1.2'
 ```
 
 ## Example

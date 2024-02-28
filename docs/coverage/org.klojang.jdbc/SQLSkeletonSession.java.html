@@ -8,6 +8,8 @@ import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.ParamExtractor;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.RenderSession;
+import org.klojang.util.ArrayMethods;
+import org.klojang.util.CollectionMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,115 +22,90 @@ import java.util.*;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static org.klojang.check.CommonChecks.deepNotNull;
 import static org.klojang.check.CommonChecks.empty;
+import static org.klojang.check.Tag.PATH;
 import static org.klojang.check.Tag.VARARGS;
 import static org.klojang.jdbc.x.Strings.*;
 
 final class SQLSkeletonSession extends DynamicSQLSession {
 
-<span class="fc" id="L28">  private static final Logger LOG = LoggerFactory.getLogger(SQLSkeletonSession.class);</span>
+<span class="fc" id="L31">  private static final Logger LOG = LoggerFactory.getLogger(SQLSkeletonSession.class);</span>
 
   SQLSkeletonSession(Connection con, AbstractSQL sql, RenderSession session) {
-<span class="fc" id="L31">    super(con, sql, session);</span>
-<span class="fc" id="L32">  }</span>
+<span class="fc" id="L34">    super(con, sql, session);</span>
+<span class="fc" id="L35">  }</span>
 
-  @Override
-  @SafeVarargs
-  @SuppressWarnings({&quot;unchecked&quot;})
-  public final &lt;T&gt; SQLSession setValues(T... beans) {
-<span class="nc" id="L38">    Check.notNull(beans, VARARGS).is(deepNotNull()).isNot(empty());</span>
-<span class="nc" id="L39">    Class&lt;T&gt; clazz = (Class&lt;T&gt;) beans.getClass().getComponentType();</span>
-<span class="nc" id="L40">    BeanReader&lt;T&gt; reader = new BeanReader&lt;&gt;(clazz);</span>
-<span class="nc" id="L41">    return setValues(Arrays.asList(beans), reader, BeanValueProcessor.identity());</span>
-  }
-
-  @Override
-  public &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans) {
-<span class="fc" id="L46">    return setValues(beans, BeanValueProcessor.identity());</span>
-  }
-
-  @Override
-  @SuppressWarnings(&quot;unchecked&quot;)
-  public &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans, BeanValueProcessor&lt;T&gt; processor) {
-<span class="fc" id="L52">    Check.that(beans, BEANS).is(deepNotNull()).isNot(empty());</span>
-<span class="fc" id="L53">    Check.notNull(processor, PROCESSOR);</span>
-<span class="fc" id="L54">    Class&lt;T&gt; clazz = (Class&lt;T&gt;) beans.getFirst().getClass();</span>
-<span class="fc" id="L55">    BeanReader&lt;T&gt; reader = new BeanReader&lt;&gt;(clazz);</span>
-<span class="fc" id="L56">    return setValues(beans, reader, processor);</span>
-  }
-
-  @Override
-  public &lt;T&gt; long[] setValuesAndExecute(List&lt;T&gt; beans) {
-<span class="fc" id="L61">    return setValuesAndExecute(beans, BeanValueProcessor.identity());</span>
-  }
-
-  @Override
-  public &lt;T&gt; long[] setValuesAndExecute(List&lt;T&gt; beans, BeanValueProcessor&lt;T&gt; processor) {
-<span class="fc" id="L66">    String executable = sql.unparsed();</span>
-<span class="fc" id="L67">    try (Statement stmt = con.createStatement()) {</span>
-<span class="fc" id="L68">      setValues(beans, processor);</span>
-<span class="fc" id="L69">      Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());</span>
-<span class="fc" id="L70">      executable = session.render();</span>
-<span class="fc" id="L71">      LOG.trace(Msg.EXECUTING_SQL, executable);</span>
-<span class="fc" id="L72">      stmt.executeUpdate(executable, RETURN_GENERATED_KEYS);</span>
-<span class="fc" id="L73">      return JDBC.getGeneratedKeys(stmt, beans.size());</span>
-<span class="nc" id="L74">    } catch (SQLException e) {</span>
-<span class="nc" id="L75">      throw Utils.wrap(e, executable);</span>
-    } finally {
-<span class="fc" id="L77">      close();</span>
+  public SQLSession setNested(String path, Object value) {
+<span class="nc" id="L38">    Check.notNull(path, PATH);</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">    if (value instanceof Collection&lt;?&gt; c) {</span>
+<span class="nc" id="L40">      session.setPath(path, i -&gt; CollectionMethods.implode(c));</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">    } else if (value.getClass().isArray()) {</span>
+<span class="nc" id="L42">      session.setPath(path, i -&gt; ArrayMethods.implodeAny(value));</span>
+    } else {
+<span class="nc" id="L44">      session.setPath(path, i -&gt; value);</span>
     }
+<span class="nc" id="L46">    return this;</span>
   }
 
-  private &lt;T&gt; SQLSession setValues(List&lt;T&gt; beans,
-        BeanReader&lt;T&gt; reader,
-        BeanValueProcessor&lt;T&gt; processor) {
-<span class="fc bfc" id="L84" title="All 2 branches covered.">    if (!session.getTemplate().hasNestedTemplate(RECORD)) {</span>
-<span class="fc" id="L85">      throw new DatabaseException(&quot;missing nested template \&quot;record\&quot;&quot;);</span>
-    }
-<span class="fc" id="L87">    String[] vars = session.getTemplate()</span>
-<span class="fc" id="L88">          .getNestedTemplate(RECORD)</span>
-<span class="fc" id="L89">          .getVariables()</span>
-<span class="fc" id="L90">          .toArray(String[]::new);</span>
-<span class="fc" id="L91">    List&lt;Map&lt;String, String&gt;&gt; quoted = new ArrayList&lt;&gt;(beans.size());</span>
-<span class="fc" id="L92">    Quoter quoter = new Quoter(statement());</span>
-<span class="fc bfc" id="L93" title="All 2 branches covered.">    for (T bean : beans) {</span>
-<span class="fc" id="L94">      Map&lt;String, String&gt; map = HashMap.newHashMap(vars.length);</span>
-<span class="fc bfc" id="L95" title="All 2 branches covered.">      for (String var : vars) {</span>
-<span class="fc" id="L96">        Object in = reader.read(bean, var);</span>
-<span class="fc" id="L97">        String out = quoteValue(processor.process(bean, var, in, quoter));</span>
-<span class="fc" id="L98">        map.put(var, out);</span>
+  public SQLSession setNestedValue(String path, Object value) {
+<span class="nc" id="L50">    Check.notNull(path, PATH);</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">    switch (value) {</span>
+<span class="nc" id="L52">      case Collection&lt;?&gt; x -&gt; {</span>
+<span class="nc" id="L53">        String val = CollectionMethods.implode(x, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L54">        session.setPath(path, i -&gt; val);</span>
+<span class="nc" id="L55">      }</span>
+<span class="nc" id="L56">      case Object[] x -&gt; {</span>
+<span class="nc" id="L57">        String val = ArrayMethods.implode(x, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L58">        session.setPath(path, i -&gt; val);</span>
+<span class="nc" id="L59">      }</span>
+<span class="nc" id="L60">      case int[] x -&gt; {</span>
+<span class="nc" id="L61">        String val = ArrayMethods.implodeInts(x, &quot;,&quot;);</span>
+<span class="nc" id="L62">        session.setPath(path, i -&gt; val);</span>
+<span class="nc" id="L63">      }</span>
+      default -&gt; {
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (value.getClass().isArray()) {</span>
+<span class="nc" id="L66">          String val = ArrayMethods.implodeAny(value, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L67">          session.setPath(path, i -&gt; val);</span>
+<span class="nc" id="L68">        } else {</span>
+<span class="nc" id="L69">          session.setPath(path, i -&gt; quoteValue(value));</span>
+        }
       }
-<span class="fc" id="L100">      quoted.add(map);</span>
-<span class="fc" id="L101">    }</span>
-<span class="fc" id="L102">    session.populate(RECORD, quoted, &quot;,&quot;);</span>
-<span class="fc" id="L103">    return this;</span>
+    }
+<span class="nc" id="L73">    return this;</span>
+  }
+
+  public SQLSession setNestedIdentifier(String varName, String identifier) {
+<span class="fc" id="L77">    Check.notNull(varName, VAR_NAME);</span>
+<span class="fc" id="L78">    Check.notNull(identifier, IDENTIFIER);</span>
+<span class="fc" id="L79">    session.setPath(varName, i -&gt; quoteIdentifier(identifier));</span>
+<span class="fc" id="L80">    return this;</span>
   }
 
   @Override
   public SQLQuery prepareQuery() {
-<span class="fc" id="L108">    close();</span>
-<span class="fc" id="L109">    SQLInfo sqlInfo = getSQLInfo();</span>
-<span class="fc" id="L110">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="fc" id="L111">    return new SQLQuery(ps, this, sqlInfo);</span>
+<span class="fc" id="L85">    close();</span>
+<span class="fc" id="L86">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="fc" id="L87">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="fc" id="L88">    return new SQLQuery(ps, this, sqlInfo);</span>
   }
 
   @Override
   public SQLInsert prepareInsert(boolean retrieveKeys) {
-<span class="nc" id="L116">    close();</span>
-<span class="nc" id="L117">    SQLInfo sqlInfo = getSQLInfo();</span>
-<span class="nc" id="L118">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
-<span class="nc" id="L119">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L93">    close();</span>
+<span class="nc" id="L94">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="nc" id="L95">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L96">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
   }
 
   @Override
   public SQLUpdate prepareUpdate() {
-<span class="nc" id="L124">    close();</span>
-<span class="nc" id="L125">    SQLInfo sqlInfo = getSQLInfo();</span>
-<span class="nc" id="L126">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="nc" id="L127">    return new SQLUpdate(ps, this, sqlInfo);</span>
+<span class="nc" id="L101">    close();</span>
+<span class="nc" id="L102">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="nc" id="L103">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="nc" id="L104">    return new SQLUpdate(ps, this, sqlInfo);</span>
   }
 
   private SQLInfo getSQLInfo() {
-<span class="fc" id="L131">    return new SQLInfo(new ParamExtractor(session.render()));</span>
+<span class="fc" id="L108">    return new SQLInfo(new ParamExtractor(session.render()));</span>
   }
 
 
