@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.aux.Result;
+import org.klojang.check.fallible.FallibleFunction;
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.ColumnReader;
@@ -15,6 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -284,6 +286,82 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
             .getSQL()
             .getBeanExtractorFactory(clazz, beanSupplier)
             .getExtractor(resultSet);
+    } catch (Throwable t) {
+      throw Utils.wrap(t);
+    }
+  }
+
+  /**
+   * Executes the query and converts the first row in the {@code ResultSet} into an object
+   * of type {@code <T>} using the specified conversion function. If the query yielded an
+   * empty {@code ResultSet}, the method returns an empty {@link Optional}. If the query
+   * had already been executed, it will not be executed again, and this method will
+   * convert the <i>current</i>> row in the {@code ResultSet}. You can keep calling this
+   * method until an empty {@code Optional} is returned. Call
+   * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
+   *
+   * @param converter the conversion function. Do not call
+   *       {@link ResultSet#next() next()} or {@link ResultSet#close() close()} on the
+   *       {@code ResultSet} passed to the conversion function. This is the responsibility
+   *       of the {@code SQLQuery} object.
+   * @param <T> the type of the objects into which the rows in the {@code ResultSet}
+   *       are converted
+   * @return an {@link Optional} containing the object created from the current row in the
+   *       {@code ResultSet} or an empty {@code Optional} if there are no (more) rows in
+   *       the {@code ResultSet}
+   */
+  public <T> Optional<T> extract(FallibleFunction<ResultSet, T, SQLException> converter) {
+    try {
+      executeSQL();
+      if (resultSet.next()) {
+        return Optional.of(converter.apply(resultSet));
+      }
+      return Optional.empty();
+    } catch (Throwable t) {
+      throw Utils.wrap(t);
+    }
+  }
+
+  /**
+   * Equivalent to {@link #extractAll(int, FallibleFunction) extractAll(10, converter)}.
+   *
+   * @param converter the conversion function. Do not call
+   *       {@link ResultSet#next() next()} or {@link ResultSet#close() close()} on the
+   *       {@code ResultSet} passed to the conversion function. This is the responsibility
+   *       of the {@code SQLQuery} object.
+   * @param <T> the type of the objects into which the rows in the {@code ResultSet}
+   *       are converted
+   * @return a {@code List} of the objects created by the conversion function
+   */
+  public <T> List<T> extractAll(FallibleFunction<ResultSet, T, SQLException> converter) {
+    return extractAll(10, converter);
+  }
+
+  /**
+   * Executes the query and converts the rows in the {@code ResultSet} into objects of
+   * type {@code <T>} using the specified conversion function. If the query had already
+   * been executed, it will not be executed again. Call
+   * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
+   *
+   * @param sizeEstimate an estimate of the number of rows in the {@code ResultSet}
+   * @param converter the conversion function. Do not call
+   *       {@link ResultSet#next() next()} or {@link ResultSet#close() close()} on the
+   *       {@code ResultSet} passed to the conversion function. This is the responsibility
+   *       of the {@code SQLQuery} object.
+   * @param <T> the type of the objects into which the rows in the {@code ResultSet}
+   *       are converted
+   * @return a {@code List} of the objects created by the conversion function
+   */
+  public <T> List<T> extractAll(int sizeEstimate,
+        FallibleFunction<ResultSet, T, SQLException> converter) {
+    try {
+      executeSQL();
+      List<T> beans = new ArrayList<>(sizeEstimate);
+      ResultSet rs = resultSet;
+      while (rs.next()) {
+        beans.add(converter.apply(rs));
+      }
+      return beans;
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }

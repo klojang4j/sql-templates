@@ -35,41 +35,37 @@ abstract sealed class AbstractSQL implements SQL
     factories = new HashMap<>();
   }
 
-  /**
-   * Returns the raw, unprocessed, user-provided SQL string, with all named parameters and
-   * template variables still in it. For reporting purposes only.
-   */
-  String unparsed() {
+  final String unparsed() {
     return unparsed;
   }
 
-  SessionConfig config() {
+  final SessionConfig config() {
     return config;
   }
 
   @SuppressWarnings("unchecked")
-  <T> BeanBinder<T> getBeanBinder(SQLInfo sqlInfo, Class<T> clazz) {
+  final <T> BeanBinder<T> getBeanBinder(SQLInfo sqlInfo, Class<T> clazz) {
     return binders.computeIfAbsent(clazz,
           k -> new BeanBinder<>(clazz, sqlInfo.parameters(), config));
   }
 
-  MapBinder getMapBinder(SQLInfo sqlInfo) {
+  final MapBinder getMapBinder(SQLInfo sqlInfo) {
     return new MapBinder(sqlInfo.parameters(), config);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  <T> BeanExtractorFactory<T> getBeanExtractorFactory(Class<T> clazz) {
+  final <T> BeanExtractorFactory<T> getBeanExtractorFactory(Class<T> clazz) {
     return factories.computeIfAbsent(clazz, k -> new BeanExtractorFactory<>(k, config));
   }
 
   @SuppressWarnings("unchecked")
-  <T> BeanExtractorFactory<T> getBeanExtractorFactory(Class<T> clazz,
+  final <T> BeanExtractorFactory<T> getBeanExtractorFactory(Class<T> clazz,
         Supplier<T> supplier) {
     return factories.computeIfAbsent(clazz,
           k -> new BeanExtractorFactory<>(clazz, supplier, config));
   }
 
-  MapExtractorFactory getMapExtractorFactory() {
+  final MapExtractorFactory getMapExtractorFactory() {
     if (mapExtractorFactory == null) {
       mapExtractorFactory = new MapExtractorFactory(config);
     }
