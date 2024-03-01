@@ -257,7 +257,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   /**
    * Executes the query and returns a {@code BeanExtractor} that you can use to convert
-   * the rows in the {@link ResultSet} into JavaBeans or records. The provided class must
+   * the rows in the {@link ResultSet} into JavaBeans. The provided class must
    * <i>not</i> be a {@code record} type. If the query had already been executed, it will
    * not be executed again. Call {@link SQLStatement#reset() reset()} to force the query
    * to be re-executed.
