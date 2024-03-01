@@ -84,8 +84,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
       executeSQL();
       if (resultSet.next()) {
         int sqlType = resultSet.getMetaData().getColumnType(1);
-        T val = ColumnReaderFactory
-              .getInstance()
+        T val = ColumnReaderFactory.getInstance()
               .getReader(clazz, sqlType)
               .getValue(resultSet, 1, clazz);
         return Result.of(val);
@@ -206,8 +205,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
         return Collections.emptyList();
       }
       int sqlType = resultSet.getMetaData().getColumnType(1);
-      ColumnReader<?, T> reader = ColumnReaderFactory
-            .getInstance()
+      ColumnReader<?, T> reader = ColumnReaderFactory.getInstance()
             .getReader(clazz, sqlType);
       List<T> list = new ArrayList<>(sizeEstimate);
       do {
@@ -231,10 +229,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public MapExtractor getExtractor() {
     try {
       executeSQL();
-      return session
-            .getSQL()
-            .getMapExtractorFactory()
-            .getExtractor(resultSet);
+      return session.getSQL().getMapExtractorFactory().getExtractor(resultSet);
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -254,10 +249,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public <T> BeanExtractor<T> getExtractor(Class<T> clazz) {
     try {
       executeSQL();
-      return session
-            .getSQL()
-            .getBeanExtractorFactory(clazz)
-            .getExtractor(resultSet);
+      return session.getSQL().getBeanExtractorFactory(clazz).getExtractor(resultSet);
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -265,10 +257,10 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   /**
    * Executes the query and returns a {@code BeanExtractor} that you can use to convert
-   * the rows in the {@link ResultSet} into JavaBeans. The provided class must <i>not</i>
-   * be a {@code record} type. If the query had already been executed, it will not be
-   * executed again. Call {@link SQLStatement#reset() reset()} to force the query to be
-   * re-executed.
+   * the rows in the {@link ResultSet} into JavaBeans or records. The provided class must
+   * <i>not</i> be a {@code record} type. If the query had already been executed, it will
+   * not be executed again. Call {@link SQLStatement#reset() reset()} to force the query
+   * to be re-executed.
    *
    * @param <T> the type of the JavaBeans (must <i>not</i> be a {@code record}
    *       type)
@@ -282,8 +274,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public <T> BeanExtractor<T> getExtractor(Class<T> clazz, Supplier<T> beanSupplier) {
     try {
       executeSQL();
-      return session
-            .getSQL()
+      return session.getSQL()
             .getBeanExtractorFactory(clazz, beanSupplier)
             .getExtractor(resultSet);
     } catch (Throwable t) {
@@ -296,9 +287,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * of type {@code <T>} using the specified conversion function. If the query yielded an
    * empty {@code ResultSet}, the method returns an empty {@link Optional}. If the query
    * had already been executed, it will not be executed again, and this method will
-   * convert the <i>current</i>> row in the {@code ResultSet}. You can keep calling this
-   * method until an empty {@code Optional} is returned. Call
-   * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
+   * convert the next row in the {@code ResultSet}. You can keep calling this method until
+   * an empty {@code Optional} is returned. Call {@link SQLStatement#reset() reset()} to
+   * force the query to be re-executed.
    *
    * @param converter the conversion function. Do not call
    *       {@link ResultSet#next() next()} or {@link ResultSet#close() close()} on the
@@ -323,6 +314,44 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
+   * <p>Executes the query and converts at most {@code limit} rows in the
+   * {@code ResultSet} into objects of type {@code <T>} using the specified conversion
+   * function. If the query had already been executed, it will not be executed again.
+   * Thus, you can call this method again to retrieve and convert the next batch of rows
+   * from the {@code ResultSet}. Call {@link SQLStatement#reset() reset()} to force the
+   * query to be re-executed.
+   *
+   * <p>This method is especially useful if the conversion process is too complicated to
+   * be carried out by a regular {@link BeanExtractor}, or if you want to eliminate all
+   * dynamic invocation (reflection,
+   * {@linkplain java.lang.invoke.MethodHandle method handles}) from the conversion
+   * process.
+   *
+   * @param limit the maximum number of rows to extract from the {@code ResultSet}
+   * @param converter the conversion function. Do not call
+   *       {@link ResultSet#next() next()} or {@link ResultSet#close() close()} on the
+   *       {@code ResultSet} passed to the conversion function. This is the responsibility
+   *       of the {@code SQLQuery} object.
+   * @param <T> the type of the objects into which the rows in the {@code ResultSet}
+   *       are converted
+   * @return a {@code List} of the objects created by the conversion function
+   */
+  public <T> List<T> extract(int limit,
+        FallibleFunction<ResultSet, T, SQLException> converter) {
+    try {
+      executeSQL();
+      List<T> beans = new ArrayList<>(limit);
+      ResultSet rs = resultSet;
+      for (int i = 0; i < limit && rs.next(); ++i) {
+        beans.add(converter.apply(rs));
+      }
+      return beans;
+    } catch (Throwable t) {
+      throw Utils.wrap(t);
+    }
+  }
+
+  /**
    * Equivalent to {@link #extractAll(int, FallibleFunction) extractAll(10, converter)}.
    *
    * @param converter the conversion function. Do not call
@@ -338,10 +367,17 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Executes the query and converts the rows in the {@code ResultSet} into objects of
+   * <p>Executes the query and converts the rows in the {@code ResultSet} into objects of
    * type {@code <T>} using the specified conversion function. If the query had already
-   * been executed, it will not be executed again. Call
+   * been executed, it will not be executed again. Thus, after a call to this method, you
+   * should really close the {@code SQLQuery} instance or call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
+   *
+   * <p>This method is especially useful if the conversion process is too complicated to
+   * be carried out by a regular {@link BeanExtractor}, or if you want to eliminate all
+   * dynamic invocation (reflection,
+   * {@linkplain java.lang.invoke.MethodHandle method handles}) from the conversion
+   * process.
    *
    * @param sizeEstimate an estimate of the number of rows in the {@code ResultSet}
    * @param converter the conversion function. Do not call

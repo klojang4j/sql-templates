@@ -84,15 +84,14 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
 <span class="fc" id="L84">      executeSQL();</span>
 <span class="pc bpc" id="L85" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
 <span class="fc" id="L86">        int sqlType = resultSet.getMetaData().getColumnType(1);</span>
-        T val = ColumnReaderFactory
-<span class="fc" id="L88">              .getInstance()</span>
-<span class="fc" id="L89">              .getReader(clazz, sqlType)</span>
-<span class="fc" id="L90">              .getValue(resultSet, 1, clazz);</span>
-<span class="fc" id="L91">        return Result.of(val);</span>
+<span class="fc" id="L87">        T val = ColumnReaderFactory.getInstance()</span>
+<span class="fc" id="L88">              .getReader(clazz, sqlType)</span>
+<span class="fc" id="L89">              .getValue(resultSet, 1, clazz);</span>
+<span class="fc" id="L90">        return Result.of(val);</span>
       }
-<span class="nc" id="L93">      return Result.notAvailable();</span>
-<span class="nc" id="L94">    } catch (Throwable t) {</span>
-<span class="nc" id="L95">      throw Utils.wrap(t);</span>
+<span class="nc" id="L92">      return Result.notAvailable();</span>
+<span class="nc" id="L93">    } catch (Throwable t) {</span>
+<span class="nc" id="L94">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -110,13 +109,13 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public Result&lt;Integer&gt; getInt() {
     try {
-<span class="fc" id="L113">      executeSQL();</span>
-<span class="pc bpc" id="L114" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
-<span class="fc" id="L115">        return Result.of(resultSet.getInt(1));</span>
+<span class="fc" id="L112">      executeSQL();</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
+<span class="fc" id="L114">        return Result.of(resultSet.getInt(1));</span>
       }
-<span class="nc" id="L117">      return Result.notAvailable();</span>
-<span class="nc" id="L118">    } catch (Throwable t) {</span>
-<span class="nc" id="L119">      throw Utils.wrap(t);</span>
+<span class="nc" id="L116">      return Result.notAvailable();</span>
+<span class="nc" id="L117">    } catch (Throwable t) {</span>
+<span class="nc" id="L118">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -134,13 +133,13 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public Result&lt;String&gt; getString() {
     try {
-<span class="fc" id="L137">      executeSQL();</span>
-<span class="pc bpc" id="L138" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
-<span class="fc" id="L139">        return Result.of(resultSet.getString(1));</span>
+<span class="fc" id="L136">      executeSQL();</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">      if (resultSet.next()) {</span>
+<span class="fc" id="L138">        return Result.of(resultSet.getString(1));</span>
       }
-<span class="nc" id="L141">      return Result.notAvailable();</span>
-<span class="nc" id="L142">    } catch (Throwable t) {</span>
-<span class="nc" id="L143">      throw Utils.wrap(t);</span>
+<span class="nc" id="L140">      return Result.notAvailable();</span>
+<span class="nc" id="L141">    } catch (Throwable t) {</span>
+<span class="nc" id="L142">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -158,10 +157,10 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public boolean exists() {
     try {
-<span class="fc" id="L161">      executeSQL();</span>
-<span class="fc" id="L162">      return resultSet.next();</span>
-<span class="nc" id="L163">    } catch (Throwable t) {</span>
-<span class="nc" id="L164">      throw Utils.wrap(t);</span>
+<span class="fc" id="L160">      executeSQL();</span>
+<span class="fc" id="L161">      return resultSet.next();</span>
+<span class="nc" id="L162">    } catch (Throwable t) {</span>
+<span class="nc" id="L163">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -173,7 +172,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    *
    * @return the values of the first column in the result set
    */
-<span class="fc" id="L176">  public List&lt;String&gt; firstColumn() { return firstColumn(String.class); }</span>
+<span class="fc" id="L175">  public List&lt;String&gt; firstColumn() { return firstColumn(String.class); }</span>
 
   /**
    * Executes the query and returns all values in the first column of the SELECT clause.
@@ -185,7 +184,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @param clazz the desired class of the values
    * @return the values of the first column in the result set
    */
-<span class="fc" id="L188">  public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz) { return firstColumn(clazz, 10); }</span>
+<span class="fc" id="L187">  public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz) { return firstColumn(clazz, 10); }</span>
 
   /**
    * Executes the query and returns all values in the first column of the SELECT clause.
@@ -201,21 +200,20 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; List&lt;T&gt; firstColumn(Class&lt;T&gt; clazz, int sizeEstimate) {
     try {
-<span class="fc" id="L204">      executeSQL();</span>
-<span class="pc bpc" id="L205" title="1 of 2 branches missed.">      if (!resultSet.next()) {</span>
-<span class="nc" id="L206">        return Collections.emptyList();</span>
+<span class="fc" id="L203">      executeSQL();</span>
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">      if (!resultSet.next()) {</span>
+<span class="nc" id="L205">        return Collections.emptyList();</span>
       }
-<span class="fc" id="L208">      int sqlType = resultSet.getMetaData().getColumnType(1);</span>
-      ColumnReader&lt;?, T&gt; reader = ColumnReaderFactory
-<span class="fc" id="L210">            .getInstance()</span>
-<span class="fc" id="L211">            .getReader(clazz, sqlType);</span>
-<span class="fc" id="L212">      List&lt;T&gt; list = new ArrayList&lt;&gt;(sizeEstimate);</span>
+<span class="fc" id="L207">      int sqlType = resultSet.getMetaData().getColumnType(1);</span>
+<span class="fc" id="L208">      ColumnReader&lt;?, T&gt; reader = ColumnReaderFactory.getInstance()</span>
+<span class="fc" id="L209">            .getReader(clazz, sqlType);</span>
+<span class="fc" id="L210">      List&lt;T&gt; list = new ArrayList&lt;&gt;(sizeEstimate);</span>
       do {
-<span class="fc" id="L214">        list.add(reader.getValue(resultSet, 1, clazz));</span>
-<span class="fc bfc" id="L215" title="All 2 branches covered.">      } while (resultSet.next());</span>
-<span class="fc" id="L216">      return list;</span>
-<span class="nc" id="L217">    } catch (Throwable t) {</span>
-<span class="nc" id="L218">      throw Utils.wrap(t);</span>
+<span class="fc" id="L212">        list.add(reader.getValue(resultSet, 1, clazz));</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">      } while (resultSet.next());</span>
+<span class="fc" id="L214">      return list;</span>
+<span class="nc" id="L215">    } catch (Throwable t) {</span>
+<span class="nc" id="L216">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -230,13 +228,10 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public MapExtractor getExtractor() {
     try {
-<span class="nc" id="L233">      executeSQL();</span>
-<span class="nc" id="L234">      return session</span>
-<span class="nc" id="L235">            .getSQL()</span>
-<span class="nc" id="L236">            .getMapExtractorFactory()</span>
-<span class="nc" id="L237">            .getExtractor(resultSet);</span>
-<span class="nc" id="L238">    } catch (Throwable t) {</span>
-<span class="nc" id="L239">      throw Utils.wrap(t);</span>
+<span class="nc" id="L231">      executeSQL();</span>
+<span class="nc" id="L232">      return session.getSQL().getMapExtractorFactory().getExtractor(resultSet);</span>
+<span class="nc" id="L233">    } catch (Throwable t) {</span>
+<span class="nc" id="L234">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -253,22 +248,19 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; BeanExtractor&lt;T&gt; getExtractor(Class&lt;T&gt; clazz) {
     try {
-<span class="fc" id="L256">      executeSQL();</span>
-<span class="fc" id="L257">      return session</span>
-<span class="fc" id="L258">            .getSQL()</span>
-<span class="fc" id="L259">            .getBeanExtractorFactory(clazz)</span>
-<span class="fc" id="L260">            .getExtractor(resultSet);</span>
-<span class="nc" id="L261">    } catch (Throwable t) {</span>
-<span class="nc" id="L262">      throw Utils.wrap(t);</span>
+<span class="fc" id="L251">      executeSQL();</span>
+<span class="fc" id="L252">      return session.getSQL().getBeanExtractorFactory(clazz).getExtractor(resultSet);</span>
+<span class="nc" id="L253">    } catch (Throwable t) {</span>
+<span class="nc" id="L254">      throw Utils.wrap(t);</span>
     }
   }
 
   /**
    * Executes the query and returns a {@code BeanExtractor} that you can use to convert
-   * the rows in the {@link ResultSet} into JavaBeans. The provided class must &lt;i&gt;not&lt;/i&gt;
-   * be a {@code record} type. If the query had already been executed, it will not be
-   * executed again. Call {@link SQLStatement#reset() reset()} to force the query to be
-   * re-executed.
+   * the rows in the {@link ResultSet} into JavaBeans or records. The provided class must
+   * &lt;i&gt;not&lt;/i&gt; be a {@code record} type. If the query had already been executed, it will
+   * not be executed again. Call {@link SQLStatement#reset() reset()} to force the query
+   * to be re-executed.
    *
    * @param &lt;T&gt; the type of the JavaBeans (must &lt;i&gt;not&lt;/i&gt; be a {@code record}
    *       type)
@@ -281,13 +273,12 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; BeanExtractor&lt;T&gt; getExtractor(Class&lt;T&gt; clazz, Supplier&lt;T&gt; beanSupplier) {
     try {
-<span class="nc" id="L284">      executeSQL();</span>
-<span class="nc" id="L285">      return session</span>
-<span class="nc" id="L286">            .getSQL()</span>
-<span class="nc" id="L287">            .getBeanExtractorFactory(clazz, beanSupplier)</span>
-<span class="nc" id="L288">            .getExtractor(resultSet);</span>
-<span class="nc" id="L289">    } catch (Throwable t) {</span>
-<span class="nc" id="L290">      throw Utils.wrap(t);</span>
+<span class="nc" id="L276">      executeSQL();</span>
+<span class="nc" id="L277">      return session.getSQL()</span>
+<span class="nc" id="L278">            .getBeanExtractorFactory(clazz, beanSupplier)</span>
+<span class="nc" id="L279">            .getExtractor(resultSet);</span>
+<span class="nc" id="L280">    } catch (Throwable t) {</span>
+<span class="nc" id="L281">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -296,9 +287,9 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * of type {@code &lt;T&gt;} using the specified conversion function. If the query yielded an
    * empty {@code ResultSet}, the method returns an empty {@link Optional}. If the query
    * had already been executed, it will not be executed again, and this method will
-   * convert the &lt;i&gt;current&lt;/i&gt;&gt; row in the {@code ResultSet}. You can keep calling this
-   * method until an empty {@code Optional} is returned. Call
-   * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
+   * convert the next row in the {@code ResultSet}. You can keep calling this method until
+   * an empty {@code Optional} is returned. Call {@link SQLStatement#reset() reset()} to
+   * force the query to be re-executed.
    *
    * @param converter the conversion function. Do not call
    *       {@link ResultSet#next() next()} or {@link ResultSet#close() close()} on the
@@ -312,13 +303,51 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public &lt;T&gt; Optional&lt;T&gt; extract(FallibleFunction&lt;ResultSet, T, SQLException&gt; converter) {
     try {
-<span class="nc" id="L315">      executeSQL();</span>
-<span class="nc bnc" id="L316" title="All 2 branches missed.">      if (resultSet.next()) {</span>
-<span class="nc" id="L317">        return Optional.of(converter.apply(resultSet));</span>
+<span class="nc" id="L306">      executeSQL();</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">      if (resultSet.next()) {</span>
+<span class="nc" id="L308">        return Optional.of(converter.apply(resultSet));</span>
       }
-<span class="nc" id="L319">      return Optional.empty();</span>
-<span class="nc" id="L320">    } catch (Throwable t) {</span>
-<span class="nc" id="L321">      throw Utils.wrap(t);</span>
+<span class="nc" id="L310">      return Optional.empty();</span>
+<span class="nc" id="L311">    } catch (Throwable t) {</span>
+<span class="nc" id="L312">      throw Utils.wrap(t);</span>
+    }
+  }
+
+  /**
+   * &lt;p&gt;Executes the query and converts at most {@code limit} rows in the
+   * {@code ResultSet} into objects of type {@code &lt;T&gt;} using the specified conversion
+   * function. If the query had already been executed, it will not be executed again.
+   * Thus, you can call this method again to retrieve and convert the next batch of rows
+   * from the {@code ResultSet}. Call {@link SQLStatement#reset() reset()} to force the
+   * query to be re-executed.
+   *
+   * &lt;p&gt;This method is especially useful if the conversion process is too complicated to
+   * be carried out by a regular {@link BeanExtractor}, or if you want to eliminate all
+   * dynamic invocation (reflection,
+   * {@linkplain java.lang.invoke.MethodHandle method handles}) from the conversion
+   * process.
+   *
+   * @param limit the maximum number of rows to extract from the {@code ResultSet}
+   * @param converter the conversion function. Do not call
+   *       {@link ResultSet#next() next()} or {@link ResultSet#close() close()} on the
+   *       {@code ResultSet} passed to the conversion function. This is the responsibility
+   *       of the {@code SQLQuery} object.
+   * @param &lt;T&gt; the type of the objects into which the rows in the {@code ResultSet}
+   *       are converted
+   * @return a {@code List} of the objects created by the conversion function
+   */
+  public &lt;T&gt; List&lt;T&gt; extract(int limit,
+        FallibleFunction&lt;ResultSet, T, SQLException&gt; converter) {
+    try {
+<span class="nc" id="L342">      executeSQL();</span>
+<span class="nc" id="L343">      List&lt;T&gt; beans = new ArrayList&lt;&gt;(limit);</span>
+<span class="nc" id="L344">      ResultSet rs = resultSet;</span>
+<span class="nc bnc" id="L345" title="All 4 branches missed.">      for (int i = 0; i &lt; limit &amp;&amp; rs.next(); ++i) {</span>
+<span class="nc" id="L346">        beans.add(converter.apply(rs));</span>
+      }
+<span class="nc" id="L348">      return beans;</span>
+<span class="nc" id="L349">    } catch (Throwable t) {</span>
+<span class="nc" id="L350">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -334,14 +363,21 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    * @return a {@code List} of the objects created by the conversion function
    */
   public &lt;T&gt; List&lt;T&gt; extractAll(FallibleFunction&lt;ResultSet, T, SQLException&gt; converter) {
-<span class="nc" id="L337">    return extractAll(10, converter);</span>
+<span class="nc" id="L366">    return extractAll(10, converter);</span>
   }
 
   /**
-   * Executes the query and converts the rows in the {@code ResultSet} into objects of
+   * &lt;p&gt;Executes the query and converts the rows in the {@code ResultSet} into objects of
    * type {@code &lt;T&gt;} using the specified conversion function. If the query had already
-   * been executed, it will not be executed again. Call
+   * been executed, it will not be executed again. Thus, after a call to this method, you
+   * should really close the {@code SQLQuery} instance or call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
+   *
+   * &lt;p&gt;This method is especially useful if the conversion process is too complicated to
+   * be carried out by a regular {@link BeanExtractor}, or if you want to eliminate all
+   * dynamic invocation (reflection,
+   * {@linkplain java.lang.invoke.MethodHandle method handles}) from the conversion
+   * process.
    *
    * @param sizeEstimate an estimate of the number of rows in the {@code ResultSet}
    * @param converter the conversion function. Do not call
@@ -355,15 +391,15 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
   public &lt;T&gt; List&lt;T&gt; extractAll(int sizeEstimate,
         FallibleFunction&lt;ResultSet, T, SQLException&gt; converter) {
     try {
-<span class="nc" id="L358">      executeSQL();</span>
-<span class="nc" id="L359">      List&lt;T&gt; beans = new ArrayList&lt;&gt;(sizeEstimate);</span>
-<span class="nc" id="L360">      ResultSet rs = resultSet;</span>
-<span class="nc bnc" id="L361" title="All 2 branches missed.">      while (rs.next()) {</span>
-<span class="nc" id="L362">        beans.add(converter.apply(rs));</span>
+<span class="nc" id="L394">      executeSQL();</span>
+<span class="nc" id="L395">      List&lt;T&gt; beans = new ArrayList&lt;&gt;(sizeEstimate);</span>
+<span class="nc" id="L396">      ResultSet rs = resultSet;</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">      while (rs.next()) {</span>
+<span class="nc" id="L398">        beans.add(converter.apply(rs));</span>
       }
-<span class="nc" id="L364">      return beans;</span>
-<span class="nc" id="L365">    } catch (Throwable t) {</span>
-<span class="nc" id="L366">      throw Utils.wrap(t);</span>
+<span class="nc" id="L400">      return beans;</span>
+<span class="nc" id="L401">    } catch (Throwable t) {</span>
+<span class="nc" id="L402">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -381,10 +417,10 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
    */
   public ResultSet execute() {
     try {
-<span class="fc" id="L384">      executeSQL();</span>
-<span class="fc" id="L385">      return resultSet;</span>
-<span class="nc" id="L386">    } catch (Throwable t) {</span>
-<span class="nc" id="L387">      throw Utils.wrap(t);</span>
+<span class="fc" id="L420">      executeSQL();</span>
+<span class="fc" id="L421">      return resultSet;</span>
+<span class="nc" id="L422">    } catch (Throwable t) {</span>
+<span class="nc" id="L423">      throw Utils.wrap(t);</span>
     }
   }
 
@@ -392,25 +428,25 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
   @Override
   void initialize() {
     try {
-<span class="nc bnc" id="L395" title="All 2 branches missed.">      if (resultSet != null) {</span>
-<span class="nc" id="L396">        resultSet.close();</span>
-<span class="nc" id="L397">        resultSet = null;</span>
+<span class="nc bnc" id="L431" title="All 2 branches missed.">      if (resultSet != null) {</span>
+<span class="nc" id="L432">        resultSet.close();</span>
+<span class="nc" id="L433">        resultSet = null;</span>
       }
-<span class="nc" id="L399">      ps.clearParameters();</span>
-<span class="nc" id="L400">    } catch (SQLException e) {</span>
-<span class="nc" id="L401">      throw Utils.wrap(e);</span>
+<span class="nc" id="L435">      ps.clearParameters();</span>
+<span class="nc" id="L436">    } catch (SQLException e) {</span>
+<span class="nc" id="L437">      throw Utils.wrap(e);</span>
     } finally {
-<span class="nc" id="L403">      resultSet = null;</span>
+<span class="nc" id="L439">      resultSet = null;</span>
     }
-<span class="nc" id="L405">  }</span>
+<span class="nc" id="L441">  }</span>
 
   private void executeSQL() throws Throwable {
-<span class="pc bpc" id="L408" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
-<span class="fc" id="L409">      applyBindings(ps);</span>
-<span class="fc" id="L410">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
-<span class="fc" id="L411">      resultSet = ps.executeQuery();</span>
+<span class="pc bpc" id="L444" title="1 of 2 branches missed.">    if (resultSet == null) {</span>
+<span class="fc" id="L445">      applyBindings(ps);</span>
+<span class="fc" id="L446">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L447">      resultSet = ps.executeQuery();</span>
     }
-<span class="fc" id="L413">  }</span>
+<span class="fc" id="L449">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
