@@ -20,7 +20,7 @@ import static org.klojang.templates.name.CamelCaseToSnakeUpperCase.camelCaseToSn
 import static org.klojang.util.ArrayMethods.EMPTY_STRING_ARRAY;
 
 /**
- * A builder class for {@link SQLBatchInsert} instances. {@code BatchInsertBuilder}
+ * A builder class for {@link BatchInsert} instances. {@code BatchInsertBuilder}
  * instances are obtained via {@link SQL#insertBatch()}.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -162,7 +162,7 @@ public final class BatchInsertBuilder {
    *       {@code SQLBatchInsert} instance
    * @return a {@code SQLBatchInsert} instance
    */
-  public <T> SQLBatchInsert<T> prepare(Connection con) {
+  public <T> BatchInsert<T> prepare(Connection con) {
     Check.notNull(con);
     Check.on(STATE, clazz, BEAN_CLASS).is(notNull());
     BeanReader reader = new BeanReader<>(clazz, includeExclude, properties);
@@ -176,7 +176,7 @@ public final class BatchInsertBuilder {
           tableName,
           chunkSize,
           commitPerChunk);
-    return new SQLBatchInsert<>(cfg);
+    return new BatchInsert<>(cfg);
   }
 
 }

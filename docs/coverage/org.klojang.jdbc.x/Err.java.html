@@ -26,6 +26,9 @@ public final class Err {
   public static final String KEY_COUNT_MISMATCH
         = &quot;actual number of database-generated keys (${arg}) does not match expected number (${obj})&quot;;
 
-<span class="nc" id="L29">  private Err() { throw new UnsupportedOperationException(); }</span>
+  public static final String STALE_QUERY
+        = &quot;No query with ID ${0} in cache. It may have gone stale&quot;;
+
+<span class="nc" id="L32">  private Err() { throw new UnsupportedOperationException(); }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

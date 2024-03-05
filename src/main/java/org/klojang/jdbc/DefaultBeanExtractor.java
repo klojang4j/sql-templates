@@ -77,11 +77,14 @@ final class DefaultBeanExtractor<T> implements BeanExtractor<T> {
       return Collections.emptyList();
     }
     List<T> beans = new ArrayList<>(limit);
-    int i = 0;
     try {
-      do {
+      for (int i = 0; i < limit; ++i) {
         beans.add(PropertyWriter.writeAll(rs, beanSupplier, writers));
-      } while (++i < limit && (empty = !rs.next()));
+        if (!rs.next()) {
+          empty = true;
+          break;
+        }
+      }
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }

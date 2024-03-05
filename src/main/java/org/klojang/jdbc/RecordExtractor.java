@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.sql.ResultSet;
 import java.util.*;
 
-import static org.klojang.check.CommonChecks.*;
+import static org.klojang.check.CommonChecks.gt;
+import static org.klojang.check.CommonChecks.no;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 
@@ -71,20 +72,18 @@ final class RecordExtractor<T extends Record> implements BeanExtractor<T> {
       return Collections.emptyList();
     }
     List<T> beans = new ArrayList<>(limit);
-    int i = 0;
     try {
-      do {
+      for (int i = 0; i < limit; ++i) {
         beans.add(factory.createRecord(rs));
-      } while (++i < limit && (empty = !rs.next()));
+        if (!rs.next()) {
+          empty = true;
+          break;
+        }
+      }
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
     return beans;
-  }
-
-  @Override
-  public List<T> extractAll() {
-    return extractAll(10);
   }
 
   @Override

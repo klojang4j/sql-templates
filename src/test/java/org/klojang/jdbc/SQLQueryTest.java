@@ -101,7 +101,7 @@ public class SQLQueryTest {
           new Person(0, "Peter", "Peterson", LocalDate.of(1963, 5, 3)),
           new Person(0, "Joe", "Peterson", LocalDate.of(1998, 9, 23))
     );
-    SQLBatchInsert bi = SQL.insertBatch()
+    BatchInsert bi = SQL.insertBatch()
           .of(Person.class)
           .into("PERSON")
           .excluding("personId")

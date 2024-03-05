@@ -26,5 +26,8 @@ public final class Err {
   public static final String KEY_COUNT_MISMATCH
         = "actual number of database-generated keys (${arg}) does not match expected number (${obj})";
 
+  public static final String STALE_QUERY
+        = "No query with ID ${0} in cache. It may have gone stale";
+
   private Err() { throw new UnsupportedOperationException(); }
 }

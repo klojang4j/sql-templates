@@ -1,6 +1,7 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
+import org.klojang.check.fallible.FallibleFunction;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.PropertyWriter;
 import org.klojang.jdbc.x.rs.RecordFactory;
@@ -12,7 +13,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import static org.klojang.check.Tag.CLASS;
-import static org.klojang.jdbc.x.Strings.*;
+import static org.klojang.jdbc.x.Strings.BEAN_SUPPLIER;
+import static org.klojang.jdbc.x.Strings.CONFIG;
 import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
 import static org.klojang.util.ClassMethods.className;
 
@@ -47,8 +49,11 @@ public final class BeanExtractorFactory<T> {
   private final SessionConfig config;
 
   /**
-   * Will either be a RecordFactory in case clazz is a record type or a PropertyWriter[]
-   * array in case it is a JavaBean type.
+   * Will either be a RecordFactory in case clazz is a record type, or a PropertyWriter[]
+   * array in case it is a JavaBean type, or a row-to-bean conversion function in case
+   * clazz is null. It's called "payload" because it's the precious thing we set up just
+   * once, and which we then pass on to BeanExtractor instances retrieved from the
+   * factory.
    */
   private Object payload;
 
@@ -121,19 +126,48 @@ public final class BeanExtractorFactory<T> {
   }
 
   /**
+   * Creates a new {@code BeanExtractorFactory}. {@link BeanExtractor} instances retrieved
+   * from this {@code BeanExtractorFactory} will use the provided conversion function to
+   * convert {@link ResultSet} rows into objects of type {@code <T>}. Contrary to the
+   * other constructors, using this one to instantiate a {@code BeanExtractorFactory} is
+   * cheap. Therefore, contrary to the recommendation in the
+   * {@linkplain BeanExtractorFactory class comments}, there is no need to cache instances
+   * created this way, or store them in a {@code static final} field. Just create them
+   * when you need them.
+   *
+   * @param converter the row-to-bean conversion function
+   */
+  public BeanExtractorFactory(FallibleFunction<ResultSet, T, SQLException> converter) {
+    this.clazz = null;
+    this.supplier = null;
+    this.config = null;
+    this.payload = converter;
+  }
+
+  /**
    * Returns a {@code BeanExtractor} that will convert the rows in the specified
    * {@code ResultSet} into JavaBeans or records of type {@code <T>}.
    *
    * @param rs the {@code ResultSet}
    * @return A {@code BeanExtractor} that will convert the rows in the specified
    *       {@code ResultSet} into JavaBeans or records of type {@code <T>}
-   * @throws SQLException if a database error occurs
    */
   @SuppressWarnings("unchecked")
-  public BeanExtractor<T> getExtractor(ResultSet rs) throws SQLException {
-    return rs.next() ? clazz.isRecord()
-          ? recordExtractor(rs) : defaultExtractor(rs)
-          : NoopBeanExtractor.INSTANCE;
+  public BeanExtractor<T> getExtractor(ResultSet rs) {
+    try {
+      if (!rs.next()) {
+        return NoopBeanExtractor.INSTANCE;
+      }
+    } catch (SQLException e) {
+      throw Utils.wrap(e);
+    }
+    if (clazz == null) {
+      var converter = (FallibleFunction<ResultSet, T, SQLException>) payload;
+      return new CustomExtractor<>(rs, converter);
+    } else if (clazz.isRecord()) {
+      return recordExtractor(rs);
+    }
+    return defaultExtractor(rs);
   }
 
   private DefaultBeanExtractor<T> defaultExtractor(ResultSet rs) {

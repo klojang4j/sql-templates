@@ -10,32 +10,33 @@ import org.slf4j.LoggerFactory;
 import java.sql.ResultSet;
 import java.util.*;
 
-import static org.klojang.check.CommonChecks.*;
+import static org.klojang.check.CommonChecks.gt;
+import static org.klojang.check.CommonChecks.no;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.jdbc.x.Strings.LIMIT;
 
 final class RecordExtractor&lt;T extends Record&gt; implements BeanExtractor&lt;T&gt; {
 
   @SuppressWarnings(&quot;unused&quot;)
-<span class="fc" id="L20">  private static final Logger LOG = LoggerFactory.getLogger(RecordExtractor.class);</span>
+<span class="fc" id="L21">  private static final Logger LOG = LoggerFactory.getLogger(RecordExtractor.class);</span>
 
   private static class BeanIterator&lt;T extends Record&gt; implements Iterator&lt;T&gt; {
 
     private final RecordExtractor&lt;T&gt; extractor;
 
-<span class="nc" id="L26">    BeanIterator(RecordExtractor&lt;T&gt; extractor) {</span>
-<span class="nc" id="L27">      this.extractor = extractor;</span>
-<span class="nc" id="L28">    }</span>
+<span class="nc" id="L27">    BeanIterator(RecordExtractor&lt;T&gt; extractor) {</span>
+<span class="nc" id="L28">      this.extractor = extractor;</span>
+<span class="nc" id="L29">    }</span>
 
     @Override
     public boolean hasNext() {
-<span class="nc bnc" id="L32" title="All 2 branches missed.">      return !extractor.empty;</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">      return !extractor.empty;</span>
     }
 
     @Override
     public T next() {
-<span class="nc" id="L37">      Check.on(STATE, extractor.empty).is(no(), Err.NO_MORE_ROWS);</span>
-<span class="nc" id="L38">      return extractor.extract().get();</span>
+<span class="nc" id="L38">      Check.on(STATE, extractor.empty).is(no(), Err.NO_MORE_ROWS);</span>
+<span class="nc" id="L39">      return extractor.extract().get();</span>
     }
   }
 
@@ -43,76 +44,74 @@ final class RecordExtractor&lt;T extends Record&gt; implements BeanExtractor&lt;
   private final ResultSet rs;
   private final RecordFactory&lt;T&gt; factory;
 
-<span class="fc" id="L46">  RecordExtractor(ResultSet rs, RecordFactory&lt;T&gt; factory) {</span>
-<span class="fc" id="L47">    this.rs = rs;</span>
-<span class="fc" id="L48">    this.factory = factory;</span>
-<span class="fc" id="L49">  }</span>
+<span class="fc" id="L47">  RecordExtractor(ResultSet rs, RecordFactory&lt;T&gt; factory) {</span>
+<span class="fc" id="L48">    this.rs = rs;</span>
+<span class="fc" id="L49">    this.factory = factory;</span>
+<span class="fc" id="L50">  }</span>
 
   private boolean empty;
 
   @Override
   public Optional&lt;T&gt; extract() {
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">    if (empty) {</span>
-<span class="nc" id="L56">      return Optional.empty();</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">    if (empty) {</span>
+<span class="nc" id="L57">      return Optional.empty();</span>
     }
     try {
-<span class="fc" id="L59">      Optional&lt;T&gt; bean = Optional.of(factory.createRecord(rs));</span>
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">      empty = !rs.next();</span>
-<span class="fc" id="L61">      return bean;</span>
-<span class="nc" id="L62">    } catch (Throwable t) {</span>
-<span class="nc" id="L63">      throw Utils.wrap(t);</span>
+<span class="fc" id="L60">      Optional&lt;T&gt; bean = Optional.of(factory.createRecord(rs));</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">      empty = !rs.next();</span>
+<span class="fc" id="L62">      return bean;</span>
+<span class="nc" id="L63">    } catch (Throwable t) {</span>
+<span class="nc" id="L64">      throw Utils.wrap(t);</span>
     }
   }
 
   @Override
   public List&lt;T&gt; extract(int limit) {
-<span class="nc" id="L69">    Check.that(limit, LIMIT).is(gt(), 0);</span>
-<span class="nc bnc" id="L70" title="All 2 branches missed.">    if (empty) {</span>
-<span class="nc" id="L71">      return Collections.emptyList();</span>
+<span class="nc" id="L70">    Check.that(limit, LIMIT).is(gt(), 0);</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">    if (empty) {</span>
+<span class="nc" id="L72">      return Collections.emptyList();</span>
     }
-<span class="nc" id="L73">    List&lt;T&gt; beans = new ArrayList&lt;&gt;(limit);</span>
-<span class="nc" id="L74">    int i = 0;</span>
+<span class="nc" id="L74">    List&lt;T&gt; beans = new ArrayList&lt;&gt;(limit);</span>
     try {
-      do {
+<span class="nc bnc" id="L76" title="All 2 branches missed.">      for (int i = 0; i &lt; limit; ++i) {</span>
 <span class="nc" id="L77">        beans.add(factory.createRecord(rs));</span>
-<span class="nc bnc" id="L78" title="All 6 branches missed.">      } while (++i &lt; limit &amp;&amp; (empty = !rs.next()));</span>
-<span class="nc" id="L79">    } catch (Throwable t) {</span>
-<span class="nc" id="L80">      throw Utils.wrap(t);</span>
-<span class="nc" id="L81">    }</span>
-<span class="nc" id="L82">    return beans;</span>
-  }
-
-  @Override
-  public List&lt;T&gt; extractAll() {
-<span class="fc" id="L87">    return extractAll(10);</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (!rs.next()) {</span>
+<span class="nc" id="L79">          empty = true;</span>
+<span class="nc" id="L80">          break;</span>
+        }
+      }
+<span class="nc" id="L83">    } catch (Throwable t) {</span>
+<span class="nc" id="L84">      throw Utils.wrap(t);</span>
+<span class="nc" id="L85">    }</span>
+<span class="nc" id="L86">    return beans;</span>
   }
 
   @Override
   public List&lt;T&gt; extractAll(int sizeEstimate) {
-<span class="fc" id="L92">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">    if (empty) {</span>
-<span class="nc" id="L94">      return Collections.emptyList();</span>
+<span class="fc" id="L91">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">    if (empty) {</span>
+<span class="nc" id="L93">      return Collections.emptyList();</span>
     }
-<span class="fc" id="L96">    List&lt;T&gt; beans = new ArrayList&lt;&gt;(sizeEstimate);</span>
+<span class="fc" id="L95">    List&lt;T&gt; beans = new ArrayList&lt;&gt;(sizeEstimate);</span>
     try {
       do {
-<span class="fc" id="L99">        beans.add(factory.createRecord(rs));</span>
-<span class="fc bfc" id="L100" title="All 2 branches covered.">      } while (rs.next());</span>
-<span class="nc" id="L101">    } catch (Throwable t) {</span>
-<span class="nc" id="L102">      throw Utils.wrap(t);</span>
-<span class="fc" id="L103">    }</span>
-<span class="fc" id="L104">    empty = true;</span>
-<span class="fc" id="L105">    return beans;</span>
+<span class="fc" id="L98">        beans.add(factory.createRecord(rs));</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">      } while (rs.next());</span>
+<span class="nc" id="L100">    } catch (Throwable t) {</span>
+<span class="nc" id="L101">      throw Utils.wrap(t);</span>
+<span class="fc" id="L102">    }</span>
+<span class="fc" id="L103">    empty = true;</span>
+<span class="fc" id="L104">    return beans;</span>
   }
 
   @Override
   public boolean isEmpty() {
-<span class="nc" id="L110">    return empty;</span>
+<span class="nc" id="L109">    return empty;</span>
   }
 
   @Override
   public Iterator&lt;T&gt; iterator() {
-<span class="nc" id="L115">    return new BeanIterator&lt;&gt;(this);</span>
+<span class="nc" id="L114">    return new BeanIterator&lt;&gt;(this);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

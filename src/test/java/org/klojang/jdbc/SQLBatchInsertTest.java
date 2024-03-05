@@ -74,7 +74,7 @@ public class SQLBatchInsertTest {
 
   @Test
   public void insertBatch00() {
-    SQLBatchInsert<Person> insert = SQL
+    BatchInsert<Person> insert = SQL
           .insertBatch()
           .of(Person.class)
           .into("TEST")
@@ -94,7 +94,7 @@ public class SQLBatchInsertTest {
   @Test
   public void insertAllAndGetIDs00() {
     long[] ids;
-    SQLBatchInsert<Person> insert = SQL
+    BatchInsert<Person> insert = SQL
           .insertBatch()
           .of(Person.class)
           .into("TEST")
@@ -118,7 +118,7 @@ public class SQLBatchInsertTest {
     List<Person> persons = List.of(new Person("John"),
           new Person("Mark"),
           new Person("Edward"));
-    SQLBatchInsert<Person> insert = SQL
+    BatchInsert<Person> insert = SQL
           .insertBatch()
           .of(Person.class)
           .into("TEST")

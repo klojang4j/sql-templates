@@ -72,48 +72,47 @@ final class DefaultMapExtractor implements MapExtractor {
 <span class="nc" id="L72">      return Collections.emptyList();</span>
     }
 <span class="nc" id="L74">    List&lt;Map&lt;String, Object&gt;&gt; all = new ArrayList&lt;&gt;(limit);</span>
-<span class="nc" id="L75">    int i = 0;</span>
-    try {
-      do {
-<span class="nc" id="L78">        all.add(toMap(rs, writers));</span>
-<span class="nc bnc" id="L79" title="All 6 branches missed.">      } while (++i &lt; limit &amp;&amp; (empty = !rs.next()));</span>
-<span class="nc" id="L80">    } catch (Throwable t) {</span>
-<span class="nc" id="L81">      throw Utils.wrap(t);</span>
-<span class="nc" id="L82">    }</span>
-<span class="nc" id="L83">    return all;</span>
-  }
 
-  @Override
-  public List&lt;Map&lt;String, Object&gt;&gt; extractAll() {
-<span class="fc" id="L88">    return extractAll(10);</span>
+    try {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">      for (int i = 0; i &lt; limit; ++i) {</span>
+<span class="nc" id="L78">        all.add(toMap(rs, writers));</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (!rs.next()) {</span>
+<span class="nc" id="L80">          empty = true;</span>
+<span class="nc" id="L81">          break;</span>
+        }
+      }
+<span class="nc" id="L84">    } catch (Throwable t) {</span>
+<span class="nc" id="L85">      throw Utils.wrap(t);</span>
+<span class="nc" id="L86">    }</span>
+<span class="nc" id="L87">    return all;</span>
   }
 
   @Override
   public List&lt;Map&lt;String, Object&gt;&gt; extractAll(int sizeEstimate) {
-<span class="fc" id="L93">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
-<span class="pc bpc" id="L94" title="1 of 2 branches missed.">    if (empty) {</span>
-<span class="nc" id="L95">      return Collections.emptyList();</span>
+<span class="fc" id="L92">    Check.that(sizeEstimate, &quot;sizeEstimate&quot;).is(gt(), 0);</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">    if (empty) {</span>
+<span class="nc" id="L94">      return Collections.emptyList();</span>
     }
-<span class="fc" id="L97">    List&lt;Map&lt;String, Object&gt;&gt; all = new ArrayList&lt;&gt;(sizeEstimate);</span>
+<span class="fc" id="L96">    List&lt;Map&lt;String, Object&gt;&gt; all = new ArrayList&lt;&gt;(sizeEstimate);</span>
     try {
       do {
-<span class="fc" id="L100">        all.add(toMap(rs, writers));</span>
-<span class="pc bpc" id="L101" title="1 of 2 branches missed.">      } while (rs.next());</span>
-<span class="nc" id="L102">    } catch (Throwable t) {</span>
-<span class="nc" id="L103">      throw Utils.wrap(t);</span>
-<span class="fc" id="L104">    }</span>
-<span class="fc" id="L105">    empty = true;</span>
-<span class="fc" id="L106">    return all;</span>
+<span class="fc" id="L99">        all.add(toMap(rs, writers));</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">      } while (rs.next());</span>
+<span class="nc" id="L101">    } catch (Throwable t) {</span>
+<span class="nc" id="L102">      throw Utils.wrap(t);</span>
+<span class="fc" id="L103">    }</span>
+<span class="fc" id="L104">    empty = true;</span>
+<span class="fc" id="L105">    return all;</span>
   }
 
   @Override
   public boolean isEmpty() {
-<span class="nc" id="L111">    return empty;</span>
+<span class="nc" id="L110">    return empty;</span>
   }
 
   @Override
   public Iterator&lt;Map&lt;String, Object&gt;&gt; iterator() {
-<span class="nc" id="L116">    return new MapIterator(this);</span>
+<span class="nc" id="L115">    return new MapIterator(this);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -72,20 +72,19 @@ final class DefaultMapExtractor implements MapExtractor {
       return Collections.emptyList();
     }
     List<Map<String, Object>> all = new ArrayList<>(limit);
-    int i = 0;
+
     try {
-      do {
+      for (int i = 0; i < limit; ++i) {
         all.add(toMap(rs, writers));
-      } while (++i < limit && (empty = !rs.next()));
+        if (!rs.next()) {
+          empty = true;
+          break;
+        }
+      }
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
     return all;
-  }
-
-  @Override
-  public List<Map<String, Object>> extractAll() {
-    return extractAll(10);
   }
 
   @Override

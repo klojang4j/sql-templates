@@ -52,7 +52,7 @@ import static org.klojang.util.StringMethods.append;
  * @see SQL#insertBatch()
  */
 @SuppressWarnings({"resource"})
-public final class SQLBatchInsert<T> {
+public final class BatchInsert<T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSQLSession.class);
 
@@ -60,7 +60,7 @@ public final class SQLBatchInsert<T> {
   private final String[] props;
   private final String sqlBase;
 
-  SQLBatchInsert(BatchInsertConfig<T> cfg) {
+  BatchInsert(BatchInsertConfig<T> cfg) {
     this.cfg = cfg;
     this.props = cfg.reader().getReadableProperties().toArray(String[]::new);
     this.sqlBase = getSqlBase(cfg, props);

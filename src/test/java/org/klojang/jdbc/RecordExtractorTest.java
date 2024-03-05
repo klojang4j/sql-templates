@@ -58,7 +58,7 @@ public class RecordExtractorTest {
           new Person(0, "Peter", "Peterson", LocalDate.of(1963, 5, 3)),
           new Person(0, "Joe", "Peterson", LocalDate.of(1998, 9, 23))
     );
-    SQLBatchInsert<Person> bi = SQL.insertBatch()
+    BatchInsert<Person> bi = SQL.insertBatch()
           .of(Person.class)
           .into("PERSON")
           .excluding("personId")
