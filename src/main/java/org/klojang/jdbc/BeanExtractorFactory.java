@@ -37,7 +37,7 @@ import static org.klojang.util.ClassMethods.className;
  * @param <T> the type of JavaBeans or records produced by the extractor
  * @author Ayco Holleman
  */
-public final class BeanExtractorFactory<T> {
+public final class BeanExtractorFactory<T> implements ExtractorFactory<T> {
 
   private static final String RECORDS_NOT_ALLOWED
         = "bean supplier not supported for immutable type ${0}";
@@ -154,13 +154,6 @@ public final class BeanExtractorFactory<T> {
    */
   @SuppressWarnings("unchecked")
   public BeanExtractor<T> getExtractor(ResultSet rs) {
-    try {
-      if (!rs.next()) {
-        return NoopBeanExtractor.INSTANCE;
-      }
-    } catch (SQLException e) {
-      throw Utils.wrap(e);
-    }
     if (clazz == null) {
       var converter = (FallibleFunction<ResultSet, T, SQLException>) payload;
       return new CustomExtractor<>(rs, converter);

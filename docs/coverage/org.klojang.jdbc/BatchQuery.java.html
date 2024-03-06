@@ -9,72 +9,185 @@ import java.util.List;
 
 import static java.lang.System.identityHashCode;
 
+/**
+ * Enables you to process a query result in batches across multiple, independent requests.
+ * These would typically be HTTP requests, but any stateless request-response mechanism
+ * might want to use the functionality offered by the {@code BatchInsert} class. The query
+ * result will be kept alive until all records have been extracted from it. Once all
+ * records have been extracted, the associated JDBC resources will be closed
+ * automatically. As soon as, and as long as there are any such persistent query results,
+ * a background thread will periodically check whether any of them have gone stale. Stale
+ * query results will be closed and disposed of by this thread.
+ *
+ * @param &lt;T&gt; the type of the JavaBeans or records produced by the
+ *       {@code BatchQuery}.
+ */
 public final class BatchQuery&lt;T&gt; {
 
+  /**
+   * An object that functions as an identifier for a query result. A {@code QueryId} (or
+   * rather it string representation) is meant to be ping-ponged back and forth between
+   * client and server, for example via a URL query parameters and response header,
+   * respectively. On the server side it use used to instantiate a {@code BatchInsert}
+   * object, allowing it to identify, and wrap itself around the query result.
+   */
   public static final class QueryId {
 
+    /**
+     * Creates a {@code QueryId} from the specified string representation
+     *
+     * @param id the string representation of a {@code QueryId}
+     * @return a {@code QueryId} from the specified string representation
+     */
     public static QueryId of(String id) {
-<span class="nc" id="L17">      return new QueryId(NumberMethods.parseInt(id));</span>
+<span class="nc" id="L43">      return new QueryId(NumberMethods.parseInt(id));</span>
     }
 
     private final int id;
 
-<span class="nc" id="L22">    private QueryId(int id) { this.id = id; }</span>
+<span class="nc" id="L48">    private QueryId(int id) { this.id = id; }</span>
 
-<span class="nc" id="L24">    QueryId(ResultSet rs) { this(identityHashCode(rs)); }</span>
+<span class="nc" id="L50">    QueryId(ResultSet rs) { this(identityHashCode(rs)); }</span>
 
-<span class="nc" id="L26">    public int hashCode() { return id; }</span>
 
+    /**
+     * Returns the hash code of this {@code QueryId}.
+     *
+     * @return the hash code of this {@code QueryId}
+     */
+<span class="nc" id="L58">    public int hashCode() { return id; }</span>
+
+    /**
+     * Determines whether this {@code QueryId} equals the specified object.
+     *
+     * @param obj the object to compare this {@code QueryId} with
+     * @return whether this {@code QueryId} equals the specified object
+     */
+    @Override
     public boolean equals(Object obj) {
-<span class="nc bnc" id="L29" title="All 6 branches missed.">      return this == obj || (obj instanceof QueryId qid &amp;&amp; id == qid.id);</span>
+<span class="nc bnc" id="L68" title="All 6 branches missed.">      return this == obj || (obj instanceof QueryId qid &amp;&amp; id == qid.id);</span>
     }
 
-<span class="nc" id="L32">    public String toString() { return String.valueOf(id); }</span>
+    /**
+     * Returns the string representation of this {@code QueryId}.
+     *
+     * @return the string representation of this {@code QueryId}
+     */
+<span class="nc" id="L76">    public String toString() { return String.valueOf(id); }</span>
   }
 
+  /**
+   * Registers the specified {@code SQLQuery} for batch processing and returns a
+   * {@code QueryId}. The {@code QueryId} can be used to instantiate a {@code BatchInsert}
+   * object, allowing it the identify and wrap itself around a {@link ResultSet}.
+   * Equivalent to
+   * {@link #register(SQLQuery, Duration) register(query, Duration.ofMinutes(10), true)}.
+   * In other words, the client gets ten minutes to process a batch before it must request
+   * the {@linkplain #nextBatch(int) next batch}. After that, the {@link ResultSet} will
+   * be deemed stale. It will be closed and disposed of, and the request will trigger a
+   * {@link DatabaseException}.
+   *
+   * @param query the {@code SQLQuery} to be registered for batch processing
+   * @return a {@code QueryId}
+   */
   public static QueryId register(SQLQuery query) {
-<span class="nc" id="L36">    return register(query, Duration.ofMinutes(10), true);</span>
+<span class="nc" id="L94">    return register(query, Duration.ofMinutes(10), true);</span>
   }
 
+  /**
+   * Registers the specified {@code SQLQuery} for batch processing and returns a
+   * {@code QueryId}. The {@code QueryId} can be used to instantiate a {@code BatchInsert}
+   * object, allowing it the identify and wrap itself around a {@link ResultSet}.
+   * Equivalent to
+   * {@link #register(SQLQuery, Duration) register(query, stayAliveTime, true)}.
+   *
+   * @param query the {@code SQLQuery} to be registered for batch processing
+   * @param stayAliveTime determines how long the query result should be kept alive
+   *       between requests for new batches. If the time interval between any two
+   *       consecutive requests is longer than the specified duration, the query result
+   *       will be deemed stale and &lt;i&gt;Klojang JDBC&lt;/i&gt; will close the associated JDBC
+   *       resources and then dispose of it.
+   * @return a {@code QueryId}
+   */
   public static QueryId register(SQLQuery query, Duration stayAliveTime) {
-<span class="nc" id="L40">    return register(query, stayAliveTime, true);</span>
+<span class="nc" id="L113">    return register(query, stayAliveTime, true);</span>
   }
 
+  /**
+   * Registers the specified {@code SQLQuery} for batch processing and returns a
+   * {@code QueryId}. The {@code QueryId} can be used to instantiate a {@code BatchInsert}
+   * object, allowing it the identify and wrap itself around a {@link ResultSet}.
+   *
+   * @param query the {@code SQLQuery} to be registered for batch processing
+   * @param stayAliveTime determines how long the query result should be kept alive
+   *       between requests for new batches. If the time interval between any two
+   *       consecutive requests is longer than the specified duration, the query result
+   *       will be deemed stale and &lt;i&gt;Klojang JDBC&lt;/i&gt; will close the associated JDBC
+   *       resources and then dispose of it.
+   * @param closeConnection whether to close the JDBC connection once all records
+   *       have been retrieved from the underlying {@link ResultSet}
+   * @return
+   */
   public static QueryId register(SQLQuery query,
         Duration stayAliveTime,
         boolean closeConnection) {
-<span class="nc" id="L46">    ResultSet rs = query.execute();</span>
-<span class="nc" id="L47">    ResultSetCache cache = ResultSetCache.getInstance();</span>
-<span class="nc" id="L48">    Connection con = query.session.con;</span>
-<span class="nc" id="L49">    return cache.add(con, rs, stayAliveTime.getSeconds(), closeConnection);</span>
+<span class="nc" id="L134">    ResultSet rs = query.execute();</span>
+<span class="nc" id="L135">    ResultSetCache cache = ResultSetCache.getInstance();</span>
+<span class="nc" id="L136">    Connection con = query.session.con;</span>
+<span class="nc" id="L137">    return cache.add(con, rs, stayAliveTime.getSeconds(), closeConnection);</span>
   }
 
+  /**
+   * Terminates the processing of all persistent query results.
+   */
   public static void terminateAll() {
-<span class="nc" id="L53">    ResultSetCache.getInstance().clearCache();</span>
-<span class="nc" id="L54">  }</span>
+<span class="nc" id="L144">    ResultSetCache.getInstance().clearCache();</span>
+<span class="nc" id="L145">  }</span>
 
   private final QueryId queryId;
-  private final BeanExtractorFactory&lt;T&gt; factory;
+  private final ExtractorFactory&lt;T&gt; factory;
 
-<span class="nc" id="L59">  public BatchQuery(QueryId queryId, BeanExtractorFactory&lt;T&gt; factory) {</span>
-<span class="nc" id="L60">    this.queryId = queryId;</span>
-<span class="nc" id="L61">    this.factory = factory;</span>
-<span class="nc" id="L62">  }</span>
+  /**
+   * Instantiates a new {@code BatchQuery} object.
+   *
+   * @param queryId the ID of the query result to be processed by the
+   *       {@code BatchQuery} object
+   * @param factory a factory for the {@link BeanExtractor} that will process the
+   *       {@code ResultSet}
+   */
+<span class="nc" id="L158">  public BatchQuery(QueryId queryId, ExtractorFactory&lt;T&gt; factory) {</span>
+<span class="nc" id="L159">    this.queryId = queryId;</span>
+<span class="nc" id="L160">    this.factory = factory;</span>
+<span class="nc" id="L161">  }</span>
 
+  /**
+   * Retrieves the next batch of records from the query result and converts them into
+   * instances of type {@code &lt;T&gt;}.
+   *
+   * @param batchSize the number of records to retrieve
+   * @return the next batch of records, converted into instances of type {@code &lt;T&gt;}
+   */
   public List&lt;T&gt; nextBatch(int batchSize) {
-<span class="nc" id="L65">    ResultSetCache cache = ResultSetCache.getInstance();</span>
-<span class="nc" id="L66">    ResultSet rs = ResultSetCache.getInstance().get(queryId);</span>
-<span class="nc" id="L67">    BeanExtractor&lt;T&gt; extractor = factory.getExtractor(rs);</span>
-<span class="nc" id="L68">    List&lt;T&gt; beans = extractor.extract(batchSize);</span>
-<span class="nc bnc" id="L69" title="All 2 branches missed.">    if (extractor.isEmpty()) {</span>
-<span class="nc" id="L70">      cache.remove(queryId);</span>
+<span class="nc" id="L171">    ResultSetCache cache = ResultSetCache.getInstance();</span>
+<span class="nc" id="L172">    ResultSet rs = ResultSetCache.getInstance().get(queryId);</span>
+<span class="nc" id="L173">    BeanExtractor&lt;T&gt; extractor = factory.getExtractor(rs);</span>
+<span class="nc" id="L174">    List&lt;T&gt; beans = extractor.extract(batchSize);</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">    if (extractor.isEmpty()) {</span>
+<span class="nc" id="L176">      cache.remove(queryId);</span>
     }
-<span class="nc" id="L72">    return beans;</span>
+<span class="nc" id="L178">    return beans;</span>
   }
 
+  /**
+   * Terminates the processing of the query result. Will close the underlying
+   * {@link ResultSet} and possibly also the associated JDBC connection (see
+   * {@link #register(SQLQuery, Duration, boolean)}). You do not need to call this method
+   * if you process the query result all the way to the last row, but you might want to
+   * call this in exceptional situations where you need to abort the query.
+   */
   public void terminate() {
-<span class="nc" id="L76">    ResultSetCache.getInstance().remove(queryId);</span>
-<span class="nc" id="L77">  }</span>
+<span class="nc" id="L189">    ResultSetCache.getInstance().remove(queryId);</span>
+<span class="nc" id="L190">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

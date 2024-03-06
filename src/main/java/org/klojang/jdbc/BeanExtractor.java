@@ -61,11 +61,8 @@ import java.util.Optional;
  * @see BeanExtractorFactory
  * @see MapExtractor
  */
-public sealed interface BeanExtractor<T> extends Iterable<T> permits DefaultBeanExtractor,
-      MapExtractor,
-      RecordExtractor,
-      CustomExtractor,
-      NoopBeanExtractor {
+public sealed interface BeanExtractor<T> extends Iterable<T>
+      permits MapExtractor, AbstractBeanExtractor {
 
   /**
    * Converts the current row within the {@code ResultSet} into a bean. If the

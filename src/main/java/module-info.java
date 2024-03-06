@@ -42,7 +42,7 @@
  *    new Person("Joe", "Peterson", LocalDate.of(1998, 9, 23))
  * );
  *
- * SQLBatchInsert batchInsert = SQL.insertBatch()
+ * BatchInsert batchInsert = SQL.insertBatch()
  *    .of(Person.class)
  *    .excluding("personId")
  *    .prepare(con);

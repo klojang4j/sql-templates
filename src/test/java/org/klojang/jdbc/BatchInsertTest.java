@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 //@Disabled
-public class SQLBatchInsertTest {
+public class BatchInsertTest {
 
   private static final String DB_DIR = System.getProperty("user.home") + "/SQLBatchInsertTest/h2";
   private static final ThreadLocal<Connection> MY_CON = new ThreadLocal<>();
@@ -50,7 +50,7 @@ public class SQLBatchInsertTest {
     }
   }
 
-  public SQLBatchInsertTest() { }
+  public BatchInsertTest() { }
 
   @BeforeEach
   public void before() throws IOException, SQLException {

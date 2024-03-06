@@ -144,7 +144,7 @@ public final class BatchInsertBuilder {
    * respectively, since all characters end up in upper case anyway.)
    *
    * @param propertyToColumnMapper the property-to-column mapper
-   * @return this {@code SQLBatchInsertBuilder}
+   * @return this {@code BatchInsertBuilder}
    */
   public BatchInsertBuilder withNameMapper(NameMapper propertyToColumnMapper) {
     Check.notNull(propertyToColumnMapper);
@@ -154,13 +154,13 @@ public final class BatchInsertBuilder {
 
 
   /**
-   * Creates and returns a {@code SQLBatchInsert} instance using the input provided via
+   * Creates and returns a {@code BatchInsert} instance using the input provided via
    * the other methods
    *
    * @param con the JDBC {@code Connection} to use for the INSERT statement
    * @param <T> the type of the beans or records to be persisted by the
-   *       {@code SQLBatchInsert} instance
-   * @return a {@code SQLBatchInsert} instance
+   *       {@code BatchInsert} instance
+   * @return a {@code BatchInsert} instance
    */
   public <T> BatchInsert<T> prepare(Connection con) {
     Check.notNull(con);

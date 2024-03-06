@@ -37,7 +37,7 @@ import static org.klojang.util.ClassMethods.className;
  * @param &lt;T&gt; the type of JavaBeans or records produced by the extractor
  * @author Ayco Holleman
  */
-public final class BeanExtractorFactory&lt;T&gt; {
+public final class BeanExtractorFactory&lt;T&gt; implements ExtractorFactory&lt;T&gt; {
 
   private static final String RECORDS_NOT_ALLOWED
         = &quot;bean supplier not supported for immutable type ${0}&quot;;
@@ -154,60 +154,53 @@ public final class BeanExtractorFactory&lt;T&gt; {
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public BeanExtractor&lt;T&gt; getExtractor(ResultSet rs) {
-    try {
-<span class="pc bpc" id="L158" title="1 of 2 branches missed.">      if (!rs.next()) {</span>
-<span class="nc" id="L159">        return NoopBeanExtractor.INSTANCE;</span>
-      }
-<span class="nc" id="L161">    } catch (SQLException e) {</span>
-<span class="nc" id="L162">      throw Utils.wrap(e);</span>
-<span class="fc" id="L163">    }</span>
-<span class="pc bpc" id="L164" title="1 of 2 branches missed.">    if (clazz == null) {</span>
-<span class="nc" id="L165">      var converter = (FallibleFunction&lt;ResultSet, T, SQLException&gt;) payload;</span>
-<span class="nc" id="L166">      return new CustomExtractor&lt;&gt;(rs, converter);</span>
-<span class="fc bfc" id="L167" title="All 2 branches covered.">    } else if (clazz.isRecord()) {</span>
-<span class="fc" id="L168">      return recordExtractor(rs);</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">    if (clazz == null) {</span>
+<span class="nc" id="L158">      var converter = (FallibleFunction&lt;ResultSet, T, SQLException&gt;) payload;</span>
+<span class="nc" id="L159">      return new CustomExtractor&lt;&gt;(rs, converter);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">    } else if (clazz.isRecord()) {</span>
+<span class="fc" id="L161">      return recordExtractor(rs);</span>
     }
-<span class="fc" id="L170">    return defaultExtractor(rs);</span>
+<span class="fc" id="L163">    return defaultExtractor(rs);</span>
   }
 
   private DefaultBeanExtractor&lt;T&gt; defaultExtractor(ResultSet rs) {
     PropertyWriter&lt;?, ?&gt;[] writers;
-<span class="pc bpc" id="L175" title="1 of 2 branches missed.">    if ((writers = (PropertyWriter&lt;?, ?&gt;[]) payload) == null) {</span>
-<span class="fc" id="L176">      lock.lock();</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">    if ((writers = (PropertyWriter&lt;?, ?&gt;[]) payload) == null) {</span>
+<span class="fc" id="L169">      lock.lock();</span>
       try {
         // Check again, but now we know for sure the only one in here
-<span class="pc bpc" id="L179" title="1 of 2 branches missed.">        if (payload == null) {</span>
-<span class="fc" id="L180">          payload = writers = createWriters(rs, clazz, config);</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        if (payload == null) {</span>
+<span class="fc" id="L173">          payload = writers = createWriters(rs, clazz, config);</span>
         }
       } finally {
-<span class="fc" id="L183">        lock.unlock();</span>
+<span class="fc" id="L176">        lock.unlock();</span>
       }
     }
-<span class="fc" id="L186">    return new DefaultBeanExtractor&lt;&gt;(rs, writers, supplier);</span>
+<span class="fc" id="L179">    return new DefaultBeanExtractor&lt;&gt;(rs, writers, supplier);</span>
   }
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   private RecordExtractor recordExtractor(ResultSet rs) {
     RecordFactory recordFactory;
-<span class="pc bpc" id="L192" title="1 of 2 branches missed.">    if ((recordFactory = (RecordFactory) payload) == null) {</span>
-<span class="fc" id="L193">      lock.lock();</span>
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">    if ((recordFactory = (RecordFactory) payload) == null) {</span>
+<span class="fc" id="L186">      lock.lock();</span>
       try {
-<span class="pc bpc" id="L195" title="1 of 2 branches missed.">        if (payload == null) {</span>
-<span class="fc" id="L196">          payload = recordFactory = new RecordFactory&lt;&gt;((Class) clazz, rs, config);</span>
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">        if (payload == null) {</span>
+<span class="fc" id="L189">          payload = recordFactory = new RecordFactory&lt;&gt;((Class) clazz, rs, config);</span>
         }
       } finally {
-<span class="fc" id="L199">        lock.unlock();</span>
+<span class="fc" id="L192">        lock.unlock();</span>
       }
     }
-<span class="fc" id="L202">    return new RecordExtractor&lt;&gt;(rs, recordFactory);</span>
+<span class="fc" id="L195">    return new RecordExtractor&lt;&gt;(rs, recordFactory);</span>
   }
 
 
   private static &lt;U&gt; U newInstance(Class&lt;U&gt; clazz) {
     try {
-<span class="fc" id="L208">      return InvokeMethods.newInstance(clazz);</span>
-<span class="nc" id="L209">    } catch (Exception e) {</span>
-<span class="nc" id="L210">      throw Utils.wrap(e);</span>
+<span class="fc" id="L201">      return InvokeMethods.newInstance(clazz);</span>
+<span class="nc" id="L202">    } catch (Exception e) {</span>
+<span class="nc" id="L203">      throw Utils.wrap(e);</span>
     }
   }
 }

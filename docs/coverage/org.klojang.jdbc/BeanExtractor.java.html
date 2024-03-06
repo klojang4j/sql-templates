@@ -61,11 +61,8 @@ import java.util.Optional;
  * @see BeanExtractorFactory
  * @see MapExtractor
  */
-public sealed interface BeanExtractor&lt;T&gt; extends Iterable&lt;T&gt; permits DefaultBeanExtractor,
-      MapExtractor,
-      RecordExtractor,
-      CustomExtractor,
-      NoopBeanExtractor {
+public sealed interface BeanExtractor&lt;T&gt; extends Iterable&lt;T&gt;
+      permits MapExtractor, AbstractBeanExtractor {
 
   /**
    * Converts the current row within the {@code ResultSet} into a bean. If the
@@ -98,7 +95,7 @@ public sealed interface BeanExtractor&lt;T&gt; extends Iterable&lt;T&gt; permits
    * @return a {@code List} of beans or an empty {@code List} if the {@code ResultSet}
    *       contained no (more) rows
    */
-<span class="fc" id="L101">  default List&lt;T&gt; extractAll() { return extractAll(10); }</span>
+<span class="fc" id="L98">  default List&lt;T&gt; extractAll() { return extractAll(10); }</span>
 
   /**
    * Converts all remaining rows in the {@code ResultSet} into beans.

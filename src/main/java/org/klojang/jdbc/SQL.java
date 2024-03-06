@@ -526,7 +526,7 @@ public sealed interface SQL permits AbstractSQL {
    * Returns an {@link BatchInsertBuilder} that enables you to easily configure large
    * batch inserts.
    *
-   * @return an {@code SQLBatchInsertBuilder} that enables you to easily configure large
+   * @return an {@code BatchInsertBuilder} that enables you to easily configure large
    *       batch inserts.
    */
   static BatchInsertBuilder insertBatch() {

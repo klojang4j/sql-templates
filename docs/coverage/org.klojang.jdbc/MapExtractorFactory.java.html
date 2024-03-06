@@ -5,7 +5,7 @@ import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.KeyWriter;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
@@ -47,7 +47,7 @@ import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
  *
  * @author Ayco Holleman
  */
-public final class MapExtractorFactory {
+public final class MapExtractorFactory implements ExtractorFactory&lt;Map&lt;String, Object&gt;&gt; {
 
 <span class="fc" id="L52">  private final ReentrantLock lock = new ReentrantLock();</span>
 
@@ -81,26 +81,19 @@ public final class MapExtractorFactory {
    *       {@code ResultSet} into {@code Map&lt;String, Object&gt;} pseudo-objects.
    */
   public MapExtractor getExtractor(ResultSet rs) {
-    try {
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">      if (!rs.next()) {</span>
-<span class="nc" id="L86">        return NoopMapExtractor.INSTANCE;</span>
-      }
-<span class="nc" id="L88">    } catch (SQLException e) {</span>
-<span class="nc" id="L89">      throw Utils.wrap(e);</span>
-<span class="fc" id="L90">    }</span>
     KeyWriter&lt;?&gt;[] writers;
-<span class="fc bfc" id="L92" title="All 2 branches covered.">    if ((writers = payload) == null) {</span>
-<span class="fc" id="L93">      lock.lock();</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">    if ((writers = payload) == null) {</span>
+<span class="fc" id="L86">      lock.lock();</span>
       try {
         // Check again, but now we know for sure the only one in here
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (payload == null) {</span>
-<span class="fc" id="L97">          payload = writers = createWriters(rs, config);</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (payload == null) {</span>
+<span class="fc" id="L90">          payload = writers = createWriters(rs, config);</span>
         }
       } finally {
-<span class="fc" id="L100">        lock.unlock();</span>
+<span class="fc" id="L93">        lock.unlock();</span>
       }
     }
-<span class="fc" id="L103">    return new DefaultMapExtractor(rs, writers);</span>
+<span class="fc" id="L96">    return new DefaultMapExtractor(rs, writers);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

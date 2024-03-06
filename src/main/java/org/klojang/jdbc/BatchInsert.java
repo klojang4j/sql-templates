@@ -25,9 +25,9 @@ import static org.klojang.util.ClassMethods.className;
 import static org.klojang.util.StringMethods.append;
 
 /**
- * <p>{@code SQLBatchInsert} specializes in saving large batches of JavaBeans or records
+ * <p>{@code BatchInsert} specializes in saving large batches of JavaBeans or records
  * to the database. Instances are configured and obtained via a
- * {@link BatchInsertBuilder}. A {@code SQLBatchInsert} is not underpinned by a
+ * {@link BatchInsertBuilder}. A {@code BatchInsert} is not underpinned by a
  * {@link java.sql.PreparedStatement}. Yet, it provides just as much protection against
  * SQL injection, as it will process each and every value in the batch using
  * {@link Quoter#quoteValue(Object) Quoter.quoteValue()}. This method ultimately relies on
@@ -47,7 +47,7 @@ import static org.klojang.util.StringMethods.append;
  * operation differently, so if performance is important, you should test which one works
  * best for your use case. Otherwise, which one you choose largely is a matter of taste.
  *
- * @param <T> the type of the JavaBeans or records to save to the database.
+ * @param <T> the type of the JavaBeans or records to save to the database
  * @see BatchInsertBuilder
  * @see SQL#insertBatch()
  */

@@ -5,7 +5,7 @@ import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.KeyWriter;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
@@ -47,7 +47,7 @@ import static org.klojang.jdbc.x.rs.KeyWriter.createWriters;
  *
  * @author Ayco Holleman
  */
-public final class MapExtractorFactory {
+public final class MapExtractorFactory implements ExtractorFactory<Map<String, Object>> {
 
   private final ReentrantLock lock = new ReentrantLock();
 
@@ -81,13 +81,6 @@ public final class MapExtractorFactory {
    *       {@code ResultSet} into {@code Map<String, Object>} pseudo-objects.
    */
   public MapExtractor getExtractor(ResultSet rs) {
-    try {
-      if (!rs.next()) {
-        return NoopMapExtractor.INSTANCE;
-      }
-    } catch (SQLException e) {
-      throw Utils.wrap(e);
-    }
     KeyWriter<?>[] writers;
     if ((writers = payload) == null) {
       lock.lock();
