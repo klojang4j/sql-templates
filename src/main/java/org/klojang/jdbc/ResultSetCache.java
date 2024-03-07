@@ -40,7 +40,7 @@ final class ResultSetCache {
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(ResultSetCache.class);
-  private static final long LIFE_CHECK_INTERVAL = 2 * 60 * 1000; // every 2 minutes
+  private static final long CHECK_INTERVAL = 2 * 60 * 1000; // every 2 minutes
 
   private static final ResultSetCache instance = new ResultSetCache();
 
@@ -95,7 +95,7 @@ final class ResultSetCache {
 
   private void removeStaleResultSets() {
     try {
-      Thread.sleep(LIFE_CHECK_INTERVAL);
+      Thread.sleep(CHECK_INTERVAL);
       synchronized (cache) {
         final long now = Instant.now().getEpochSecond();
         // Copy keys to avoid ConcurrentModificationException
@@ -114,7 +114,7 @@ final class ResultSetCache {
         }
       }
     } catch (InterruptedException e) {
-      LOG.trace("Aborting staleness checks");
+      LOG.trace("Aborting staleness check");
     }
   }
 
