@@ -1,34 +1,22 @@
 package org.klojang.jdbc;
 
 import org.klojang.check.Check;
-import org.klojang.invoke.BeanReader;
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.jdbc.x.Msg;
-import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.ParamExtractor;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
 import org.klojang.util.CollectionMethods;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
+import java.util.Collection;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static org.klojang.check.CommonChecks.deepNotNull;
-import static org.klojang.check.CommonChecks.empty;
 import static org.klojang.check.Tag.PATH;
-import static org.klojang.check.Tag.VARARGS;
-import static org.klojang.jdbc.x.Strings.*;
+import static org.klojang.jdbc.x.Strings.IDENTIFIER;
+import static org.klojang.jdbc.x.Strings.VAR_NAME;
 
 final class SQLSkeletonSession extends DynamicSQLSession {
-
-  private static final Logger LOG = LoggerFactory.getLogger(SQLSkeletonSession.class);
 
   SQLSkeletonSession(Connection con, AbstractSQL sql, RenderSession session) {
     super(con, sql, session);
@@ -107,6 +95,5 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   private SQLInfo getSQLInfo() {
     return new SQLInfo(new ParamExtractor(session.render()));
   }
-
 
 }

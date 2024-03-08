@@ -7,7 +7,6 @@ import org.klojang.templates.RenderSession;
 
 import java.sql.Connection;
 
-
 final class SQLTemplateSession extends DynamicSQLSession {
 
   private final ParamExtractor extractor;
@@ -44,6 +43,5 @@ final class SQLTemplateSession extends DynamicSQLSession {
   private SQLInfo getSQLInfo(RenderSession session, ParamExtractor extractor) {
     return new SQLInfo(session.render(), extractor);
   }
-
 
 }

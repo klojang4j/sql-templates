@@ -1,5 +1,6 @@
 package org.klojang.jdbc;
 
+import org.klojang.check.Check;
 import org.klojang.convert.NumberMethods;
 
 import java.sql.Connection;
@@ -8,6 +9,7 @@ import java.time.Duration;
 import java.util.List;
 
 import static java.lang.System.identityHashCode;
+import static org.klojang.jdbc.x.Strings.QUERY;
 
 /**
  * Facilitates the processing of large query results in batches across multiple,
@@ -24,57 +26,6 @@ import static java.lang.System.identityHashCode;
  *       {@code BatchQuery}
  */
 public final class BatchQuery<T> {
-
-  /**
-   * Functions as an identifier for a persistent query result. A {@code QueryId} (or
-   * rather it string representation) is meant to be ping-ponged back and forth between
-   * client and server, for example via a URL query parameter and response header,
-   * respectively. On the server side it is used to instantiate a {@code BatchInsert}
-   * object, allowing it to identify and wrap itself around the query result.
-   */
-  public static final class QueryId {
-
-    /**
-     * Creates a {@code QueryId} from the specified string representation
-     *
-     * @param id the string representation of a {@code QueryId}
-     * @return a {@code QueryId} from the specified string representation
-     */
-    public static QueryId of(String id) {
-      return new QueryId(NumberMethods.parseInt(id));
-    }
-
-    private final int id;
-
-    private QueryId(int id) { this.id = id; }
-
-    QueryId(ResultSet rs) { this(identityHashCode(rs)); }
-
-    /**
-     * Returns the hash code of this {@code QueryId}.
-     *
-     * @return the hash code of this {@code QueryId}
-     */
-    public int hashCode() { return id; }
-
-    /**
-     * Determines whether this {@code QueryId} equals the specified object.
-     *
-     * @param obj the object to compare this {@code QueryId} with
-     * @return whether this {@code QueryId} equals the specified object
-     */
-    @Override
-    public boolean equals(Object obj) {
-      return this == obj || (obj instanceof QueryId qid && id == qid.id);
-    }
-
-    /**
-     * Returns the string representation of this {@code QueryId}.
-     *
-     * @return the string representation of this {@code QueryId}
-     */
-    public String toString() { return String.valueOf(id); }
-  }
 
   /**
    * Registers the specified {@code SQLQuery} for batch processing and returns a
@@ -131,6 +82,8 @@ public final class BatchQuery<T> {
   public static QueryId register(SQLQuery query,
         Duration stayAliveTime,
         boolean closeConnection) {
+    Check.notNull(query, QUERY);
+    Check.notNull(stayAliveTime, "stayAliveTime");
     ResultSet rs = query.execute();
     ResultSetCache cache = ResultSetCache.getInstance();
     Connection con = query.session.con;
@@ -193,6 +146,58 @@ public final class BatchQuery<T> {
    */
   public void terminate() {
     ResultSetCache.getInstance().remove(queryId);
+  }
+
+  /**
+   * Functions as an identifier for a persistent query result. A {@code QueryId} (or
+   * rather it string representation) is meant to be ping-ponged back and forth between
+   * client and server, for example via a URL query parameter and response header,
+   * respectively. On the server side it is used to instantiate a {@code BatchInsert}
+   * object, allowing it to identify and wrap itself around the query result.
+   */
+  public static final class QueryId {
+
+    private final int id;
+
+    private QueryId(int id) { this.id = id; }
+
+    QueryId(ResultSet rs) { this(identityHashCode(rs)); }
+
+    /**
+     * Creates a {@code QueryId} from the specified string representation
+     *
+     * @param id the string representation of a {@code QueryId}
+     * @return a {@code QueryId} from the specified string representation
+     */
+    public static QueryId of(String id) {
+      Check.notNull(id);
+      return new QueryId(NumberMethods.parseInt(id));
+    }
+
+    /**
+     * Returns the hash code of this {@code QueryId}.
+     *
+     * @return the hash code of this {@code QueryId}
+     */
+    public int hashCode() { return id; }
+
+    /**
+     * Determines whether this {@code QueryId} equals the specified object.
+     *
+     * @param obj the object to compare this {@code QueryId} with
+     * @return whether this {@code QueryId} equals the specified object
+     */
+    @Override
+    public boolean equals(Object obj) {
+      return this == obj || (obj instanceof QueryId qid && id == qid.id);
+    }
+
+    /**
+     * Returns the string representation of this {@code QueryId}.
+     *
+     * @return the string representation of this {@code QueryId}
+     */
+    public String toString() { return String.valueOf(id); }
   }
 
 }

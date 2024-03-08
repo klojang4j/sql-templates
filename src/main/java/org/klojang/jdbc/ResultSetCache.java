@@ -19,40 +19,20 @@ import static org.klojang.jdbc.BatchQuery.QueryId;
 
 final class ResultSetCache {
 
-  private static final class ResultSetInfo {
-    final Connection con;
-    final ResultSet rs;
-    final long stayAliveSeconds;
-    final boolean closeConnection;
-
-    long lastRequested;
-
-    ResultSetInfo(Connection con,
-          ResultSet rs,
-          long stayAliveSeconds,
-          boolean closeConnection) {
-      this.con = con;
-      this.rs = rs;
-      this.stayAliveSeconds = stayAliveSeconds;
-      this.closeConnection = closeConnection;
-      this.lastRequested = Instant.now().getEpochSecond();
-    }
-  }
-
   private static final Logger LOG = LoggerFactory.getLogger(ResultSetCache.class);
   private static final long CHECK_INTERVAL = 2 * 60 * 1000; // every 2 minutes
 
   private static final ResultSetCache instance = new ResultSetCache();
-
-  static ResultSetCache getInstance() {
-    return instance;
-  }
 
   private final Map<QueryId, ResultSetInfo> cache = new HashMap<>();
 
   private Thread cleaner;
 
   private ResultSetCache() { }
+
+  static ResultSetCache getInstance() {
+    return instance;
+  }
 
   ResultSet get(QueryId id) {
     synchronized (cache) {
@@ -95,31 +75,35 @@ final class ResultSetCache {
 
   private void removeStaleResultSets() {
     try {
-      Thread.sleep(CHECK_INTERVAL);
-      synchronized (cache) {
-        final long now = Instant.now().getEpochSecond();
-        // Copy keys to avoid ConcurrentModificationException
-        List<QueryId> ids = List.copyOf(cache.keySet());
-        for (QueryId id : ids) {
-          ResultSetInfo info = cache.get(id);
-          if (now - info.lastRequested > info.stayAliveSeconds) {
-            LOG.trace("Evicting stale query (id={}) from cache", id);
-            close(id, info);
-            cache.remove(id);
+      while (true) {
+        Thread.sleep(CHECK_INTERVAL);
+        synchronized (cache) {
+          final long now = Instant.now().getEpochSecond();
+          // Copy keys to avoid ConcurrentModificationException
+          List<QueryId> ids = List.copyOf(cache.keySet());
+          for (QueryId id : ids) {
+            ResultSetInfo info = cache.get(id);
+            if (now - info.lastRequested > info.stayAliveSeconds) {
+              LOG.trace("Evicting stale query (id={}) from cache", id);
+              close(id, info);
+              cache.remove(id);
+            }
           }
-        }
-        if (cache.isEmpty() && cleaner != null) {
-          cleaner.interrupt();
-          cleaner = null;
+          if (cache.isEmpty()) {
+            break;
+          }
         }
       }
     } catch (InterruptedException e) {
       LOG.trace("Aborting staleness check");
+    } finally {
+      cleaner = null;
     }
   }
 
   void clearCache() {
     synchronized (cache) {
+      LOG.trace("Aborting all queries");
       cleaner.interrupt();
       cleaner = null;
       try {
@@ -139,6 +123,26 @@ final class ResultSetCache {
       }
     } catch (SQLException e) {
       LOG.error(e.toString(), e);
+    }
+  }
+
+  private static final class ResultSetInfo {
+    final Connection con;
+    final ResultSet rs;
+    final long stayAliveSeconds;
+    final boolean closeConnection;
+
+    long lastRequested;
+
+    ResultSetInfo(Connection con,
+          ResultSet rs,
+          long stayAliveSeconds,
+          boolean closeConnection) {
+      this.con = con;
+      this.rs = rs;
+      this.stayAliveSeconds = stayAliveSeconds;
+      this.closeConnection = closeConnection;
+      this.lastRequested = Instant.now().getEpochSecond();
     }
   }
 

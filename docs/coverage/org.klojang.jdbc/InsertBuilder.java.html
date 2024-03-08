@@ -16,7 +16,7 @@ import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.check.Tag.PROPERTIES;
-import static org.klojang.jdbc.x.Strings.BEAN_CLASS;
+import static org.klojang.jdbc.x.Strings.CLAZZ;
 import static org.klojang.util.CollectionMethods.implode;
 import static org.klojang.util.ObjectMethods.ifNull;
 import static org.klojang.util.ObjectMethods.isEmpty;
@@ -133,7 +133,7 @@ public final class InsertBuilder {
    */
   public SQLInsert prepare(Connection con) {
 <span class="fc" id="L135">    Check.notNull(con);</span>
-<span class="fc" id="L136">    Check.on(STATE, clazz, BEAN_CLASS).is(notNull());</span>
+<span class="fc" id="L136">    Check.on(STATE, clazz, CLAZZ).is(notNull());</span>
 <span class="fc" id="L137">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(clazz, true);</span>
 <span class="fc" id="L138">    Set&lt;String&gt; props = getters.keySet();</span>
 <span class="fc bfc" id="L139" title="All 2 branches covered.">    if (!isEmpty(properties)) {</span>

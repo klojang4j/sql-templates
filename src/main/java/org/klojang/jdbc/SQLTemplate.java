@@ -1,11 +1,14 @@
 package org.klojang.jdbc;
 
+import org.klojang.check.Check;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.sql.ParamExtractor;
 import org.klojang.templates.ParseException;
 import org.klojang.templates.Template;
 
 import java.sql.Connection;
+
+import static org.klojang.jdbc.x.Strings.CONNECTION;
 
 final class SQLTemplate extends AbstractSQL {
 
@@ -24,6 +27,7 @@ final class SQLTemplate extends AbstractSQL {
 
   @Override
   public SQLSession session(Connection con) {
+    Check.notNull(con, CONNECTION);
     return new SQLTemplateSession(con, this, extractor, template.newRenderSession());
   }
 

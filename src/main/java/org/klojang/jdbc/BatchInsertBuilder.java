@@ -14,7 +14,7 @@ import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.check.CommonExceptions.STATE;
 import static org.klojang.invoke.IncludeExclude.EXCLUDE;
 import static org.klojang.invoke.IncludeExclude.INCLUDE;
-import static org.klojang.jdbc.x.Strings.BEAN_CLASS;
+import static org.klojang.jdbc.x.Strings.CLAZZ;
 import static org.klojang.jdbc.x.Strings.PROCESSOR;
 import static org.klojang.templates.name.CamelCaseToSnakeUpperCase.camelCaseToSnakeUpperCase;
 import static org.klojang.util.ArrayMethods.EMPTY_STRING_ARRAY;
@@ -164,7 +164,7 @@ public final class BatchInsertBuilder {
    */
   public <T> BatchInsert<T> prepare(Connection con) {
     Check.notNull(con);
-    Check.on(STATE, clazz, BEAN_CLASS).is(notNull());
+    Check.on(STATE, clazz, CLAZZ).is(notNull());
     BeanReader reader = new BeanReader<>(clazz, includeExclude, properties);
     if (tableName == null) {
       tableName = nameMapper.map(clazz.getSimpleName());

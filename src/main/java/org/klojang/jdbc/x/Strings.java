@@ -12,7 +12,7 @@ public final class Strings {
   public static final String RECORD = "record";
   public static final String LIMIT = "limit";
   public static final String SIZE_ESTIMATE = "sizeEstimate";
-  public static final String BEAN_CLASS = "beanClass";
+  public static final String CLAZZ = "beanClass";
   public static final String ID_PROPERTY = "ID property";
   public static final String ID_KEY = "ID key";
   public static final String BEAN_SUPPLIER = "bean supplier";
@@ -20,6 +20,7 @@ public final class Strings {
   public static final String CONFIG = "config";
   public static final String SQL_ARGUMENT = "sql";
   public static final String CONNECTION = "connection";
+  public static final String QUERY = "query";
 
   private Strings() { throw new UnsupportedOperationException(); }
 

@@ -10,8 +10,6 @@ import java.sql.PreparedStatement;
 
 final class SimpleSQLSession extends AbstractSQLSession {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SimpleSQLSession.class);
-
   private final SQLInfo sqlInfo;
 
   SimpleSQLSession(Connection con, AbstractSQL sql, SQLInfo sqlInfo) {
@@ -36,7 +34,6 @@ final class SimpleSQLSession extends AbstractSQLSession {
     PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
     return new SQLUpdate(ps, this, sqlInfo);
   }
-
 
   @Override
   public int execute() {

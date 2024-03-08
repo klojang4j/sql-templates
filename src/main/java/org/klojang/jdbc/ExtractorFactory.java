@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 /**
  * Specifies the capacities of {@link BeanExtractor} factory objects.
  *
+ * @see BatchQuery#BatchQuery(BatchQuery.QueryId, ExtractorFactory) 
+ *
  * @param <T> the type of the objects produced by the {@code BeanExtractor}
  */
 public sealed interface ExtractorFactory<T>
