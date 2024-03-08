@@ -8,9 +8,13 @@ import org.klojang.jdbc.SessionConfig;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.klojang.util.exception.UncheckedException;
 
+import java.lang.ref.Cleaner;
+
 public final class Utils {
 
   public static final SessionConfig DEFAULT_CONFIG = new SessionConfig() { };
+
+  public static final Cleaner CENTRAL_CLEANER = Cleaner.create();
 
   private Utils() { throw new UnsupportedOperationException(); }
 

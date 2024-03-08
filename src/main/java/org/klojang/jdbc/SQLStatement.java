@@ -12,10 +12,12 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static java.lang.ref.Cleaner.Cleanable;
 import static java.util.Collections.singletonMap;
 import static org.klojang.check.CommonChecks.*;
 import static org.klojang.check.Tag.*;
 import static org.klojang.jdbc.x.Strings.RECORD;
+import static org.klojang.jdbc.x.Utils.CENTRAL_CLEANER;
 import static org.klojang.util.CollectionMethods.collectionToSet;
 
 /**
@@ -34,21 +36,24 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   private static final String NO_SUCH_PARAM = "no such parameter: \"${arg}\"";
   private static final String DIRTY_INSTANCE = "statement already executed; call reset() first()";
 
-  final PreparedStatement ps;
   final AbstractSQLSession session;
   final SQLInfo sqlInfo;
 
   final List<Object> bindings;
   final Set<NamedParameter> bound;
 
+  private final State state;
+  private final Cleanable cleanable;
+
   private boolean fresh = true;
 
-  SQLStatement(PreparedStatement ps, AbstractSQLSession session, SQLInfo sqlInfo) {
-    this.ps = ps;
+  SQLStatement(PreparedStatement stmt, AbstractSQLSession session, SQLInfo sqlInfo) {
     this.session = session;
     this.sqlInfo = sqlInfo;
     this.bindings = new ArrayList<>(5);
     this.bound = HashSet.newHashSet(sqlInfo.parameters().size());
+    this.state = new State(stmt);
+    this.cleanable = CENTRAL_CLEANER.register(this, state);
   }
 
   /**
@@ -121,6 +126,8 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     initialize();
   }
 
+  PreparedStatement stmt() { return state.stmt; }
+
   abstract void initialize();
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -146,11 +153,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    */
   @Override
   public void close() {
-    try {
-      ps.close();
-    } catch (SQLException e) {
-      throw Utils.wrap(e, sqlInfo);
-    }
+    cleanable.clean();
   }
 
   private Supplier<DatabaseException> unboundParameters() {
@@ -160,5 +163,21 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     String fmt = "SQL contains named parameters that have not been bound yet: %s";
     String msg = String.format(fmt, all);
     return () -> Utils.exception(msg, session.getSQL().unparsed());
+  }
+
+  private static class State implements Runnable {
+
+    private final PreparedStatement stmt;
+
+    State(PreparedStatement stmt) { this.stmt = stmt; }
+
+    @Override
+    public void run() {
+      try {
+        stmt.close();
+      } catch (SQLException e) {
+        // ...
+      }
+    }
   }
 }

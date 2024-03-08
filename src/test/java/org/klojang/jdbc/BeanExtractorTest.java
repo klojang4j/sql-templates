@@ -9,10 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.klojang.jdbc.SQL.simpleQuery;
@@ -22,6 +20,30 @@ public class BeanExtractorTest {
 
   private static final String DB_DIR = System.getProperty("user.home") + "/klojang-jdbc-tests/BeanExtractorTest/h2";
   private static final ThreadLocal<Connection> MY_CON = new ThreadLocal<>();
+
+  @BeforeEach
+  public void before() throws IOException, SQLException {
+    IOMethods.rm(DB_DIR);
+    Files.createDirectories(Path.of(DB_DIR));
+    Connection con = DriverManager.getConnection("jdbc:h2:" + DB_DIR + "/h2");
+    MY_CON.set(con);
+    String sql = "CREATE TABLE EMPLOYEE(EMP_ID INT AUTO_INCREMENT, EMP_NAME VARCHAR(32))";
+    staticSQL(sql).session(con).execute();
+    sql = "CREATE TABLE DEPARTMENT(DEPT_ID INT AUTO_INCREMENT, DEPT_NAME VARCHAR(32))";
+    staticSQL(sql).session(con).execute();
+  }
+
+  @Test
+  public void test00()  {
+    Connection con = MY_CON.get();
+    staticSQL("INSERT INTO EMPLOYEE(EMP_NAME)VALUES('Foo')").session(con).execute();
+    String sql = "SELECT EMP_ID, EMP_NAME FROM EMPLOYEE";
+    try (SQLQuery query = simpleQuery(con, sql)) {
+      List<Employee> emps = query.getExtractor(Employee.class).extractAll();
+      assertEquals("Foo", emps.get(0).getEmpName());
+    }
+  }
+  //@formatter:on
 
   //@formatter:off
   public static class Employee {
@@ -41,29 +63,4 @@ public class BeanExtractorTest {
     public String getDeptName() { return deptName; }
     public void setDeptName(String deptName) { this.deptName = deptName; }
    }
-  //@formatter:on
-
-  @BeforeEach
-  public void before() throws IOException, SQLException {
-    IOMethods.rm(DB_DIR);
-    Files.createDirectories(Path.of(DB_DIR));
-    Connection con = DriverManager.getConnection("jdbc:h2:" + DB_DIR + "/h2");
-    MY_CON.set(con);
-    String sql = "CREATE TABLE EMPLOYEE(EMP_ID INT AUTO_INCREMENT, EMP_NAME VARCHAR(32))";
-    staticSQL(sql).session(con).execute();
-    sql = "CREATE TABLE DEPARTMENT(DEPT_ID INT AUTO_INCREMENT, DEPT_NAME VARCHAR(32))";
-    staticSQL(sql).session(con).execute();
-  }
-
-  @Test
-  public void test00() throws SQLException {
-    Connection con = MY_CON.get();
-    staticSQL("INSERT INTO EMPLOYEE(EMP_NAME)VALUES('Foo')").session(con).execute();
-    try (ResultSet rs = simpleQuery(con,
-          "SELECT EMP_ID, EMP_NAME FROM EMPLOYEE").execute()) {
-      BeanExtractorFactory<Employee> factory0 = new BeanExtractorFactory<>(Employee.class);
-      List<Employee> emps = factory0.getExtractor(rs).extractAll();
-      assertEquals("Foo", emps.get(0).getEmpName());
-    }
-  }
 }

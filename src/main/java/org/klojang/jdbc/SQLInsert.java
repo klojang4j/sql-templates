@@ -44,11 +44,11 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
 
   private final boolean retrieveKeys;
 
-  SQLInsert(PreparedStatement ps,
+  SQLInsert(PreparedStatement stmt,
         AbstractSQLSession sql,
         SQLInfo sqlInfo,
         boolean retrieveKeys) {
-    super(ps, sql, sqlInfo);
+    super(stmt, sql, sqlInfo);
     this.retrieveKeys = retrieveKeys;
   }
 
@@ -168,9 +168,9 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
    */
   public long execute() {
     try {
-      executeSQL();
+      executeStatement();
       if (retrieveKeys) {
-        long[] keys = JDBC.getGeneratedKeys(ps, 1);
+        long[] keys = JDBC.getGeneratedKeys(stmt(), 1);
         return keys.length == 0 ? -1 : keys[0];
       }
       return -1;
@@ -195,8 +195,8 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
   public long executeAndSetID() {
     Check.that(retrieveKeys).is(yes(), illegalState(KEY_RETRIEVAL_DISABLED));
     try {
-      executeSQL();
-      long[] keys = JDBC.getGeneratedKeys(ps, 1);
+      executeStatement();
+      long[] keys = JDBC.getGeneratedKeys(stmt(), 1);
       Utils.check(keys.length).isNot(zero(), NO_KEYS_WERE_GENERATED);
       long dbKey = keys[0];
       for (int i = 0; i < idProperties.size(); ++i) {
@@ -233,7 +233,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
         addToBatch(bean);
       }
       LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
-      ps.executeBatch();
+      stmt().executeBatch();
     } catch (Throwable t) {
       throw Utils.wrap(t, sqlInfo);
     }
@@ -256,8 +256,8 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
         addToBatch(bean);
       }
       LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
-      ps.executeBatch();
-      return JDBC.getGeneratedKeys(ps, beans.size());
+      stmt().executeBatch();
+      return JDBC.getGeneratedKeys(stmt(), beans.size());
     } catch (Throwable t) {
       throw Utils.wrap(t, sqlInfo);
     }
@@ -283,8 +283,8 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
         addToBatch(bean);
       }
       LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
-      ps.executeBatch();
-      long[] keys = JDBC.getGeneratedKeys(ps, beans.size());
+      stmt().executeBatch();
+      long[] keys = JDBC.getGeneratedKeys(stmt(), beans.size());
       int i = 0;
       for (U bean : beans) {
         JDBC.setID(bean, idProperty, keys[i++]);
@@ -298,24 +298,24 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
   void initialize() {
     idProperties.clear();
     try {
-      ps.clearParameters();
+      stmt().clearParameters();
     } catch (SQLException e) {
       throw Utils.wrap(e, sqlInfo);
     }
   }
 
-  private void executeSQL() throws Throwable {
+  private void executeStatement() throws Throwable {
     LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
-    applyBindings(ps);
-    ps.executeUpdate();
+    applyBindings(stmt());
+    stmt().executeUpdate();
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   private <U> void addToBatch(U bean) throws Throwable {
     Check.that(bean).is(notNull(), npe(ILLEGAL_NULL_VALUE_IN_LIST));
     BeanBinder binder = session.getSQL().getBeanBinder(sqlInfo, bean.getClass());
-    binder.bind(ps, bean);
-    ps.addBatch();
+    binder.bind(stmt(), bean);
+    stmt().addBatch();
   }
 
 }

@@ -16,8 +16,8 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SQLUpdate.class);
 
-  SQLUpdate(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
-    super(ps, sql, sqlInfo);
+  SQLUpdate(PreparedStatement stmt, AbstractSQLSession sql, SQLInfo sqlInfo) {
+    super(stmt, sql, sqlInfo);
   }
 
   /**
@@ -28,8 +28,8 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
   public int execute() {
     LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
     try {
-      applyBindings(ps);
-      return ps.executeUpdate();
+      applyBindings(stmt());
+      return stmt().executeUpdate();
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -38,7 +38,7 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
   @Override
   void initialize() {
     try {
-      ps.clearParameters();
+      stmt().clearParameters();
     } catch (SQLException e) {
       throw Utils.wrap(e, sqlInfo);
     }

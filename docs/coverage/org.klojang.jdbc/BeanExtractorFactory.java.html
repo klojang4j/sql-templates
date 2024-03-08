@@ -64,11 +64,11 @@ public final class BeanExtractorFactory&lt;T&gt; implements ExtractorFactory&lt;
    *       the {@code BeanExtractor} instances obtained from this
    *       {@code BeanExtractorFactory}
    */
-<span class="fc" id="L67">  public BeanExtractorFactory(Class&lt;T&gt; clazz) {</span>
-<span class="fc" id="L68">    this.clazz = Check.notNull(clazz).ok();</span>
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">    this.supplier = clazz.isRecord() ? null : () -&gt; newInstance(clazz);</span>
-<span class="fc" id="L70">    this.config = Utils.DEFAULT_CONFIG;</span>
-<span class="fc" id="L71">  }</span>
+<span class="nc" id="L67">  public BeanExtractorFactory(Class&lt;T&gt; clazz) {</span>
+<span class="nc" id="L68">    this.clazz = Check.notNull(clazz).ok();</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">    this.supplier = clazz.isRecord() ? null : () -&gt; newInstance(clazz);</span>
+<span class="nc" id="L70">    this.config = Utils.DEFAULT_CONFIG;</span>
+<span class="nc" id="L71">  }</span>
 
   /**
    * Creates a new {@code BeanExtractorFactory}.

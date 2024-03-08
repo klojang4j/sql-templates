@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static java.lang.ref.Cleaner.Cleanable;
+import static org.klojang.jdbc.x.Utils.CENTRAL_CLEANER;
+
 /**
  * <p>Facilitates the execution of SQL SELECT statements. {@code SQLQuery} instances are
  * obtained via {@link SQLSession#prepareQuery() SQLSession.prepareQuery()}. Here is an
@@ -58,11 +61,13 @@ import java.util.function.Supplier;
 public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SQLQuery.class);
+  private final State state;
+  private final Cleanable cleanable;
 
-  private ResultSet resultSet;
-
-  SQLQuery(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
-    super(ps, sql, sqlInfo);
+  SQLQuery(PreparedStatement stmt, AbstractSQLSession sql, SQLInfo sqlInfo) {
+    super(stmt, sql, sqlInfo);
+    this.state = new State();
+    this.cleanable = CENTRAL_CLEANER.register(this, state);
   }
 
   /**
@@ -81,12 +86,12 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> Result<T> lookup(Class<T> clazz) {
     try {
-      executeSQL();
-      if (resultSet.next()) {
-        int sqlType = resultSet.getMetaData().getColumnType(1);
+      executeStatement();
+      if (resultSet().next()) {
+        int sqlType = resultSet().getMetaData().getColumnType(1);
         T val = ColumnReaderFactory.getInstance()
               .getReader(clazz, sqlType)
-              .getValue(resultSet, 1, clazz);
+              .getValue(resultSet(), 1, clazz);
         return Result.of(val);
       }
       return Result.notAvailable();
@@ -109,9 +114,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public Result<Integer> getInt() {
     try {
-      executeSQL();
-      if (resultSet.next()) {
-        return Result.of(resultSet.getInt(1));
+      executeStatement();
+      if (resultSet().next()) {
+        return Result.of(resultSet().getInt(1));
       }
       return Result.notAvailable();
     } catch (Throwable t) {
@@ -133,9 +138,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public Result<String> getString() {
     try {
-      executeSQL();
-      if (resultSet.next()) {
-        return Result.of(resultSet.getString(1));
+      executeStatement();
+      if (resultSet().next()) {
+        return Result.of(resultSet().getString(1));
       }
       return Result.notAvailable();
     } catch (Throwable t) {
@@ -157,8 +162,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public boolean exists() {
     try {
-      executeSQL();
-      return resultSet.next();
+      executeStatement();
+      return resultSet().next();
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -200,17 +205,17 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> List<T> firstColumn(Class<T> clazz, int sizeEstimate) {
     try {
-      executeSQL();
-      if (!resultSet.next()) {
+      executeStatement();
+      if (!resultSet().next()) {
         return Collections.emptyList();
       }
-      int sqlType = resultSet.getMetaData().getColumnType(1);
+      int sqlType = resultSet().getMetaData().getColumnType(1);
       ColumnReader<?, T> reader = ColumnReaderFactory.getInstance()
             .getReader(clazz, sqlType);
       List<T> list = new ArrayList<>(sizeEstimate);
       do {
-        list.add(reader.getValue(resultSet, 1, clazz));
-      } while (resultSet.next());
+        list.add(reader.getValue(resultSet(), 1, clazz));
+      } while (resultSet().next());
       return list;
     } catch (Throwable t) {
       throw Utils.wrap(t);
@@ -218,9 +223,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Executes the query and returns a {@code MapExtractor} that you can use to convert the
-   * rows in the {@link ResultSet} into {@code Map<String, Object>} pseudo-objects. If the
-   * query had already been executed, it will not be executed again. Call
+   * <p>Executes the query and returns a {@code MapExtractor} that you can use to convert
+   * the rows in the {@link ResultSet} into {@code Map<String, Object>} pseudo-objects. If
+   * the query had already been executed, it will not be executed again. Call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
    * @return a {@code MapExtractor} that you can use to convert the rows in the
@@ -228,8 +233,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public MapExtractor getExtractor() {
     try {
-      executeSQL();
-      return session.getSQL().getMapExtractorFactory().getExtractor(resultSet);
+      executeStatement();
+      return session.getSQL().getMapExtractorFactory().getExtractor(resultSet());
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -241,6 +246,27 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * been executed, it will not be executed again. Call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed.
    *
+   *
+   * <p>Be wary of code like this:
+   *
+   * <blockquote><pre>{@code
+   * BeanExtractor<Foo> extractor = SQL.simpleQuery(con, "SELECT * FROM FOO").getExtractor(Foo.class);
+   * }</pre></blockquote>
+   *
+   * <p>This code does not close the temporary {@code SQLQuery} object from which you
+   * retrieve the {@code BeanExtractor}, and hence you may think you can safely use the
+   * {@code BeanExtractor}. But the {@code SQLQuery} object has gone out of scope by the
+   * time you receive the {@code BeanExtractor}, and <i>Klojang JDBC</i> makes sure that
+   * even if you do not close the {@code SQLQuery}, the JDBC resources associated with it
+   * <i>will</i> get closed once the {@code SQLQuery} object gets garbage-collected.
+   * Confusingly, you may sometimes get away with it and happily use the
+   * {@code BeanExtractor} &#8212; when it takes some time for the garbage collector to
+   * come around and reclaim the {@code SQLQuery} object. More often, though, the
+   * {@code BeanExtractor} will operate on a {@code ResultSet} that has already been
+   * closed. Request the {@code BeanExtractor} within a try-with-resource block created
+   * for the {@code SQLQuery}, or at the very least make sure the {@code SQLQuery} stays
+   * alive while you use the {@code BeanExtractor}.
+   *
    * @param <T> the type of the JavaBeans or records
    * @param clazz the class of the JavaBeans or records
    * @return a {@code BeanExtractor} that you can use to convert the rows in the
@@ -248,8 +274,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> BeanExtractor<T> getExtractor(Class<T> clazz) {
     try {
-      executeSQL();
-      return session.getSQL().getBeanExtractorFactory(clazz).getExtractor(resultSet);
+      executeStatement();
+      return session.getSQL().getBeanExtractorFactory(clazz).getExtractor(resultSet());
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -273,10 +299,10 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> BeanExtractor<T> getExtractor(Class<T> clazz, Supplier<T> beanSupplier) {
     try {
-      executeSQL();
+      executeStatement();
       return session.getSQL()
             .getBeanExtractorFactory(clazz, beanSupplier)
-            .getExtractor(resultSet);
+            .getExtractor(resultSet());
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -303,9 +329,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> Optional<T> extract(FallibleFunction<ResultSet, T, SQLException> converter) {
     try {
-      executeSQL();
-      if (resultSet.next()) {
-        return Optional.of(converter.apply(resultSet));
+      executeStatement();
+      if (resultSet().next()) {
+        return Optional.of(converter.apply(resultSet()));
       }
       return Optional.empty();
     } catch (Throwable t) {
@@ -339,9 +365,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public <T> List<T> extract(int limit,
         FallibleFunction<ResultSet, T, SQLException> converter) {
     try {
-      executeSQL();
+      executeStatement();
       List<T> beans = new ArrayList<>(limit);
-      ResultSet rs = resultSet;
+      ResultSet rs = resultSet();
       for (int i = 0; i < limit && rs.next(); ++i) {
         beans.add(converter.apply(rs));
       }
@@ -391,9 +417,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public <T> List<T> extractAll(int sizeEstimate,
         FallibleFunction<ResultSet, T, SQLException> converter) {
     try {
-      executeSQL();
+      executeStatement();
       List<T> beans = new ArrayList<>(sizeEstimate);
-      ResultSet rs = resultSet;
+      ResultSet rs = resultSet();
       while (rs.next()) {
         beans.add(converter.apply(rs));
       }
@@ -404,47 +430,86 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   }
 
   /**
-   * Executes the query and returns the {@link ResultSet}. If the query had already been
-   * executed, it will not be executed again. Instead, the {@code ResultSet} generated by
-   * the first call to {@code execute()} will be returned. Call
+   * <p>Executes the query and returns the {@link ResultSet}. If the query had already
+   * been executed, it will not be executed again. Instead, the {@code ResultSet}
+   * generated by the first call to {@code execute()} will be returned. Call
    * {@link SQLStatement#reset() reset()} to force the query to be re-executed. Since the
    * returned {@code ResultSet} is the same one that underpins this instance, be careful
    * what you do with it. For example, if you {@code close} the {@code ResultSet}, but
    * then continue to use this instance, an exception is almost guaranteed to follow.
-   * <i>Klojang JDBC</i> does not protect itself against such unintended usage.
+   * <i>Klojang JDBC</i> does not protect itself against such unintended usage. Also, be
+   * wary of code like this:
+   *
+   * <blockquote><pre>{@code
+   * ResultSet rs = SQL.simpleQuery(con, "SELECT * FROM FOO").execute();
+   * }</pre></blockquote>
+   *
+   * <p>This code does not close the temporary {@code SQLQuery} object from which you
+   * retrieve the {@code ResultSet}, and hence you may think you can safely use the
+   * {@code ResultSet}. But the {@code SQLQuery} object has gone out of scope by the time
+   * you receive the {@code ResultSet}, and <i>Klojang JDBC</i> makes sure that even if
+   * you do not close the {@code SQLQuery}, the JDBC resources associated with it
+   * <i>will</i> get closed once the {@code SQLQuery} object gets garbage-collected.
+   * Confusingly, you may sometimes get away with it and happily use the {@code ResultSet}
+   * &#8212; when it takes some time for the garbage collector to come around and reclaim
+   * the {@code SQLQuery} object. More often, though, the {@code ResultSet} will be closed
+   * by the time you get it.
    *
    * @return the {@code ResultSet} produced by the JDBC driver
    */
   public ResultSet execute() {
     try {
-      executeSQL();
-      return resultSet;
+      executeStatement();
+      return resultSet();
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
   }
 
+  @Override
+  public void close() {
+    cleanable.clean();
+    super.close();
+  }
 
   @Override
   void initialize() {
     try {
-      if (resultSet != null) {
-        resultSet.close();
-        resultSet = null;
+      if (resultSet() != null) {
+        resultSet().close();
       }
-      ps.clearParameters();
+      stmt().clearParameters();
     } catch (SQLException e) {
       throw Utils.wrap(e);
     } finally {
-      resultSet = null;
+      state.rs = null;
     }
   }
 
-  private void executeSQL() throws Throwable {
-    if (resultSet == null) {
-      applyBindings(ps);
+  private void executeStatement() throws Throwable {
+    if (resultSet() == null) {
+      applyBindings(stmt());
       LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
-      resultSet = ps.executeQuery();
+      state.rs = stmt().executeQuery();
+    }
+  }
+
+  private ResultSet resultSet() { return state.rs; }
+
+
+  private static class State implements Runnable {
+
+    private ResultSet rs;
+
+    @Override
+    public void run() {
+      if (rs != null) {
+        try {
+          rs.close();
+        } catch (SQLException e) {
+          // ...
+        }
+      }
     }
   }
 

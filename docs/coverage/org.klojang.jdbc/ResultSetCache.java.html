@@ -16,30 +16,31 @@ import java.util.Map;
 import static org.klojang.check.CommonChecks.keyIn;
 import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.BatchQuery.QueryId;
+import static org.klojang.jdbc.x.Utils.CENTRAL_CLEANER;
 
 final class ResultSetCache {
 
-<span class="nc" id="L22">  private static final Logger LOG = LoggerFactory.getLogger(ResultSetCache.class);</span>
+<span class="nc" id="L23">  private static final Logger LOG = LoggerFactory.getLogger(ResultSetCache.class);</span>
   private static final long CHECK_INTERVAL = 2 * 60 * 1000; // every 2 minutes
 
-<span class="nc" id="L25">  private static final ResultSetCache instance = new ResultSetCache();</span>
+<span class="nc" id="L26">  private static final ResultSetCache instance = new ResultSetCache();</span>
 
-<span class="nc" id="L27">  private final Map&lt;QueryId, ResultSetInfo&gt; cache = new HashMap&lt;&gt;();</span>
 
-  private Thread cleaner;
+  private final State state;
 
-<span class="nc" id="L31">  private ResultSetCache() { }</span>
+<span class="nc" id="L31">  private ResultSetCache() {</span>
+<span class="nc" id="L32">    state = new State();</span>
+<span class="nc" id="L33">    CENTRAL_CLEANER.register(this, state);</span>
+<span class="nc" id="L34">  }</span>
 
-  static ResultSetCache getInstance() {
-<span class="nc" id="L34">    return instance;</span>
-  }
+<span class="nc" id="L36">  static ResultSetCache getInstance() { return instance; }</span>
 
   ResultSet get(QueryId id) {
-<span class="nc" id="L38">    synchronized (cache) {</span>
-<span class="nc" id="L39">      ResultSetInfo info = cache.get(id);</span>
-<span class="nc" id="L40">      Utils.check(info).is(notNull(), Err.STALE_QUERY, id);</span>
-<span class="nc" id="L41">      info.lastRequested = Instant.now().getEpochSecond();</span>
-<span class="nc" id="L42">      return info.rs;</span>
+<span class="nc" id="L39">    synchronized (cache()) {</span>
+<span class="nc" id="L40">      ResultSetInfo info = state.cache.get(id);</span>
+<span class="nc" id="L41">      Utils.check(info).is(notNull(), Err.STALE_QUERY, id);</span>
+<span class="nc" id="L42">      info.lastRequested = Instant.now().getEpochSecond();</span>
+<span class="nc" id="L43">      return info.rs;</span>
     }
   }
 
@@ -47,84 +48,96 @@ final class ResultSetCache {
         ResultSet rs,
         long stayAliveSeconds,
         boolean closeConnection) {
-<span class="nc" id="L50">    QueryId id = new QueryId(rs);</span>
-<span class="nc" id="L51">    synchronized (cache) {</span>
-<span class="nc" id="L52">      Utils.check(id).isNot(keyIn(), cache, &quot;query with id {} already registered&quot;, id);</span>
-<span class="nc" id="L53">      LOG.trace(&quot;Registering query (id={})&quot;, id);</span>
-<span class="nc" id="L54">      cache.put(id, new ResultSetInfo(con, rs, stayAliveSeconds, closeConnection));</span>
-<span class="nc bnc" id="L55" title="All 2 branches missed.">      if (cleaner == null) {</span>
-<span class="nc" id="L56">        cleaner = Thread.ofVirtual().start(this::removeStaleResultSets);</span>
+<span class="nc" id="L51">    QueryId id = new QueryId(rs);</span>
+<span class="nc" id="L52">    synchronized (cache()) {</span>
+<span class="nc" id="L53">      Utils.check(id).isNot(keyIn(), cache(), &quot;query already registered (id={})&quot;, id);</span>
+<span class="nc" id="L54">      LOG.trace(&quot;Registering query (id={})&quot;, id);</span>
+<span class="nc" id="L55">      cache().put(id, new ResultSetInfo(con, rs, stayAliveSeconds, closeConnection));</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">      if (cleaner() == null) {</span>
+<span class="nc" id="L57">        state.cleaner = Thread.ofVirtual().start(this::removeStaleResultSets);</span>
       }
-<span class="nc" id="L58">    }</span>
-<span class="nc" id="L59">    return id;</span>
+<span class="nc" id="L59">    }</span>
+<span class="nc" id="L60">    return id;</span>
   }
 
   void remove(QueryId id) {
-<span class="nc" id="L63">    synchronized (cache) {</span>
-<span class="nc" id="L64">      LOG.trace(&quot;Removing query (id={}) from cache&quot;, id);</span>
-<span class="nc" id="L65">      ResultSetInfo info = cache.remove(id);</span>
-<span class="nc bnc" id="L66" title="All 2 branches missed.">      if (info != null) {</span>
-<span class="nc" id="L67">        close(id, info);</span>
-<span class="nc bnc" id="L68" title="All 4 branches missed.">        if (cache.isEmpty() &amp;&amp; cleaner != null) {</span>
-<span class="nc" id="L69">          cleaner.interrupt();</span>
-<span class="nc" id="L70">          cleaner = null;</span>
+<span class="nc" id="L64">    synchronized (cache()) {</span>
+<span class="nc" id="L65">      LOG.trace(&quot;Removing query (id={}) from cache&quot;, id);</span>
+<span class="nc" id="L66">      ResultSetInfo info = cache().remove(id);</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">      if (info != null) {</span>
+<span class="nc" id="L68">        info.close(id);</span>
+<span class="nc bnc" id="L69" title="All 4 branches missed.">        if (cache().isEmpty() &amp;&amp; cleaner() != null) {</span>
+<span class="nc" id="L70">          cleaner().interrupt();</span>
+<span class="nc" id="L71">          state.cleaner = null;</span>
         }
       }
-<span class="nc" id="L73">    }</span>
-<span class="nc" id="L74">  }</span>
+<span class="nc" id="L74">    }</span>
+<span class="nc" id="L75">  }</span>
 
   private void removeStaleResultSets() {
     try {
       while (true) {
-<span class="nc" id="L79">        Thread.sleep(CHECK_INTERVAL);</span>
-<span class="nc" id="L80">        synchronized (cache) {</span>
-<span class="nc" id="L81">          final long now = Instant.now().getEpochSecond();</span>
+<span class="nc" id="L80">        Thread.sleep(CHECK_INTERVAL);</span>
+<span class="nc" id="L81">        synchronized (cache()) {</span>
+<span class="nc" id="L82">          final long now = Instant.now().getEpochSecond();</span>
           // Copy keys to avoid ConcurrentModificationException
-<span class="nc" id="L83">          List&lt;QueryId&gt; ids = List.copyOf(cache.keySet());</span>
-<span class="nc bnc" id="L84" title="All 2 branches missed.">          for (QueryId id : ids) {</span>
-<span class="nc" id="L85">            ResultSetInfo info = cache.get(id);</span>
-<span class="nc bnc" id="L86" title="All 2 branches missed.">            if (now - info.lastRequested &gt; info.stayAliveSeconds) {</span>
-<span class="nc" id="L87">              LOG.trace(&quot;Evicting stale query (id={}) from cache&quot;, id);</span>
-<span class="nc" id="L88">              close(id, info);</span>
-<span class="nc" id="L89">              cache.remove(id);</span>
+<span class="nc" id="L84">          List&lt;QueryId&gt; ids = List.copyOf(cache().keySet());</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">          for (QueryId id : ids) {</span>
+<span class="nc" id="L86">            ResultSetInfo info = cache().get(id);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            if (now - info.lastRequested &gt; info.stayAliveSeconds) {</span>
+<span class="nc" id="L88">              LOG.trace(&quot;Evicting stale query (id={}) from cache&quot;, id);</span>
+<span class="nc" id="L89">              info.close(id);</span>
+<span class="nc" id="L90">              cache().remove(id);</span>
             }
-<span class="nc" id="L91">          }</span>
-<span class="nc bnc" id="L92" title="All 2 branches missed.">          if (cache.isEmpty()) {</span>
-<span class="nc" id="L93">            break;</span>
+<span class="nc" id="L92">          }</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">          if (cache().isEmpty()) {</span>
+<span class="nc" id="L94">            break;</span>
           }
-<span class="nc" id="L95">        }</span>
+<span class="nc" id="L96">        }</span>
       }
-<span class="nc" id="L97">    } catch (InterruptedException e) {</span>
-<span class="nc" id="L98">      LOG.trace(&quot;Aborting staleness check&quot;);</span>
+<span class="nc" id="L98">    } catch (InterruptedException e) {</span>
+<span class="nc" id="L99">      LOG.trace(&quot;Aborting staleness check&quot;);</span>
     } finally {
-<span class="nc" id="L100">      cleaner = null;</span>
+<span class="nc" id="L101">      state.cleaner = null;</span>
     }
-<span class="nc" id="L102">  }</span>
+<span class="nc" id="L103">  }</span>
 
   void clearCache() {
-<span class="nc" id="L105">    synchronized (cache) {</span>
-<span class="nc" id="L106">      LOG.trace(&quot;Aborting all queries&quot;);</span>
-<span class="nc" id="L107">      cleaner.interrupt();</span>
-<span class="nc" id="L108">      cleaner = null;</span>
-      try {
-<span class="nc" id="L110">        cache.forEach(this::close);</span>
-      } finally {
-<span class="nc" id="L112">        cache.clear();</span>
-      }
+<span class="nc bnc" id="L106" title="All 2 branches missed.">    if (cleaner() != null) {</span>
+<span class="nc" id="L107">      cleaner().interrupt();</span>
+<span class="nc" id="L108">      state.cleaner = null;</span>
+    }
+<span class="nc" id="L110">    synchronized (cache()) {</span>
+<span class="nc" id="L111">      LOG.trace(&quot;Terminating all queries&quot;);</span>
+<span class="nc" id="L112">      cache().forEach((id, info) -&gt; info.close(id));</span>
+<span class="nc" id="L113">      cache().clear();</span>
 <span class="nc" id="L114">    }</span>
 <span class="nc" id="L115">  }</span>
 
-  private void close(QueryId id, ResultSetInfo info) {
-    try {
-<span class="nc" id="L119">      info.rs.close();</span>
-<span class="nc bnc" id="L120" title="All 2 branches missed.">      if (info.closeConnection) {</span>
-<span class="nc" id="L121">        LOG.trace(&quot;Closing connection associated with query (id={})&quot;, id);</span>
-<span class="nc" id="L122">        info.con.close();</span>
+<span class="nc" id="L117">  private Map&lt;QueryId, ResultSetInfo&gt; cache() { return state.cache; }</span>
+
+<span class="nc" id="L119">  private Thread cleaner() { return state.cleaner; }</span>
+
+
+<span class="nc" id="L122">  private static class State implements Runnable {</span>
+<span class="nc" id="L123">    private final Map&lt;QueryId, ResultSetInfo&gt; cache = new HashMap&lt;&gt;();</span>
+    private Thread cleaner;
+
+    @Override
+    public void run() {
+      try {
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (cleaner != null) {</span>
+<span class="nc" id="L130">          cleaner.interrupt();</span>
+        }
+      } finally {
+        try {
+<span class="nc" id="L134">          cache.values().forEach(ResultSetInfo::close);</span>
+        } finally {
+<span class="nc" id="L136">          cache.clear();</span>
+        }
       }
-<span class="nc" id="L124">    } catch (SQLException e) {</span>
-<span class="nc" id="L125">      LOG.error(e.toString(), e);</span>
-<span class="nc" id="L126">    }</span>
-<span class="nc" id="L127">  }</span>
+<span class="nc" id="L139">    }</span>
+  }
 
   private static final class ResultSetInfo {
     final Connection con;
@@ -137,13 +150,36 @@ final class ResultSetCache {
     ResultSetInfo(Connection con,
           ResultSet rs,
           long stayAliveSeconds,
-<span class="nc" id="L140">          boolean closeConnection) {</span>
-<span class="nc" id="L141">      this.con = con;</span>
-<span class="nc" id="L142">      this.rs = rs;</span>
-<span class="nc" id="L143">      this.stayAliveSeconds = stayAliveSeconds;</span>
-<span class="nc" id="L144">      this.closeConnection = closeConnection;</span>
-<span class="nc" id="L145">      this.lastRequested = Instant.now().getEpochSecond();</span>
-<span class="nc" id="L146">    }</span>
+<span class="nc" id="L153">          boolean closeConnection) {</span>
+<span class="nc" id="L154">      this.con = con;</span>
+<span class="nc" id="L155">      this.rs = rs;</span>
+<span class="nc" id="L156">      this.stayAliveSeconds = stayAliveSeconds;</span>
+<span class="nc" id="L157">      this.closeConnection = closeConnection;</span>
+<span class="nc" id="L158">      this.lastRequested = Instant.now().getEpochSecond();</span>
+<span class="nc" id="L159">    }</span>
+
+    void close(QueryId id) {
+<span class="nc" id="L162">      LOG.trace(&quot;Closing connection associated with query (id={})&quot;, id);</span>
+      try {
+<span class="nc" id="L164">        rs.close();</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (closeConnection) {</span>
+<span class="nc" id="L166">          con.close();</span>
+        }
+<span class="nc" id="L168">      } catch (SQLException e) {</span>
+<span class="nc" id="L169">        LOG.error(e.toString(), e);</span>
+<span class="nc" id="L170">      }</span>
+<span class="nc" id="L171">    }</span>
+
+    void close() {
+      try {
+<span class="nc" id="L175">        rs.close();</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (closeConnection) {</span>
+<span class="nc" id="L177">          con.close();</span>
+        }
+<span class="nc" id="L179">      } catch (SQLException e) {</span>
+        // ...
+<span class="nc" id="L181">      }</span>
+<span class="nc" id="L182">    }</span>
   }
 
 

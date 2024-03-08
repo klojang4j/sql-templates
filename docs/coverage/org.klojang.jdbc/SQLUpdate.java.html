@@ -16,8 +16,8 @@ public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
 
 <span class="fc" id="L17">  private static final Logger LOG = LoggerFactory.getLogger(SQLUpdate.class);</span>
 
-  SQLUpdate(PreparedStatement ps, AbstractSQLSession sql, SQLInfo sqlInfo) {
-<span class="fc" id="L20">    super(ps, sql, sqlInfo);</span>
+  SQLUpdate(PreparedStatement stmt, AbstractSQLSession sql, SQLInfo sqlInfo) {
+<span class="fc" id="L20">    super(stmt, sql, sqlInfo);</span>
 <span class="fc" id="L21">  }</span>
 
   /**
@@ -28,8 +28,8 @@ public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
   public int execute() {
 <span class="fc" id="L29">    LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
     try {
-<span class="fc" id="L31">      applyBindings(ps);</span>
-<span class="fc" id="L32">      return ps.executeUpdate();</span>
+<span class="fc" id="L31">      applyBindings(stmt());</span>
+<span class="fc" id="L32">      return stmt().executeUpdate();</span>
 <span class="nc" id="L33">    } catch (Throwable t) {</span>
 <span class="nc" id="L34">      throw Utils.wrap(t);</span>
     }
@@ -38,7 +38,7 @@ public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
   @Override
   void initialize() {
     try {
-<span class="nc" id="L41">      ps.clearParameters();</span>
+<span class="nc" id="L41">      stmt().clearParameters();</span>
 <span class="nc" id="L42">    } catch (SQLException e) {</span>
 <span class="nc" id="L43">      throw Utils.wrap(e, sqlInfo);</span>
 <span class="nc" id="L44">    }</span>
