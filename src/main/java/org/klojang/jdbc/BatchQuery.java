@@ -3,7 +3,6 @@ package org.klojang.jdbc;
 import org.klojang.check.Check;
 import org.klojang.convert.NumberMethods;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.time.Duration;
 import java.util.List;
@@ -32,17 +31,17 @@ public final class BatchQuery<T> {
    * {@code QueryId}. The {@code QueryId} can be used to instantiate a {@code BatchInsert}
    * object, allowing it the identify and wrap itself around a {@link ResultSet}.
    * Equivalent to
-   * {@link #register(SQLQuery, Duration) register(query, Duration.ofMinutes(10), true)}.
-   * In other words, the client gets ten minutes to process a batch before it must request
-   * the {@linkplain #nextBatch(int) next batch}. After that, the {@link ResultSet} will
-   * be deemed stale. It will be closed and disposed of, and any subsequent call to
-   * {@code nextBatch()} cause a {@link DatabaseException}.
+   * {@link #pin(SQLQuery, Duration) pin(query, Duration.ofMinutes(5), true)}. In other
+   * words, the client gets five minutes to process a batch before it must request the
+   * {@linkplain #nextBatch(int) next batch}. After that, the {@link ResultSet} will be
+   * deemed stale. It will be closed and disposed of, and all subsequent calls to
+   * {@code nextBatch()} will cause a {@link DatabaseException}.
    *
    * @param query the {@code SQLQuery} to be registered for batch processing
    * @return a {@code QueryId}
    */
-  public static QueryId register(SQLQuery query) {
-    return register(query, Duration.ofMinutes(10), true);
+  public static QueryId pin(SQLQuery query) {
+    return pin(query, Duration.ofMinutes(5), true);
   }
 
   /**
@@ -50,18 +49,18 @@ public final class BatchQuery<T> {
    * {@code QueryId}. The {@code QueryId} can be used to instantiate a {@code BatchInsert}
    * object, allowing it the identify and wrap itself around a {@link ResultSet}.
    * Equivalent to
-   * {@link #register(SQLQuery, Duration) register(query, stayAliveTime, true)}.
+   * {@link #pin(SQLQuery, Duration, boolean) pin(query, stayAliveTime, true)}.
    *
    * @param query the {@code SQLQuery} to be registered for batch processing
    * @param stayAliveTime determines how long the query result should be kept alive
    *       between requests for new batches. If the time interval between any two
    *       consecutive requests is longer than the specified duration, the query result
    *       will be deemed stale and <i>Klojang JDBC</i> will close the associated JDBC
-   *       resources and remove it.
+   *       resources.
    * @return a {@code QueryId}
    */
-  public static QueryId register(SQLQuery query, Duration stayAliveTime) {
-    return register(query, stayAliveTime, true);
+  public static QueryId pin(SQLQuery query, Duration stayAliveTime) {
+    return pin(query, stayAliveTime, true);
   }
 
   /**
@@ -71,33 +70,33 @@ public final class BatchQuery<T> {
    *
    * @param query the {@code SQLQuery} to be registered for batch processing
    * @param stayAliveTime determines how long the query result should be kept alive
-   *       between requests for new batches. If the time interval between any two
-   *       consecutive requests is longer than the specified duration, the query result
-   *       will be deemed stale and <i>Klojang JDBC</i> will close the associated JDBC
-   *       resources and remove it.
+   *       between requests for new batches &#8212; essentially the time you allow
+   *       yourself to process the batches produced by the {@code BatchQuery}. If the time
+   *       interval between any two consecutive requests is longer than the specified
+   *       duration, the query result will be deemed stale and <i>Klojang JDBC</i> will
+   *       close the associated JDBC resources.
    * @param closeConnection whether to close the JDBC connection once all records
    *       have been retrieved from the underlying {@link ResultSet}
-   * @return
+   * @return a {@code QueryId}
    */
-  public static QueryId register(SQLQuery query,
+  public static QueryId pin(SQLQuery query,
         Duration stayAliveTime,
         boolean closeConnection) {
     Check.notNull(query, QUERY);
     Check.notNull(stayAliveTime, "stayAliveTime");
-    ResultSet rs = query.execute();
-    ResultSetCache cache = ResultSetCache.getInstance();
-    Connection con = query.session.con;
-    return cache.add(con, rs, stayAliveTime.getSeconds(), closeConnection);
+    QueryCache cache = QueryCache.getInstance();
+    return cache.addQuery(query, stayAliveTime.getSeconds(), closeConnection);
   }
 
   /**
-   * Terminates the processing of all query results. Any subsequent call on any existing
-   * {@code BatchQuery} instances to {@link #nextBatch(int)} will cause a
-   * {@link DatabaseException}.
+   * Terminates and unpins all {@link SQLQuery} objects. All {@code BatchQuery} objects
+   * instantiated before calling this method will effectively become unusable. Calls to
+   * {@link #nextBatch(int) nextBatch()} will cause a {@link DatabaseException}.
    */
   public static void terminateAll() {
-    ResultSetCache.getInstance().clearCache();
+    QueryCache.getInstance().terminateAll();
   }
+
 
   private final QueryId queryId;
   private final ExtractorFactory<T> factory;
@@ -120,32 +119,33 @@ public final class BatchQuery<T> {
    * instances of type {@code <T>}. A {@link DatabaseException} is thrown if it has taken
    * too long for this method to be called since the previous time it was called (too long
    * as defined by the {@code stayAliveTime} argument passed to the
-   * {@link #register(SQLQuery, Duration, boolean) register()} method).
+   * {@link #pin(SQLQuery, Duration, boolean) pin()} method).
    *
    * @param batchSize the number of records to retrieve
    * @return the next batch of records, converted into instances of type {@code <T>}
    */
   public List<T> nextBatch(int batchSize) {
-    ResultSetCache cache = ResultSetCache.getInstance();
-    ResultSet rs = ResultSetCache.getInstance().get(queryId);
+    QueryCache cache = QueryCache.getInstance();
+    ResultSet rs = QueryCache.getInstance().getResultSet(queryId);
     BeanExtractor<T> extractor = factory.getExtractor(rs);
     List<T> beans = extractor.extract(batchSize);
     if (extractor.isEmpty()) {
-      cache.remove(queryId);
+      cache.terminate(queryId);
     }
     return beans;
   }
 
   /**
-   * Terminates the processing of the query result. All subsequent calls to
-   * {@link #nextBatch(int)} will cause a {@link DatabaseException}. Will close the
-   * underlying {@link ResultSet} and possibly also the associated JDBC connection (see
-   * {@link #register(SQLQuery, Duration, boolean)}). You do not need to call this method
-   * if you process the query result all the way to the last row, but you might want to
-   * call this in exceptional situations where you need to abort the query.
+   * Terminates and unpins {@link SQLQuery} object associated with this
+   * {@code BatchQuery}. All subsequent calls to {@link #nextBatch(int) nextBatch()} will
+   * cause a {@link DatabaseException}. You do not need to call this method if you process
+   * the query result all the way to the last row, but you might want to call it in
+   * exceptional situations where you need to abort the query. Note that even if you do
+   * not call this method, the {@link SQLQuery} will be terminated and unpinned, not too
+   * long after requests for new batches have stopped coming in.
    */
   public void terminate() {
-    ResultSetCache.getInstance().remove(queryId);
+    QueryCache.getInstance().terminate(queryId);
   }
 
   /**

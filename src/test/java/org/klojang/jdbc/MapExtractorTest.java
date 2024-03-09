@@ -60,12 +60,12 @@ public class MapExtractorTest {
     Connection con = MY_CON.get();
     staticSQL("INSERT INTO EMPLOYEE(EMP_NAME)VALUES('Foo')").session(con).execute();
     staticSQL("INSERT INTO DEPARTMENT(DEPT_NAME)VALUES('Bar')").session(con).execute();
-    ResultSet rs = simpleQuery(con, "SELECT EMP_ID AS ID, EMP_NAME AS NAME FROM EMPLOYEE").execute();
+    ResultSet rs = simpleQuery(con, "SELECT EMP_ID AS ID, EMP_NAME AS NAME FROM EMPLOYEE").getResultSet();
     MapExtractorFactory factory = new MapExtractorFactory();
     MapExtractor sharedExtractor = factory.getExtractor(rs);
     List<Map<String, Object>> emps = sharedExtractor.extractAll();
     assertEquals("Foo", emps.get(0).get("name"));
-    rs = simpleQuery(con, "SELECT DEPT_ID AS ID, DEPT_NAME AS NAME FROM DEPARTMENT").execute();
+    rs = simpleQuery(con, "SELECT DEPT_ID AS ID, DEPT_NAME AS NAME FROM DEPARTMENT").getResultSet();
     sharedExtractor = factory.getExtractor(rs);
     List<Map<String, Object>> depts = sharedExtractor.extractAll();
     assertEquals("Bar", depts.get(0).get("name"));

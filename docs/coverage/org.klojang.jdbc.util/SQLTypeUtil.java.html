@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLTypeUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.util</a> &gt; <span class="el_source">SQLTypeUtil.java</span></div><h1>SQLTypeUtil.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.util;
+
+import org.klojang.check.Check;
+import org.klojang.jdbc.x.Utils;
+
+import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.sql.Types;
+import java.util.Map;
+import java.util.TreeMap;
+
+/**
+ * Utility class for translating between the names and values of the constants in the
+ * {@link Types java.sql.Types} class. The {@code Types} class screams out to be an
+ * {@code enum} type, but this class predates the introduction of enums into the Java
+ * language. The constants represent SQL datatypes like VARCHAR and TIMESTAMP, and there
+ * are a lot of them in the {@code Types} class. Therefore, knowing that you are dealing,
+ * say, with type {@code 12} will likely not be very helpful. This class lets you look up
+ * the name of the corresponding constant. (For the curious: {@code 12} is the value of
+ * the {@link Types#VARCHAR VARCHAR} constant.)
+ */
+public final class SQLTypeUtil {
+
+  private static final String NO_SUCH_TYPE = &quot;no such constant in java.sql.Types: ${arg}&quot;;
+
+  /**
+   * Returns the name of the constant with the specified value. Throws an
+   * {@link IllegalArgumentException} if there is no constant with the specified value in
+   * the {@link java.sql.Types} class.
+   *
+   * @param sqlType the value of the constant whose name you want to retrieve
+   * @return the name of the constant with the specified value
+   */
+  public static String getTypeName(int sqlType) {
+<span class="fc" id="L35">    Check.that(sqlType).is(SQLTypeUtil::isValidValue, NO_SUCH_TYPE);</span>
+<span class="fc" id="L36">    return cache.get(sqlType);</span>
+  }
+
+  /**
+   * Returns {@code true} if the specified integer is the value of one of the constants in
+   * the {@link java.sql.Types} class, {@code false} otherwise.
+   *
+   * @param sqlType the integer value to check
+   * @return {@code true} if the integer is the value of one of the constants in the
+   *       {@code Types} class, {@code false} otherwise
+   */
+  public static boolean isValidValue(int sqlType) {
+<span class="fc" id="L48">    return cache.containsKey(sqlType);</span>
+  }
+
+  /**
+   * Returns the value of the constant with the specified name. Throws an
+   * {@link IllegalArgumentException} if there is no constant with the specified name in
+   * the {@link java.sql.Types} class.
+   *
+   * @param name the name of the constant (e&amp;#46;g&amp;#46; &quot;VARCHAR&quot; or &quot;TIMESTAMP&quot;)
+   * @return the value of the constant with the specified name
+   */
+  public static int forName(String name) {
+<span class="fc" id="L60">    return Check.that(name).is(SQLTypeUtil::isValidName, NO_SUCH_TYPE).ok(reverse::get);</span>
+  }
+
+  /**
+   * Returns {@code true} if the specified string is the name of one of the constants in
+   * the {@link java.sql.Types} class, {@code false} otherwise.
+   *
+   * @param name the string value to check
+   * @return {@code true} if the specified string is the name of one of the constants in
+   *       the {@code Types} class, {@code false} otherwise
+   */
+  public static boolean isValidName(String name) {
+<span class="fc" id="L72">    return reverse.containsKey(name);</span>
+  }
+
+  /**
+   * Returns the values of all constants in ascending order.
+   *
+   * @return the values of all constants in ascending order
+   */
+  public static int[] getAllValues() {
+<span class="fc" id="L81">    return cache.keySet().stream().mapToInt(Integer::intValue).toArray();</span>
+  }
+
+  /**
+   * Returns the names of all constants, sorted alphabetically.
+   *
+   * @return the names of all constants, sorted alphabetically
+   */
+  public static String[] getAllNames() {
+<span class="fc" id="L90">    return reverse.keySet().toArray(String[]::new);</span>
+  }
+
+  /**
+   * Prints the values of all constants in ascending order of the values of the constants.
+   * For each value, the name of the constant is printed next to it.
+   *
+   * @param out the {@code PrintStream} to write to
+   */
+  public static void printAllValues(PrintStream out) {
+<span class="fc" id="L100">    Check.notNull(out);</span>
+<span class="fc" id="L101">    cache.forEach((k, v) -&gt; out.printf(&quot;%5d : %s%n&quot;, k, v));</span>
+<span class="fc" id="L102">  }</span>
+
+  /**
+   * Prints the names all constants, sorted alphabetically. For each name, the value of
+   * the constant is printed next to it.
+   *
+   * @param out the {@code PrintStream} to write to
+   */
+  public static void printAllNames(PrintStream out) {
+<span class="fc" id="L111">    Check.notNull(out);</span>
+<span class="fc" id="L112">    reverse.forEach((k, v) -&gt; out.printf(&quot;%23s : %d%n&quot;, k, v));</span>
+<span class="fc" id="L113">  }</span>
+
+  /**
+   * Returns an {@code int} value that is guaranteed &lt;i&gt;not&lt;/i&gt; to be the value of any of
+   * the constants in the {@link java.sql.Types} class. Could be used as an initialization
+   * value or as a pseudo-null value.
+   *
+   * @return an {@code int} value that is guaranteed &lt;i&gt;not&lt;/i&gt; to be the value of any of
+   *       the constants in the {@code Types java.sql.Types} class
+   */
+  public static int getNonValue() {
+<span class="nc" id="L124">    for (int i = Integer.MAX_VALUE; ; --i) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">      if (!isValidValue(i)) {</span>
+<span class="nc" id="L126">        return i;</span>
+      }
+    }
+  }
+
+  private static final Map&lt;Integer, String&gt; cache;
+  private static final Map&lt;String, Integer&gt; reverse;
+
+  static {
+<span class="fc" id="L135">    Class&lt;Types&gt; clazz = Types.class;</span>
+<span class="fc" id="L136">    Field[] fields = clazz.getDeclaredFields();</span>
+<span class="fc" id="L137">    cache = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L138">    reverse = new TreeMap&lt;&gt;();</span>
+    try {
+<span class="fc bfc" id="L140" title="All 2 branches covered.">      for (Field f : fields) {</span>
+<span class="fc" id="L141">        int type = f.getInt(null);</span>
+<span class="fc" id="L142">        cache.put(type, f.getName());</span>
+<span class="fc" id="L143">        reverse.put(f.getName(), type);</span>
+      }
+<span class="nc" id="L145">    } catch (Throwable t) {</span>
+<span class="nc" id="L146">      throw Utils.wrap(t);</span>
+<span class="fc" id="L147">    }</span>
+<span class="fc" id="L148">  }</span>
+
+<span class="nc" id="L150">  private SQLTypeUtil() { throw new UnsupportedOperationException(); }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

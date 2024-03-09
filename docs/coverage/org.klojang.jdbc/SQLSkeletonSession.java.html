@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLSkeletonSession.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLSkeletonSession.java</span></div><h1>SQLSkeletonSession.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.check.Check;
+import org.klojang.jdbc.x.JDBC;
+import org.klojang.jdbc.x.sql.ParamExtractor;
+import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.templates.RenderSession;
+import org.klojang.util.ArrayMethods;
+import org.klojang.util.CollectionMethods;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.Collection;
+
+import static org.klojang.check.Tag.PATH;
+import static org.klojang.jdbc.x.Strings.IDENTIFIER;
+import static org.klojang.jdbc.x.Strings.VAR_NAME;
+
+final class SQLSkeletonSession extends DynamicSQLSession {
+
+  SQLSkeletonSession(Connection con, AbstractSQL sql, RenderSession session) {
+<span class="fc" id="L22">    super(con, sql, session);</span>
+<span class="fc" id="L23">  }</span>
+
+  public SQLSession setNested(String path, Object value) {
+<span class="nc" id="L26">    Check.notNull(path, PATH);</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">    if (value instanceof Collection&lt;?&gt; c) {</span>
+<span class="nc" id="L28">      session.setPath(path, i -&gt; CollectionMethods.implode(c));</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">    } else if (value.getClass().isArray()) {</span>
+<span class="nc" id="L30">      session.setPath(path, i -&gt; ArrayMethods.implodeAny(value));</span>
+    } else {
+<span class="nc" id="L32">      session.setPath(path, i -&gt; value);</span>
+    }
+<span class="nc" id="L34">    return this;</span>
+  }
+
+  public SQLSession setNestedValue(String path, Object value) {
+<span class="nc" id="L38">    Check.notNull(path, PATH);</span>
+<span class="nc bnc" id="L39" title="All 4 branches missed.">    switch (value) {</span>
+<span class="nc" id="L40">      case Collection&lt;?&gt; x -&gt; {</span>
+<span class="nc" id="L41">        String val = CollectionMethods.implode(x, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L42">        session.setPath(path, i -&gt; val);</span>
+<span class="nc" id="L43">      }</span>
+<span class="nc" id="L44">      case Object[] x -&gt; {</span>
+<span class="nc" id="L45">        String val = ArrayMethods.implode(x, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L46">        session.setPath(path, i -&gt; val);</span>
+<span class="nc" id="L47">      }</span>
+<span class="nc" id="L48">      case int[] x -&gt; {</span>
+<span class="nc" id="L49">        String val = ArrayMethods.implodeInts(x, &quot;,&quot;);</span>
+<span class="nc" id="L50">        session.setPath(path, i -&gt; val);</span>
+<span class="nc" id="L51">      }</span>
+      default -&gt; {
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (value.getClass().isArray()) {</span>
+<span class="nc" id="L54">          String val = ArrayMethods.implodeAny(value, this::quoteValue, &quot;,&quot;);</span>
+<span class="nc" id="L55">          session.setPath(path, i -&gt; val);</span>
+<span class="nc" id="L56">        } else {</span>
+<span class="nc" id="L57">          session.setPath(path, i -&gt; quoteValue(value));</span>
+        }
+      }
+    }
+<span class="nc" id="L61">    return this;</span>
+  }
+
+  public SQLSession setNestedIdentifier(String varName, String identifier) {
+<span class="fc" id="L65">    Check.notNull(varName, VAR_NAME);</span>
+<span class="fc" id="L66">    Check.notNull(identifier, IDENTIFIER);</span>
+<span class="fc" id="L67">    session.setPath(varName, i -&gt; quoteIdentifier(identifier));</span>
+<span class="fc" id="L68">    return this;</span>
+  }
+
+  @Override
+  public SQLQuery prepareQuery() {
+<span class="fc" id="L73">    close();</span>
+<span class="fc" id="L74">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="fc" id="L75">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="fc" id="L76">    return new SQLQuery(ps, this, sqlInfo);</span>
+  }
+
+  @Override
+  public SQLInsert prepareInsert(boolean retrieveKeys) {
+<span class="nc" id="L81">    close();</span>
+<span class="nc" id="L82">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="nc" id="L83">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L84">    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);</span>
+  }
+
+  @Override
+  public SQLUpdate prepareUpdate() {
+<span class="nc" id="L89">    close();</span>
+<span class="nc" id="L90">    SQLInfo sqlInfo = getSQLInfo();</span>
+<span class="nc" id="L91">    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);</span>
+<span class="nc" id="L92">    return new SQLUpdate(ps, this, sqlInfo);</span>
+  }
+
+  private SQLInfo getSQLInfo() {
+<span class="fc" id="L96">    return new SQLInfo(new ParamExtractor(session.render()));</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

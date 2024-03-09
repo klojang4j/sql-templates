@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BeanExtractorCache.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">BeanExtractorCache.java</span></div><h1>BeanExtractorCache.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.jdbc.x.rs.PropertyWriter;
+import org.klojang.jdbc.x.rs.RecordFactory;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
+import static org.klojang.jdbc.x.rs.PropertyWriter.createWriters;
+
+/**
+ * Not currently used, because in the end we thought it would make the extractor retrieval
+ * mechanism too expensive. We keep it around though, because it is both more elegant and
+ * more idiot-proof than what we currently have. Maybe we change our minds.
+ */
+@SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;, &quot;unused&quot;})
+<span class="nc" id="L20">final class BeanExtractorCache {</span>
+
+<span class="nc" id="L22">  private record BeanExtractorId(Class&lt;?&gt; clazz,</span>
+        SessionConfig config,
+        ResultSetId resultSetId) { }
+
+<span class="nc" id="L26">  private final Map&lt;BeanExtractorId, PropertyWriter&lt;?,?&gt;[]&gt; cache0 = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L27">  private final Map&lt;BeanExtractorId, RecordFactory&lt;?&gt;&gt; cache1 = new HashMap&lt;&gt;();</span>
+
+  &lt;T&gt; BeanExtractor&lt;T&gt; getBeanExtractor(Class&lt;T&gt; clazz,
+        SessionConfig config,
+        ResultSet rs,
+        Supplier&lt;T&gt; supplier) throws SQLException {
+<span class="nc" id="L33">    ResultSetId resultSetId = new ResultSetId(rs);</span>
+<span class="nc" id="L34">    BeanExtractorId extractorId = new BeanExtractorId(clazz, config, resultSetId);</span>
+<span class="nc" id="L35">    PropertyWriter&lt;?,?&gt;[] writers = cache0.get(extractorId);</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">    if (writers == null) {</span>
+<span class="nc" id="L37">      writers = createWriters(rs, clazz, config);</span>
+<span class="nc" id="L38">      cache0.put(extractorId, writers);</span>
+    }
+<span class="nc" id="L40">    return new DefaultBeanExtractor&lt;&gt;(rs, writers, supplier);</span>
+  }
+
+  &lt;T&gt; BeanExtractor&lt;T&gt; getRecordExtractor(Class&lt;T&gt; clazz,
+        SessionConfig config,
+        ResultSet rs) throws SQLException {
+<span class="nc" id="L46">    ResultSetId resultSetId = new ResultSetId(rs);</span>
+<span class="nc" id="L47">    BeanExtractorId extractorId = new BeanExtractorId(clazz, config, resultSetId);</span>
+<span class="nc" id="L48">    RecordFactory&lt;?&gt; factory = cache1.get(extractorId);</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">    if (factory == null) {</span>
+<span class="nc" id="L50">      factory = new RecordFactory(clazz, rs, config);</span>
+<span class="nc" id="L51">      cache1.put(extractorId, factory);</span>
+    }
+<span class="nc" id="L53">    return (BeanExtractor&lt;T&gt;) new RecordExtractor&lt;&gt;(rs, factory);</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
