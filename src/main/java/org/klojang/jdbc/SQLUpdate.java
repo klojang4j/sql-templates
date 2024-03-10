@@ -12,6 +12,7 @@ import java.sql.SQLException;
 /**
  * Facilitates the execution of UPDATE, DELETE, and DDL statements.
  */
+@SuppressWarnings("resource")
 public final class SQLUpdate extends SQLStatement<SQLUpdate> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SQLUpdate.class);

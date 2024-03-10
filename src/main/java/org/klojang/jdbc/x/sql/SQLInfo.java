@@ -19,5 +19,4 @@ public record SQLInfo(String sql,
     this(sql, paramExtractor.getParameters(), paramExtractor.getParameterPositions());
   }
 
-
 }

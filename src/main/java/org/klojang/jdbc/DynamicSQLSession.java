@@ -14,24 +14,28 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.function.Supplier;
 
+import static java.lang.ref.Cleaner.Cleanable;
 import static org.klojang.check.CommonExceptions.illegalState;
 import static org.klojang.check.Tag.VARARGS;
 import static org.klojang.jdbc.x.Strings.*;
+import static org.klojang.jdbc.x.Utils.CENTRAL_CLEANER;
 import static org.klojang.util.StringMethods.append;
 
 abstract sealed class DynamicSQLSession extends AbstractSQLSession
       permits SQLTemplateSession, SQLSkeletonSession {
 
-  @SuppressWarnings({"unused"})
   private static final Logger LOG = LoggerFactory.getLogger(DynamicSQLSession.class);
 
-  final RenderSession session;
+  private final StatementContainer stmt;
+  private final Cleanable cleanable;
 
-  private Statement stmt;
+  final RenderSession session;
 
   DynamicSQLSession(Connection con, AbstractSQL sql, RenderSession session) {
     super(con, sql);
     this.session = session;
+    this.stmt = new StatementContainer();
+    this.cleanable = CENTRAL_CLEANER.register(this, stmt);
   }
 
   @Override
@@ -60,7 +64,8 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
         session.set(varName, val);
       }
       case int[] x -> {
-        session.set(varName, ArrayMethods.implodeInts(x, ","));
+        String val = ArrayMethods.implodeInts(x, ",");
+        session.set(varName, val);
       }
       default -> {
         if (value.getClass().isArray()) {
@@ -132,6 +137,17 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
   }
 
   @Override
+  public final int execute() {
+    try {
+      Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());
+      return execute(session.render());
+    } finally {
+      close();
+    }
+  }
+
+  @Override
+  @SuppressWarnings("resource")
   public final String quoteIdentifier(String identifier) {
     Check.notNull(identifier, IDENTIFIER);
     try {
@@ -142,43 +158,47 @@ abstract sealed class DynamicSQLSession extends AbstractSQLSession
     }
   }
 
-  @Override
-  public final int execute() {
-    try {
-      Check.that(session).isNot(RenderSession::hasUnsetVariables, rogueVariables());
-      return execute(session.render());
-    } finally {
-      close();
-    }
-  }
-
 
   Statement statement() {
-    if (stmt == null) {
-      try {
-        stmt = con.createStatement();
-      } catch (SQLException e) {
-        throw DatabaseException.wrap(e, sql);
-      }
+    try {
+      return stmt.get(con);
+    } catch (SQLException e) {
+      throw DatabaseException.wrap(e, sql);
     }
-    return stmt;
   }
 
   void close() {
-    if (stmt != null) {
-      try {
-        stmt.close();
-      } catch (SQLException e) {
-        throw DatabaseException.wrap(e, sql);
-      } finally {
-        stmt = null;
-      }
-    }
+    cleanable.clean();
   }
 
   Supplier<IllegalStateException> rogueVariables() {
     String unset = CollectionMethods.implode(session.getAllUnsetVariables());
     return illegalState("unset variables in SQL template: " + unset);
+  }
+
+  private static class StatementContainer implements Runnable {
+
+    private Statement stmt;
+
+    Statement get(Connection con) throws SQLException {
+      if (stmt == null) {
+        stmt = con.createStatement();
+      }
+      return stmt;
+    }
+
+    @Override
+    public void run() {
+      if (stmt != null) {
+        try {
+          stmt.close();
+        } catch (Throwable t) {
+          LOG.error(t.toString());
+        } finally {
+          stmt = null;
+        }
+      }
+    }
   }
 
 

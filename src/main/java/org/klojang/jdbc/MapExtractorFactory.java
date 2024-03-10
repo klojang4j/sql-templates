@@ -85,7 +85,7 @@ public final class MapExtractorFactory implements ExtractorFactory<Map<String, O
     if ((writers = payload) == null) {
       lock.lock();
       try {
-        // Check again, but now we know for sure the only one in here
+        // Check again, but now we know for sure we are the only one in here
         if (payload == null) {
           payload = writers = createWriters(rs, config);
         }

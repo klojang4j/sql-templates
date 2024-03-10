@@ -2,11 +2,8 @@ package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.sql.SQLInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 
 final class SimpleSQLSession extends AbstractSQLSession {
 
@@ -19,20 +16,20 @@ final class SimpleSQLSession extends AbstractSQLSession {
 
   @Override
   public SQLQuery prepareQuery() {
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
-    return new SQLQuery(ps, this, sqlInfo);
+    var stmt = JDBC.getPreparedStatement(con, sqlInfo);
+    return new SQLQuery(stmt, this, sqlInfo);
   }
 
   @Override
   public SQLInsert prepareInsert(boolean retrieveKeys) {
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
-    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);
+    var stmt = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
+    return new SQLInsert(stmt, this, sqlInfo, retrieveKeys);
   }
 
   @Override
   public SQLUpdate prepareUpdate() {
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
-    return new SQLUpdate(ps, this, sqlInfo);
+    var stmt = JDBC.getPreparedStatement(con, sqlInfo);
+    return new SQLUpdate(stmt, this, sqlInfo);
   }
 
   @Override

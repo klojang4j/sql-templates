@@ -4,7 +4,6 @@ import org.klojang.check.aux.Result;
 import org.klojang.check.fallible.FallibleFunction;
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.rs.ColumnReader;
 import org.klojang.jdbc.x.rs.ColumnReaderFactory;
 import org.klojang.jdbc.x.sql.SQLInfo;
 import org.slf4j.Logger;
@@ -58,16 +57,18 @@ import static org.klojang.jdbc.x.Utils.CENTRAL_CLEANER;
  * }
  * }</pre></blockquote>
  */
+@SuppressWarnings("resource")
 public final class SQLQuery extends SQLStatement<SQLQuery> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SQLQuery.class);
-  private final State state;
+
+  private final ResultSetContainer result;
   private final Cleanable cleanable;
 
   SQLQuery(PreparedStatement stmt, AbstractSQLSession sql, SQLInfo sqlInfo) {
     super(stmt, sql, sqlInfo);
-    this.state = new State();
-    this.cleanable = CENTRAL_CLEANER.register(this, state);
+    this.result = new ResultSetContainer();
+    this.cleanable = CENTRAL_CLEANER.register(this, result);
   }
 
   /**
@@ -86,12 +87,12 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> Result<T> lookup(Class<T> clazz) {
     try {
-      executeStatement();
-      if (resultSet().next()) {
-        int sqlType = resultSet().getMetaData().getColumnType(1);
+      ResultSet rs = executeIfNull();
+      if (rs.next()) {
+        int sqlType = rs.getMetaData().getColumnType(1);
         T val = ColumnReaderFactory.getInstance()
               .getReader(clazz, sqlType)
-              .getValue(resultSet(), 1, clazz);
+              .getValue(rs, 1, clazz);
         return Result.of(val);
       }
       return Result.notAvailable();
@@ -114,9 +115,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public Result<Integer> getInt() {
     try {
-      executeStatement();
-      if (resultSet().next()) {
-        return Result.of(resultSet().getInt(1));
+      ResultSet rs = executeIfNull();
+      if (rs.next()) {
+        return Result.of(rs.getInt(1));
       }
       return Result.notAvailable();
     } catch (Throwable t) {
@@ -138,9 +139,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public Result<String> getString() {
     try {
-      executeStatement();
-      if (resultSet().next()) {
-        return Result.of(resultSet().getString(1));
+      ResultSet rs = executeIfNull();
+      if (rs.next()) {
+        return Result.of(rs.getString(1));
       }
       return Result.notAvailable();
     } catch (Throwable t) {
@@ -162,8 +163,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public boolean exists() {
     try {
-      executeStatement();
-      return resultSet().next();
+      return executeIfNull().next();
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -205,17 +205,16 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> List<T> firstColumn(Class<T> clazz, int sizeEstimate) {
     try {
-      executeStatement();
-      if (!resultSet().next()) {
+      ResultSet rs = executeIfNull();
+      if (!rs.next()) {
         return Collections.emptyList();
       }
-      int sqlType = resultSet().getMetaData().getColumnType(1);
-      ColumnReader<?, T> reader = ColumnReaderFactory.getInstance()
-            .getReader(clazz, sqlType);
+      int sqlType = rs.getMetaData().getColumnType(1);
+      var reader = ColumnReaderFactory.getInstance().getReader(clazz, sqlType);
       List<T> list = new ArrayList<>(sizeEstimate);
       do {
-        list.add(reader.getValue(resultSet(), 1, clazz));
-      } while (resultSet().next());
+        list.add(reader.getValue(rs, 1, clazz));
+      } while (rs.next());
       return list;
     } catch (Throwable t) {
       throw Utils.wrap(t);
@@ -233,8 +232,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public MapExtractor getExtractor() {
     try {
-      executeStatement();
-      return session.getSQL().getMapExtractorFactory().getExtractor(resultSet());
+      ResultSet rs = executeIfNull();
+      return session.getSQL().getMapExtractorFactory().getExtractor(rs);
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -274,8 +273,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> BeanExtractor<T> getExtractor(Class<T> clazz) {
     try {
-      executeStatement();
-      return session.getSQL().getBeanExtractorFactory(clazz).getExtractor(resultSet());
+      ResultSet rs = executeIfNull();
+      return session.getSQL().getBeanExtractorFactory(clazz).getExtractor(rs);
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -299,10 +298,10 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> BeanExtractor<T> getExtractor(Class<T> clazz, Supplier<T> beanSupplier) {
     try {
-      executeStatement();
+      ResultSet rs = executeIfNull();
       return session.getSQL()
             .getBeanExtractorFactory(clazz, beanSupplier)
-            .getExtractor(resultSet());
+            .getExtractor(rs);
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -329,9 +328,9 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public <T> Optional<T> extract(FallibleFunction<ResultSet, T, SQLException> converter) {
     try {
-      executeStatement();
-      if (resultSet().next()) {
-        return Optional.of(converter.apply(resultSet()));
+      ResultSet rs = executeIfNull();
+      if (rs.next()) {
+        return Optional.of(converter.apply(rs));
       }
       return Optional.empty();
     } catch (Throwable t) {
@@ -365,9 +364,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public <T> List<T> extract(int limit,
         FallibleFunction<ResultSet, T, SQLException> converter) {
     try {
-      executeStatement();
+      ResultSet rs = executeIfNull();
       List<T> beans = new ArrayList<>(limit);
-      ResultSet rs = resultSet();
       for (int i = 0; i < limit && rs.next(); ++i) {
         beans.add(converter.apply(rs));
       }
@@ -417,9 +415,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   public <T> List<T> extractAll(int sizeEstimate,
         FallibleFunction<ResultSet, T, SQLException> converter) {
     try {
-      executeStatement();
+      ResultSet rs = executeIfNull();
       List<T> beans = new ArrayList<>(sizeEstimate);
-      ResultSet rs = resultSet();
       while (rs.next()) {
         beans.add(converter.apply(rs));
       }
@@ -447,8 +444,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * <p>This code does not close the temporary {@code SQLQuery} object from which you
    * retrieve the {@code ResultSet}, and hence you may think you can safely use the
    * {@code ResultSet}. But the {@code SQLQuery} object goes out of scope once you have
-   * received the {@code ResultSet}, and <i>Klojang JDBC</i> makes sure that even if
-   * you do not close the {@code SQLQuery}, the JDBC resources associated with it
+   * received the {@code ResultSet}, and <i>Klojang JDBC</i> makes sure that even if you
+   * do not close the {@code SQLQuery}, the JDBC resources associated with it
    * <i>will</i> get closed once the {@code SQLQuery} object gets garbage-collected.
    * Confusingly, you may sometimes get away with it and happily use the {@code ResultSet}
    * &#8212; when it takes some time for the garbage collector to come around and reclaim
@@ -459,8 +456,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    */
   public ResultSet getResultSet() {
     try {
-      executeStatement();
-      return resultSet();
+      return executeIfNull();
     } catch (Throwable t) {
       throw Utils.wrap(t);
     }
@@ -475,31 +471,36 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   @Override
   void initialize() {
     try {
-      if (resultSet() != null) {
-        resultSet().close();
+      if (result.get() != null) {
+        result.get().close();
       }
       stmt().clearParameters();
     } catch (SQLException e) {
       throw Utils.wrap(e);
     } finally {
-      state.rs = null;
+      result.set(null);
     }
   }
 
-  private void executeStatement() throws Throwable {
-    if (resultSet() == null) {
+  private ResultSet executeIfNull() throws Throwable {
+    ResultSet rs = result.get();
+    if (rs == null) {
       applyBindings(stmt());
       LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
-      state.rs = stmt().executeQuery();
+      rs = stmt().executeQuery();
+      result.set(rs);
     }
+    return rs;
   }
 
-  private ResultSet resultSet() { return state.rs; }
 
-
-  private static class State implements Runnable {
+  private static class ResultSetContainer implements Runnable {
 
     private ResultSet rs;
+
+    ResultSet get() { return rs; }
+
+    void set(ResultSet rs) { this.rs = rs; }
 
     @Override
     public void run() {

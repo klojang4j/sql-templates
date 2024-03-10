@@ -9,7 +9,6 @@ import org.klojang.util.ArrayMethods;
 import org.klojang.util.CollectionMethods;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.Collection;
 
 import static org.klojang.check.Tag.PATH;
@@ -71,25 +70,25 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   @Override
   public SQLQuery prepareQuery() {
     close();
-    SQLInfo sqlInfo = getSQLInfo();
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
-    return new SQLQuery(ps, this, sqlInfo);
+    var sqlInfo = getSQLInfo();
+    var stmt = JDBC.getPreparedStatement(con, sqlInfo);
+    return new SQLQuery(stmt, this, sqlInfo);
   }
 
   @Override
   public SQLInsert prepareInsert(boolean retrieveKeys) {
     close();
-    SQLInfo sqlInfo = getSQLInfo();
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
-    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);
+    var sqlInfo = getSQLInfo();
+    var stmt = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
+    return new SQLInsert(stmt, this, sqlInfo, retrieveKeys);
   }
 
   @Override
   public SQLUpdate prepareUpdate() {
     close();
-    SQLInfo sqlInfo = getSQLInfo();
-    PreparedStatement ps = JDBC.getPreparedStatement(con, sqlInfo);
-    return new SQLUpdate(ps, this, sqlInfo);
+    var sqlInfo = getSQLInfo();
+    var stmt = JDBC.getPreparedStatement(con, sqlInfo);
+    return new SQLUpdate(stmt, this, sqlInfo);
   }
 
   private SQLInfo getSQLInfo() {

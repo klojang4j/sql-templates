@@ -1,7 +1,5 @@
 package org.klojang.jdbc;
 
-import java.util.List;
-
 /**
  * Used to selectively modify values within a batch of JavaBeans or records. A
  * {@code BeanValueProcessor} can be "plugged into" batch inserts to apply last-minute

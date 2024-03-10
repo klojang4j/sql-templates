@@ -32,6 +32,7 @@ import static org.klojang.util.ClassMethods.className;
  * @see SQLSession#prepareInsert()
  * @see SQL#insert()
  */
+@SuppressWarnings("resource")
 public final class SQLInsert extends SQLStatement<SQLInsert> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SQLInsert.class);

@@ -22,22 +22,22 @@ final class SQLTemplateSession extends DynamicSQLSession {
   public SQLQuery prepareQuery() {
     close();
     var sqlInfo = getSQLInfo(session, extractor);
-    var ps = JDBC.getPreparedStatement(con, sqlInfo);
-    return new SQLQuery(ps, this, sqlInfo);
+    var stmt = JDBC.getPreparedStatement(con, sqlInfo);
+    return new SQLQuery(stmt, this, sqlInfo);
   }
 
   public SQLInsert prepareInsert(boolean retrieveKeys) {
     close();
     var sqlInfo = getSQLInfo(session, extractor);
-    var ps = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
-    return new SQLInsert(ps, this, sqlInfo, retrieveKeys);
+    var stmt = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
+    return new SQLInsert(stmt, this, sqlInfo, retrieveKeys);
   }
 
   public SQLUpdate prepareUpdate() {
     close();
     var sqlInfo = getSQLInfo(session, extractor);
-    var ps = JDBC.getPreparedStatement(con, sqlInfo);
-    return new SQLUpdate(ps, this, sqlInfo);
+    var stmt = JDBC.getPreparedStatement(con, sqlInfo);
+    return new SQLUpdate(stmt, this, sqlInfo);
   }
 
   private SQLInfo getSQLInfo(RenderSession session, ParamExtractor extractor) {

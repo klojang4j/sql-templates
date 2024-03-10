@@ -42,7 +42,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   final List<Object> bindings;
   final Set<NamedParameter> bound;
 
-  private final State state;
+  private final StatementContainer stmt;
   private final Cleanable cleanable;
 
   private boolean fresh = true;
@@ -52,8 +52,8 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     this.sqlInfo = sqlInfo;
     this.bindings = new ArrayList<>(5);
     this.bound = HashSet.newHashSet(sqlInfo.parameters().size());
-    this.state = new State(stmt);
-    this.cleanable = CENTRAL_CLEANER.register(this, state);
+    this.stmt = new StatementContainer(stmt);
+    this.cleanable = CENTRAL_CLEANER.register(this, this.stmt);
   }
 
   /**
@@ -126,7 +126,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     initialize();
   }
 
-  PreparedStatement stmt() { return state.stmt; }
+  PreparedStatement stmt() { return stmt.get(); }
 
   abstract void initialize();
 
@@ -165,11 +165,13 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     return () -> Utils.exception(msg, session.getSQL().unparsed());
   }
 
-  private static class State implements Runnable {
+  private static class StatementContainer implements Runnable {
 
     private final PreparedStatement stmt;
 
-    State(PreparedStatement stmt) { this.stmt = stmt; }
+    StatementContainer(PreparedStatement stmt) { this.stmt = stmt; }
+
+    PreparedStatement get() { return stmt; }
 
     @Override
     public void run() {

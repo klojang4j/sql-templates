@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.klojang.check.CommonChecks.keyIn;
@@ -85,28 +84,30 @@ final class QueryCacheManager implements Runnable {
   }
 
   private void removeStaleQueries() {
-    try {
-      while (true) {
+    while (true) {
+      try {
         Thread.sleep(CHECK_INTERVAL);
-        synchronized (cache) {
-          // Copy keys to avoid ConcurrentModificationException
-          List<QueryId> ids = List.copyOf(cache.keySet());
-          for (QueryId id : ids) {
-            LiveQuery query = cache.get(id);
-            if (query.isStale()) {
-              query.terminate(id);
-              cache.remove(id);
-            }
-          }
-          if (cache.isEmpty()) {
-            break;
+      } catch (InterruptedException e) {
+        LOG.trace("Aborting staleness check");
+        cleaner = null;
+        break;
+      }
+      synchronized (cache) {
+        var iterator = cache.entrySet().iterator();
+        while (iterator.hasNext()) {
+          var entry = iterator.next();
+          var id = entry.getKey();
+          var query = entry.getValue();
+          if (query.isStale()) {
+            query.terminate(id);
+            iterator.remove();
           }
         }
+        if (cache.isEmpty()) {
+          cleaner = null;
+          break;
+        }
       }
-    } catch (InterruptedException e) {
-      LOG.trace("Aborting staleness check");
-    } finally {
-      cleaner = null;
     }
   }
 }
