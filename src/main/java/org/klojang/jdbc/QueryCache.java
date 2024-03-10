@@ -2,6 +2,7 @@ package org.klojang.jdbc;
 
 import java.sql.ResultSet;
 
+import static java.lang.System.identityHashCode;
 import static org.klojang.jdbc.BatchQuery.QueryId;
 import static org.klojang.jdbc.x.Utils.CENTRAL_CLEANER;
 
@@ -27,7 +28,8 @@ final class QueryCache {
   QueryId addQuery(SQLQuery query,
         long stayAliveSeconds,
         boolean closeConnection) {
-    QueryId id = new QueryId(query.getResultSet());
+    String hash = String.valueOf(identityHashCode(query.getResultSet()));
+    QueryId id = QueryId.of(hash);
     LiveQuery liveQuery = new LiveQuery(query, stayAliveSeconds, closeConnection);
     cacheManager.add(id, liveQuery);
     return id;

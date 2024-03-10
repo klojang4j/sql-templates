@@ -2,45 +2,47 @@
 
 import java.sql.ResultSet;
 
+import static java.lang.System.identityHashCode;
 import static org.klojang.jdbc.BatchQuery.QueryId;
 import static org.klojang.jdbc.x.Utils.CENTRAL_CLEANER;
 
 // Despite its name, this is more like a ResultSet cache
 final class QueryCache {
 
-<span class="nc" id="L11">  private static final QueryCache instance = new QueryCache();</span>
+<span class="nc" id="L12">  private static final QueryCache instance = new QueryCache();</span>
 
-<span class="nc" id="L13">  static QueryCache getInstance() { return instance; }</span>
+<span class="nc" id="L14">  static QueryCache getInstance() { return instance; }</span>
 
 
   private final QueryCacheManager cacheManager;
 
-<span class="nc" id="L18">  private QueryCache() {</span>
-<span class="nc" id="L19">    cacheManager = new QueryCacheManager();</span>
-<span class="nc" id="L20">    CENTRAL_CLEANER.register(this, cacheManager);</span>
-<span class="nc" id="L21">  }</span>
+<span class="nc" id="L19">  private QueryCache() {</span>
+<span class="nc" id="L20">    cacheManager = new QueryCacheManager();</span>
+<span class="nc" id="L21">    CENTRAL_CLEANER.register(this, cacheManager);</span>
+<span class="nc" id="L22">  }</span>
 
   ResultSet getResultSet(QueryId id) {
-<span class="nc" id="L24">    return cacheManager.get(id);</span>
+<span class="nc" id="L25">    return cacheManager.get(id);</span>
   }
 
   QueryId addQuery(SQLQuery query,
         long stayAliveSeconds,
         boolean closeConnection) {
-<span class="nc" id="L30">    QueryId id = new QueryId(query.getResultSet());</span>
-<span class="nc" id="L31">    LiveQuery liveQuery = new LiveQuery(query, stayAliveSeconds, closeConnection);</span>
-<span class="nc" id="L32">    cacheManager.add(id, liveQuery);</span>
-<span class="nc" id="L33">    return id;</span>
+<span class="nc" id="L31">    String hash = String.valueOf(identityHashCode(query.getResultSet()));</span>
+<span class="nc" id="L32">    QueryId id = QueryId.of(hash);</span>
+<span class="nc" id="L33">    LiveQuery liveQuery = new LiveQuery(query, stayAliveSeconds, closeConnection);</span>
+<span class="nc" id="L34">    cacheManager.add(id, liveQuery);</span>
+<span class="nc" id="L35">    return id;</span>
   }
 
   void terminate(QueryId id) {
-<span class="nc" id="L37">    cacheManager.terminate(id);</span>
-<span class="nc" id="L38">  }</span>
+<span class="nc" id="L39">    cacheManager.terminate(id);</span>
+<span class="nc" id="L40">  }</span>
 
 
   void terminateAll() {
-<span class="nc" id="L42">    cacheManager.terminateAll();</span>
-<span class="nc" id="L43">  }</span>
+<span class="nc" id="L44">    cacheManager.terminateAll();</span>
+<span class="nc" id="L45">  }</span>
 
 
 }

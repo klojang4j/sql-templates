@@ -65,7 +65,7 @@ Klojang JDBC,org.klojang.jdbc,DatabaseException,19,0,0,0,7,0,4,0,4,0
 Klojang JDBC,org.klojang.jdbc,DynamicSQLSession,217,124,8,8,46,31,13,12,6,10
 Klojang JDBC,org.klojang.jdbc,BatchInsert,27,482,8,24,8,97,8,25,0,17
 Klojang JDBC,org.klojang.jdbc,QueryCacheManager,216,0,14,0,56,0,18,0,11,0
-Klojang JDBC,org.klojang.jdbc,BatchQuery,70,0,2,0,21,0,8,0,7,0
+Klojang JDBC,org.klojang.jdbc,BatchQuery,66,0,2,0,20,0,8,0,7,0
 Klojang JDBC,org.klojang.jdbc,RecordExtractor,0,10,0,0,0,2,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,SQLSkeleton,4,23,0,0,2,6,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,SQLSession,70,4,0,0,18,1,16,1,16,1
@@ -77,14 +77,14 @@ Klojang JDBC,org.klojang.jdbc,SQLQuery,165,170,15,7,58,44,17,15,7,14
 Klojang JDBC,org.klojang.jdbc,BeanExtractorCache.BeanExtractorId,12,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc,SimpleSQL,0,39,0,2,0,7,0,3,0,2
 Klojang JDBC,org.klojang.jdbc,InsertBuilder,56,200,3,5,8,35,3,11,1,9
-Klojang JDBC,org.klojang.jdbc,QueryCache,55,0,0,0,15,0,7,0,7,0
+Klojang JDBC,org.klojang.jdbc,QueryCache,57,0,0,0,16,0,7,0,7,0
 Klojang JDBC,org.klojang.jdbc,DefaultMapExtractor,0,10,0,0,0,2,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,DefaultBeanExtractor,0,12,0,0,0,2,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,SQLUpdate,15,24,0,0,7,6,1,3,1,3
 Klojang JDBC,org.klojang.jdbc,BeanExtractorFactory,137,118,7,9,29,23,11,8,5,6
 Klojang JDBC,org.klojang.jdbc,SessionConfig,20,27,0,0,5,10,5,10,5,10
 Klojang JDBC,org.klojang.jdbc,SQLStatement,7,253,0,4,0,48,1,12,1,10
-Klojang JDBC,org.klojang.jdbc,BatchQuery.QueryId,45,0,6,0,7,0,9,0,6,0
+Klojang JDBC,org.klojang.jdbc,BatchQuery.QueryId,40,0,6,0,6,0,8,0,5,0
 Klojang JDBC,org.klojang.jdbc,SQLTemplateSession,44,37,0,0,8,8,2,3,2,3
 Klojang JDBC,org.klojang.jdbc,BeanValueProcessor,0,4,0,0,0,1,0,2,0,2
 Klojang JDBC,org.klojang.jdbc,SQLSkeletonSession,187,55,10,0,35,11,18,5,12,5
