@@ -37,4 +37,8 @@ abstract sealed class AbstractSQLSession implements SQLSession
     }
   }
 
+  Connection getConnection() {
+    return con;
+  }
+
 }

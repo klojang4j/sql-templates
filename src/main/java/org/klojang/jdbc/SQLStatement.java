@@ -147,6 +147,10 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     Check.that(bound.size()).is(eq(), sqlInfo.parameters().size(), unboundParameters());
   }
 
+  AbstractSQLSession getSession() {
+    return session;
+  }
+
   /**
    * Releases all resources held by this instance. You cannot reuse the instance after a
    * call to this method.

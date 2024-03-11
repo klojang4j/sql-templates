@@ -13,14 +13,15 @@ import static org.klojang.jdbc.x.Strings.QUERY;
  * &lt;p&gt;Facilitates the processing of large query results in batches across multiple,
  * isolated requests. These would typically be HTTP requests, but any stateless
  * request-response mechanism might want to use the functionality offered by the
- * {@code BatchQuery} class. The query result will be kept alive until all records have
- * been extracted from it. Once all records have been extracted, the associated JDBC
- * resources will be closed automatically. As soon as, and as long as there are any
- * persistent query results, a background thread will periodically check whether any of
- * them have gone stale and, if so, close and remove them. Once there are no more
- * persistent query results, the thread will itself be terminated.
+ * {@code BatchQuery} class. The query will be kept alive until all records have been
+ * extracted from it. Once all records have been extracted, the associated JDBC resources
+ * will be closed automatically. As soon as, and as long as there are any persistent
+ * queries, a background thread will periodically check whether any of them have gone
+ * stale and, if so, close and remove them. Once they have all been either fully processed
+ * or forcibly terminated, the thread will itself be terminated (until a new persistent
+ * query comes into existence).
  *
- * &lt;p&gt;Since the point is to keep the query result alive across multiple requests, you may
+ * &lt;p&gt;Since the point is to keep the query alive across multiple requests, you may
  * have to suppress a (good) habit of always setting up try-with-resources blocks for
  * {@link AutoCloseable} objects (the JDBC {@link java.sql.Connection Connection} and the
  * {@link SQLQuery} in this case). This would &lt;i&gt;not&lt;/i&gt; be a good way to get hold of a
@@ -67,7 +68,7 @@ public final class BatchQuery&lt;T&gt; {
    * @return a {@code QueryId}
    */
   public static QueryId pin(SQLQuery query) {
-<span class="nc" id="L70">    return pin(query, Duration.ofMinutes(5), true);</span>
+<span class="nc" id="L71">    return pin(query, Duration.ofMinutes(5), true);</span>
   }
 
   /**
@@ -84,7 +85,7 @@ public final class BatchQuery&lt;T&gt; {
    * @return a {@code QueryId}
    */
   public static QueryId pin(SQLQuery query, Duration stayAliveTime) {
-<span class="nc" id="L87">    return pin(query, stayAliveTime, true);</span>
+<span class="nc" id="L88">    return pin(query, stayAliveTime, true);</span>
   }
 
   /**
@@ -105,10 +106,10 @@ public final class BatchQuery&lt;T&gt; {
   public static QueryId pin(SQLQuery query,
         Duration stayAliveTime,
         boolean closeConnection) {
-<span class="nc" id="L108">    Check.notNull(query, QUERY);</span>
-<span class="nc" id="L109">    Check.notNull(stayAliveTime, &quot;stayAliveTime&quot;);</span>
-<span class="nc" id="L110">    QueryCache cache = QueryCache.getInstance();</span>
-<span class="nc" id="L111">    return cache.addQuery(query, stayAliveTime.getSeconds(), closeConnection);</span>
+<span class="nc" id="L109">    Check.notNull(query, QUERY);</span>
+<span class="nc" id="L110">    Check.notNull(stayAliveTime, &quot;stayAliveTime&quot;);</span>
+<span class="nc" id="L111">    QueryCache cache = QueryCache.getInstance();</span>
+<span class="nc" id="L112">    return cache.addQuery(query, stayAliveTime.getSeconds(), closeConnection);</span>
   }
 
   /**
@@ -117,8 +118,8 @@ public final class BatchQuery&lt;T&gt; {
    * {@link #nextBatch(int) nextBatch()} will cause a {@link DatabaseException}.
    */
   public static void terminateAll() {
-<span class="nc" id="L120">    QueryCache.getInstance().terminateAll();</span>
-<span class="nc" id="L121">  }</span>
+<span class="nc" id="L121">    QueryCache.getInstance().terminateAll();</span>
+<span class="nc" id="L122">  }</span>
 
 
   private final QueryId queryId;
@@ -132,10 +133,10 @@ public final class BatchQuery&lt;T&gt; {
    * @param factory a factory for the {@link BeanExtractor} that will process the
    *       {@code ResultSet}
    */
-<span class="nc" id="L135">  public BatchQuery(QueryId queryId, ExtractorFactory&lt;T&gt; factory) {</span>
-<span class="nc" id="L136">    this.queryId = queryId;</span>
-<span class="nc" id="L137">    this.factory = factory;</span>
-<span class="nc" id="L138">  }</span>
+<span class="nc" id="L136">  public BatchQuery(QueryId queryId, ExtractorFactory&lt;T&gt; factory) {</span>
+<span class="nc" id="L137">    this.queryId = queryId;</span>
+<span class="nc" id="L138">    this.factory = factory;</span>
+<span class="nc" id="L139">  }</span>
 
   /**
    * Instantiates a new {@code BatchQuery} object.
@@ -145,27 +146,27 @@ public final class BatchQuery&lt;T&gt; {
    * @param clazz the type of the JavaBeans or records produced by the
    *       {@code BatchQuery}
    */
-<span class="nc" id="L148">  public BatchQuery(QueryId queryId, Class&lt;T&gt; clazz) {</span>
-<span class="nc" id="L149">    this.queryId = queryId;</span>
-<span class="nc" id="L150">    SQLQuery query = QueryCache.getInstance().getSQLQuery(queryId);</span>
-<span class="nc" id="L151">    factory = query.session.getSQL().getBeanExtractorFactory(clazz);</span>
-<span class="nc" id="L152">  }</span>
+<span class="nc" id="L149">  public BatchQuery(QueryId queryId, Class&lt;T&gt; clazz) {</span>
+<span class="nc" id="L150">    this.queryId = queryId;</span>
+<span class="nc" id="L151">    SQLQuery query = QueryCache.getInstance().getSQLQuery(queryId);</span>
+<span class="nc" id="L152">    factory = query.getSession().getSQL().getBeanExtractorFactory(clazz);</span>
+<span class="nc" id="L153">  }</span>
 
   /**
    * Instantiates a new {@code BatchQuery} object that will produce lists of
    * {@code Map&lt;String, Object&gt;} pseudo-objects. This requires that {@code &lt;T&gt;} (the type
-   * argument for the {@code BatchQuery} variable) actually is
+   * argument for the {@code BatchQuery} variable) really is
    * {@code &lt;Map&lt;String, Object&gt;&gt;}. Otherwise a {@link ClassCastException} will follow.
    *
    * @param queryId the ID of the query result to be processed by the
    *       {@code BatchQuery}
    */
   @SuppressWarnings(&quot;unchecked&quot;)
-<span class="nc" id="L164">  public BatchQuery(QueryId queryId) {</span>
-<span class="nc" id="L165">    this.queryId = queryId;</span>
-<span class="nc" id="L166">    SQLQuery query = QueryCache.getInstance().getSQLQuery(queryId);</span>
-<span class="nc" id="L167">    factory = (ExtractorFactory&lt;T&gt;) query.session.getSQL().getMapExtractorFactory();</span>
-<span class="nc" id="L168">  }</span>
+<span class="nc" id="L165">  public BatchQuery(QueryId queryId) {</span>
+<span class="nc" id="L166">    this.queryId = queryId;</span>
+<span class="nc" id="L167">    SQLQuery query = QueryCache.getInstance().getSQLQuery(queryId);</span>
+<span class="nc" id="L168">    factory = (ExtractorFactory&lt;T&gt;) query.getSession().getSQL().getMapExtractorFactory();</span>
+<span class="nc" id="L169">  }</span>
 
   /**
    * Retrieves the next batch of records from the query result and converts them into
@@ -178,13 +179,13 @@ public final class BatchQuery&lt;T&gt; {
    * @return the next batch of records, converted into instances of type {@code &lt;T&gt;}
    */
   public List&lt;T&gt; nextBatch(int batchSize) {
-<span class="nc" id="L181">    ResultSet rs = QueryCache.getInstance().getResultSet(queryId);</span>
-<span class="nc" id="L182">    BeanExtractor&lt;T&gt; extractor = factory.getExtractor(rs);</span>
-<span class="nc" id="L183">    List&lt;T&gt; beans = extractor.extract(batchSize);</span>
-<span class="nc bnc" id="L184" title="All 2 branches missed.">    if (extractor.isEmpty()) {</span>
-<span class="nc" id="L185">      terminate();</span>
+<span class="nc" id="L182">    ResultSet rs = QueryCache.getInstance().getResultSet(queryId);</span>
+<span class="nc" id="L183">    BeanExtractor&lt;T&gt; extractor = factory.getExtractor(rs);</span>
+<span class="nc" id="L184">    List&lt;T&gt; beans = extractor.extract(batchSize);</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">    if (extractor.isEmpty()) {</span>
+<span class="nc" id="L186">      terminate();</span>
     }
-<span class="nc" id="L187">    return beans;</span>
+<span class="nc" id="L188">    return beans;</span>
   }
 
   /**
@@ -197,8 +198,8 @@ public final class BatchQuery&lt;T&gt; {
    * long after requests for new batches have stopped coming in.
    */
   public void terminate() {
-<span class="nc" id="L200">    QueryCache.getInstance().terminate(queryId);</span>
-<span class="nc" id="L201">  }</span>
+<span class="nc" id="L201">    QueryCache.getInstance().terminate(queryId);</span>
+<span class="nc" id="L202">  }</span>
 
   /**
    * Functions as an identifier for a persistent query result. A {@code QueryId} (or
@@ -211,7 +212,7 @@ public final class BatchQuery&lt;T&gt; {
 
     private final int id;
 
-<span class="nc" id="L214">    private QueryId(int id) { this.id = id; }</span>
+<span class="nc" id="L215">    private QueryId(int id) { this.id = id; }</span>
 
     /**
      * Creates a {@code QueryId} from the specified string representation
@@ -220,8 +221,8 @@ public final class BatchQuery&lt;T&gt; {
      * @return a {@code QueryId} from the specified string representation
      */
     public static QueryId of(String id) {
-<span class="nc" id="L223">      Check.notNull(id);</span>
-<span class="nc" id="L224">      return new QueryId(NumberMethods.parseInt(id));</span>
+<span class="nc" id="L224">      Check.notNull(id);</span>
+<span class="nc" id="L225">      return new QueryId(NumberMethods.parseInt(id));</span>
     }
 
     /**
@@ -229,7 +230,7 @@ public final class BatchQuery&lt;T&gt; {
      *
      * @return the hash code of this {@code QueryId}
      */
-<span class="nc" id="L232">    public int hashCode() { return id; }</span>
+<span class="nc" id="L233">    public int hashCode() { return id; }</span>
 
     /**
      * Determines whether this {@code QueryId} equals the specified object.
@@ -239,7 +240,7 @@ public final class BatchQuery&lt;T&gt; {
      */
     @Override
     public boolean equals(Object obj) {
-<span class="nc bnc" id="L242" title="All 6 branches missed.">      return this == obj || (obj instanceof QueryId qid &amp;&amp; id == qid.id);</span>
+<span class="nc bnc" id="L243" title="All 6 branches missed.">      return this == obj || (obj instanceof QueryId qid &amp;&amp; id == qid.id);</span>
     }
 
     /**
@@ -247,7 +248,7 @@ public final class BatchQuery&lt;T&gt; {
      *
      * @return the string representation of this {@code QueryId}
      */
-<span class="nc" id="L250">    public String toString() { return String.valueOf(id); }</span>
+<span class="nc" id="L251">    public String toString() { return String.valueOf(id); }</span>
   }
 
 }

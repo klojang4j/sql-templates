@@ -47,7 +47,7 @@ final class LiveQuery {
 <span class="nc" id="L47">      query.close();</span>
 <span class="nc bnc" id="L48" title="All 2 branches missed.">      if (closeConnection) {</span>
 <span class="nc" id="L49">        LOG.trace(&quot;Closing connection for query (id={})&quot;, id);</span>
-<span class="nc" id="L50">        query.session.con.close();</span>
+<span class="nc" id="L50">        query.getSession().getConnection().close();</span>
       }
 <span class="nc" id="L52">    } catch (Throwable t) {</span>
 <span class="nc" id="L53">      LOG.error(t.toString(), t);</span>
@@ -58,7 +58,7 @@ final class LiveQuery {
     try {
 <span class="nc" id="L59">      query.close();</span>
 <span class="nc bnc" id="L60" title="All 2 branches missed.">      if (closeConnection) {</span>
-<span class="nc" id="L61">        query.session.con.close();</span>
+<span class="nc" id="L61">        query.getSession().getConnection().close();</span>
       }
 <span class="nc" id="L63">    } catch (Throwable t) {</span>
       // ...

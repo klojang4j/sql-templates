@@ -265,8 +265,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * {@code SQLQuery} object. More often, though, the {@code BeanExtractor} will operate
    * on a {@code ResultSet} that has already been closed. Request the
    * {@code BeanExtractor} within a try-with-resource block created for the
-   * {@code SQLQuery}, or at the very least make sure the {@code SQLQuery} stays alive
-   * while you use the {@code BeanExtractor}.
+   * {@code SQLQuery}, or at least make sure the {@code SQLQuery} stays alive while you
+   * use the {@code BeanExtractor}.
    *
    * @param <T> the type of the JavaBeans or records
    * @param clazz the class of the JavaBeans or records

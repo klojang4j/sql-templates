@@ -47,7 +47,7 @@ final class LiveQuery {
       query.close();
       if (closeConnection) {
         LOG.trace("Closing connection for query (id={})", id);
-        query.session.con.close();
+        query.getSession().getConnection().close();
       }
     } catch (Throwable t) {
       LOG.error(t.toString(), t);
@@ -58,7 +58,7 @@ final class LiveQuery {
     try {
       query.close();
       if (closeConnection) {
-        query.session.con.close();
+        query.getSession().getConnection().close();
       }
     } catch (Throwable t) {
       // ...

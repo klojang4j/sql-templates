@@ -147,40 +147,44 @@ public abstract sealed class SQLStatement&lt;T extends SQLStatement&lt;T&gt;&gt;
 <span class="fc" id="L147">    Check.that(bound.size()).is(eq(), sqlInfo.parameters().size(), unboundParameters());</span>
 <span class="fc" id="L148">  }</span>
 
+  AbstractSQLSession getSession() {
+<span class="nc" id="L151">    return session;</span>
+  }
+
   /**
    * Releases all resources held by this instance. You cannot reuse the instance after a
    * call to this method.
    */
   @Override
   public void close() {
-<span class="fc" id="L156">    cleanable.clean();</span>
-<span class="fc" id="L157">  }</span>
+<span class="fc" id="L160">    cleanable.clean();</span>
+<span class="fc" id="L161">  }</span>
 
   private Supplier&lt;DatabaseException&gt; unboundParameters() {
-<span class="fc" id="L160">    Set&lt;String&gt; all = HashSet.newHashSet(sqlInfo.parameters().size());</span>
-<span class="fc" id="L161">    all.addAll(sqlInfo.parameterPositions().keySet());</span>
-<span class="fc" id="L162">    all.removeAll(collectionToSet(bound, NamedParameter::name));</span>
-<span class="fc" id="L163">    String fmt = &quot;SQL contains named parameters that have not been bound yet: %s&quot;;</span>
-<span class="fc" id="L164">    String msg = String.format(fmt, all);</span>
-<span class="pc" id="L165">    return () -&gt; Utils.exception(msg, session.getSQL().unparsed());</span>
+<span class="fc" id="L164">    Set&lt;String&gt; all = HashSet.newHashSet(sqlInfo.parameters().size());</span>
+<span class="fc" id="L165">    all.addAll(sqlInfo.parameterPositions().keySet());</span>
+<span class="fc" id="L166">    all.removeAll(collectionToSet(bound, NamedParameter::name));</span>
+<span class="fc" id="L167">    String fmt = &quot;SQL contains named parameters that have not been bound yet: %s&quot;;</span>
+<span class="fc" id="L168">    String msg = String.format(fmt, all);</span>
+<span class="pc" id="L169">    return () -&gt; Utils.exception(msg, session.getSQL().unparsed());</span>
   }
 
   private static class StatementContainer implements Runnable {
 
     private final PreparedStatement stmt;
 
-<span class="fc" id="L172">    StatementContainer(PreparedStatement stmt) { this.stmt = stmt; }</span>
+<span class="fc" id="L176">    StatementContainer(PreparedStatement stmt) { this.stmt = stmt; }</span>
 
-<span class="fc" id="L174">    PreparedStatement get() { return stmt; }</span>
+<span class="fc" id="L178">    PreparedStatement get() { return stmt; }</span>
 
     @Override
     public void run() {
       try {
-<span class="fc" id="L179">        stmt.close();</span>
-<span class="nc" id="L180">      } catch (SQLException e) {</span>
+<span class="fc" id="L183">        stmt.close();</span>
+<span class="nc" id="L184">      } catch (SQLException e) {</span>
         // ...
-<span class="fc" id="L182">      }</span>
-<span class="fc" id="L183">    }</span>
+<span class="fc" id="L186">      }</span>
+<span class="fc" id="L187">    }</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
