@@ -48,7 +48,8 @@ import java.util.Optional;
  * idempotent operation. Be aware of this. If you call {@code FACTORY.getExtractor(rs)}
  * twice in a row, the second {@code BeanExtractor} will start its life sitting on the
  * second row of the {@code ResultSet}. In short: only instantiate a {@code BeanExtractor}
- * if you intend to extract at least one row from the underlying {@code ResultSet}.
+ * if you intend to extract at least one row from the underlying {@code ResultSet} (when
+ * available).
  *
  * <h2>JavaBeans vs. Records</h2>
  * When converting a row into a JavaBean, a {@code BeanExtractor} will always use the
