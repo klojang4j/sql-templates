@@ -7,12 +7,11 @@ import java.sql.ResultSet;
 import java.time.Duration;
 import java.util.List;
 
-import static java.lang.System.identityHashCode;
 import static org.klojang.jdbc.x.Strings.QUERY;
 
 /**
- * Facilitates the processing of large query results in batches across multiple,
- * independent requests. These would typically be HTTP requests, but any stateless
+ * <p>Facilitates the processing of large query results in batches across multiple,
+ * isolated requests. These would typically be HTTP requests, but any stateless
  * request-response mechanism might want to use the functionality offered by the
  * {@code BatchQuery} class. The query result will be kept alive until all records have
  * been extracted from it. Once all records have been extracted, the associated JDBC
@@ -20,6 +19,34 @@ import static org.klojang.jdbc.x.Strings.QUERY;
  * persistent query results, a background thread will periodically check whether any of
  * them have gone stale and, if so, close and remove them. Once there are no more
  * persistent query results, the thread will itself be terminated.
+ *
+ * <p>Since the point is to keep the query result alive across multiple requests, you may
+ * have to suppress a (good) habit of always setting up try-with-resources blocks for
+ * {@link AutoCloseable} objects (the JDBC {@link java.sql.Connection Connection} and the
+ * {@link SQLQuery} in this case). This would <i>not</i> be a good way to get hold of a
+ * {@code BatchQuery}:
+ *
+ * <blockquote><pre>{@code
+ * try(Connection con = ...) {
+ *   SQLSession session = SQL.staticSQL("SELECT * FROM PERSON").session(con);
+ *   try(SQLQuery query = session.prepareQuery()) {
+ *     QueryId queryId = BatchQuery.pin(query);
+ *     BatchQuery<Person> batchQuery = new BatchQuery<>(queryId, Person.class);
+ *   }
+ * }
+ * }</pre></blockquote>
+ *
+ * <p>Instead, simply write:
+ *
+ * <blockquote><pre>{@code
+ * @SuppressWarnings("resource")
+ * Connection con = ...;
+ * SQLSession session = SQL.staticSQL("SELECT * FROM PERSON").session(con);
+ * @SuppressWarnings("resource")
+ * SQLQuery query = session.prepareQuery();
+ * QueryId queryId = BatchQuery.pin(query);
+ * BatchQuery<Person> batchQuery = new BatchQuery<>(queryId, Person.class);
+ * }</pre></blockquote>
  *
  * @param <T> the type of the JavaBeans or records produced by the
  *       {@code BatchQuery}
@@ -108,6 +135,36 @@ public final class BatchQuery<T> {
   public BatchQuery(QueryId queryId, ExtractorFactory<T> factory) {
     this.queryId = queryId;
     this.factory = factory;
+  }
+
+  /**
+   * Instantiates a new {@code BatchQuery} object.
+   *
+   * @param queryId the ID of the query result to be processed by the
+   *       {@code BatchQuery}
+   * @param clazz the type of the JavaBeans or records produced by the
+   *       {@code BatchQuery}
+   */
+  public BatchQuery(QueryId queryId, Class<T> clazz) {
+    this.queryId = queryId;
+    SQLQuery query = QueryCache.getInstance().getSQLQuery(queryId);
+    factory = query.session.getSQL().getBeanExtractorFactory(clazz);
+  }
+
+  /**
+   * Instantiates a new {@code BatchQuery} object that will produce lists of
+   * {@code Map<String, Object>} pseudo-objects. This requires that {@code <T>} (the type
+   * argument for the {@code BatchQuery} variable) actually is
+   * {@code <Map<String, Object>>}. Otherwise a {@link ClassCastException} will follow.
+   *
+   * @param queryId the ID of the query result to be processed by the
+   *       {@code BatchQuery}
+   */
+  @SuppressWarnings("unchecked")
+  public BatchQuery(QueryId queryId) {
+    this.queryId = queryId;
+    SQLQuery query = QueryCache.getInstance().getSQLQuery(queryId);
+    factory = (ExtractorFactory<T>) query.session.getSQL().getMapExtractorFactory();
   }
 
   /**

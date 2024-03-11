@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PropertyBinder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.ps</a> &gt; <span class="el_source">PropertyBinder.java</span></div><h1>PropertyBinder.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.ps;
+
+import org.klojang.invoke.Getter;
+import org.klojang.invoke.GetterFactory;
+import org.klojang.jdbc.SessionConfig;
+import org.klojang.jdbc.x.ps.writer.EnumBinderLookup;
+import org.klojang.jdbc.x.sql.NamedParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.PreparedStatement;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import org.klojang.jdbc.CustomBinder;
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_BYTES;
+import static org.klojang.jdbc.x.ps.PreparedStatementMethod.SET_STRING;
+import static org.klojang.util.ClassMethods.isSubtype;
+
+
+/**
+ * Binds a single bean property or record component to a PreparedStatement.
+ *
+ * @param &lt;INPUT_TYPE&gt; the type of the value to be bound
+ * @param &lt;PARAM_TYPE&gt; the type of the value passed to the particular
+ *       {@code setXXX()} method of {@code PreparedStatement} that we want to use
+ * @author Ayco Holleman
+ */
+final class PropertyBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; {
+
+<span class="fc" id="L35">  private static final Logger LOG = LoggerFactory.getLogger(PropertyBinder.class);</span>
+
+  @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
+  static &lt;T&gt; void readAll(PreparedStatement ps, T bean, PropertyBinder[] readers)
+        throws Throwable {
+<span class="fc" id="L40">    LOG.debug(&quot;Binding {} to PreparedStatement&quot;, bean.getClass().getSimpleName());</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">    for (PropertyBinder reader : readers) {</span>
+<span class="fc" id="L42">      reader.bindProperty(ps, bean);</span>
+    }
+<span class="fc" id="L44">  }</span>
+
+  @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
+  static PropertyBinder[] createReaders(Class beanClass,
+        List&lt;NamedParameter&gt; params,
+        SessionConfig config,
+        List&lt;NamedParameter&gt; bound) {
+<span class="fc" id="L51">    ValueBinderFactory factory = ValueBinderFactory.getInstance();</span>
+<span class="fc" id="L52">    Map&lt;String, Getter&gt; getters = GetterFactory.INSTANCE.getGetters(beanClass, true);</span>
+<span class="fc" id="L53">    List&lt;PropertyBinder&gt; readers = new ArrayList&lt;&gt;(params.size());</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">    for (NamedParameter param : params) {</span>
+<span class="fc" id="L55">      Getter getter = getters.get(param.name());</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">      if (getter == null) {</span>
+<span class="nc" id="L57">        continue;</span>
+      }
+<span class="fc" id="L59">      bound.add(param);</span>
+<span class="fc" id="L60">      String property = param.name();</span>
+<span class="fc" id="L61">      Class type = getter.getReturnType();</span>
+<span class="fc" id="L62">      CustomBinder custom = config.getCustomBinder(beanClass, property, type);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">      if (custom != null) {</span>
+<span class="fc" id="L64">        readers.add(new PropertyBinder(getter, param, custom));</span>
+<span class="fc" id="L65">        continue;</span>
+      }
+<span class="fc" id="L67">      Integer sqlType = config.getSQLType(beanClass, property, type);</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">      if (sqlType != null) {</span>
+<span class="nc" id="L69">        ValueBinder vb = factory.getBinder(type, sqlType);</span>
+<span class="nc" id="L70">        readers.add(new PropertyBinder(getter, param, vb));</span>
+<span class="nc" id="L71">        continue;</span>
+      }
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">      if (isSubtype(type, Enum.class)) {</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        ValueBinder vb = config.saveEnumAsString(beanClass, property, type)</span>
+<span class="nc" id="L75">              ? ValueBinder.ANY_TO_STRING</span>
+<span class="nc" id="L76">              : EnumBinderLookup.DEFAULT;</span>
+<span class="nc" id="L77">        readers.add(new PropertyBinder(getter, param, vb));</span>
+<span class="nc" id="L78">        continue;</span>
+      }
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">      if (isSubtype(type, TemporalAccessor.class)) {</span>
+<span class="nc" id="L81">        DateTimeFormatter dtf = config.getDateTimeFormatter(beanClass, property, type);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (dtf != null) {</span>
+<span class="nc" id="L83">          ValueBinder vb = ValueBinder.dateTimeToString(dtf);</span>
+<span class="nc" id="L84">          readers.add(new PropertyBinder(getter, param, vb));</span>
+<span class="nc" id="L85">          continue;</span>
+        }
+      }
+<span class="fc" id="L88">      Function&lt;Object, String&gt; ser0 = config.getSerializer(beanClass, property, type);</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">      if (ser0 != null) {</span>
+<span class="fc" id="L90">        ValueBinder vb = new ValueBinder&lt;&gt;(SET_STRING, ser0);</span>
+<span class="fc" id="L91">        readers.add(new PropertyBinder(getter, param, vb));</span>
+<span class="fc" id="L92">        continue;</span>
+      }
+<span class="fc" id="L94">      Function&lt;Object, byte[]&gt; ser1 = config.getBinarySerializer(beanClass, property, type);</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">      if (ser1 != null) {</span>
+<span class="nc" id="L96">        ValueBinder vb = new ValueBinder&lt;&gt;(SET_BYTES, ser1);</span>
+<span class="nc" id="L97">        readers.add(new PropertyBinder(getter, param, vb));</span>
+<span class="nc" id="L98">        continue;</span>
+      }
+<span class="fc" id="L100">      ValueBinder vb = factory.getDefaultBinder(type);</span>
+<span class="fc" id="L101">      readers.add(new PropertyBinder(getter, param, vb));</span>
+<span class="fc" id="L102">    }</span>
+<span class="fc" id="L103">    return readers.toArray(PropertyBinder[]::new);</span>
+  }
+
+  private final Getter getter;
+  private final ValueBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; binder;
+  private final NamedParameter param;
+  private final CustomBinder custom;
+
+  private PropertyBinder(Getter getter,
+<span class="fc" id="L112">        NamedParameter param, ValueBinder&lt;INPUT_TYPE, PARAM_TYPE&gt; binder) {</span>
+<span class="fc" id="L113">    this.getter = getter;</span>
+<span class="fc" id="L114">    this.param = param;</span>
+<span class="fc" id="L115">    this.binder = binder;</span>
+<span class="fc" id="L116">    this.custom = null;</span>
+<span class="fc" id="L117">  }</span>
+
+<span class="fc" id="L119">  private PropertyBinder(Getter getter, NamedParameter param, CustomBinder custom) {</span>
+<span class="fc" id="L120">    this.getter = getter;</span>
+<span class="fc" id="L121">    this.param = param;</span>
+<span class="fc" id="L122">    this.custom = custom;</span>
+<span class="fc" id="L123">    this.binder = null;</span>
+<span class="fc" id="L124">  }</span>
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private &lt;T&gt; void bindProperty(PreparedStatement ps, T bean) throws Throwable {
+<span class="fc" id="L128">    INPUT_TYPE beanValue = (INPUT_TYPE) getter.read(bean);</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">    if (custom != null) {</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
+<span class="fc" id="L131">        LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (using custom binder)&quot;,</span>
+<span class="fc" id="L132">              param.name(),</span>
+              beanValue);
+      }
+<span class="fc" id="L135">      param.positions().forEachThrowing(i -&gt; custom.bind(ps, i, beanValue));</span>
+    } else {
+<span class="fc" id="L137">      PARAM_TYPE paramValue = binder.getParamValue(beanValue);</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">      if (LOG.isTraceEnabled()) {</span>
+<span class="pc bpc" id="L139" title="1 of 4 branches missed.">        if (binder.isAdaptive() &amp;&amp; beanValue != paramValue) {</span>
+<span class="fc" id="L140">          String fmt = &quot;==&gt; Parameter \&quot;{}\&quot;: {} (original value: {})&quot;;</span>
+<span class="fc" id="L141">          LOG.trace(fmt, param.name(), paramValue, beanValue);</span>
+<span class="fc" id="L142">        } else {</span>
+<span class="fc" id="L143">          LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {}&quot;, getter.getProperty(), paramValue);</span>
+        }
+      }
+<span class="fc" id="L146">      param.positions().forEachThrowing(i -&gt; binder.bind(ps, i, paramValue));</span>
+    }
+<span class="fc" id="L148">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParamExtractor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.sql</a> &gt; <span class="el_source">ParamExtractor.java</span></div><h1>ParamExtractor.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.sql;
+
+import org.klojang.jdbc.DatabaseException;
+import org.klojang.jdbc.x.Utils;
+import org.klojang.util.CollectionMethods;
+import org.klojang.util.MutableInt;
+import org.klojang.util.collection.IntArrayList;
+import org.klojang.util.collection.IntList;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.klojang.check.Check.fail;
+import static org.klojang.check.CommonChecks.ne;
+import static org.klojang.check.CommonProperties.strlen;
+import static org.klojang.util.CollectionMethods.collectionToList;
+
+/**
+ * Extracts named parameters from a SQL query and replaces them with positional parameters
+ * (question marks).
+ */
+public final class ParamExtractor {
+
+  private static final String ERR_ADJACENT_PARAMS =
+        &quot;adjacent parameters at positions ${0} and ${1} cannot yield valid SQL&quot;;
+  private static final String ERR_EMPTY_NAME =
+        &quot;zero-length parameter name at position ${0}&quot;;
+
+  private static final char QUOTE = '\'';
+  private static final char COLON = ':';
+  private static final char BACKSLASH = '\\';
+
+  private final String normalized;
+  private final Map&lt;String, IntList&gt; positions;
+  private final List&lt;NamedParameter&gt; params;
+
+  // For static SQL - containing no named parameters
+<span class="fc" id="L40">  public ParamExtractor(String sql, int dummy) {</span>
+<span class="fc" id="L41">    this.normalized = sql;</span>
+<span class="fc" id="L42">    this.positions = Map.of();</span>
+<span class="fc" id="L43">    this.params = List.of();</span>
+<span class="fc" id="L44">  }</span>
+
+<span class="fc" id="L46">  public ParamExtractor(String sql) {</span>
+<span class="fc" id="L47">    final var normalized = new StringBuilder(sql.length());</span>
+<span class="fc" id="L48">    final var positions = new LinkedHashMap&lt;String, IntList&gt;();</span>
+<span class="fc" id="L49">    final var counter = new MutableInt(); // parameter counter</span>
+<span class="fc" id="L50">    final var name = new StringBuilder(); // parameter name</span>
+<span class="fc" id="L51">    int position = -1; // parameter start position</span>
+<span class="fc" id="L52">    boolean insideString = false;</span>
+<span class="fc" id="L53">    boolean escaped = false;</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">    for (int i = 0; i &lt; sql.length(); ++i) {</span>
+<span class="fc" id="L55">      char c = sql.charAt(i);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">      if (insideString) {</span>
+<span class="fc" id="L57">        normalized.append(c);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (c == QUOTE) {</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">          if (!escaped) {</span>
+<span class="fc" id="L60">            insideString = false;</span>
+          }
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        } else if (c == BACKSLASH) {</span>
+<span class="fc" id="L63">          escaped = true;</span>
+        } else {
+<span class="fc" id="L65">          escaped = false;</span>
+        }
+<span class="fc bfc" id="L67" title="All 2 branches covered.">      } else if (position != -1) { // we are assembling a parameter name</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (isParamChar(c)) {</span>
+<span class="fc" id="L69">          name.append(c);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">          if (i == sql.length() - 1) {</span>
+<span class="fc" id="L71">            addParam(name, position, positions, counter);</span>
+          }
+        } else {
+<span class="fc" id="L74">          addParam(name, position, positions, counter);</span>
+<span class="fc" id="L75">          normalized.append(c);</span>
+<span class="fc" id="L76">          position = -1;</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">          if (c == QUOTE) {</span>
+<span class="nc" id="L78">            insideString = true;</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">          } else if (c == COLON) {</span>
+<span class="nc" id="L80">            fail(DatabaseException::new, ERR_ADJACENT_PARAMS, position, i);</span>
+          }
+        }
+<span class="fc bfc" id="L83" title="All 2 branches covered.">      } else if (c == COLON) {</span>
+<span class="fc" id="L84">        normalized.append('?');</span>
+<span class="fc" id="L85">        position = i;</span>
+<span class="fc" id="L86">        name.setLength(0);</span>
+      } else {
+<span class="fc" id="L88">        normalized.append(c);</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (c == QUOTE) {</span>
+<span class="fc" id="L90">          insideString = true;</span>
+        }
+      }
+    }
+<span class="fc" id="L94">    this.normalized = normalized.toString();</span>
+<span class="fc" id="L95">    this.positions = CollectionMethods.freeze(positions, IntList::copyOf);</span>
+<span class="fc" id="L96">    this.params = collectionToList(positions.entrySet(), this::entryToParam);</span>
+<span class="fc" id="L97">  }</span>
+
+  /**
+   * Returns SQL in which all named parameters have been replaced with question marks
+   * (i&amp;#46;e&amp;#46; standard JDBC positional parameters), but with &lt;i&gt;Klojang Templates&lt;/i&gt;
+   * variables potentially still present.
+   */
+  public String getNormalizedSQL() {
+<span class="fc" id="L105">    return normalized;</span>
+  }
+
+  public List&lt;NamedParameter&gt; getParameters() {
+<span class="fc" id="L109">    return params;</span>
+  }
+
+  public Map&lt;String, IntList&gt; getParameterPositions() {
+<span class="fc" id="L113">    return positions;</span>
+  }
+
+  private static boolean isParamChar(char c) {
+<span class="pc bpc" id="L117" title="1 of 4 branches missed.">    return Character.isLetterOrDigit(c) || c == '_';</span>
+  }
+
+  private static void addParam(
+        StringBuilder name,
+        int position,
+        Map&lt;String, IntList&gt; positions,
+        MutableInt counter) {
+<span class="fc" id="L125">    Utils.check(name).has(strlen(), ne(), 0, ERR_EMPTY_NAME, position);</span>
+<span class="fc" id="L126">    positions</span>
+<span class="fc" id="L127">          .computeIfAbsent(name.toString(), k -&gt; new IntArrayList())</span>
+<span class="fc" id="L128">          .add(counter.ppi());</span>
+<span class="fc" id="L129">  }</span>
+
+  private NamedParameter entryToParam(Entry&lt;String, IntList&gt; e) {
+<span class="fc" id="L132">    return new NamedParameter(e.getKey(), IntList.copyOf(e.getValue()));</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

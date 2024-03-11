@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FloatReaderLookup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x.rs.reader</a> &gt; <span class="el_source">FloatReaderLookup.java</span></div><h1>FloatReaderLookup.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x.rs.reader;
+
+import org.klojang.jdbc.x.rs.ColumnReader;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+import static java.sql.Types.*;
+import static java.util.Map.Entry;
+import static org.klojang.convert.NumberMethods.convert;
+import static org.klojang.convert.NumberMethods.parse;
+import static org.klojang.jdbc.x.rs.ResultSetMethod.*;
+
+<span class="fc" id="L16">public final class FloatReaderLookup extends AbstractColumnReaderLookup&lt;Float&gt; {</span>
+
+  @Override
+  List&lt;Entry&lt;Integer, ColumnReader&lt;?, Float&gt;&gt;&gt; getColumnReaders() {
+<span class="fc" id="L20">    List&lt;Entry&lt;Integer, ColumnReader&lt;?, Float&gt;&gt;&gt; entries = new ArrayList&lt;&gt;(16);</span>
+    // Confusingly, Types.REAL corresponds to the Java float type while both
+    // Types.DOUBLE and Types.FLOAT correspond to the Java double type. Types.NUMERIC
+    // and Types.DECIMAL both correspond to BigDecimal.
+<span class="fc" id="L24">    entries.add(entry(GET_FLOAT, REAL));</span>
+<span class="fc" id="L25">    entries.add(entry(GET_BOOLEAN, boolToFloat(), BOOLEAN));</span>
+<span class="fc" id="L26">    entries.add(entry(GET_LONG, longToFloat(), BIGINT));</span>
+<span class="fc" id="L27">    entries.addAll(entries(GET_INT, intToFloat(), INTEGER, SMALLINT, TINYINT));</span>
+<span class="fc" id="L28">    entries.addAll(entries(GET_DOUBLE, doubleToFloat(), DOUBLE, FLOAT));</span>
+<span class="fc" id="L29">    entries.addAll(entries(GET_BIG_DECIMAL, bdToFloat(), NUMERIC, DECIMAL));</span>
+<span class="fc" id="L30">    entries.addAll(entries(GET_STRING, stringToFloat(), VARCHAR, CHAR));</span>
+<span class="fc" id="L31">    return entries;</span>
+  }
+
+  private static Function&lt;Boolean, Float&gt; boolToFloat() {
+<span class="pc bnc" id="L35" title="All 4 branches missed.">    return x -&gt; x == null || !x ? 0F : 1F;</span>
+  }
+
+  private static Function&lt;Integer, Float&gt; intToFloat() {
+<span class="fc" id="L39">    return Integer::floatValue;</span>
+  }
+
+  private static Function&lt;Long, Float&gt; longToFloat() {
+<span class="pc" id="L43">    return x -&gt; convert(x, Float.class);</span>
+  }
+
+  private static Function&lt;Double, Float&gt; doubleToFloat() {
+<span class="pc" id="L47">    return x -&gt; convert(x, Float.class);</span>
+  }
+
+  private static Function&lt;BigDecimal, Float&gt; bdToFloat() {
+<span class="pc" id="L51">    return x -&gt; convert(x, Float.class);</span>
+  }
+
+  private static Function&lt;String, Float&gt; stringToFloat() {
+<span class="pc" id="L55">    return x -&gt; parse(x, Float.class);</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

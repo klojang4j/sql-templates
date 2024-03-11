@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SQLSession.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SQLSession.java</span></div><h1>SQLSession.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import java.util.Collection;
+
+/**
+ * &lt;p&gt;A {@code SQLSession} allows you to provide values for &lt;i&gt;template variables&lt;/i&gt;
+ * within an SQL template. Once you have set all template variables, you can obtain a
+ * {@link SQLStatement} from the {@code SQLSession} and use it to set (a.k.a. &quot;bind&quot;) the
+ * &lt;i&gt;named parameters&lt;/i&gt; within the SQL. The difference between template variables and
+ * named parameters is explained in the comments for the {@linkplain SQL SQL interface}.
+ * Since the {@code SQLSession} implementation obtained via
+ * {@link SQL#simple(String) SQL.simple()}) does not allow for template variables, you
+ * have no choice but to retrieve a {@code SQLStatement} from it straight away. If the SQL
+ * does not contain any named parameters, you may also call {@link #execute()} on the
+ * {@code SQLSession}, without going through the creation of a {@code SQLStatement}.
+ *
+ * &lt;p&gt;{@code SQLSession} instances are meant to be throw-away objects that should, in
+ * principle, not survive the method in which they are created.
+ */
+public sealed interface SQLSession permits AbstractSQLSession {
+
+  private static UnsupportedOperationException notSupported(String method) {
+<span class="nc" id="L23">    String fmt = &quot;method %s() only supported for SQL templates and SQL skeletons&quot;;</span>
+<span class="nc" id="L24">    return new UnsupportedOperationException(String.format(fmt, method));</span>
+  }
+
+  private static UnsupportedOperationException sqlSkeletonsOnly(String method) {
+<span class="nc" id="L28">    String fmt = &quot;method %s() only supported for SQL skeletons&quot;;</span>
+<span class="nc" id="L29">    return new UnsupportedOperationException(String.format(fmt, method));</span>
+  }
+
+  /**
+   * Sets the specified template variable to the specified value. Only use this method if
+   * you know and trust the origin of the provided value. The value will not be escaped or
+   * quoted. Preferably use {@link #setValue(String, Object) setValue()} or
+   * {@link #setIdentifier(String, String) setIdentifier()} to prevent SQL injection. If
+   * the value is an array or collection, it will be &quot;imploded&quot; to a string, using
+   * {@code &quot;,&quot; } (comma) to separate the elements in the array or collection. This method
+   * will throw an {@link UnsupportedOperationException} for
+   * {@linkplain SQL#simple(String) simple SQL sessions} since these are not based on &lt;a
+   * href=&quot;https://klojang4j.github.io/klojang-templates/1/api/org.klojang.templates/module-summary.html&quot;&gt;Klojang
+   * Templates&lt;/a&gt;.
+   *
+   * @param varName the name of the template variable
+   * @param value the value to set the variable to
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   * @see org.klojang.templates.Template
+   * @see org.klojang.templates.RenderSession#set(String, Object)
+   * @see org.klojang.util.ArrayMethods#implode(Object[])
+   * @see org.klojang.util.CollectionMethods#implode(Collection)
+   */
+  default SQLSession set(String varName, Object value)
+        throws UnsupportedOperationException {
+<span class="nc" id="L56">    throw notSupported(&quot;set&quot;);</span>
+  }
+
+  /**
+   * Sets the specified template variable to the escaped and quoted version of the
+   * specified value. Use this method if you do not know or trust the origin of the value
+   * to prevent SQL injection. If the value is an array or {@link Collection}, it will be
+   * &quot;imploded&quot; to a string, using a comma to separate the elements in the array or
+   * collection, and using {@link #quoteValue(Object) quoteValue()} to escape and quote
+   * each element separately. Otherwise this method is equivalent to
+   * {@code set(varName, quoteValue(value))}.
+   *
+   * @param varName the name of the template variable
+   * @param value the value to set the variable to
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   * @see #quoteValue(Object)
+   */
+  default SQLSession setValue(String varName, Object value)
+        throws UnsupportedOperationException {
+<span class="nc" id="L77">    throw notSupported(&quot;setValue&quot;);</span>
+  }
+
+  /**
+   * &lt;p&gt;Convenience method, equivalent to
+   * {@link #setValue(String, Object) setValue(varName, values)}. Can be used to elegantly
+   * populate a SQL IN clause with an arbitrary number of values:
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * SQL sql = SQL.template(&quot;SELECT * FROM AIRPORT WHERE NAME IN(~%names%)&quot;;
+   * try(Connection con = ...) {
+   *   List&lt;Airport&gt; airports =  sql.session(con)
+   *       .setArray(&quot;names&quot;, &quot;London Heathrow&quot;, &quot;Chicago O'Hare&quot;)
+   *       .prepareQuery()
+   *       .getExtractor()
+   *       .extractAll();
+   * }
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * &lt;p&gt;This will execute the following SQL:
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * SELECT * FROM AIRPORT WHERE NAME IN('London Heathrow','Chicago O''Hare')
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * @param varName the name of the template variable
+   * @param values an array, which will be &quot;imploded&quot; to a {@code String}, using a
+   *       comma to separate the array elements, and using
+   *       {@link #quoteValue(Object) quoteValue()} to escape and quote the array
+   *       elements
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   * @see #quoteValue(Object)
+   */
+  default SQLSession setArray(String varName, Object... values)
+        throws UnsupportedOperationException {
+<span class="nc" id="L114">    throw notSupported(&quot;setArray&quot;);</span>
+  }
+
+  /**
+   * Convenience method, equivalent to
+   * {@link #setValue(String, Object) setValue(varName, values)}.
+   *
+   * @param varName the name of the template variable
+   * @param values an array, which will be &quot;imploded&quot; to a {@code String}, using a
+   *       comma to separate the array elements
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   */
+  default SQLSession setArray(String varName, int... values)
+        throws UnsupportedOperationException {
+<span class="nc" id="L130">    throw notSupported(&quot;setArray&quot;);</span>
+  }
+
+  /**
+   * Sets the specified template variable to the escaped and quoted version of the
+   * specified identifier (e&amp;#46;g&amp;#46; a column name or table name).
+   *
+   * @param varName the name of the template variable
+   * @param identifier the identifier to substitute the variable with
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   * @see #quoteIdentifier(String)
+   */
+  default SQLSession setIdentifier(String varName, String identifier)
+        throws UnsupportedOperationException {
+<span class="nc" id="L146">    throw notSupported(&quot;setIdentifier&quot;);</span>
+  }
+
+  /**
+   * &lt;p&gt;Sets a variable in a &lt;a
+   * href=&quot;https://github.com/klojang4j/klojang-templates?tab=readme-ov-file#nested-templates&quot;&gt;nested
+   * template&lt;/a&gt; within the SQL skeleton to the specified value. If the value is an array
+   * or collection, it will be &quot;imploded&quot; to a string, using {@code &quot;,&quot; } (comma) to
+   * separate the elements in the array or collection. This method is only supported for
+   * {@link SQL#skeleton(String) SQL skeletons}. When calling this method on a
+   * {@code SQLSession} obtained via {@link SQL#simple(String) SQL.simple()} or
+   * {@link SQL#template(String) SQL.template()}, this method will throw an
+   * {@code UnsupportedOperationException}.
+   *
+   * &lt;p&gt;&lt;b&gt;NB Nested templates in general are &lt;i&gt;only&lt;/i&gt; supported in SQL skeletons. The
+   * are &lt;i&gt;not&lt;/i&gt; supported in regular SQL templates.&lt;/b&gt;
+   *
+   * @param path the path to the variable within the SQL skeleton
+   * @param value the value to set the variable to
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       &lt;i&gt;not&lt;/i&gt; obtained via {@link SQL#skeleton(String) SQL.skeleton()}
+   */
+  default SQLSession setNested(String path, Object value)
+        throws UnsupportedOperationException {
+<span class="nc" id="L171">    throw sqlSkeletonsOnly(&quot;setNested&quot;);</span>
+  }
+
+  /**
+   * &lt;p&gt;Sets a variable in a &lt;a
+   * href=&quot;https://github.com/klojang4j/klojang-templates?tab=readme-ov-file#nested-templates&quot;&gt;nested
+   * template&lt;/a&gt; within the SQL skeleton to the escaped and quoted version of the
+   * specified value. If the value is an array or collection, it will be &quot;imploded&quot; to a
+   * string, using {@code &quot;,&quot; } (comma) to separate the elements in the array or
+   * collection, and using {@link #quoteValue(Object) quoteValue()} to escape and quote
+   * each element separately. This method is only supported for
+   * {@link SQL#skeleton(String) SQL skeletons}. When calling this method on a
+   * {@code SQLSession} obtained via {@link SQL#simple(String) SQL.simple()} or
+   * {@link SQL#template(String) SQL.template()}, this method will throw an
+   * {@code UnsupportedOperationException}.
+   *
+   * &lt;p&gt;&lt;b&gt;NB Nested templates in general are &lt;i&gt;only&lt;/i&gt; supported in SQL skeletons. The
+   * are &lt;i&gt;not&lt;/i&gt; supported in regular SQL templates.&lt;/b&gt;
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * String sql = &quot;&quot;&quot;
+   *     SELECT * FROM EMPLOYEE
+   *     ~%%begin:whereClause%
+   *      WHERE FIRST_NAME LIKE ~%searchPhrase% OR LAST_NAME LIKE ~%searchPhrase%
+   *     ~%%end:whereClause%
+   *     &quot;&quot;&quot;;
+   * try(Connection con = ...) {
+   *   SQLSession session = SQL.skeleton(sql).session(con);
+   *   if(searchPhrase != null) {
+   *     session.setNestedValue(&quot;whereClause.searchPhrase&quot;, '%' + searchPhrase + '%');
+   *   }
+   *   try(SQLQuery query = session.prepareQuery()) {
+   *     return query.getExtractor(Employee.class).extractAll();
+   *   }
+   * }
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * &lt;p&gt;Note that, by default, nested templates are not rendered. They remain invisible
+   * unless you do something that makes them become visible. In this case, setting a
+   * variable within the nested template forces its entire contents to become visible.
+   * Alternatively, you can call {@link #enable(String)} to force the contents of a nested
+   * template to become visible.
+   *
+   * @param path the path to the variable within the SQL skeleton
+   * @param value the value to set the variable to
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       &lt;i&gt;not&lt;/i&gt; obtained via {@link SQL#skeleton(String) SQL.skeleton()}
+   */
+  default SQLSession setNestedValue(String path, Object value)
+        throws UnsupportedOperationException {
+<span class="nc" id="L222">    throw sqlSkeletonsOnly(&quot;setNestedValue&quot;);</span>
+  }
+
+  /**
+   * &lt;p&gt;Sets a variable in a &lt;a
+   * href=&quot;https://github.com/klojang4j/klojang-templates?tab=readme-ov-file#nested-templates&quot;&gt;nested
+   * template&lt;/a&gt; within the SQL skeleton to the escaped and quoted version of the
+   * specified identifier (e&amp;#46;g&amp;#46; a column name or table name). This method is only
+   * supported for {@link SQL#skeleton(String) SQL skeletons}. When calling this method on
+   * a {@code SQLSession} obtained via {@link SQL#simple(String) SQL.simple()} or
+   * {@link SQL#template(String) SQL.template()}, this method will throw an
+   * {@code UnsupportedOperationException}.
+   *
+   * &lt;p&gt;&lt;b&gt;NB Nested templates in general are &lt;i&gt;only&lt;/i&gt; supported in SQL skeletons. The
+   * are &lt;i&gt;not&lt;/i&gt; supported in regular SQL templates.&lt;/b&gt;
+   *
+   * @param path the path to the variable within the SQL skeleton
+   * @param identifier the identifier to substitute the variable with
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       &lt;i&gt;not&lt;/i&gt; obtained via {@link SQL#skeleton(String) SQL.skeleton()}
+   */
+  default SQLSession setNestedIdentifier(String path, String identifier)
+        throws UnsupportedOperationException {
+<span class="nc" id="L246">    throw sqlSkeletonsOnly(&quot;setNestedIdentifier&quot;);</span>
+  }
+
+  /**
+   * Enables the contents of the specified nested template. That is, the contents of the
+   * specified nested template will be rendered. By default, nested templates remain
+   * invisible unless you do something that makes them become visible. This method is only
+   * supported for {@link SQL#skeleton(String) SQL skeletons}. When calling this method on
+   * a {@code SQLSession} obtained via {@link SQL#simple(String) SQL.simple()} or
+   * {@link SQL#template(String) SQL.template()}, this method will throw an
+   * {@code UnsupportedOperationException}.
+   *
+   * &lt;p&gt;&lt;b&gt;NB Nested templates in general are &lt;i&gt;only&lt;/i&gt; supported in SQL skeletons. The
+   * are &lt;i&gt;not&lt;/i&gt; supported in regular SQL templates.&lt;/b&gt;
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * String sql = &quot;&quot;&quot;
+   *     SELECT * FROM EMPLOYEE
+   *     ~%%begin:whereClause%
+   *      WHERE FIRST_NAME LIKE :searchPhrase OR LAST_NAME LIKE :searchPhrase
+   *     ~%%end:whereClause%
+   *     &quot;&quot;&quot;;
+   * try(Connection con = ...) {
+   *   SQLSession session = SQL.skeleton(sql).session(con);
+   *   if(searchPhrase != null) {
+   *     session.enable(&quot;whereClause&quot;);
+   *   }
+   *   try(SQLQuery query = session.prepareQuery()) {
+   *     if(searchPhrase != null) {
+   *       query.bind(&quot;searchPhrase&quot;, searchPhrase);
+   *     }
+   *     return query.getExtractor(Employee.class).extractAll();
+   *   }
+   * }
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * @param nestedTemplate the nested template within the SQL skeleton to enable
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       &lt;i&gt;not&lt;/i&gt; obtained via {@link SQL#skeleton(String) SQL.skeleton()}
+   * @see org.klojang.templates.RenderSession#enable(String...)
+   */
+  default SQLSession enable(String nestedTemplate) throws UnsupportedOperationException {
+<span class="nc" id="L289">    throw sqlSkeletonsOnly(&quot;setNested&quot;);</span>
+  }
+
+  /**
+   * Sets the sort column of the ORDER BY clause within a SQL template. This presumes and
+   * requires that the template contains a template variable named &quot;orderBy&quot;. This is a
+   * convenience method facilitating a common use case for template variables: to
+   * parametrize the sort column within the ORDER BY clause. It is equivalent to calling
+   * {@code setIdentifier(&quot;orderBy&quot;, sortColumn)}.
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * try(Connection con = ...) {
+   *   List&lt;Person&gt; lastNames = SQL.template(&quot;SELECT * FROM PERSON ORDER BY ~%orderBy%&quot;)
+   *       .session(con)
+   *       .setOrderBy(&quot;LAST_NAME&quot;)
+   *       .prepareQuery(con)
+   *       .getExtractor(Person.class)
+   *       .extractAll();
+   * }
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * @param sortColumn the column to sort on
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   */
+  default SQLSession setOrderBy(String sortColumn) throws UnsupportedOperationException {
+<span class="nc" id="L316">    throw notSupported(&quot;setOrderBy&quot;);</span>
+  }
+
+  /**
+   * Sets the sort column and sort order of the ORDER BY clause within a SQL template.
+   * This presumes and requires that the template contains a template variable named
+   * &quot;orderBy&quot;. This is a convenience method facilitating a common use case for template
+   * variables: to parametrize the sort column and sort order within the ORDER BY clause.
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * SQL sql = SQL.template(&quot;SELECT LAST_NAME FROM EMPLOYEE ORDER BY ~%orderBy%&quot;);
+   * try(Connection con = ...) {
+   *   // Sort in descending order of salary
+   *   List&lt;String&gt; lastNames = sql.session(con).setOrderBy(&quot;SALARY&quot;, true).prepareQuery().firstColumn();
+   * }
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * @param sortColumn the column to sort on
+   * @param isDescending whether to sort in descending order. If true, the
+   *       &quot;sortOrder&quot; variable in the SQL template will be set to &quot;DESC&quot;, else to &quot;ASC&quot;.
+   * @return this {@code SQLSession} instance
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   */
+  default SQLSession setOrderBy(String sortColumn, boolean isDescending)
+        throws UnsupportedOperationException {
+<span class="nc" id="L342">    throw notSupported(&quot;setOrderBy&quot;);</span>
+  }
+
+  /**
+   * &lt;p&gt;Returns a properly escaped and quoted string. More precisely:
+   *
+   * &lt;ul&gt;
+   *     &lt;li&gt;If the value is {@code null}, the literal string {@code &quot;NULL&quot;} (without the
+   *         quotes) is returned.
+   *     &lt;li&gt;If the value is a {@link Number}, a {@link Boolean}, or a
+   *         {@link SQLExpression}, the value is returned as-is. That is,
+   *         {@code toString()} will be called on the value, but the resulting string
+   *         will &lt;i&gt;not&lt;/i&gt; be quoted.
+   *     &lt;li&gt;Otherwise {@code toString()} is called on the value, and the resulting string
+   *         is escaped and quoted according to the quoting rules of the target database.
+   * &lt;/ul&gt;
+   *
+   * &lt;p&gt;Use this method if you do not know or trust the origin of the value to prevent
+   * SQL injection.
+   *
+   * @param value the value to be escaped and quoted
+   * @return the escaped and quoted value
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   * @see java.sql.Statement#enquoteLiteral(String)
+   * @see Quoter#quoteValue(Object)
+   */
+  default String quoteValue(Object value) throws UnsupportedOperationException {
+<span class="nc" id="L370">    throw notSupported(&quot;quoteValue&quot;);</span>
+  }
+
+  /**
+   * &lt;p&gt;Generates a SQL function call in which each of the function arguments is escaped
+   * and quoted using the {@link #quoteValue(Object) quoteValue()} method. If you do not
+   * want this to happen for a particular argument, because it is an identifier (a column
+   * name) rather than a literal value, wrap it in a {@code SQLExpression} again:
+   *
+   * &lt;blockquote&gt;&lt;pre&gt;{@code
+   * SQLExpression column = SQL.expression(session.quoteIdentifier(&quot;LAST_NAME&quot;));
+   * sqlFunction(&quot;CONCAT&quot;, &quot;Dear Mr./Ms. &quot;, column, &quot;,&quot;));
+   * }&lt;/pre&gt;&lt;/blockquote&gt;
+   *
+   * &lt;p&gt;&lt;i&gt;NB This example is just to illustrate the point, but is of course rather silly
+   * in practice. You can &lt;b&gt;see&lt;/b&gt; here what is being concatenated, and you can
+   * &lt;b&gt;see&lt;/b&gt; that nothing needs escaping, and that there is no risk of SQL injection,
+   * so you might as well simply have written:&lt;/i&gt;
+   * {@code &quot;CONCAT('Dear Mr./Ms. ', LAST_NAME, ',')&quot;}
+   *
+   * @param name the name of the function, like {@code &quot;SUBSTRING&quot;} or
+   *       {@code &quot;CONCAT&quot;}. Note that this argument not escaped or quoted. Therefore,
+   *       with SQL injection in mind, be wary of this being a dynamically generated
+   *       value.
+   * @param args the function arguments. Each of the provided arguments will pass
+   *       through {@link #quoteValue(Object)}.
+   * @return an {@code SQLExpression} representing a SQL function call
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   */
+  default SQLExpression sqlFunction(String name, Object... args)
+        throws UnsupportedOperationException {
+<span class="nc" id="L402">    throw notSupported(&quot;sqlFunction&quot;);</span>
+  }
+
+  /**
+   * If necessary, quotes the specified identifier (e&amp;#46;g&amp;#46; a column name or table
+   * name) according to the quoting rules of the target database. Use this method if the
+   * identifier is passed in from outside your program to prevent SQL injection.
+   *
+   * @param identifier the identifier to quote
+   * @return the quoted identifier
+   * @throws UnsupportedOperationException in case this {@code SQLSession} was
+   *       obtained via the {@link SQL#simple(String) SQL.simple()} method
+   * @see java.sql.Statement#enquoteIdentifier(String, boolean)
+   * @see Quoter#quoteIdentifier(String)
+   */
+  default String quoteIdentifier(String identifier) throws UnsupportedOperationException {
+<span class="nc" id="L418">    throw notSupported(&quot;quoteIdentifier&quot;);</span>
+  }
+
+  /**
+   * Executes the SQL. You can call this method either if the SQL is completely static, or
+   * if you have set all template variables and the SQL does not contain any named
+   * parameters. If the SQL &lt;i&gt;does&lt;/i&gt; contain named parameters, you must first bind them
+   * using a {@link SQLStatement} obtained from the {@code SQLSession}.
+   *
+   * @return the number of inserted, updated, or deleted rows, if applicable; -1 otherwise
+   */
+  int execute();
+
+  /**
+   * Returns a {@code SQLQuery} instance that allows you to provide values for named
+   * parameters and then execute the query.
+   *
+   * @return a {@code SQLQuery} instance
+   */
+  SQLQuery prepareQuery();
+
+  /**
+   * Returns a {@code SQLInsert} instance that allows you to provide values for named
+   * parameters and then execute the INSERT statement. Auto-generated keys will be made
+   * available to the client.
+   *
+   * @return a {@code SQLInsert} instance
+   */
+  default SQLInsert prepareInsert() {
+<span class="fc" id="L447">    return prepareInsert(true);</span>
+  }
+
+  /**
+   * Returns a {@code SQLInsert} instance that allows you to provide values for named
+   * parameters and then execute the INSERT statement.
+   *
+   * @param retrieveKeys whether to retrieve the keys that were generated by the
+   *       database
+   * @return a {@code SQLInsert} instance
+   */
+  SQLInsert prepareInsert(boolean retrieveKeys);
+
+  /**
+   * Returns a {@code SQLUpdate} instance that allows you to provide values for named
+   * parameters and then execute the UPDATE or DELETE statement.
+   *
+   * @return a {@code SQLUpdate} instance
+   */
+  SQLUpdate prepareUpdate();
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

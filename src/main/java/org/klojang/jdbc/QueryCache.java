@@ -21,7 +21,10 @@ final class QueryCache {
   }
 
   ResultSet getResultSet(QueryId id) {
-    return cacheManager.get(id);
+    return cacheManager.getResultSet(id);
+  }
+  SQLQuery getSQLQuery(QueryId id) {
+    return cacheManager.getSQLQuery(id);
   }
 
   QueryId addQuery(SQLQuery query,

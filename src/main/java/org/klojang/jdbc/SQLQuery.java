@@ -154,10 +154,11 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * {@code false} otherwise. If the query had already been executed, it will not be
    * executed again. Call {@link SQLStatement#reset() reset()} to force the query to be
    * re-executed. Note that this method will call {@link ResultSet#next()}, moving the
-   * cursor to the next row in the {@code ResultSet}. This will influence the outcome of
-   * the other methods of {@code SQLQuery}, and of subsequent calls to {@code exists()}
-   * for that matter. Only call this method if the only thing you are interested in is
-   * figuring out if a query yields a result, and nothing else.
+   * cursor to the next row in the {@code ResultSet} (it would look ugly, but you could
+   * even use it for precisely this purpose). This will influence the outcome of the other
+   * methods of {@code SQLQuery}, and of subsequent calls to {@code exists()} for that
+   * matter. Only call this method if the only thing you are interested in is whether a
+   * query yields a result (and nothing else).
    *
    * @return {@code true} if the query yielded at least one row; {@code false} otherwise
    */
@@ -257,14 +258,15 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
    * {@code BeanExtractor}. But the {@code SQLQuery} object has gone out of scope by the
    * time you receive the {@code BeanExtractor}, and <i>Klojang JDBC</i> makes sure that
    * even if you do not close the {@code SQLQuery}, the JDBC resources associated with it
-   * <i>will</i> get closed once the {@code SQLQuery} object gets garbage-collected.
-   * Confusingly, you may sometimes get away with it and happily use the
-   * {@code BeanExtractor} &#8212; when it takes some time for the garbage collector to
-   * come around and reclaim the {@code SQLQuery} object. More often, though, the
-   * {@code BeanExtractor} will operate on a {@code ResultSet} that has already been
-   * closed. Request the {@code BeanExtractor} within a try-with-resource block created
-   * for the {@code SQLQuery}, or at the very least make sure the {@code SQLQuery} stays
-   * alive while you use the {@code BeanExtractor}.
+   * <i>will</i> get closed once the {@code SQLQuery} object gets garbage-collected (more
+   * technically: once it becomes phantom-reachable, which is even sooner). Confusingly,
+   * you may sometimes get away with it and happily use the {@code BeanExtractor} &#8212;
+   * when it takes some time for the garbage collector to come around and reclaim the
+   * {@code SQLQuery} object. More often, though, the {@code BeanExtractor} will operate
+   * on a {@code ResultSet} that has already been closed. Request the
+   * {@code BeanExtractor} within a try-with-resource block created for the
+   * {@code SQLQuery}, or at the very least make sure the {@code SQLQuery} stays alive
+   * while you use the {@code BeanExtractor}.
    *
    * @param <T> the type of the JavaBeans or records
    * @param clazz the class of the JavaBeans or records

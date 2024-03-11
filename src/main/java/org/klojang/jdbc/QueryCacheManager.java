@@ -13,6 +13,11 @@ import static org.klojang.check.CommonChecks.keyIn;
 import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.BatchQuery.QueryId;
 
+/**
+ * Functions as the cleaner function for the QueryCache. Treat it as though it were a
+ * private static inner class of QueryCache. Do _not_ instantiate it and do _not_ use it
+ * directly. Always go via the QueryCache.
+ */
 final class QueryCacheManager implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(QueryCacheManager.class);
@@ -22,11 +27,19 @@ final class QueryCacheManager implements Runnable {
 
   private Thread cleaner;
 
-  ResultSet get(QueryId id) {
+  ResultSet getResultSet(QueryId id) {
     synchronized (cache) {
       LiveQuery query = cache.get(id);
       Utils.check(query).is(notNull(), Err.STALE_QUERY, id);
       return query.getResultSet();
+    }
+  }
+
+  SQLQuery getSQLQuery(QueryId id) {
+    synchronized (cache) {
+      LiveQuery query = cache.get(id);
+      Utils.check(query).is(notNull(), Err.STALE_QUERY, id);
+      return query.getSQLQuery();
     }
   }
 

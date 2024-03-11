@@ -37,6 +37,10 @@ final class LiveQuery {
     return query.getResultSet();
   }
 
+  SQLQuery getSQLQuery() {
+    return query;
+  }
+
   void terminate(QueryId id) {
     LOG.trace("Terminating query (id={})", id);
     try {

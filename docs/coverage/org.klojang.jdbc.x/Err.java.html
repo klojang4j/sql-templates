@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Err.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc.x</a> &gt; <span class="el_source">Err.java</span></div><h1>Err.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc.x;
+
+public final class Err {
+
+  public static final String NO_SUCH_SQL_TYPE
+        = &quot;no such constant in java.sql.Types: ${arg}&quot;;
+
+  public static final String CANNOT_CONVERT_SQL_TYPE_TO_JAVA_TYPE
+        = &quot;cannot convert SQL datatype ${0} to Java type ${1}&quot;;
+
+  public static final String NO_MORE_ROWS
+        = &quot;no more rows in result set&quot;;
+
+  public static final String NOT_MUTABLE
+        = &quot;method not supported for immutable types ({})&quot;;
+
+  public static final String ILLEGAL_NULL_VALUE_IN_LIST
+        = &quot;list must not contain null values&quot;;
+
+  public static final String NO_KEYS_WERE_GENERATED
+        = &quot;cannot set ID on the provided object(s) because no keys were generated&quot;;
+
+  public static final String TOO_MANY_KEYS
+        = &quot;actual number of database-generated keys exceeds expected number (${arg})&quot;;
+
+  public static final String KEY_COUNT_MISMATCH
+        = &quot;actual number of database-generated keys (${arg}) does not match expected number (${obj})&quot;;
+
+  public static final String STALE_QUERY
+        = &quot;No query with ID ${0} in cache. It may have gone stale&quot;;
+
+<span class="nc" id="L32">  private Err() { throw new UnsupportedOperationException(); }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SessionConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">SessionConfig.java</span></div><h1>SessionConfig.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+
+import org.klojang.jdbc.x.Utils;
+import org.klojang.templates.NameMapper;
+import org.klojang.templates.name.CamelCaseToSnakeLowerCase;
+import org.klojang.templates.name.CamelCaseToSnakeUpperCase;
+import org.klojang.templates.name.SnakeCaseToCamelCase;
+
+import java.sql.ResultSet;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.function.Function;
+
+import static org.klojang.templates.name.CamelCaseToSnakeLowerCase.camelCaseToSnakeLowerCase;
+import static org.klojang.templates.name.CamelCaseToSnakeUpperCase.camelCaseToSnakeUpperCase;
+import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCase;
+
+/**
+ * &lt;p&gt;{@code SessionConfig} objects allow you to fine-tune or modify various aspects of
+ * how
+ * &lt;i&gt;Klojang JDBC&lt;/i&gt; processes and executes SQL. {@code SessionConfig} is an interface
+ * that provides default implementations for all its methods. The default implementations
+ * specify &lt;i&gt;Klojang JDBC's&lt;/i&gt; default behaviour. You might want to implement
+ * {@code SessionConfig} through an anonymous class:
+ *
+ * &lt;blockquote&gt;&lt;pre&gt;{@code
+ * SessionConfig config = new SessionConfig() {
+ *   public boolean saveEnumAsString(Class&lt;?&gt; beanType, String enumProperty Class&lt;?&gt; enumType) {
+ *     return true;
+ *   }
+ * };
+ * }&lt;/pre&gt;&lt;/blockquote&gt;
+ *
+ * &lt;p&gt;Alternatively, you could use the provided &quot;withers&quot; to modify how &lt;i&gt;Klojang
+ * JDBC&lt;/i&gt; operates:
+ *
+ * &lt;blockquote&gt;&lt;pre&gt;{@code
+ * SessionConfig config = SessionConfig.getDefaultConfig().withEnumsSavedAsStrings();
+ * }&lt;/pre&gt;&lt;/blockquote&gt;
+ *
+ * &lt;p&gt;Whichever option you choose, assuming you will need just one, or maybe two
+ * {@code org.klojang.templates.SessionConfig SessionConfig} objects in your entire
+ * application, it is recommended that you store them in {@code public static final}
+ * fields, and share them whenever and wherever possible.
+ *
+ * @author Ayco Holleman
+ */
+public interface SessionConfig {
+
+  /**
+   * Returns a {@code SessionConfig} instance which does not override any of the defaults
+   * provided by the {@code SessionConfig} instance.
+   *
+   * @return a {@code SessionConfig} instance which does not override any of the defaults
+   *       provided by the {@code SessionConfig} instance
+   */
+<span class="fc" id="L57">  static SessionConfig getDefaultConfig() { return Utils.DEFAULT_CONFIG; }</span>
+
+  /**
+   * Returns a {@code CustomBinder} for the provided combination of arguments, or
+   * {@code null} if no {@code CustomBinder} is required for the provided combination of
+   * arguments. The default implementation returns {@code null}. You may ignore any or all
+   * arguments that you don't need in order to determine whether to use a
+   * {@code CustomBinder}.
+   *
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the values for which to specify a {@code CustomBinder}
+   * @param propertyName the name of the bean property, record component, or map key
+   *       for which to specify a {@code CustomBinder}
+   * @param propertyType the type of the values for which to specify a
+   *       {@code CustomBinder}
+   * @return a {@code CustomBinder} for the provided combination of arguments
+   */
+  default CustomBinder getCustomBinder(Class&lt;?&gt; beanType,
+        String propertyName,
+        Class&lt;?&gt; propertyType) {
+<span class="fc" id="L77">    return null;</span>
+  }
+
+  /**
+   * Returns a {@code CustomReader} for the provided combination of arguments, or
+   * {@code null} if no {@code CustomReader} is required for the provided combination of
+   * arguments. The default implementation returns {@code null}. You may ignore any or all
+   * arguments that you don't need in order to determine whether to use a
+   * {@code CustomReader}.
+   *
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map} that
+   *       will receive the value from the {@code ResultSet}. Note that when writing to a
+   *       {@code Map} (using a {@link MapExtractor}), this argument will always be
+   *       {@code HashMap.class} because that happens to be the type of {@code Map} that a
+   *       {@link MapExtractor} creates.
+   * @param propertyName the name of the bean property, record component, or map key
+   *       that will receive the value from the {@code ResultSet}
+   * @param propertyType the type of the values for which to specify a
+   *       {@code CustomReader}. Note that when writing to a {@code Map} (using a
+   *       {@link MapExtractor}), this argument will always be {@code Object.class}
+   *       because we don't know the runtime type yet of the values when the
+   *       {@code MapExtractor} is configured, and Java's type erase feature prevents us
+   *       from being any more specific beforehand.
+   * @param sqlType the SQL datatype of the column for which to specify a
+   *       {@code CustomReader}. Must be one of the constants of the
+   *       {@link java.sql.Types java.sql.Types}, like
+   *       {@link java.sql.Types#VARCHAR Types.VARCHAR} or
+   *       {@link java.sql.Types#TIMESTAMP Types.TIMESTAMP}}
+   * @return a {@code CustomReader} for the provided combination of arguments
+   */
+  default CustomReader getCustomReader(Class&lt;?&gt; beanType,
+        String propertyName,
+        Class&lt;?&gt; propertyType,
+        int sqlType) {
+<span class="fc" id="L111">    return null;</span>
+  }
+
+  /**
+   * Returns the SQL datatype for the provided combination of arguments, or {@code null}
+   * if want you leave it to &lt;i&gt;Klojang JDBC&lt;/i&gt; to determine the SQL datatype. The
+   * default implementation returns {@code null}. If not {@code null}, the return value
+   * must be one of the constants in the {@link java.sql.Types java.sql.Types} class (like
+   * {@link java.sql.Types#VARCHAR Types.VARCHAR}). This method will only be evaluated if
+   * {@link #getCustomBinder(Class, String, Class) getCustomBinder()} returned
+   * {@code null}. You may ignore any or all arguments that you don't need in order to
+   * determine the return value. For example, in many cases the type of the value
+   * (provided via the {@code propertyType} argument) will be all you need to know in
+   * order to determine the corresponding SQL datatype.
+   *
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the value
+   * @param propertyName the name of the bean property, record component, or map key
+   *       for which to specify the SQL datatype.
+   * @param propertyType the type of the value whose SQL datatype to determine
+   * @return one of the class constants of the {@link java.sql.Types java.sql.Types} class
+   *       or {@code null}
+   */
+  default Integer getSQLType(Class&lt;?&gt; beanType,
+        String propertyName,
+        Class&lt;?&gt; propertyType) {
+<span class="fc" id="L137">    return null;</span>
+  }
+
+  /**
+   * &lt;p&gt;Whether to save enums as strings (by calling their {@code toString()} method) or
+   * as ints (by calling their {@code ordinal()} method). The default implementation
+   * returns {@code false}, meaning that by default &lt;i&gt;Klojang JDBC&lt;/i&gt; will save enums as
+   * ints. More precisely: enums will be &lt;i&gt;bound&lt;/i&gt; using
+   * {@code preparedStatement.setInt(paramIndex, myEnum.ordinal())}. The target column
+   * may
+   * &lt;i&gt;still&lt;/i&gt; be a {@code VARCHAR} column since most databases will easily convert
+   * integers to strings when needed. Whichever option you choose, the reverse process
+   * &amp;#8212; converting {@code ResultSet} values to enums &amp;#8212; will always work
+   * correctly, without requiring additional configuration. You may ignore any or all
+   * arguments that you don't need in order to determine the return value. To save
+   * &lt;i&gt;all&lt;/i&gt; enums in your application as strings, ignore all arguments and simply
+   * return {@code true} straight away.
+   *
+   * &lt;p&gt;This method will only be evaluated if
+   * {@link #getSQLType(Class, String, Class) getSqlType()} returned {@code null}.
+   *
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the value
+   * @param enumProperty the name of the bean property, record component, or map key
+   *       for which to specify the SQL datatype
+   * @param enumType the type of the {@code enum} value whose SQL datatype to
+   *       determine
+   * @return whether to bind enums as strings ({@code true}) or as ints ({@code false})
+   */
+  default boolean saveEnumAsString(Class&lt;?&gt; beanType,
+        String enumProperty,
+        Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
+<span class="nc" id="L169">    return false;</span>
+  }
+
+  /**
+   * Returns the {@code DateTimeFormatter} to be used for date/time values, or
+   * {@code null} if the provided combination of arguments does not require the use of a
+   * {@code DateTimeFormatter}. The default implementation returns {@code null}. If a
+   * non-{@code null} value is returned, date/time objects will be saved as a string
+   * rather than as a SQL {@link java.sql.Types#DATE} or {@link java.sql.Types#TIMESTAMP}.
+   * More precisely: they will be &lt;i&gt;bound&lt;/i&gt; using
+   * {@code preparedStatement.setString(paramIndex, formatter.format(value))}. The target
+   * column may &lt;i&gt;still&lt;/i&gt; be a {@code DATE} or {@code TIMESTAMP} column since most
+   * databases will easily convert a (properly formatted) string to a {@code DATE} or
+   * {@code TIMESTAMP}. You may ignore any or all arguments that you don't need in order
+   * to determine the return value.
+   *
+   * &lt;p&gt;This method will only be evaluated if
+   * {@link #getSQLType(Class, String, Class) getSqlType()} returned {@code null}.
+   *
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the value
+   * @param dateTimeProperty the name of the bean property, record component, or map
+   *       key for which to use the {@code DateTimeFormatter}
+   * @param dateTimeType the exact date/time type for which to use the
+   *       {@code DateTimeFormatter}
+   * @return the {@code DateTimeFormatter} to be used for a date/time values, or
+   *       {@code null} if the provided combination of arguments does not require the use
+   *       of a {@code DateTimeFormatter}.
+   */
+  default DateTimeFormatter getDateTimeFormatter(Class&lt;?&gt; beanType,
+        String dateTimeProperty,
+        Class&lt;? extends TemporalAccessor&gt; dateTimeType) {
+<span class="nc" id="L201">    return null;</span>
+  }
+
+  /**
+   * &lt;p&gt;Returns the serialization function to be used for the provided combination of
+   * arguments, or {@code null} if no special serialization is required for the provided
+   * combination of arguments. The default implementation returns {@code null}. If a
+   * non-{@code null} value is returned, objects will be bound using
+   * {@code preparedStatement.setString(paramIndex, function.apply(object))}. You may
+   * ignore any or all arguments that you don't need in order to determine the return
+   * value.
+   *
+   * &lt;p&gt;This method can be used to save types for which no default java-to-SQL
+   * type mapping exists. If you specify a serializer for such a type, it pays if the type
+   * also contains a static factory method that takes a {@code String} and returns an
+   * instance of that type (in other words, a deserializer). If there is exactly one such
+   * method, &lt;i&gt;Klojang JDBC&lt;/i&gt; will use it for the reverse process: deserializing
+   * {@link ResultSet} values into instances of that type. Alternatively, if the type
+   * contains a constructor that takes a single {@code String} argument, then that
+   * constructor will be used as the deserialization mechanism. This works for classes
+   * like {@link StringBuilder}, but it may be assuming a bit too much for other classes.
+   * In that case, specify a
+   * {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
+   * deserialize the values.
+   *
+   * &lt;p&gt;Note that if the type is properly serialized through its {@code toString()}
+   * method, you don't need to specify a serializer for it. &lt;i&gt;Klojang JDBC&lt;/i&gt; will
+   * already, as a last resort, call {@code toString()} on (non-{@code null}) values with
+   * an unknown type. More precisely, it will bind them using
+   * {@code preparedStatement.setString(paramIndex, value.toString())}.
+   *
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the value to be bound
+   * @param propertyName the name of the bean property, record component, or map key
+   *       for which to specify the serializer function
+   * @param propertyType the type of the value for which to specify the serializer
+   *       function
+   * @return the serialization function to be used for the provided combination of
+   *       arguments, or {@code null} if no special serialization is required for the
+   *       provided combination of arguments
+   */
+  default Function&lt;Object, String&gt; getSerializer(Class&lt;?&gt; beanType,
+        String propertyName,
+        Class&lt;?&gt; propertyType) {
+<span class="fc" id="L245">    return null;</span>
+  }
+
+  /**
+   * &lt;p&gt;Returns the serialization function to be used for the provided combination of
+   * arguments, or {@code null} if no special serialization is required for the provided
+   * combination of arguments. The default implementation returns {@code null}. If a
+   * non-{@code null} value is returned, objects will be bound using
+   * {@code preparedStatement.setBytes(paramIndex, function.apply(object))}. You may
+   * ignore any or all arguments that you don't need in order to determine the return
+   * value.
+   *
+   * &lt;p&gt;This method can be used to save types for which no default java-to-SQL
+   * type mapping exists. If you specify a serializer for such a type, it pays if the type
+   * also contains a static factory method that takes a {@code String} and returns an
+   * instance of that type (in other words, a deserializer). If there is exactly one such
+   * method, &lt;i&gt;Klojang JDBC&lt;/i&gt; will use it for the reverse process: deserializing
+   * {@link ResultSet} values into instances of that type. Alternatively, if the type
+   * contains a constructor that takes a single {@code byte[]} array argument, then that
+   * constructor will be used as the deserialization mechanism. That may work for some
+   * classes, but it may be assuming a bit too much for other classes. In that case,
+   * specify a {@link #getCustomReader(Class, String, Class, int) CustomReader} that will
+   * deserialize the values.
+   *
+   * @param beanType the type of the JavaBean, {@code record}, or {@code Map}
+   *       containing the value to be bound
+   * @param propertyName the name of the bean property, record component, or map key
+   *       for which to specify the serializer function
+   * @param propertyType the type of the value for which to specify the serializer
+   *       function
+   * @return the serialization function to be used for the provided combination of
+   *       arguments, or {@code null} if no special serialization is required for the
+   *       provided combination of arguments
+   */
+  default Function&lt;Object, byte[]&gt; getBinarySerializer(Class&lt;?&gt; beanType,
+        String propertyName,
+        Class&lt;?&gt; propertyType) {
+<span class="fc" id="L282">    return null;</span>
+  }
+
+  /**
+   * Specifies the {@link NameMapper} to be used for mapping bean properties, record
+   * components, or map keys to column names. The default implementation returns
+   * {@link CamelCaseToSnakeUpperCase#camelCaseToSnakeUpperCase()
+   * camelCaseToSnakeUpperCase()}, which would map {@code &quot;camelCaseToSnakeUpperCase&quot;} to
+   * {@code &quot;CAMEL_CASE_TO_SNAKE_UPPER_CASE&quot;}. (It would also map {@code &quot;WordCase&quot;}
+   * a.k.a. {@code &quot;PascalCase&quot;} to {@code &quot;WORD_CASE&quot;} and {@code &quot;PASCAL_CASE&quot;},
+   * respectively, since all characters end up in upper case anyhow.)
+   *
+   * @return the {@link NameMapper} to be used for mapping bean properties, record
+   *       components, or map keys to column names
+   */
+  default NameMapper getPropertyToColumnMapper() {
+<span class="fc" id="L298">    return camelCaseToSnakeUpperCase();</span>
+  }
+
+  /**
+   * Specifies the {@link NameMapper} to be used for mapping column names to bean
+   * properties, record components, or map keys. The default implementation returns
+   * {@link SnakeCaseToCamelCase#snakeCaseToCamelCase() snakeCaseToCamelCase()}, which
+   * would map {@code &quot;SNAKE_CASE_TO_CAMEL_CASE}&quot; to {@code &quot;snakeCaseToCamelCase&quot;}. (It
+   * would also map {@code &quot;snake_case_to_camel_case&quot;} to
+   * {@code &quot;SNAKE_CASE_TO_CAMEL_CASE}&quot; because the casing of the input string is
+   * irrelevant for this {@code NameMapper}.)
+   *
+   * @return the {@link NameMapper} to be used for mapping column names to bean
+   *       properties, record components, or map keys
+   */
+  default NameMapper getColumnToPropertyMapper() {
+<span class="fc" id="L314">    return snakeCaseToCamelCase();</span>
+  }
+
+  /**
+   * Returns a new instance that is equal to this instance except with the
+   * property-to-column mapper set to the specified {@code NameMapper}.
+   *
+   * @param mapper the {@code NameMapper} to be used for mapping bean properties,
+   *       record components, or map keys to column names
+   * @return a new instance that is equal to this instance except with the
+   *       property-to-column mapper set to the specified {@code NameMapper}.
+   */
+  default SessionConfig withPropertyToColumnMapper(NameMapper mapper) {
+<span class="fc" id="L327">    return new SessionConfig() {</span>
+<span class="fc" id="L328">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
+    };
+  }
+
+  /**
+   * Returns a new instance that is equal to this instance except with the
+   * column-to-property mapper set to the specified {@code NameMapper}.
+   *
+   * @param mapper the {@code NameMapper} to be used for mapping column names to
+   *       bean properties, record components, or map keys
+   * @return a new instance that is equal to this instance except with the
+   *       column-to-property mapper set to the specified {@code NameMapper}.
+   */
+  default SessionConfig withColumnToPropertyMapper(NameMapper mapper) {
+<span class="nc" id="L342">    return new SessionConfig() {</span>
+<span class="nc" id="L343">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
+    };
+  }
+
+  /**
+   * Returns a new instance that is equal to this instance except that property names are
+   * mapped &lt;i&gt;as-is&lt;/i&gt; to column names and vice versa.
+   *
+   * @return a new instance that is equal to this instance except that property names are
+   *       mapped &lt;i&gt;as-is&lt;/i&gt; to column names and vice versa
+   * @see NameMapper#AS_IS
+   */
+  default SessionConfig withNamesMappedAsIs() {
+<span class="nc" id="L356">    return new SessionConfig() {</span>
+<span class="nc" id="L357">      public NameMapper getPropertyToColumnMapper() { return NameMapper.AS_IS; }</span>
+
+<span class="nc" id="L359">      public NameMapper getColumnToPropertyMapper() { return NameMapper.AS_IS; }</span>
+    };
+  }
+
+  /**
+   * Returns a new instance that is equal to this instance except that property names are
+   * mapped to column names using the
+   * {@link CamelCaseToSnakeLowerCase#camelCaseToSnakeLowerCase()
+   * camelCaseToSnakeLowerCase()} name mapper. This {@code NameMapper} would map
+   * {@code &quot;camelCaseToSnakeLowerCase&quot;} to {@code &quot;camel_case_to_snake_lower_case&quot;}. It
+   * would also map {@code &quot;WordCase&quot;} a.k.a. {@code &quot;PascalCase&quot;} to {@code &quot;word_case&quot;}
+   * and {@code &quot;pascal_case&quot;}, respectively, since all characters end up in lower case
+   * anyhow. The reverse (column-to-property) mapper remains at its default value
+   * ({@link SnakeCaseToCamelCase#snakeCaseToCamelCase() snakeCaseToCamelCase()}). When
+   * mapping snake case names to camel case names, the casing of the input string is
+   * irrelevant.
+   *
+   * @return a new instance that is equal to this instance except that property names are
+   *       mapped to column names using the
+   *       {@link CamelCaseToSnakeLowerCase#camelCaseToSnakeLowerCase()
+   *       camelCaseToSnakeLowerCase()} name mapper
+   */
+  default SessionConfig withLowerCaseColumnNames() {
+<span class="nc" id="L382">    return new SessionConfig() {</span>
+<span class="nc" id="L383">      public NameMapper getPropertyToColumnMapper() { return camelCaseToSnakeLowerCase(); }</span>
+    };
+  }
+
+  /**
+   * Returns a new instance that is equal to this instance except that &lt;i&gt;all&lt;/i&gt; enums
+   * will be saved by calling {@code toString()} on them.
+   *
+   * @return a new instance that is equal to this instance except that &lt;i&gt;all&lt;/i&gt; enums
+   *       will be saved by calling {@code toString()} on them.
+   */
+  default SessionConfig withEnumsSavedAsStrings() {
+<span class="fc" id="L395">    return new SessionConfig() {</span>
+      public boolean saveEnumAsString(Class&lt;?&gt; beanType,
+            String enumProperty,
+            Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
+<span class="fc" id="L399">        return true;</span>
+      }
+    };
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
