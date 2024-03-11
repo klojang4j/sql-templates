@@ -2,7 +2,7 @@ package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +17,8 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SQLUpdate.class);
 
-  SQLUpdate(PreparedStatement stmt, AbstractSQLSession sql, SQLInfo sqlInfo) {
-    super(stmt, sql, sqlInfo);
+  SQLUpdate(PreparedStatement stmt, AbstractSQLSession sql, ParameterInfo paramInfo) {
+    super(stmt, sql, paramInfo);
   }
 
   /**
@@ -27,7 +27,7 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
    * @return the number of affected rows
    */
   public int execute() {
-    LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
+    LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());
     try {
       applyBindings(stmt());
       return stmt().executeUpdate();
@@ -41,7 +41,7 @@ public final class SQLUpdate extends SQLStatement<SQLUpdate> {
     try {
       stmt().clearParameters();
     } catch (SQLException e) {
-      throw Utils.wrap(e, sqlInfo);
+      throw Utils.wrap(e, paramInfo);
     }
   }
 

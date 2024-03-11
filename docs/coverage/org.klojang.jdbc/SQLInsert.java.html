@@ -6,7 +6,7 @@ import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.ps.BeanBinder;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +47,9 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 
   SQLInsert(PreparedStatement stmt,
         AbstractSQLSession sql,
-        SQLInfo sqlInfo,
+        ParameterInfo paramInfo,
         boolean retrieveKeys) {
-<span class="fc" id="L52">    super(stmt, sql, sqlInfo);</span>
+<span class="fc" id="L52">    super(stmt, sql, paramInfo);</span>
 <span class="fc" id="L53">    this.retrieveKeys = retrieveKeys;</span>
 <span class="fc" id="L54">  }</span>
 
@@ -176,7 +176,7 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
       }
 <span class="fc" id="L177">      return -1;</span>
 <span class="nc" id="L178">    } catch (Throwable t) {</span>
-<span class="nc" id="L179">      throw Utils.wrap(t, sqlInfo);</span>
+<span class="nc" id="L179">      throw Utils.wrap(t, paramInfo);</span>
     } finally {
 <span class="fc" id="L181">      reset();</span>
     }
@@ -213,7 +213,7 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
       }
 <span class="fc" id="L214">      return dbKey;</span>
 <span class="nc" id="L215">    } catch (Throwable t) {</span>
-<span class="nc" id="L216">      throw Utils.wrap(t, sqlInfo);</span>
+<span class="nc" id="L216">      throw Utils.wrap(t, paramInfo);</span>
     } finally {
 <span class="fc" id="L218">      reset();</span>
     }
@@ -233,10 +233,10 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 <span class="fc bfc" id="L233" title="All 2 branches covered.">      for (U bean : beans) {</span>
 <span class="fc" id="L234">        addToBatch(bean);</span>
 <span class="fc" id="L235">      }</span>
-<span class="fc" id="L236">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L236">      LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());</span>
 <span class="fc" id="L237">      stmt().executeBatch();</span>
 <span class="nc" id="L238">    } catch (Throwable t) {</span>
-<span class="nc" id="L239">      throw Utils.wrap(t, sqlInfo);</span>
+<span class="nc" id="L239">      throw Utils.wrap(t, paramInfo);</span>
 <span class="fc" id="L240">    }</span>
 <span class="fc" id="L241">  }</span>
 
@@ -256,11 +256,11 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 <span class="fc bfc" id="L256" title="All 2 branches covered.">      for (U bean : beans) {</span>
 <span class="fc" id="L257">        addToBatch(bean);</span>
 <span class="fc" id="L258">      }</span>
-<span class="fc" id="L259">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L259">      LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());</span>
 <span class="fc" id="L260">      stmt().executeBatch();</span>
 <span class="fc" id="L261">      return JDBC.getGeneratedKeys(stmt(), beans.size());</span>
 <span class="nc" id="L262">    } catch (Throwable t) {</span>
-<span class="nc" id="L263">      throw Utils.wrap(t, sqlInfo);</span>
+<span class="nc" id="L263">      throw Utils.wrap(t, paramInfo);</span>
     }
   }
 
@@ -283,7 +283,7 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 <span class="fc bfc" id="L283" title="All 2 branches covered.">      for (U bean : beans) {</span>
 <span class="fc" id="L284">        addToBatch(bean);</span>
 <span class="fc" id="L285">      }</span>
-<span class="fc" id="L286">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L286">      LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());</span>
 <span class="fc" id="L287">      stmt().executeBatch();</span>
 <span class="fc" id="L288">      long[] keys = JDBC.getGeneratedKeys(stmt(), beans.size());</span>
 <span class="fc" id="L289">      int i = 0;</span>
@@ -291,7 +291,7 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
 <span class="fc" id="L291">        JDBC.setID(bean, idProperty, keys[i++]);</span>
 <span class="fc" id="L292">      }</span>
 <span class="nc" id="L293">    } catch (Throwable t) {</span>
-<span class="nc" id="L294">      throw Utils.wrap(t, sqlInfo);</span>
+<span class="nc" id="L294">      throw Utils.wrap(t, paramInfo);</span>
 <span class="fc" id="L295">    }</span>
 <span class="fc" id="L296">  }</span>
 
@@ -301,12 +301,12 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
     try {
 <span class="fc" id="L302">      stmt().clearParameters();</span>
 <span class="nc" id="L303">    } catch (SQLException e) {</span>
-<span class="nc" id="L304">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="nc" id="L304">      throw Utils.wrap(e, paramInfo);</span>
 <span class="fc" id="L305">    }</span>
 <span class="fc" id="L306">  }</span>
 
   private void executeStatement() throws Throwable {
-<span class="fc" id="L309">    LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L309">    LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());</span>
 <span class="fc" id="L310">    applyBindings(stmt());</span>
 <span class="fc" id="L311">    stmt().executeUpdate();</span>
 <span class="fc" id="L312">  }</span>
@@ -314,7 +314,7 @@ public final class SQLInsert extends SQLStatement&lt;SQLInsert&gt; {
   @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
   private &lt;U&gt; void addToBatch(U bean) throws Throwable {
 <span class="fc" id="L316">    Check.that(bean).is(notNull(), npe(ILLEGAL_NULL_VALUE_IN_LIST));</span>
-<span class="fc" id="L317">    BeanBinder binder = session.getSQL().getBeanBinder(sqlInfo, bean.getClass());</span>
+<span class="fc" id="L317">    BeanBinder binder = session.getSQL().getBeanBinder(paramInfo, bean.getClass());</span>
 <span class="fc" id="L318">    binder.bind(stmt(), bean);</span>
 <span class="fc" id="L319">    stmt().addBatch();</span>
 <span class="fc" id="L320">  }</span>

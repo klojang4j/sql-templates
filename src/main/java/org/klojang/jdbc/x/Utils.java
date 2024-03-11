@@ -5,7 +5,7 @@ import org.klojang.check.IntCheck;
 import org.klojang.check.ObjectCheck;
 import org.klojang.jdbc.DatabaseException;
 import org.klojang.jdbc.SessionConfig;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 import org.klojang.util.exception.UncheckedException;
 
 import java.lang.ref.Cleaner;
@@ -26,8 +26,8 @@ public final class Utils {
     return Check.on(DatabaseException::new, arg);
   }
 
-  public static DatabaseException wrap(Throwable exc, SQLInfo sqlInfo) {
-    return wrap(exc, sqlInfo.sql());
+  public static DatabaseException wrap(Throwable exc, ParameterInfo paramInfo) {
+    return wrap(exc, paramInfo.normalizedSQL());
   }
 
   public static DatabaseException wrap(Throwable exc, String sql) {
@@ -46,8 +46,8 @@ public final class Utils {
     };
   }
 
-  public static DatabaseException exception(String message, SQLInfo sqlInfo) {
-    return exception(message, sqlInfo.sql());
+  public static DatabaseException exception(String message, ParameterInfo paramInfo) {
+    return exception(message, paramInfo.normalizedSQL());
   }
 
   public static DatabaseException exception(String message, String sql) {

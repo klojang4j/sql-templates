@@ -1,40 +1,40 @@
 package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.JDBC;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 
 import java.sql.Connection;
 
 final class SimpleSQLSession extends AbstractSQLSession {
 
-  private final SQLInfo sqlInfo;
+  private final ParameterInfo paramInfo;
 
-  SimpleSQLSession(Connection con, AbstractSQL sql, SQLInfo sqlInfo) {
+  SimpleSQLSession(Connection con, AbstractSQL sql, ParameterInfo paramInfo) {
     super(con, sql);
-    this.sqlInfo = sqlInfo;
+    this.paramInfo = paramInfo;
   }
 
   @Override
   public SQLQuery prepareQuery() {
-    var stmt = JDBC.getPreparedStatement(con, sqlInfo);
-    return new SQLQuery(stmt, this, sqlInfo);
+    var stmt = JDBC.getPreparedStatement(con, paramInfo);
+    return new SQLQuery(stmt, this, paramInfo);
   }
 
   @Override
   public SQLInsert prepareInsert(boolean retrieveKeys) {
-    var stmt = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
-    return new SQLInsert(stmt, this, sqlInfo, retrieveKeys);
+    var stmt = JDBC.getPreparedStatement(con, paramInfo, retrieveKeys);
+    return new SQLInsert(stmt, this, paramInfo, retrieveKeys);
   }
 
   @Override
   public SQLUpdate prepareUpdate() {
-    var stmt = JDBC.getPreparedStatement(con, sqlInfo);
-    return new SQLUpdate(stmt, this, sqlInfo);
+    var stmt = JDBC.getPreparedStatement(con, paramInfo);
+    return new SQLUpdate(stmt, this, paramInfo);
   }
 
   @Override
   public int execute() {
-    return execute(sqlInfo.sql());
+    return execute(paramInfo.normalizedSQL());
   }
 
 }

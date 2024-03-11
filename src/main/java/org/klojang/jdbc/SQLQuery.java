@@ -5,7 +5,7 @@ import org.klojang.check.fallible.FallibleFunction;
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.ColumnReaderFactory;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,8 +65,8 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
   private final ResultSetContainer result;
   private final Cleanable cleanable;
 
-  SQLQuery(PreparedStatement stmt, AbstractSQLSession sql, SQLInfo sqlInfo) {
-    super(stmt, sql, sqlInfo);
+  SQLQuery(PreparedStatement stmt, AbstractSQLSession sql, ParameterInfo paramInfo) {
+    super(stmt, sql, paramInfo);
     this.result = new ResultSetContainer();
     this.cleanable = CENTRAL_CLEANER.register(this, result);
   }
@@ -488,7 +488,7 @@ public final class SQLQuery extends SQLStatement<SQLQuery> {
     ResultSet rs = result.get();
     if (rs == null) {
       applyBindings(stmt());
-      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
+      LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());
       rs = stmt().executeQuery();
       result.set(rs);
     }

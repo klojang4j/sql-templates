@@ -4,7 +4,7 @@ import org.klojang.check.Check;
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
 import org.klojang.jdbc.SQLExpression;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 
 import java.sql.*;
 import java.util.Map;
@@ -36,22 +36,23 @@ public final class JDBC {
     }
   }
 
-  public static PreparedStatement getPreparedStatement(Connection con, SQLInfo sqlInfo) {
+  public static PreparedStatement getPreparedStatement(Connection con,
+        ParameterInfo paramInfo) {
     try {
-      return con.prepareStatement(sqlInfo.sql());
+      return con.prepareStatement(paramInfo.normalizedSQL());
     } catch (SQLException e) {
-      throw Utils.wrap(e, sqlInfo);
+      throw Utils.wrap(e, paramInfo);
     }
   }
 
   public static PreparedStatement getPreparedStatement(Connection con,
-        SQLInfo sqlInfo,
+        ParameterInfo paramInfo,
         boolean retrieveKeys) {
     int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;
     try {
-      return con.prepareStatement(sqlInfo.sql(), x);
+      return con.prepareStatement(paramInfo.normalizedSQL(), x);
     } catch (SQLException e) {
-      throw Utils.wrap(e, sqlInfo);
+      throw Utils.wrap(e, paramInfo);
     }
   }
 

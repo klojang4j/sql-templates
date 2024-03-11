@@ -2,7 +2,7 @@
 
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.sql.ParamExtractor;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 
 import java.sql.Connection;
 
@@ -10,21 +10,21 @@ import static org.klojang.jdbc.x.Strings.CONNECTION;
 
 final class SimpleSQL extends AbstractSQL {
 
-  private final SQLInfo sqlInfo;
+  private final ParameterInfo paramInfo;
 
   SimpleSQL(String sql, SessionConfig config, boolean isStatic) {
 <span class="fc" id="L16">    super(sql, config);</span>
 <span class="fc bfc" id="L17" title="All 2 branches covered.">    if (isStatic) {</span>
-<span class="fc" id="L18">      sqlInfo = new SQLInfo(new ParamExtractor(sql, 0));</span>
+<span class="fc" id="L18">      paramInfo = new ParameterInfo(new ParamExtractor(sql, 0));</span>
     } else {
-<span class="fc" id="L20">      sqlInfo = new SQLInfo(new ParamExtractor(sql));</span>
+<span class="fc" id="L20">      paramInfo = new ParameterInfo(new ParamExtractor(sql));</span>
     }
 <span class="fc" id="L22">  }</span>
 
   @Override
   public SQLSession session(Connection con) {
 <span class="fc" id="L26">    Check.notNull(con, CONNECTION);</span>
-<span class="fc" id="L27">    return new SimpleSQLSession(con, this, sqlInfo);</span>
+<span class="fc" id="L27">    return new SimpleSQLSession(con, this, paramInfo);</span>
   }
 
 }

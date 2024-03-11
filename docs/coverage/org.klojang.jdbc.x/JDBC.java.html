@@ -4,7 +4,7 @@ import org.klojang.check.Check;
 import org.klojang.invoke.Setter;
 import org.klojang.invoke.SetterFactory;
 import org.klojang.jdbc.SQLExpression;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 
 import java.sql.*;
 import java.util.Map;
@@ -36,61 +36,62 @@ public final class JDBC {
     }
   }
 
-  public static PreparedStatement getPreparedStatement(Connection con, SQLInfo sqlInfo) {
+  public static PreparedStatement getPreparedStatement(Connection con,
+        ParameterInfo paramInfo) {
     try {
-<span class="fc" id="L41">      return con.prepareStatement(sqlInfo.sql());</span>
-<span class="nc" id="L42">    } catch (SQLException e) {</span>
-<span class="nc" id="L43">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="fc" id="L42">      return con.prepareStatement(paramInfo.normalizedSQL());</span>
+<span class="nc" id="L43">    } catch (SQLException e) {</span>
+<span class="nc" id="L44">      throw Utils.wrap(e, paramInfo);</span>
     }
   }
 
   public static PreparedStatement getPreparedStatement(Connection con,
-        SQLInfo sqlInfo,
+        ParameterInfo paramInfo,
         boolean retrieveKeys) {
-<span class="fc bfc" id="L50" title="All 2 branches covered.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    int x = retrieveKeys ? RETURN_GENERATED_KEYS : NO_GENERATED_KEYS;</span>
     try {
-<span class="fc" id="L52">      return con.prepareStatement(sqlInfo.sql(), x);</span>
-<span class="nc" id="L53">    } catch (SQLException e) {</span>
-<span class="nc" id="L54">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="fc" id="L53">      return con.prepareStatement(paramInfo.normalizedSQL(), x);</span>
+<span class="nc" id="L54">    } catch (SQLException e) {</span>
+<span class="nc" id="L55">      throw Utils.wrap(e, paramInfo);</span>
     }
   }
 
   public static long[] getGeneratedKeys(Statement stmt, int expected)
         throws SQLException {
-<span class="fc" id="L60">    try (ResultSet rs = stmt.getGeneratedKeys()) {</span>
-<span class="fc bfc" id="L61" title="All 2 branches covered.">      if (!rs.next()) {</span>
-<span class="fc" id="L62">        return new long[0];</span>
+<span class="fc" id="L61">    try (ResultSet rs = stmt.getGeneratedKeys()) {</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">      if (!rs.next()) {</span>
+<span class="fc" id="L63">        return new long[0];</span>
       }
-<span class="fc" id="L64">      long[] keys = new long[expected];</span>
-<span class="fc" id="L65">      int i = 0;</span>
+<span class="fc" id="L65">      long[] keys = new long[expected];</span>
+<span class="fc" id="L66">      int i = 0;</span>
       do {
-<span class="fc" id="L67">        Utils.check(i).is(ne(), keys.length, TOO_MANY_KEYS);</span>
-<span class="fc" id="L68">        keys[i++] = rs.getLong(1);</span>
-<span class="fc bfc" id="L69" title="All 2 branches covered.">      } while (rs.next());</span>
-<span class="fc" id="L70">      Utils.check(i).is(eq(), expected, KEY_COUNT_MISMATCH);</span>
-<span class="fc" id="L71">      return keys;</span>
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">    }</span>
+<span class="fc" id="L68">        Utils.check(i).is(ne(), keys.length, TOO_MANY_KEYS);</span>
+<span class="fc" id="L69">        keys[i++] = rs.getLong(1);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">      } while (rs.next());</span>
+<span class="fc" id="L71">      Utils.check(i).is(eq(), expected, KEY_COUNT_MISMATCH);</span>
+<span class="fc" id="L72">      return keys;</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">    }</span>
   }
 
   public static String quote(Statement stmt, Object value) throws SQLException {
-<span class="pc bpc" id="L76" title="3 of 5 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L77">      case null -&gt; &quot;NULL&quot;;</span>
-<span class="fc" id="L78">      case Number x -&gt; x.toString();</span>
-<span class="nc" id="L79">      case Boolean x -&gt; x.toString();</span>
-<span class="nc" id="L80">      case SQLExpression x -&gt; x.toString();</span>
-<span class="fc" id="L81">      default -&gt; stmt.enquoteLiteral(value.toString());</span>
+<span class="pc bpc" id="L77" title="3 of 5 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L78">      case null -&gt; &quot;NULL&quot;;</span>
+<span class="fc" id="L79">      case Number x -&gt; x.toString();</span>
+<span class="nc" id="L80">      case Boolean x -&gt; x.toString();</span>
+<span class="nc" id="L81">      case SQLExpression x -&gt; x.toString();</span>
+<span class="fc" id="L82">      default -&gt; stmt.enquoteLiteral(value.toString());</span>
     };
   }
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
   public static void setID(Object bean, String idProperty, long value)
         throws Throwable {
-<span class="fc" id="L88">    SetterFactory sf = SetterFactory.INSTANCE;</span>
-<span class="fc" id="L89">    Map&lt;String, Setter&gt; setters = sf.getSetters(bean.getClass());</span>
-<span class="pc" id="L90">    Check.that(idProperty).is(keyIn(), setters, () -&gt; noSuchProperty(bean, idProperty));</span>
-<span class="fc" id="L91">    Setter setter = setters.get(idProperty);</span>
-<span class="fc" id="L92">    Number id = convert(value, (Class) box(setter.getParamType()));</span>
-<span class="fc" id="L93">    setter.write(bean, id);</span>
-<span class="fc" id="L94">  }</span>
+<span class="fc" id="L89">    SetterFactory sf = SetterFactory.INSTANCE;</span>
+<span class="fc" id="L90">    Map&lt;String, Setter&gt; setters = sf.getSetters(bean.getClass());</span>
+<span class="pc" id="L91">    Check.that(idProperty).is(keyIn(), setters, () -&gt; noSuchProperty(bean, idProperty));</span>
+<span class="fc" id="L92">    Setter setter = setters.get(idProperty);</span>
+<span class="fc" id="L93">    Number id = convert(value, (Class) box(setter.getParamType()));</span>
+<span class="fc" id="L94">    setter.write(bean, id);</span>
+<span class="fc" id="L95">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

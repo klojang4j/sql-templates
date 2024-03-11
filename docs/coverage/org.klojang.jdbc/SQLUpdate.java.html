@@ -2,7 +2,7 @@
 
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +17,8 @@ public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
 
 <span class="fc" id="L18">  private static final Logger LOG = LoggerFactory.getLogger(SQLUpdate.class);</span>
 
-  SQLUpdate(PreparedStatement stmt, AbstractSQLSession sql, SQLInfo sqlInfo) {
-<span class="fc" id="L21">    super(stmt, sql, sqlInfo);</span>
+  SQLUpdate(PreparedStatement stmt, AbstractSQLSession sql, ParameterInfo paramInfo) {
+<span class="fc" id="L21">    super(stmt, sql, paramInfo);</span>
 <span class="fc" id="L22">  }</span>
 
   /**
@@ -27,7 +27,7 @@ public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
    * @return the number of affected rows
    */
   public int execute() {
-<span class="fc" id="L30">    LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L30">    LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());</span>
     try {
 <span class="fc" id="L32">      applyBindings(stmt());</span>
 <span class="fc" id="L33">      return stmt().executeUpdate();</span>
@@ -41,7 +41,7 @@ public final class SQLUpdate extends SQLStatement&lt;SQLUpdate&gt; {
     try {
 <span class="nc" id="L42">      stmt().clearParameters();</span>
 <span class="nc" id="L43">    } catch (SQLException e) {</span>
-<span class="nc" id="L44">      throw Utils.wrap(e, sqlInfo);</span>
+<span class="nc" id="L44">      throw Utils.wrap(e, paramInfo);</span>
 <span class="nc" id="L45">    }</span>
 <span class="nc" id="L46">  }</span>
 

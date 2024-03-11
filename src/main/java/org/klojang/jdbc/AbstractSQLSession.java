@@ -23,10 +23,6 @@ abstract sealed class AbstractSQLSession implements SQLSession
     this.sql = sql;
   }
 
-  AbstractSQL getSQL() {
-    return sql;
-  }
-
   final int execute(String sql) {
     try(Statement stmt = con.createStatement()) {
       LOG.trace(EXECUTING_SQL, sql);
@@ -35,6 +31,10 @@ abstract sealed class AbstractSQLSession implements SQLSession
      } catch (SQLException e) {
       throw Utils.wrap(e, sql);
     }
+  }
+
+  AbstractSQL getSQL() {
+    return sql;
   }
 
   Connection getConnection() {

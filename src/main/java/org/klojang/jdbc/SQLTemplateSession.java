@@ -2,7 +2,7 @@ package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.sql.ParamExtractor;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 import org.klojang.templates.RenderSession;
 
 import java.sql.Connection;
@@ -21,27 +21,27 @@ final class SQLTemplateSession extends DynamicSQLSession {
 
   public SQLQuery prepareQuery() {
     close();
-    var sqlInfo = getSQLInfo(session, extractor);
-    var stmt = JDBC.getPreparedStatement(con, sqlInfo);
-    return new SQLQuery(stmt, this, sqlInfo);
+    var paramInfo = getParamInfo(session, extractor);
+    var stmt = JDBC.getPreparedStatement(con, paramInfo);
+    return new SQLQuery(stmt, this, paramInfo);
   }
 
   public SQLInsert prepareInsert(boolean retrieveKeys) {
     close();
-    var sqlInfo = getSQLInfo(session, extractor);
-    var stmt = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);
-    return new SQLInsert(stmt, this, sqlInfo, retrieveKeys);
+    var paramInfo = getParamInfo(session, extractor);
+    var stmt = JDBC.getPreparedStatement(con, paramInfo, retrieveKeys);
+    return new SQLInsert(stmt, this, paramInfo, retrieveKeys);
   }
 
   public SQLUpdate prepareUpdate() {
     close();
-    var sqlInfo = getSQLInfo(session, extractor);
-    var stmt = JDBC.getPreparedStatement(con, sqlInfo);
-    return new SQLUpdate(stmt, this, sqlInfo);
+    var paramInfo = getParamInfo(session, extractor);
+    var stmt = JDBC.getPreparedStatement(con, paramInfo);
+    return new SQLUpdate(stmt, this, paramInfo);
   }
 
-  private SQLInfo getSQLInfo(RenderSession session, ParamExtractor extractor) {
-    return new SQLInfo(session.render(), extractor);
+  private ParameterInfo getParamInfo(RenderSession session, ParamExtractor extractor) {
+    return new ParameterInfo(session.render(), extractor);
   }
 
 }

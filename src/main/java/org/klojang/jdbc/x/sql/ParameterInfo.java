@@ -5,17 +5,17 @@ import org.klojang.util.collection.IntList;
 import java.util.List;
 import java.util.Map;
 
-public record SQLInfo(String sql,
+public record ParameterInfo(String normalizedSQL,
       List<NamedParameter> parameters,
       Map<String, IntList> parameterPositions) {
 
-  public SQLInfo(ParamExtractor paramExtractor) {
+  public ParameterInfo(ParamExtractor paramExtractor) {
     this(paramExtractor.getNormalizedSQL(),
           paramExtractor.getParameters(),
           paramExtractor.getParameterPositions());
   }
 
-  public SQLInfo(String sql, ParamExtractor paramExtractor) {
+  public ParameterInfo(String sql, ParamExtractor paramExtractor) {
     this(sql, paramExtractor.getParameters(), paramExtractor.getParameterPositions());
   }
 

@@ -3,7 +3,7 @@
 import org.klojang.check.Check;
 import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.sql.ParamExtractor;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 import org.klojang.templates.RenderSession;
 import org.klojang.util.ArrayMethods;
 import org.klojang.util.CollectionMethods;
@@ -70,29 +70,29 @@ final class SQLSkeletonSession extends DynamicSQLSession {
   @Override
   public SQLQuery prepareQuery() {
 <span class="fc" id="L72">    close();</span>
-<span class="fc" id="L73">    var sqlInfo = getSQLInfo();</span>
-<span class="fc" id="L74">    var stmt = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="fc" id="L75">    return new SQLQuery(stmt, this, sqlInfo);</span>
+<span class="fc" id="L73">    var paramInfo = getParamInfo();</span>
+<span class="fc" id="L74">    var stmt = JDBC.getPreparedStatement(con, paramInfo);</span>
+<span class="fc" id="L75">    return new SQLQuery(stmt, this, paramInfo);</span>
   }
 
   @Override
   public SQLInsert prepareInsert(boolean retrieveKeys) {
 <span class="nc" id="L80">    close();</span>
-<span class="nc" id="L81">    var sqlInfo = getSQLInfo();</span>
-<span class="nc" id="L82">    var stmt = JDBC.getPreparedStatement(con, sqlInfo, retrieveKeys);</span>
-<span class="nc" id="L83">    return new SQLInsert(stmt, this, sqlInfo, retrieveKeys);</span>
+<span class="nc" id="L81">    var paramInfo = getParamInfo();</span>
+<span class="nc" id="L82">    var stmt = JDBC.getPreparedStatement(con, paramInfo, retrieveKeys);</span>
+<span class="nc" id="L83">    return new SQLInsert(stmt, this, paramInfo, retrieveKeys);</span>
   }
 
   @Override
   public SQLUpdate prepareUpdate() {
 <span class="nc" id="L88">    close();</span>
-<span class="nc" id="L89">    var sqlInfo = getSQLInfo();</span>
-<span class="nc" id="L90">    var stmt = JDBC.getPreparedStatement(con, sqlInfo);</span>
-<span class="nc" id="L91">    return new SQLUpdate(stmt, this, sqlInfo);</span>
+<span class="nc" id="L89">    var paramInfo = getParamInfo();</span>
+<span class="nc" id="L90">    var stmt = JDBC.getPreparedStatement(con, paramInfo);</span>
+<span class="nc" id="L91">    return new SQLUpdate(stmt, this, paramInfo);</span>
   }
 
-  private SQLInfo getSQLInfo() {
-<span class="fc" id="L95">    return new SQLInfo(new ParamExtractor(session.render()));</span>
+  private ParameterInfo getParamInfo() {
+<span class="fc" id="L95">    return new ParameterInfo(new ParamExtractor(session.render()));</span>
   }
 
 }

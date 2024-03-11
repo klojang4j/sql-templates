@@ -2,7 +2,7 @@ package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.ps.MapBinder;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +44,13 @@ abstract sealed class AbstractSQL implements SQL
   }
 
   @SuppressWarnings("unchecked")
-  final <T> BeanBinder<T> getBeanBinder(SQLInfo sqlInfo, Class<T> clazz) {
+  final <T> BeanBinder<T> getBeanBinder(ParameterInfo paramInfo, Class<T> clazz) {
     return binders.computeIfAbsent(clazz,
-          k -> new BeanBinder<>(clazz, sqlInfo.parameters(), config));
+          k -> new BeanBinder<>(clazz, paramInfo.parameters(), config));
   }
 
-  final MapBinder getMapBinder(SQLInfo sqlInfo) {
-    return new MapBinder(sqlInfo.parameters(), config);
+  final MapBinder getMapBinder(ParameterInfo paramInfo) {
+    return new MapBinder(paramInfo.parameters(), config);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

@@ -5,7 +5,7 @@ import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.ps.BeanBinder;
 import org.klojang.jdbc.x.ps.MapBinder;
 import org.klojang.jdbc.x.sql.NamedParameter;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -37,7 +37,7 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   private static final String DIRTY_INSTANCE = "statement already executed; call reset() first()";
 
   final AbstractSQLSession session;
-  final SQLInfo sqlInfo;
+  final ParameterInfo paramInfo;
 
   final List<Object> bindings;
   final Set<NamedParameter> bound;
@@ -47,11 +47,13 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
 
   private boolean fresh = true;
 
-  SQLStatement(PreparedStatement stmt, AbstractSQLSession session, SQLInfo sqlInfo) {
+  SQLStatement(PreparedStatement stmt,
+        AbstractSQLSession session,
+        ParameterInfo paramInfo) {
     this.session = session;
-    this.sqlInfo = sqlInfo;
+    this.paramInfo = paramInfo;
     this.bindings = new ArrayList<>(5);
-    this.bound = HashSet.newHashSet(sqlInfo.parameters().size());
+    this.bound = HashSet.newHashSet(paramInfo.parameters().size());
     this.stmt = new StatementContainer(stmt);
     this.cleanable = CENTRAL_CLEANER.register(this, this.stmt);
   }
@@ -65,7 +67,8 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
    */
   public T bind(String param, Object value) {
     Check.that(fresh).is(yes(), DIRTY_INSTANCE);
-    Check.notNull(param, PARAM).is(keyIn(), sqlInfo.parameterPositions(), NO_SUCH_PARAM);
+    Check.notNull(param, PARAM)
+          .is(keyIn(), paramInfo.parameterPositions(), NO_SUCH_PARAM);
     return bind(singletonMap(param, value));
   }
 
@@ -136,15 +139,15 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
     for (Object obj : bindings) {
       AbstractSQL sql = session.getSQL();
       if (obj instanceof Map map) {
-        MapBinder binder = sql.getMapBinder(sqlInfo);
+        MapBinder binder = sql.getMapBinder(paramInfo);
         binder.bind(ps, map, bound);
       } else {
-        BeanBinder binder = sql.getBeanBinder(sqlInfo, obj.getClass());
+        BeanBinder binder = sql.getBeanBinder(paramInfo, obj.getClass());
         binder.bind(ps, obj);
         bound.addAll(binder.getBoundParameters());
       }
     }
-    Check.that(bound.size()).is(eq(), sqlInfo.parameters().size(), unboundParameters());
+    Check.that(bound.size()).is(eq(), paramInfo.parameters().size(), unboundParameters());
   }
 
   AbstractSQLSession getSession() {
@@ -161,8 +164,8 @@ public abstract sealed class SQLStatement<T extends SQLStatement<T>>
   }
 
   private Supplier<DatabaseException> unboundParameters() {
-    Set<String> all = HashSet.newHashSet(sqlInfo.parameters().size());
-    all.addAll(sqlInfo.parameterPositions().keySet());
+    Set<String> all = HashSet.newHashSet(paramInfo.parameters().size());
+    all.addAll(paramInfo.parameterPositions().keySet());
     all.removeAll(collectionToSet(bound, NamedParameter::name));
     String fmt = "SQL contains named parameters that have not been bound yet: %s";
     String msg = String.format(fmt, all);

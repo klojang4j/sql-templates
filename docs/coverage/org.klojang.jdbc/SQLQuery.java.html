@@ -5,7 +5,7 @@ import org.klojang.check.fallible.FallibleFunction;
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.ColumnReaderFactory;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,8 +65,8 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
   private final ResultSetContainer result;
   private final Cleanable cleanable;
 
-  SQLQuery(PreparedStatement stmt, AbstractSQLSession sql, SQLInfo sqlInfo) {
-<span class="fc" id="L69">    super(stmt, sql, sqlInfo);</span>
+  SQLQuery(PreparedStatement stmt, AbstractSQLSession sql, ParameterInfo paramInfo) {
+<span class="fc" id="L69">    super(stmt, sql, paramInfo);</span>
 <span class="fc" id="L70">    this.result = new ResultSetContainer();</span>
 <span class="fc" id="L71">    this.cleanable = CENTRAL_CLEANER.register(this, result);</span>
 <span class="fc" id="L72">  }</span>
@@ -488,7 +488,7 @@ public final class SQLQuery extends SQLStatement&lt;SQLQuery&gt; {
 <span class="fc" id="L488">    ResultSet rs = result.get();</span>
 <span class="pc bpc" id="L489" title="1 of 2 branches missed.">    if (rs == null) {</span>
 <span class="fc" id="L490">      applyBindings(stmt());</span>
-<span class="fc" id="L491">      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());</span>
+<span class="fc" id="L491">      LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());</span>
 <span class="fc" id="L492">      rs = stmt().executeQuery();</span>
 <span class="fc" id="L493">      result.set(rs);</span>
     }

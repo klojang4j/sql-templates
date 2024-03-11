@@ -6,7 +6,7 @@ import org.klojang.jdbc.x.JDBC;
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.ps.BeanBinder;
-import org.klojang.jdbc.x.sql.SQLInfo;
+import org.klojang.jdbc.x.sql.ParameterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +47,9 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
 
   SQLInsert(PreparedStatement stmt,
         AbstractSQLSession sql,
-        SQLInfo sqlInfo,
+        ParameterInfo paramInfo,
         boolean retrieveKeys) {
-    super(stmt, sql, sqlInfo);
+    super(stmt, sql, paramInfo);
     this.retrieveKeys = retrieveKeys;
   }
 
@@ -176,7 +176,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
       }
       return -1;
     } catch (Throwable t) {
-      throw Utils.wrap(t, sqlInfo);
+      throw Utils.wrap(t, paramInfo);
     } finally {
       reset();
     }
@@ -213,7 +213,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
       }
       return dbKey;
     } catch (Throwable t) {
-      throw Utils.wrap(t, sqlInfo);
+      throw Utils.wrap(t, paramInfo);
     } finally {
       reset();
     }
@@ -233,10 +233,10 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
       for (U bean : beans) {
         addToBatch(bean);
       }
-      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
+      LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());
       stmt().executeBatch();
     } catch (Throwable t) {
-      throw Utils.wrap(t, sqlInfo);
+      throw Utils.wrap(t, paramInfo);
     }
   }
 
@@ -256,11 +256,11 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
       for (U bean : beans) {
         addToBatch(bean);
       }
-      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
+      LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());
       stmt().executeBatch();
       return JDBC.getGeneratedKeys(stmt(), beans.size());
     } catch (Throwable t) {
-      throw Utils.wrap(t, sqlInfo);
+      throw Utils.wrap(t, paramInfo);
     }
   }
 
@@ -283,7 +283,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
       for (U bean : beans) {
         addToBatch(bean);
       }
-      LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
+      LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());
       stmt().executeBatch();
       long[] keys = JDBC.getGeneratedKeys(stmt(), beans.size());
       int i = 0;
@@ -291,7 +291,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
         JDBC.setID(bean, idProperty, keys[i++]);
       }
     } catch (Throwable t) {
-      throw Utils.wrap(t, sqlInfo);
+      throw Utils.wrap(t, paramInfo);
     }
   }
 
@@ -301,12 +301,12 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
     try {
       stmt().clearParameters();
     } catch (SQLException e) {
-      throw Utils.wrap(e, sqlInfo);
+      throw Utils.wrap(e, paramInfo);
     }
   }
 
   private void executeStatement() throws Throwable {
-    LOG.trace(Msg.EXECUTING_SQL, sqlInfo.sql());
+    LOG.trace(Msg.EXECUTING_SQL, paramInfo.normalizedSQL());
     applyBindings(stmt());
     stmt().executeUpdate();
   }
@@ -314,7 +314,7 @@ public final class SQLInsert extends SQLStatement<SQLInsert> {
   @SuppressWarnings({"rawtypes", "unchecked"})
   private <U> void addToBatch(U bean) throws Throwable {
     Check.that(bean).is(notNull(), npe(ILLEGAL_NULL_VALUE_IN_LIST));
-    BeanBinder binder = session.getSQL().getBeanBinder(sqlInfo, bean.getClass());
+    BeanBinder binder = session.getSQL().getBeanBinder(paramInfo, bean.getClass());
     binder.bind(stmt(), bean);
     stmt().addBatch();
   }
