@@ -18,6 +18,8 @@ import java.util.Optional;
  * for example). The beans may have nested structures, but only top-level properties will
  * be populated.
  *
+ * <h2>Iteration</h2>
+ *
  * <p>{@code BeanExtractor} is an extension of the {@link Iterable} interface,
  * enabling you to extract the beans in a {@code forEach} loop:
  *
@@ -32,6 +34,21 @@ import java.util.Optional;
  *   }
  * }
  * }</pre></blockquote>
+ *
+ * Iterating over JDBC result sets is problematic in the sense that the {@link ResultSet}
+ * class does not provide an idempotent {@code hasNext}-like method. Calling
+ * {@link ResultSet#next()} will tell you whether there is a next row, but it will also
+ * move the cursor to that row. <i>Klojang JDBC</i> has opted to make it immediately
+ * whether there are any beans to be extracted from a {@code ResultSet}. That is,
+ * {@link #isEmpty() BeanExtractor.isEmpty()} can be called immediately after obtaining
+ * the {@code BeanExtractor} from the {@code BeanExtractorFactory} and it will give you
+ * the right answer. Upon instantiation the {@code BeanExtractor} will prefetch the first
+ * row from the {@code ResultSet} to gage whether there was one in the first place. The
+ * consequence, however, is that obtaining a {@code BeanExtractor} is itself not an
+ * idempotent operation. Be aware of this. If you call {@code FACTORY.getExtractor(rs)}
+ * twice in a row, the second {@code BeanExtractor} will start its life sitting on the
+ * second row of the {@code ResultSet}. In short: only instantiate a {@code BeanExtractor}
+ * if you intend to extract at least one row from the underlying {@code ResultSet}.
  *
  * <h2>JavaBeans vs. Records</h2>
  * When converting a row into a JavaBean, a {@code BeanExtractor} will always use the
