@@ -111,7 +111,7 @@ public final class BeanExtractorFactory<T> implements ExtractorFactory<T> {
    * @param clazz the class of the JavaBeans that will be extracted by the
    *       {@code BeanExtractor} instances obtained from this
    *       {@code BeanExtractorFactory}
-   * @param beanSupplier the supplier of the JavaBeans.
+   * @param beanSupplier the supplier of the JavaBeans
    * @param config a {@code SessionConfig} object that allows you to fine-tune the
    *       behaviour of the {@code BeanExtractor}
    */

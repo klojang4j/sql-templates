@@ -6,6 +6,7 @@ import org.klojang.convert.NumberMethods;
 import java.sql.ResultSet;
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static org.klojang.jdbc.x.Strings.QUERY;
 
@@ -128,8 +129,7 @@ public final class BatchQuery<T> {
   /**
    * Instantiates a new {@code BatchQuery} object.
    *
-   * @param queryId the ID of the query result to be processed by the
-   *       {@code BatchQuery} object
+   * @param queryId the ID of a pinned query
    * @param factory a factory for the {@link BeanExtractor} that will process the
    *       {@code ResultSet}
    */
@@ -139,10 +139,11 @@ public final class BatchQuery<T> {
   }
 
   /**
-   * Instantiates a new {@code BatchQuery} object.
+   * Instantiates a new {@code BatchQuery} object. The {@code BatchQuery} will use the
+   * same {@link SessionConfig} object as the {@link SQLQuery} identified by the specified
+   * {@code QueryId}.
    *
-   * @param queryId the ID of the query result to be processed by the
-   *       {@code BatchQuery}
+   * @param queryId the ID of a pinned query
    * @param clazz the type of the JavaBeans or records produced by the
    *       {@code BatchQuery}
    */
@@ -153,13 +154,30 @@ public final class BatchQuery<T> {
   }
 
   /**
+   * Instantiates a new {@code BatchQuery} object. The {@code BatchQuery} will use the
+   * same {@link SessionConfig} object as the {@link SQLQuery} identified by the specified
+   * {@code QueryId}.
+   *
+   * @param queryId the ID of a pinned query
+   * @param clazz the type of the JavaBeans or records produced by the
+   *       {@code BatchQuery}
+   * @param beanSupplier the supplier of the JavaBeans
+   */
+  public BatchQuery(QueryId queryId, Class<T> clazz, Supplier<T> beanSupplier) {
+    this.queryId = queryId;
+    SQLQuery query = QueryCache.getInstance().getSQLQuery(queryId);
+    factory = query.getSession().getSQL().getBeanExtractorFactory(clazz, beanSupplier);
+  }
+
+  /**
    * Instantiates a new {@code BatchQuery} object that will produce lists of
    * {@code Map<String, Object>} pseudo-objects. This requires that {@code <T>} (the type
    * argument for the {@code BatchQuery} variable) really is
    * {@code <Map<String, Object>>}. Otherwise a {@link ClassCastException} will follow.
+   * The {@code BatchQuery} will use the same {@link SessionConfig} object as the
+   * {@link SQLQuery} identified by the specified {@code QueryId}.
    *
-   * @param queryId the ID of the query result to be processed by the
-   *       {@code BatchQuery}
+   * @param queryId the ID of a pinned query
    */
   @SuppressWarnings("unchecked")
   public BatchQuery(QueryId queryId) {
@@ -202,11 +220,11 @@ public final class BatchQuery<T> {
   }
 
   /**
-   * Functions as an identifier for a persistent query result. A {@code QueryId} (or
-   * rather it string representation) is meant to be ping-ponged back and forth between
-   * client and server, for example via a URL query parameter and response header,
-   * respectively. On the server side it is used to instantiate a {@code BatchQuery}
-   * object, allowing it to identify and wrap itself around the query result.
+   * Functions as an identifier for a persistent query. A {@code QueryId} (or rather it
+   * string representation) is meant to be ping-ponged back and forth between client and
+   * server, for example via a URL query parameter and response header, respectively. On
+   * the server side it is used to instantiate a {@code BatchQuery} object, allowing it to
+   * identify and wrap itself around the query result.
    */
   public static final class QueryId {
 
