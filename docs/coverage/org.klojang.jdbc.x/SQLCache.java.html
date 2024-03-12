@@ -14,29 +14,33 @@ import static org.klojang.check.Tag.CLASS;
 import static org.klojang.check.Tag.PATH;
 import static org.klojang.jdbc.x.Strings.CONFIG;
 
-<span class="nc" id="L17">public final class SQLCache {</span>
+/**
+ * Cache of {@link SQL} objects created using from a classpath resource. Used to minimize
+ * file i/o.
+ */
+<span class="nc" id="L21">public final class SQLCache {</span>
 
-<span class="fc" id="L19">  private record Key(String path, Class&lt;?&gt; clazz, SessionConfig config) {</span>
+<span class="fc" id="L23">  private record Key(String path, Class&lt;?&gt; clazz, SessionConfig config) {</span>
     private static Key of(String path, Class&lt;?&gt; clazz, SessionConfig config) {
-<span class="nc" id="L21">      return new Key(path, clazz, config);</span>
+<span class="nc" id="L25">      return new Key(path, clazz, config);</span>
     }
 
     private static Key of(String path, Class&lt;?&gt; clazz) {
-<span class="fc" id="L25">      return new Key(path, clazz, Utils.DEFAULT_CONFIG);</span>
+<span class="fc" id="L29">      return new Key(path, clazz, Utils.DEFAULT_CONFIG);</span>
     }
   }
 
-<span class="fc" id="L29">  private static final Map&lt;Key, SQL&gt; cache = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L33">  private static final Map&lt;Key, SQL&gt; cache = new HashMap&lt;&gt;();</span>
 
   public static SQL get(Class&lt;?&gt; clazz, String path, Function&lt;String, SQL&gt; factory) {
-<span class="fc" id="L32">    Check.notNull(clazz, CLASS);</span>
-<span class="fc" id="L33">    Check.notNull(path, PATH);</span>
-<span class="fc" id="L34">    return cache.computeIfAbsent(Key.of(path, clazz), k -&gt; {</span>
+<span class="fc" id="L36">    Check.notNull(clazz, CLASS);</span>
+<span class="fc" id="L37">    Check.notNull(path, PATH);</span>
+<span class="fc" id="L38">    return cache.computeIfAbsent(Key.of(path, clazz), k -&gt; {</span>
       try {
-<span class="fc" id="L36">        String sql = IOMethods.getContents(clazz, path);</span>
-<span class="fc" id="L37">        return factory.apply(sql);</span>
-<span class="nc" id="L38">      } catch (Throwable t) {</span>
-<span class="nc" id="L39">        throw Utils.wrap(t);</span>
+<span class="fc" id="L40">        String sql = IOMethods.getContents(clazz, path);</span>
+<span class="fc" id="L41">        return factory.apply(sql);</span>
+<span class="nc" id="L42">      } catch (Throwable t) {</span>
+<span class="nc" id="L43">        throw Utils.wrap(t);</span>
       }
     });
   }
@@ -45,15 +49,15 @@ import static org.klojang.jdbc.x.Strings.CONFIG;
         String path,
         SessionConfig config,
         BiFunction&lt;SessionConfig, String, SQL&gt; factory) {
-<span class="nc" id="L48">    Check.notNull(clazz, CLASS);</span>
-<span class="nc" id="L49">    Check.notNull(path, PATH);</span>
-<span class="nc" id="L50">    Check.notNull(config, CONFIG);</span>
-<span class="nc" id="L51">    return cache.computeIfAbsent(Key.of(path, clazz, config), k -&gt; {</span>
+<span class="nc" id="L52">    Check.notNull(clazz, CLASS);</span>
+<span class="nc" id="L53">    Check.notNull(path, PATH);</span>
+<span class="nc" id="L54">    Check.notNull(config, CONFIG);</span>
+<span class="nc" id="L55">    return cache.computeIfAbsent(Key.of(path, clazz, config), k -&gt; {</span>
       try {
-<span class="nc" id="L53">        String sql = IOMethods.getContents(clazz, path);</span>
-<span class="nc" id="L54">        return factory.apply(config, sql);</span>
-<span class="nc" id="L55">      } catch (Throwable t) {</span>
-<span class="nc" id="L56">        throw Utils.wrap(t);</span>
+<span class="nc" id="L57">        String sql = IOMethods.getContents(clazz, path);</span>
+<span class="nc" id="L58">        return factory.apply(config, sql);</span>
+<span class="nc" id="L59">      } catch (Throwable t) {</span>
+<span class="nc" id="L60">        throw Utils.wrap(t);</span>
       }
     });
   }

@@ -3,7 +3,6 @@ package org.klojang.jdbc.x.ps;
 import org.klojang.collections.TypeMap;
 import org.klojang.jdbc.util.SQLTypeUtil;
 import org.klojang.jdbc.x.ps.writer.*;
-import org.klojang.util.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +16,7 @@ import static org.klojang.jdbc.x.Msg.NO_PREDEFINED_BINDER;
 import static org.klojang.jdbc.x.Msg.NO_PREDEFINED_TYPE_MAPPING;
 import static org.klojang.jdbc.x.ps.PreparedStatementMethod.getObjectSetter;
 import static org.klojang.util.ClassMethods.className;
+import static org.klojang.util.ClassMethods.simpleClassName;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class ValueBinderFactory {
@@ -26,9 +26,10 @@ final class ValueBinderFactory {
 
   static ValueBinderFactory getInstance() { return INSTANCE; }
 
+  private record Key(Class inputType, int targetSqlType) { }
 
   private final Map<Class, Map<Integer, ValueBinder>> predefined;
-  private final Map<Tuple2<Class, Integer>, ValueBinder> custom = new HashMap();
+  private final Map<Key, ValueBinder> custom = new HashMap();
 
   private ValueBinderFactory() {
     predefined = (Map<Class, Map<Integer, ValueBinder>>) getPredefinedBinders();
@@ -42,19 +43,21 @@ final class ValueBinderFactory {
     Map<Integer, ValueBinder> binders = predefined.get(inputType);
     ValueBinder binder;
     if (binders == null) {
-      Tuple2<Class, Integer> key = Tuple2.of(inputType, targetSqlType);
+      Key key = new Key(inputType, targetSqlType);
       binder = custom.get(key);
       if (binder == null) {
         if (LOG.isTraceEnabled()) {
-          LOG.trace(NO_PREDEFINED_BINDER, className(inputType));
+          LOG.trace(NO_PREDEFINED_BINDER,
+                className(inputType),
+                simpleClassName(inputType));
         }
-        binder = new ValueBinder<>(getObjectSetter(targetSqlType));
+        binder = StringBinderLookup.DEFAULT;
         custom.put(key, binder);
       }
     } else {
       binder = binders.get(targetSqlType);
       if (binder == null) {
-        Tuple2<Class, Integer> key = Tuple2.of(inputType, targetSqlType);
+        Key key = new Key(inputType, targetSqlType);
         binder = custom.get(key);
         if (binder == null) {
           if (LOG.isTraceEnabled()) {

@@ -8,7 +8,6 @@ import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.reader.*;
-import org.klojang.util.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,19 +40,18 @@ public class ColumnReaderFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(ColumnReaderFactory.class);
 
-  private static ColumnReaderFactory INSTANCE;
+  private static final ColumnReaderFactory INSTANCE = new ColumnReaderFactory();
 
   public static ColumnReaderFactory getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new ColumnReaderFactory();
-    }
     return INSTANCE;
   }
+
+  private record Key(Class targetType, int columnType) { }
 
   // Predefined ColumnReaders for common types
   private final Map<Class, ColumnReaderLookup<?>> predefined;
   // ColumnReaders that are created on demand
-  private final Map<Tuple2<Class, Integer>, ColumnReader> custom = new HashMap<>();
+  private final Map<Key, ColumnReader> custom = new HashMap<>();
 
   @SuppressWarnings("unchecked")
   private ColumnReaderFactory() {
@@ -99,7 +97,7 @@ public class ColumnReaderFactory {
 
   @SuppressWarnings("unchecked")
   private ColumnReader createCustomReader(Class targetType, int columnType) {
-    Tuple2<Class, Integer> key = Tuple2.of(targetType, columnType);
+    Key key = new Key(targetType, columnType);
     ColumnReader reader = custom.get(key);
     if (reader != null) {
       return reader;
@@ -192,7 +190,9 @@ public class ColumnReaderFactory {
             simpleClassName(forType),
             simpleClassName(fromType));
       return mh;
-    } catch (Exception e) { }
+    } catch (Exception e) {
+      // ...
+    }
     return null;
   }
 

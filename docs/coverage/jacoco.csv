@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-Klojang JDBC,org.klojang.jdbc.x.rs,ColumnReaderFactory,155,321,39,25,36,82,23,23,0,14
+Klojang JDBC,org.klojang.jdbc.x.rs,ColumnReaderFactory,155,320,39,23,36,81,23,22,0,14
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetShort,5,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.rs,KeyWriter,43,131,2,6,11,30,3,7,1,5
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetBD,4,0,0,0,1,0,1,0,1,0
@@ -13,6 +13,7 @@ Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetLong,5,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetObject,6,6,0,0,1,3,1,1,1,1
 Klojang JDBC,org.klojang.jdbc.x.rs,ComponentWriter,0,74,0,2,0,21,0,5,0,4
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetDouble,5,0,0,0,1,0,1,0,1,0
+Klojang JDBC,org.klojang.jdbc.x.rs,ColumnReaderFactory.Key,0,9,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetBoolean,0,5,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetByte,5,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.rs,RecordFactory,18,220,4,8,6,47,3,11,0,8
@@ -20,16 +21,17 @@ Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetBytes,4,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetTime,4,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.rs,PropertyWriter,51,226,9,13,13,56,9,10,1,7
 Klojang JDBC,org.klojang.jdbc.x.rs,RecordFactory.WriteConfig,0,9,0,0,0,1,0,1,0,1
-Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethodLookup,7,173,1,1,1,33,2,4,1,4
+Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethodLookup,0,172,0,0,0,32,0,5,0,5
 Klojang JDBC,org.klojang.jdbc.x.rs,ResultSetMethod.GetFloat,5,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.sql,BatchInsertConfig,0,24,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc.x.sql,ParameterInfo,0,29,0,0,0,7,0,3,0,3
 Klojang JDBC,org.klojang.jdbc.x.sql,ParamExtractor,20,210,3,25,2,54,3,20,0,9
 Klojang JDBC,org.klojang.jdbc.x.sql,NamedParameter,0,9,0,0,0,1,0,1,0,1
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetDouble,6,4,0,0,1,1,1,1,1,1
-Klojang JDBC,org.klojang.jdbc.x.ps,ValueBinderFactory,91,111,12,0,22,25,7,6,1,6
+Klojang JDBC,org.klojang.jdbc.x.ps,ValueBinderFactory,91,111,12,0,24,25,7,6,1,6
 Klojang JDBC,org.klojang.jdbc.x.ps,ValueBinderLookup,0,17,0,0,0,3,0,3,0,3
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetLong,6,4,0,0,1,1,1,1,1,1
+Klojang JDBC,org.klojang.jdbc.x.ps,ValueBinderFactory.Key,9,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetFloat,6,4,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetBoolean,6,4,0,0,1,1,1,1,1,1
 Klojang JDBC,org.klojang.jdbc.x.ps,PreparedStatementMethod.SetShort,6,4,0,0,1,1,1,1,1,1
@@ -113,7 +115,7 @@ Klojang JDBC,org.klojang.jdbc.x.ps.writer,ByteBinderLookup,0,88,0,0,0,12,0,2,0,2
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,EnumBinderLookup,15,67,0,0,0,12,3,6,3,6
 Klojang JDBC,org.klojang.jdbc.x.ps.writer,LocalDateTimeBinderLookup,23,55,0,0,2,10,4,5,4,5
 Klojang JDBC,org.klojang.jdbc.x,Utils.new SessionConfig() {...},0,3,0,0,0,1,0,1,0,1
-Klojang JDBC,org.klojang.jdbc.x,Err,6,0,0,0,1,0,1,0,1,0
+Klojang JDBC,org.klojang.jdbc.x,Err,13,3,0,0,1,1,2,1,2,1
 Klojang JDBC,org.klojang.jdbc.x,Strings,6,0,0,0,1,0,1,0,1,0
 Klojang JDBC,org.klojang.jdbc.x,SQLCache.Key,7,19,0,0,1,2,1,2,1,2
 Klojang JDBC,org.klojang.jdbc.x,JDBC,38,149,4,11,10,30,6,11,2,6

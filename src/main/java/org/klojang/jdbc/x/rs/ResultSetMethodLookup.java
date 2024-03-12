@@ -1,7 +1,7 @@
 package org.klojang.jdbc.x.rs;
 
 import org.klojang.check.Check;
-import org.klojang.jdbc.DatabaseException;
+import org.klojang.jdbc.x.Err;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -11,7 +11,6 @@ import java.util.Map;
 import static java.sql.Types.*;
 import static org.klojang.check.CommonChecks.keyIn;
 import static org.klojang.check.CommonProperties.box;
-import static org.klojang.jdbc.util.SQLTypeUtil.getTypeName;
 
 /**
  * Maps SQL types (the static final int constants of java.sql.SQLType) to ResultSetMethod
@@ -20,12 +19,9 @@ import static org.klojang.jdbc.util.SQLTypeUtil.getTypeName;
  */
 final class ResultSetMethodLookup {
 
-  private static ResultSetMethodLookup INSTANCE;
+  private static final ResultSetMethodLookup INSTANCE = new ResultSetMethodLookup();
 
   static ResultSetMethodLookup getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new ResultSetMethodLookup();
-    }
     return INSTANCE;
   }
 
@@ -37,9 +33,8 @@ final class ResultSetMethodLookup {
 
   @SuppressWarnings("unchecked")
   <T> ResultSetMethod<T> getMethod(int sqlType) {
-    Check.that(sqlType).has(box(), keyIn(), cache,
-          () -> new DatabaseException("unsupported SQL type: " + getTypeName(sqlType)));
-    return (ResultSetMethod<T>) cache.get(sqlType);
+    Check.that(sqlType).has(box(), keyIn(), cache, Err.sqlDataTypeNotSupported(sqlType));
+     return (ResultSetMethod<T>) cache.get(sqlType);
   }
 
   private static Map<Integer, ResultSetMethod<?>> createCache() {

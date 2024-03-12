@@ -1,6 +1,14 @@
 package org.klojang.jdbc.x;
 
+import org.klojang.jdbc.DatabaseException;
+
+import java.util.function.Supplier;
+
+import static org.klojang.jdbc.util.SQLTypeUtil.getTypeName;
+
 public final class Err {
+
+  private Err() { throw new UnsupportedOperationException(); }
 
   public static final String NO_SUCH_SQL_TYPE
         = "no such constant in java.sql.Types: ${arg}";
@@ -29,5 +37,7 @@ public final class Err {
   public static final String STALE_QUERY
         = "No query with ID ${0} in cache. It may have gone stale";
 
-  private Err() { throw new UnsupportedOperationException(); }
+   public static Supplier<DatabaseException> sqlDataTypeNotSupported(int sqlType) {
+    return () -> new DatabaseException("unsupported SQL data type: " + getTypeName(sqlType));
+  }
 }

@@ -8,7 +8,6 @@ import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Msg;
 import org.klojang.jdbc.x.Utils;
 import org.klojang.jdbc.x.rs.reader.*;
-import org.klojang.util.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,160 +38,161 @@ import static org.klojang.util.ClassMethods.simpleClassName;
 @SuppressWarnings(&quot;rawtypes&quot;)
 public class ColumnReaderFactory {
 
-<span class="fc" id="L42">  private static final Logger LOG = LoggerFactory.getLogger(ColumnReaderFactory.class);</span>
+<span class="fc" id="L41">  private static final Logger LOG = LoggerFactory.getLogger(ColumnReaderFactory.class);</span>
 
-  private static ColumnReaderFactory INSTANCE;
+<span class="fc" id="L43">  private static final ColumnReaderFactory INSTANCE = new ColumnReaderFactory();</span>
 
   public static ColumnReaderFactory getInstance() {
-<span class="fc bfc" id="L47" title="All 2 branches covered.">    if (INSTANCE == null) {</span>
-<span class="fc" id="L48">      INSTANCE = new ColumnReaderFactory();</span>
-    }
-<span class="fc" id="L50">    return INSTANCE;</span>
+<span class="fc" id="L46">    return INSTANCE;</span>
   }
+
+<span class="fc" id="L49">  private record Key(Class targetType, int columnType) { }</span>
 
   // Predefined ColumnReaders for common types
   private final Map&lt;Class, ColumnReaderLookup&lt;?&gt;&gt; predefined;
   // ColumnReaders that are created on demand
-<span class="fc" id="L56">  private final Map&lt;Tuple2&lt;Class, Integer&gt;, ColumnReader&gt; custom = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L54">  private final Map&lt;Key, ColumnReader&gt; custom = new HashMap&lt;&gt;();</span>
 
   @SuppressWarnings(&quot;unchecked&quot;)
-<span class="fc" id="L59">  private ColumnReaderFactory() {</span>
-<span class="fc" id="L60">    predefined = getPredefinedColumnReaders();</span>
-<span class="fc" id="L61">  }</span>
+<span class="fc" id="L57">  private ColumnReaderFactory() {</span>
+<span class="fc" id="L58">    predefined = getPredefinedColumnReaders();</span>
+<span class="fc" id="L59">  }</span>
 
   @SuppressWarnings({&quot;unchecked&quot;})
   public &lt;T, U&gt; ColumnReader&lt;T, U&gt; getReader(Class&lt;U&gt; targetType, int columnType) {
-<span class="fc" id="L65">    ColumnReaderLookup&lt;?&gt; lookup = predefined.get(targetType);</span>
+<span class="fc" id="L63">    ColumnReaderLookup&lt;?&gt; lookup = predefined.get(targetType);</span>
     ColumnReader reader;
-<span class="fc bfc" id="L67" title="All 2 branches covered.">    if (lookup == null) {</span>
-<span class="fc" id="L68">      reader = createCustomReader(targetType, columnType);</span>
-<span class="fc" id="L69">      checkReaderNotNull(targetType, columnType, reader);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">    if (lookup == null) {</span>
+<span class="fc" id="L66">      reader = createCustomReader(targetType, columnType);</span>
+<span class="fc" id="L67">      checkReaderNotNull(targetType, columnType, reader);</span>
     } else {
-<span class="fc" id="L71">      Check.that(columnType).is(SQLTypeUtil::isValidValue, Err.NO_SUCH_SQL_TYPE);</span>
-<span class="fc" id="L72">      reader = lookup.getColumnReader(columnType);</span>
-<span class="pc bpc" id="L73" title="1 of 2 branches missed.">      if (reader == null) {</span>
-<span class="nc" id="L74">        reader = createCustomReader(targetType, columnType);</span>
-<span class="nc" id="L75">        checkReaderNotNull(targetType, columnType, reader);</span>
+<span class="fc" id="L69">      Check.that(columnType).is(SQLTypeUtil::isValidValue, Err.NO_SUCH_SQL_TYPE);</span>
+<span class="fc" id="L70">      reader = lookup.getColumnReader(columnType);</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">      if (reader == null) {</span>
+<span class="nc" id="L72">        reader = createCustomReader(targetType, columnType);</span>
+<span class="nc" id="L73">        checkReaderNotNull(targetType, columnType, reader);</span>
       }
     }
-<span class="fc" id="L78">    return reader;</span>
+<span class="fc" id="L76">    return reader;</span>
   }
 
   private static Map getPredefinedColumnReaders() {
-<span class="fc" id="L82">    return TypeMap.nativeTypeMapBuilder()</span>
-<span class="fc" id="L83">          .autobox(true)</span>
-<span class="fc" id="L84">          .add(String.class, new StringReaderLookup())</span>
-<span class="fc" id="L85">          .add(Integer.class, new IntReaderLookup())</span>
-<span class="fc" id="L86">          .add(Boolean.class, new BooleanReaderLookup())</span>
-<span class="fc" id="L87">          .add(Double.class, new DoubleReaderLookup())</span>
-<span class="fc" id="L88">          .add(Long.class, new LongReaderLookup())</span>
-<span class="fc" id="L89">          .add(Enum.class, new EnumReaderLookup())</span>
-<span class="fc" id="L90">          .add(BigDecimal.class, new BigDecimalReaderLookup())</span>
-<span class="fc" id="L91">          .add(LocalDate.class, new LocalDateReaderLookup())</span>
-<span class="fc" id="L92">          .add(LocalDateTime.class, new LocalDateTimeReaderLookup())</span>
-<span class="fc" id="L93">          .add(Short.class, new ShortReaderLookup())</span>
-<span class="fc" id="L94">          .add(Byte.class, new ByteReaderLookup())</span>
-<span class="fc" id="L95">          .add(Float.class, new FloatReaderLookup())</span>
-<span class="fc" id="L96">          .add(UUID.class, new UUIDReaderLookup())</span>
-<span class="fc" id="L97">          .freeze();</span>
+<span class="fc" id="L80">    return TypeMap.nativeTypeMapBuilder()</span>
+<span class="fc" id="L81">          .autobox(true)</span>
+<span class="fc" id="L82">          .add(String.class, new StringReaderLookup())</span>
+<span class="fc" id="L83">          .add(Integer.class, new IntReaderLookup())</span>
+<span class="fc" id="L84">          .add(Boolean.class, new BooleanReaderLookup())</span>
+<span class="fc" id="L85">          .add(Double.class, new DoubleReaderLookup())</span>
+<span class="fc" id="L86">          .add(Long.class, new LongReaderLookup())</span>
+<span class="fc" id="L87">          .add(Enum.class, new EnumReaderLookup())</span>
+<span class="fc" id="L88">          .add(BigDecimal.class, new BigDecimalReaderLookup())</span>
+<span class="fc" id="L89">          .add(LocalDate.class, new LocalDateReaderLookup())</span>
+<span class="fc" id="L90">          .add(LocalDateTime.class, new LocalDateTimeReaderLookup())</span>
+<span class="fc" id="L91">          .add(Short.class, new ShortReaderLookup())</span>
+<span class="fc" id="L92">          .add(Byte.class, new ByteReaderLookup())</span>
+<span class="fc" id="L93">          .add(Float.class, new FloatReaderLookup())</span>
+<span class="fc" id="L94">          .add(UUID.class, new UUIDReaderLookup())</span>
+<span class="fc" id="L95">          .freeze();</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
   private ColumnReader createCustomReader(Class targetType, int columnType) {
-<span class="fc" id="L102">    Tuple2&lt;Class, Integer&gt; key = Tuple2.of(targetType, columnType);</span>
-<span class="fc" id="L103">    ColumnReader reader = custom.get(key);</span>
-<span class="fc bfc" id="L104" title="All 2 branches covered.">    if (reader != null) {</span>
-<span class="fc" id="L105">      return reader;</span>
+<span class="fc" id="L100">    Key key = new Key(targetType, columnType);</span>
+<span class="fc" id="L101">    ColumnReader reader = custom.get(key);</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">    if (reader != null) {</span>
+<span class="fc" id="L103">      return reader;</span>
     }
-<span class="pc bpc" id="L107" title="1 of 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
-<span class="fc" id="L108">      LOG.trace(Msg.NO_PREDEFINED_COLUMN_READER,</span>
-<span class="fc" id="L109">            className(targetType),</span>
-<span class="fc" id="L110">            getTypeName(columnType));</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">    if (LOG.isTraceEnabled()) {</span>
+<span class="fc" id="L106">      LOG.trace(Msg.NO_PREDEFINED_COLUMN_READER,</span>
+<span class="fc" id="L107">            className(targetType),</span>
+<span class="fc" id="L108">            getTypeName(columnType));</span>
     }
-<span class="pc bpc" id="L112" title="3 of 4 branches missed.">    if (columnType == VARCHAR || columnType == CHAR) {</span>
-<span class="fc" id="L113">      MethodHandle mh = findFactoryMethod(targetType, String.class);</span>
-<span class="fc bfc" id="L114" title="All 2 branches covered.">      if (mh == null) {</span>
-<span class="fc" id="L115">        mh = findConstructor(targetType, String.class);</span>
+<span class="pc bpc" id="L110" title="3 of 4 branches missed.">    if (columnType == VARCHAR || columnType == CHAR) {</span>
+<span class="fc" id="L111">      MethodHandle mh = findFactoryMethod(targetType, String.class);</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">      if (mh == null) {</span>
+<span class="fc" id="L113">        mh = findConstructor(targetType, String.class);</span>
       }
-<span class="pc bpc" id="L117" title="1 of 2 branches missed.">      if (mh != null) {</span>
-<span class="fc" id="L118">        reader = new ColumnReader(GET_STRING, createAdapter(mh));</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">      if (mh != null) {</span>
+<span class="fc" id="L116">        reader = new ColumnReader(GET_STRING, createAdapter(mh));</span>
       }
-<span class="pc bnc" id="L120" title="All 2 branches missed.">    } else if (columnType == INTEGER) {</span>
-<span class="nc" id="L121">      MethodHandle mh = findFactoryMethod(targetType, int.class);</span>
-<span class="nc bnc" id="L122" title="All 2 branches missed.">      if (mh == null) {</span>
-<span class="nc" id="L123">        mh = findFactoryMethod(targetType, Integer.class);</span>
+<span class="pc bnc" id="L118" title="All 2 branches missed.">    } else if (columnType == INTEGER) {</span>
+<span class="nc" id="L119">      MethodHandle mh = findFactoryMethod(targetType, int.class);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">      if (mh == null) {</span>
+<span class="nc" id="L121">        mh = findFactoryMethod(targetType, Integer.class);</span>
       }
-<span class="nc bnc" id="L125" title="All 2 branches missed.">      if (mh != null) {</span>
-<span class="nc" id="L126">        reader = new ColumnReader(GET_STRING, createAdapter(mh));</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">      if (mh != null) {</span>
+<span class="nc" id="L124">        reader = new ColumnReader(GET_STRING, createAdapter(mh));</span>
       }
-<span class="nc bnc" id="L128" title="All 2 branches missed.">    } else if (columnType == BIGINT) {</span>
-<span class="nc" id="L129">      MethodHandle mh = findFactoryMethod(targetType, long.class);</span>
-<span class="nc bnc" id="L130" title="All 2 branches missed.">      if (mh == null) {</span>
-<span class="nc" id="L131">        mh = findFactoryMethod(targetType, Long.class);</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">    } else if (columnType == BIGINT) {</span>
+<span class="nc" id="L127">      MethodHandle mh = findFactoryMethod(targetType, long.class);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">      if (mh == null) {</span>
+<span class="nc" id="L129">        mh = findFactoryMethod(targetType, Long.class);</span>
       }
-<span class="nc bnc" id="L133" title="All 2 branches missed.">      if (mh != null) {</span>
-<span class="nc" id="L134">        reader = new ColumnReader(GET_LONG, createAdapter(mh));</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">      if (mh != null) {</span>
+<span class="nc" id="L132">        reader = new ColumnReader(GET_LONG, createAdapter(mh));</span>
       }
-<span class="nc bnc" id="L136" title="All 4 branches missed.">    } else if (columnType == NUMERIC || columnType == DECIMAL) {</span>
-<span class="nc" id="L137">      MethodHandle mh = findFactoryMethod(targetType, double.class);</span>
-<span class="nc bnc" id="L138" title="All 2 branches missed.">      if (mh == null) {</span>
-<span class="nc" id="L139">        mh = findFactoryMethod(targetType, Double.class);</span>
+<span class="nc bnc" id="L134" title="All 4 branches missed.">    } else if (columnType == NUMERIC || columnType == DECIMAL) {</span>
+<span class="nc" id="L135">      MethodHandle mh = findFactoryMethod(targetType, double.class);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">      if (mh == null) {</span>
+<span class="nc" id="L137">        mh = findFactoryMethod(targetType, Double.class);</span>
       }
-<span class="nc bnc" id="L141" title="All 2 branches missed.">      if (mh != null) {</span>
-<span class="nc" id="L142">        reader = new ColumnReader(GET_DOUBLE, createAdapter(mh));</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">      if (mh != null) {</span>
+<span class="nc" id="L140">        reader = new ColumnReader(GET_DOUBLE, createAdapter(mh));</span>
       }
-<span class="nc bnc" id="L144" title="All 6 branches missed.">    } else if (columnType == VARBINARY || columnType == BINARY || columnType == LONGVARBINARY) {</span>
-<span class="nc" id="L145">      MethodHandle mh = findFactoryMethod(targetType, byte[].class);</span>
-<span class="nc bnc" id="L146" title="All 2 branches missed.">      if (mh == null) {</span>
-<span class="nc" id="L147">        mh = findConstructor(targetType, byte[].class);</span>
+<span class="nc bnc" id="L142" title="All 6 branches missed.">    } else if (columnType == VARBINARY || columnType == BINARY || columnType == LONGVARBINARY) {</span>
+<span class="nc" id="L143">      MethodHandle mh = findFactoryMethod(targetType, byte[].class);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">      if (mh == null) {</span>
+<span class="nc" id="L145">        mh = findConstructor(targetType, byte[].class);</span>
       }
-<span class="nc bnc" id="L149" title="All 2 branches missed.">      if (mh != null) {</span>
-<span class="nc" id="L150">        reader = new ColumnReader(GET_BYTES, createAdapter(mh));</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">      if (mh != null) {</span>
+<span class="nc" id="L148">        reader = new ColumnReader(GET_BYTES, createAdapter(mh));</span>
       }
     }
-<span class="pc bpc" id="L153" title="1 of 2 branches missed.">    if (reader != null) {</span>
-<span class="fc" id="L154">      custom.put(key, reader);</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">    if (reader != null) {</span>
+<span class="fc" id="L152">      custom.put(key, reader);</span>
     }
-<span class="fc" id="L156">    return reader;</span>
+<span class="fc" id="L154">    return reader;</span>
   }
 
   private MethodHandle findFactoryMethod(Class forType, Class fromType) {
-<span class="fc" id="L160">    Method[] candidates = Arrays.stream(forType.getDeclaredMethods())</span>
-<span class="fc" id="L161">          .filter(method -&gt; isFactoryMethod(method, fromType))</span>
-<span class="fc" id="L162">          .toArray(Method[]::new);</span>
-<span class="fc bfc" id="L163" title="All 2 branches covered.">    if (candidates.length == 0) {</span>
-<span class="fc" id="L164">      LOG.trace(&quot;Unable to find a factory method that returns a {} from a {}&quot;,</span>
-<span class="fc" id="L165">            simpleClassName(forType),</span>
-<span class="fc" id="L166">            simpleClassName(fromType));</span>
-<span class="fc" id="L167">      return null;</span>
-<span class="pc bpc" id="L168" title="1 of 2 branches missed.">    } else if (candidates.length &gt; 1) {</span>
-<span class="nc" id="L169">      LOG.trace(&quot;Too many factory methods ({}) that return a {} from a {}&quot;,</span>
-<span class="nc" id="L170">            candidates.length,</span>
-<span class="nc" id="L171">            simpleClassName(forType),</span>
-<span class="nc" id="L172">            simpleClassName(fromType));</span>
-<span class="nc" id="L173">      return null;</span>
+<span class="fc" id="L158">    Method[] candidates = Arrays.stream(forType.getDeclaredMethods())</span>
+<span class="fc" id="L159">          .filter(method -&gt; isFactoryMethod(method, fromType))</span>
+<span class="fc" id="L160">          .toArray(Method[]::new);</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">    if (candidates.length == 0) {</span>
+<span class="fc" id="L162">      LOG.trace(&quot;Unable to find a factory method that returns a {} from a {}&quot;,</span>
+<span class="fc" id="L163">            simpleClassName(forType),</span>
+<span class="fc" id="L164">            simpleClassName(fromType));</span>
+<span class="fc" id="L165">      return null;</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">    } else if (candidates.length &gt; 1) {</span>
+<span class="nc" id="L167">      LOG.trace(&quot;Too many factory methods ({}) that return a {} from a {}&quot;,</span>
+<span class="nc" id="L168">            candidates.length,</span>
+<span class="nc" id="L169">            simpleClassName(forType),</span>
+<span class="nc" id="L170">            simpleClassName(fromType));</span>
+<span class="nc" id="L171">      return null;</span>
     }
-<span class="fc" id="L175">    Method method = candidates[0];</span>
-<span class="fc" id="L176">    LOG.trace(&quot;Will use {}.{}({})&quot;,</span>
-<span class="fc" id="L177">          simpleClassName(forType),</span>
-<span class="fc" id="L178">          method.getName(),</span>
-<span class="fc" id="L179">          simpleClassName(fromType));</span>
+<span class="fc" id="L173">    Method method = candidates[0];</span>
+<span class="fc" id="L174">    LOG.trace(&quot;Will use {}.{}({})&quot;,</span>
+<span class="fc" id="L175">          simpleClassName(forType),</span>
+<span class="fc" id="L176">          method.getName(),</span>
+<span class="fc" id="L177">          simpleClassName(fromType));</span>
     try {
-<span class="fc" id="L181">      return MethodHandles.publicLookup().unreflect(method);</span>
-<span class="nc" id="L182">    } catch (IllegalAccessException e) {</span>
-<span class="nc" id="L183">      throw Utils.wrap(e);</span>
+<span class="fc" id="L179">      return MethodHandles.publicLookup().unreflect(method);</span>
+<span class="nc" id="L180">    } catch (IllegalAccessException e) {</span>
+<span class="nc" id="L181">      throw Utils.wrap(e);</span>
     }
   }
 
   private static MethodHandle findConstructor(Class forType, Class fromType) {
-<span class="fc" id="L188">    MethodHandles.Lookup lookup = MethodHandles.publicLookup();</span>
+<span class="fc" id="L186">    MethodHandles.Lookup lookup = MethodHandles.publicLookup();</span>
     try {
-<span class="fc" id="L190">      MethodHandle mh = lookup.findConstructor(forType, methodType(void.class, fromType));</span>
-<span class="fc" id="L191">      LOG.trace(&quot;Will use constructor new {}({})&quot;,</span>
-<span class="fc" id="L192">            simpleClassName(forType),</span>
-<span class="fc" id="L193">            simpleClassName(fromType));</span>
-<span class="fc" id="L194">      return mh;</span>
-<span class="nc" id="L195">    } catch (Exception e) { }</span>
+<span class="fc" id="L188">      MethodHandle mh = lookup.findConstructor(forType, methodType(void.class, fromType));</span>
+<span class="fc" id="L189">      LOG.trace(&quot;Will use constructor new {}({})&quot;,</span>
+<span class="fc" id="L190">            simpleClassName(forType),</span>
+<span class="fc" id="L191">            simpleClassName(fromType));</span>
+<span class="fc" id="L192">      return mh;</span>
+<span class="nc" id="L193">    } catch (Exception e) {</span>
+      // ...
+    }
 <span class="nc" id="L196">    return null;</span>
   }
 

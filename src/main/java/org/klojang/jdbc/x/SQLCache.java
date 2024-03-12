@@ -14,6 +14,10 @@ import static org.klojang.check.Tag.CLASS;
 import static org.klojang.check.Tag.PATH;
 import static org.klojang.jdbc.x.Strings.CONFIG;
 
+/**
+ * Cache of {@link SQL} objects created using from a classpath resource. Used to minimize
+ * file i/o.
+ */
 public final class SQLCache {
 
   private record Key(String path, Class<?> clazz, SessionConfig config) {
