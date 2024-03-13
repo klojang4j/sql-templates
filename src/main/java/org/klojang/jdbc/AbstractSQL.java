@@ -35,6 +35,8 @@ abstract sealed class AbstractSQL implements SQL
     factories = new HashMap<>();
   }
 
+  // Returns the original, user-provided SQL string, with any named parameters and
+  // template variables still present
   final String unparsed() {
     return unparsed;
   }

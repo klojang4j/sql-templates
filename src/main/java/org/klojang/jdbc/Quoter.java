@@ -16,10 +16,10 @@ import static org.klojang.util.StringMethods.append;
 /**
  * <p>Escapes and quotes values according to the quoting rules of the target database.
  * You do not normally need to concern yourself with quoting and escaping unless you want
- * to dynamically generate and inject a {@link SQLExpression SQL expression} in the SQL to
- * be executed. For example, suppose (somewhat unrealistically) you have a variable
- * {@code firstName} in your program, and you want to embed the following expression in
- * your SQL: <b>{@code "SUBSTRING('" + firstName + "', 1, 3)"}</b>. If the value of
+ * to embed a {@link SQLExpression SQL expression} in the SQL to be executed. For example,
+ * suppose (pretty unrealistically) you have a variable {@code firstName} in your program,
+ * and you want to embed the following expression in your SQL:
+ * <b>{@code "SUBSTRING('" + firstName + "', 1, 3)"}</b>. If the value of
  * {@code firstName} comes from outside your program, you expose yourself to the risk of
  * SQL injection. In this case you should use a {@code Quoter} to eliminate the risk:
  * <b>{@code "SUBSTRING(" + quoter.quoteValue(firstName) + ", 1, 3)"}</b>. For SQL
@@ -32,9 +32,8 @@ import static org.klojang.util.StringMethods.append;
  * JDBC</i>.
  *
  * @see SQLExpression
+ * @see BeanValueProcessor#process(Object, String, Object, Quoter)
  * @see SQLSession#quoteValue(Object)
- * @see Statement#enquoteLiteral(String)
- * @see Statement#enquoteIdentifier(String, boolean)
  */
 public final class Quoter {
 
@@ -94,12 +93,12 @@ public final class Quoter {
    * quoted using the {@link #quoteValue(Object) quoteValue()} method.
    *
    * @param name the name of the function, like {@code "SUBSTRING"} or
-   *       {@code "CONCAT"}. Note that this argument is not processed or checked in any
-   *       way. Therefore, with SQL injection in mind, be wary of this being a dynamically
+   *       {@code "CONCAT"}. Note that the function name is itself not escaped or quoted.
+   *       Therefore, with SQL injection in mind, be wary of this being a dynamically
    *       generated value.
    * @param args the function arguments. Each of the provided arguments will pass
    *       through {@link #quoteValue(Object)}.
-   * @return an {@code SQLExpression} representing a SQL function call
+   * @return a {@code SQLExpression} representing a SQL function call
    */
   public SQLExpression sqlFunction(String name, Object... args) {
     Check.notNull(name, FUNCTION_NAME);

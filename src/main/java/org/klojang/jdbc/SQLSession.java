@@ -388,12 +388,12 @@ public sealed interface SQLSession permits AbstractSQLSession {
    * {@code "CONCAT('Dear Mr./Ms. ', LAST_NAME, ',')"}
    *
    * @param name the name of the function, like {@code "SUBSTRING"} or
-   *       {@code "CONCAT"}. Note that this argument not escaped or quoted. Therefore,
-   *       with SQL injection in mind, be wary of this being a dynamically generated
-   *       value.
+   *       {@code "CONCAT"}. Note that the function name is itself not escaped or quoted.
+   *       Therefore, with SQL injection in mind, be wary of this being a dynamically
+   *       generated value.
    * @param args the function arguments. Each of the provided arguments will pass
    *       through {@link #quoteValue(Object)}.
-   * @return an {@code SQLExpression} representing a SQL function call
+   * @return a {@code SQLExpression} representing a SQL function call
    * @throws UnsupportedOperationException in case this {@code SQLSession} was
    *       obtained via the {@link SQL#simple(String) SQL.simple()} method
    */

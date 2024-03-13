@@ -38,10 +38,8 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
  * SessionConfig config = SessionConfig.getDefaultConfig().withEnumsSavedAsStrings();
  * }</pre></blockquote>
  *
- * <p>Whichever option you choose, assuming you will need just one, or maybe two
- * {@code org.klojang.templates.SessionConfig SessionConfig} objects in your entire
- * application, it is recommended that you store them in {@code public static final}
- * fields, and share them whenever and wherever possible.
+ * <p>It is recommended that you store {@code SessionConfig} objects in
+ * {@code public static final} fields and share them whenever and wherever possible.
  *
  * @author Ayco Holleman
  */

@@ -38,10 +38,8 @@ import static org.klojang.templates.name.SnakeCaseToCamelCase.snakeCaseToCamelCa
  * SessionConfig config = SessionConfig.getDefaultConfig().withEnumsSavedAsStrings();
  * }&lt;/pre&gt;&lt;/blockquote&gt;
  *
- * &lt;p&gt;Whichever option you choose, assuming you will need just one, or maybe two
- * {@code org.klojang.templates.SessionConfig SessionConfig} objects in your entire
- * application, it is recommended that you store them in {@code public static final}
- * fields, and share them whenever and wherever possible.
+ * &lt;p&gt;It is recommended that you store {@code SessionConfig} objects in
+ * {@code public static final} fields and share them whenever and wherever possible.
  *
  * @author Ayco Holleman
  */
@@ -54,7 +52,7 @@ public interface SessionConfig {
    * @return a {@code SessionConfig} instance which does not override any of the defaults
    *       provided by the {@code SessionConfig} instance
    */
-<span class="fc" id="L57">  static SessionConfig getDefaultConfig() { return Utils.DEFAULT_CONFIG; }</span>
+<span class="fc" id="L55">  static SessionConfig getDefaultConfig() { return Utils.DEFAULT_CONFIG; }</span>
 
   /**
    * Returns a {@code CustomBinder} for the provided combination of arguments, or
@@ -74,7 +72,7 @@ public interface SessionConfig {
   default CustomBinder getCustomBinder(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L77">    return null;</span>
+<span class="fc" id="L75">    return null;</span>
   }
 
   /**
@@ -108,7 +106,7 @@ public interface SessionConfig {
         String propertyName,
         Class&lt;?&gt; propertyType,
         int sqlType) {
-<span class="fc" id="L111">    return null;</span>
+<span class="fc" id="L109">    return null;</span>
   }
 
   /**
@@ -134,7 +132,7 @@ public interface SessionConfig {
   default Integer getSQLType(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L137">    return null;</span>
+<span class="fc" id="L135">    return null;</span>
   }
 
   /**
@@ -166,7 +164,7 @@ public interface SessionConfig {
   default boolean saveEnumAsString(Class&lt;?&gt; beanType,
         String enumProperty,
         Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="nc" id="L169">    return false;</span>
+<span class="nc" id="L167">    return false;</span>
   }
 
   /**
@@ -198,7 +196,7 @@ public interface SessionConfig {
   default DateTimeFormatter getDateTimeFormatter(Class&lt;?&gt; beanType,
         String dateTimeProperty,
         Class&lt;? extends TemporalAccessor&gt; dateTimeType) {
-<span class="nc" id="L201">    return null;</span>
+<span class="nc" id="L199">    return null;</span>
   }
 
   /**
@@ -242,7 +240,7 @@ public interface SessionConfig {
   default Function&lt;Object, String&gt; getSerializer(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L245">    return null;</span>
+<span class="fc" id="L243">    return null;</span>
   }
 
   /**
@@ -279,7 +277,7 @@ public interface SessionConfig {
   default Function&lt;Object, byte[]&gt; getBinarySerializer(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L282">    return null;</span>
+<span class="fc" id="L280">    return null;</span>
   }
 
   /**
@@ -295,7 +293,7 @@ public interface SessionConfig {
    *       components, or map keys to column names
    */
   default NameMapper getPropertyToColumnMapper() {
-<span class="fc" id="L298">    return camelCaseToSnakeUpperCase();</span>
+<span class="fc" id="L296">    return camelCaseToSnakeUpperCase();</span>
   }
 
   /**
@@ -311,7 +309,7 @@ public interface SessionConfig {
    *       properties, record components, or map keys
    */
   default NameMapper getColumnToPropertyMapper() {
-<span class="fc" id="L314">    return snakeCaseToCamelCase();</span>
+<span class="fc" id="L312">    return snakeCaseToCamelCase();</span>
   }
 
   /**
@@ -324,8 +322,8 @@ public interface SessionConfig {
    *       property-to-column mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withPropertyToColumnMapper(NameMapper mapper) {
-<span class="fc" id="L327">    return new SessionConfig() {</span>
-<span class="fc" id="L328">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
+<span class="fc" id="L325">    return new SessionConfig() {</span>
+<span class="fc" id="L326">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
     };
   }
 
@@ -339,8 +337,8 @@ public interface SessionConfig {
    *       column-to-property mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withColumnToPropertyMapper(NameMapper mapper) {
-<span class="nc" id="L342">    return new SessionConfig() {</span>
-<span class="nc" id="L343">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
+<span class="nc" id="L340">    return new SessionConfig() {</span>
+<span class="nc" id="L341">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
     };
   }
 
@@ -353,10 +351,10 @@ public interface SessionConfig {
    * @see NameMapper#AS_IS
    */
   default SessionConfig withNamesMappedAsIs() {
-<span class="nc" id="L356">    return new SessionConfig() {</span>
-<span class="nc" id="L357">      public NameMapper getPropertyToColumnMapper() { return NameMapper.AS_IS; }</span>
+<span class="nc" id="L354">    return new SessionConfig() {</span>
+<span class="nc" id="L355">      public NameMapper getPropertyToColumnMapper() { return NameMapper.AS_IS; }</span>
 
-<span class="nc" id="L359">      public NameMapper getColumnToPropertyMapper() { return NameMapper.AS_IS; }</span>
+<span class="nc" id="L357">      public NameMapper getColumnToPropertyMapper() { return NameMapper.AS_IS; }</span>
     };
   }
 
@@ -379,8 +377,8 @@ public interface SessionConfig {
    *       camelCaseToSnakeLowerCase()} name mapper
    */
   default SessionConfig withLowerCaseColumnNames() {
-<span class="nc" id="L382">    return new SessionConfig() {</span>
-<span class="nc" id="L383">      public NameMapper getPropertyToColumnMapper() { return camelCaseToSnakeLowerCase(); }</span>
+<span class="nc" id="L380">    return new SessionConfig() {</span>
+<span class="nc" id="L381">      public NameMapper getPropertyToColumnMapper() { return camelCaseToSnakeLowerCase(); }</span>
     };
   }
 
@@ -392,11 +390,11 @@ public interface SessionConfig {
    *       will be saved by calling {@code toString()} on them.
    */
   default SessionConfig withEnumsSavedAsStrings() {
-<span class="fc" id="L395">    return new SessionConfig() {</span>
+<span class="fc" id="L393">    return new SessionConfig() {</span>
       public boolean saveEnumAsString(Class&lt;?&gt; beanType,
             String enumProperty,
             Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="fc" id="L399">        return true;</span>
+<span class="fc" id="L397">        return true;</span>
       }
     };
   }

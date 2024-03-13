@@ -512,22 +512,22 @@ public sealed interface SQL permits AbstractSQL {
 
 
   /**
-   * Returns an {@link InsertBuilder} that enables you to easily configure an SQL INSERT
-   * statement.
+   * Returns an {@link InsertBuilder} that enables you to configure a {@link SQLInsert}
+   * object.
    *
-   * @return an {@code SQLInsertBuilder} that enables you to easily configure an SQL
-   *       INSERT statement
+   * @return an {@link InsertBuilder} that enables you to configure a {@link SQLInsert}
+   *       object
    */
   static InsertBuilder insert() {
 <span class="fc" id="L522">    return new InsertBuilder();</span>
   }
 
   /**
-   * Returns an {@link BatchInsertBuilder} that enables you to easily configure large
-   * batch inserts.
+   * Returns a {@code BatchInsertBuilder} that enables you to configure a
+   * {@link BatchInsert} object.
    *
-   * @return an {@code BatchInsertBuilder} that enables you to easily configure large
-   *       batch inserts.
+   * @return a {@code BatchInsertBuilder} that enables you to configure a
+   *       {@link BatchInsert} object
    */
   static BatchInsertBuilder insertBatch() {
 <span class="fc" id="L533">    return new BatchInsertBuilder();</span>
@@ -536,7 +536,7 @@ public sealed interface SQL permits AbstractSQL {
   /**
    * Returns a special string wrapper object whose type signals to &lt;i&gt;Klojang JDBC&lt;/i&gt;
    * that the specified string is to be treated as a native SQL expression and hence must
-   * not be quoted or escaped.
+   * not be escaped or quoted.
    *
    * @param expression the SQL expression
    * @return a special string wrapper object whose type signals to &lt;i&gt;Klojang JDBC&lt;/i&gt;
@@ -550,10 +550,10 @@ public sealed interface SQL permits AbstractSQL {
   }
 
   /**
-   * Returns a {@code SQLSession} that allows you to execute the SQL query.
+   * Returns a {@code SQLSession} that allows you to execute the SQL.
    *
    * @param con the JDBC connection to use
-   * @return a {@code SQLSession} that allows you to execute the SQL query
+   * @return a {@code SQLSession} that allows you to execute the SQL
    */
   SQLSession session(Connection con);
 

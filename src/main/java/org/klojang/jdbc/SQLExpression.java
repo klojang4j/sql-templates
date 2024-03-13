@@ -12,13 +12,14 @@ package org.klojang.jdbc;
  *   <li>an already properly escaped and quoted string literal like
  *       <b>{@code 'Chicago O''Hare International Airport'}</b>
  * </ul>
- * <p>SQL expressions will be injected as-is into SQL statements. Use a {@link Quoter} or
- * the various {@code quote} methods in {@link SQLSession} to escape and quote the
- * individual components of the expression if necessary.
+ * <p>SQL expressions will be injected as-is into SQL statements. Use a {@link Quoter},
+ * {@link SQLSession#quoteValue(Object) SQLSession.quoteValue()}, or
+ * {@link SQLSession#quoteIdentifier(String) SQLSession.quoteIdentifier()} to escape and
+ * quote elements <i>within</i> the expression if necessary.
  *
  * <p><i>(Although you could, it would be overblown to wrap a plain number into a
- * {@code SQLExpression}. Numbers &#8212; the primitive number types and instances of
- * {@link Number} &#8212; will anyhow not be quoted by Klojang JDBC.)</i>
+ * {@code SQLExpression}. Numbers will anyhow not be quoted by Klojang JDBC. See
+ * {@link Quoter#quoteValue(Object) Quoter.quoteValue()}.)</i>
  */
 public final class SQLExpression {
 

@@ -12,21 +12,22 @@
  *   &lt;li&gt;an already properly escaped and quoted string literal like
  *       &lt;b&gt;{@code 'Chicago O''Hare International Airport'}&lt;/b&gt;
  * &lt;/ul&gt;
- * &lt;p&gt;SQL expressions will be injected as-is into SQL statements. Use a {@link Quoter} or
- * the various {@code quote} methods in {@link SQLSession} to escape and quote the
- * individual components of the expression if necessary.
+ * &lt;p&gt;SQL expressions will be injected as-is into SQL statements. Use a {@link Quoter},
+ * {@link SQLSession#quoteValue(Object) SQLSession.quoteValue()}, or
+ * {@link SQLSession#quoteIdentifier(String) SQLSession.quoteIdentifier()} to escape and
+ * quote elements &lt;i&gt;within&lt;/i&gt; the expression if necessary.
  *
  * &lt;p&gt;&lt;i&gt;(Although you could, it would be overblown to wrap a plain number into a
- * {@code SQLExpression}. Numbers &amp;#8212; the primitive number types and instances of
- * {@link Number} &amp;#8212; will anyhow not be quoted by Klojang JDBC.)&lt;/i&gt;
+ * {@code SQLExpression}. Numbers will anyhow not be quoted by Klojang JDBC. See
+ * {@link Quoter#quoteValue(Object) Quoter.quoteValue()}.)&lt;/i&gt;
  */
 public final class SQLExpression {
 
   private final String expression;
 
-<span class="nc" id="L27">  SQLExpression(String expression) {</span>
-<span class="nc" id="L28">    this.expression = expression;</span>
-<span class="nc" id="L29">  }</span>
+<span class="nc" id="L28">  SQLExpression(String expression) {</span>
+<span class="nc" id="L29">    this.expression = expression;</span>
+<span class="nc" id="L30">  }</span>
 
   /**
    * Returns the SQL expression.
@@ -34,6 +35,6 @@ public final class SQLExpression {
    * @return the SQL expression
    */
   @Override
-<span class="nc" id="L37">  public String toString() { return expression; }</span>
+<span class="nc" id="L38">  public String toString() { return expression; }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
