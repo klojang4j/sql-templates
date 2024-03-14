@@ -106,33 +106,33 @@ final class PropertyBinder<INPUT_TYPE, PARAM_TYPE> {
   private final Getter getter;
   private final ValueBinder<INPUT_TYPE, PARAM_TYPE> binder;
   private final NamedParameter param;
-  private final CustomBinder custom;
+  private final CustomBinder customBinder;
 
   private PropertyBinder(Getter getter,
         NamedParameter param, ValueBinder<INPUT_TYPE, PARAM_TYPE> binder) {
     this.getter = getter;
     this.param = param;
     this.binder = binder;
-    this.custom = null;
+    this.customBinder = null;
   }
 
-  private PropertyBinder(Getter getter, NamedParameter param, CustomBinder custom) {
+  private PropertyBinder(Getter getter, NamedParameter param, CustomBinder customBinder) {
     this.getter = getter;
     this.param = param;
-    this.custom = custom;
+    this.customBinder = customBinder;
     this.binder = null;
   }
 
   @SuppressWarnings("unchecked")
   private <T> void bindProperty(PreparedStatement ps, T bean) throws Throwable {
     INPUT_TYPE beanValue = (INPUT_TYPE) getter.read(bean);
-    if (custom != null) {
+    if (customBinder != null) {
       if (LOG.isTraceEnabled()) {
         LOG.trace("==> Parameter \"{}\": {} (using custom binder)",
               param.name(),
               beanValue);
       }
-      param.positions().forEachThrowing(i -> custom.bind(ps, i, beanValue));
+      param.positions().forEachThrowing(i -> customBinder.bind(ps, i, beanValue));
     } else {
       PARAM_TYPE paramValue = binder.getParamValue(beanValue);
       if (LOG.isTraceEnabled()) {

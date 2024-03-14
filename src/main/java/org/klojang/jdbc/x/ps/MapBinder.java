@@ -36,7 +36,7 @@ public final class MapBinder {
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public void bind(PreparedStatement ps, Map<String, Object> map,
+  public void bind(PreparedStatement stmt, Map<String, Object> map,
         Set<NamedParameter> bound) throws Throwable {
     for (NamedParameter param : params) {
       String key = param.name();
@@ -47,7 +47,7 @@ public final class MapBinder {
       Object val = map.get(key);
       if (val == null) {
         LOG.trace("==> Parameter \"{}\": null", key);
-        param.positions().forEachThrowing(i -> ps.setNull(i, Types.OTHER));
+        param.positions().forEachThrowing(i -> stmt.setNull(i, Types.OTHER));
         continue;
       }
       Class mapType = map.getClass();
@@ -55,51 +55,51 @@ public final class MapBinder {
       CustomBinder cb = config.getCustomBinder(mapType, key, valType);
       if (cb != null) {
         LOG.trace("==> Parameter \"{}\": {} (using custom binder)", key, val);
-        param.positions().forEachThrowing(i -> cb.bind(ps, i, val));
+        param.positions().forEachThrowing(i -> cb.bind(stmt, i, val));
         continue;
       }
       Integer sqlType = config.getSQLType(mapType, key, valType);
       if (sqlType != null) {
         ValueBinderFactory factory = ValueBinderFactory.getInstance();
         ValueBinder vb = factory.getBinder(valType, sqlType);
-        bind(ps, param, vb, val);
+        bind(stmt, param, vb, val);
         continue;
       }
       if (isSubtype(valType, Enum.class)) {
         ValueBinder vb = config.saveEnumAsString(mapType, key, valType)
               ? ValueBinder.ANY_TO_STRING
               : EnumBinderLookup.DEFAULT;
-        bind(ps, param, vb, val);
+        bind(stmt, param, vb, val);
         continue;
       }
       if (isSubtype(valType, TemporalAccessor.class)) {
         DateTimeFormatter dtf = config.getDateTimeFormatter(mapType, key, valType);
         if (dtf != null) {
           ValueBinder vb = ValueBinder.dateTimeToString(dtf);
-          bind(ps, param, vb, val);
+          bind(stmt, param, vb, val);
           continue;
         }
       }
       Function<Object, String> ser0 = config.getSerializer(mapType, key, valType);
       if (ser0 != null) {
         ValueBinder vb = new ValueBinder<>(SET_STRING, ser0);
-        bind(ps, param, vb, val);
+        bind(stmt, param, vb, val);
         continue;
       }
       Function<Object, byte[]> ser1 = config.getBinarySerializer(mapType, key, valType);
       if (ser1 != null) {
         ValueBinder vb = new ValueBinder<>(SET_BYTES, ser1);
-        bind(ps, param, vb, val);
+        bind(stmt, param, vb, val);
         continue;
       }
       ValueBinderFactory factory = ValueBinderFactory.getInstance();
       ValueBinder vb = factory.getDefaultBinder(valType);
-      bind(ps, param, vb, val);
+      bind(stmt, param, vb, val);
     }
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private static void bind(PreparedStatement ps,
+  private static void bind(PreparedStatement stmt,
         NamedParameter param,
         ValueBinder vb,
         Object val) throws Throwable {
@@ -112,7 +112,7 @@ public final class MapBinder {
         LOG.trace("==> Parameter \"{}\": {}", key, output);
       }
     }
-    param.positions().forEachThrowing(i -> vb.bind(ps, i, output));
+    param.positions().forEachThrowing(i -> vb.bind(stmt, i, output));
   }
 
 }

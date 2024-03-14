@@ -36,7 +36,7 @@ public final class MapBinder {
 <span class="fc" id="L36">  }</span>
 
   @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
-  public void bind(PreparedStatement ps, Map&lt;String, Object&gt; map,
+  public void bind(PreparedStatement stmt, Map&lt;String, Object&gt; map,
         Set&lt;NamedParameter&gt; bound) throws Throwable {
 <span class="fc bfc" id="L41" title="All 2 branches covered.">    for (NamedParameter param : params) {</span>
 <span class="fc" id="L42">      String key = param.name();</span>
@@ -47,7 +47,7 @@ public final class MapBinder {
 <span class="fc" id="L47">      Object val = map.get(key);</span>
 <span class="pc bpc" id="L48" title="1 of 2 branches missed.">      if (val == null) {</span>
 <span class="nc" id="L49">        LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: null&quot;, key);</span>
-<span class="nc" id="L50">        param.positions().forEachThrowing(i -&gt; ps.setNull(i, Types.OTHER));</span>
+<span class="nc" id="L50">        param.positions().forEachThrowing(i -&gt; stmt.setNull(i, Types.OTHER));</span>
 <span class="nc" id="L51">        continue;</span>
       }
 <span class="fc" id="L53">      Class mapType = map.getClass();</span>
@@ -55,51 +55,51 @@ public final class MapBinder {
 <span class="fc" id="L55">      CustomBinder cb = config.getCustomBinder(mapType, key, valType);</span>
 <span class="pc bpc" id="L56" title="1 of 2 branches missed.">      if (cb != null) {</span>
 <span class="nc" id="L57">        LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {} (using custom binder)&quot;, key, val);</span>
-<span class="nc" id="L58">        param.positions().forEachThrowing(i -&gt; cb.bind(ps, i, val));</span>
+<span class="nc" id="L58">        param.positions().forEachThrowing(i -&gt; cb.bind(stmt, i, val));</span>
 <span class="nc" id="L59">        continue;</span>
       }
 <span class="fc" id="L61">      Integer sqlType = config.getSQLType(mapType, key, valType);</span>
 <span class="pc bpc" id="L62" title="1 of 2 branches missed.">      if (sqlType != null) {</span>
 <span class="nc" id="L63">        ValueBinderFactory factory = ValueBinderFactory.getInstance();</span>
 <span class="nc" id="L64">        ValueBinder vb = factory.getBinder(valType, sqlType);</span>
-<span class="nc" id="L65">        bind(ps, param, vb, val);</span>
+<span class="nc" id="L65">        bind(stmt, param, vb, val);</span>
 <span class="nc" id="L66">        continue;</span>
       }
 <span class="pc bpc" id="L68" title="1 of 2 branches missed.">      if (isSubtype(valType, Enum.class)) {</span>
 <span class="nc bnc" id="L69" title="All 2 branches missed.">        ValueBinder vb = config.saveEnumAsString(mapType, key, valType)</span>
 <span class="nc" id="L70">              ? ValueBinder.ANY_TO_STRING</span>
 <span class="nc" id="L71">              : EnumBinderLookup.DEFAULT;</span>
-<span class="nc" id="L72">        bind(ps, param, vb, val);</span>
+<span class="nc" id="L72">        bind(stmt, param, vb, val);</span>
 <span class="nc" id="L73">        continue;</span>
       }
 <span class="pc bpc" id="L75" title="1 of 2 branches missed.">      if (isSubtype(valType, TemporalAccessor.class)) {</span>
 <span class="nc" id="L76">        DateTimeFormatter dtf = config.getDateTimeFormatter(mapType, key, valType);</span>
 <span class="nc bnc" id="L77" title="All 2 branches missed.">        if (dtf != null) {</span>
 <span class="nc" id="L78">          ValueBinder vb = ValueBinder.dateTimeToString(dtf);</span>
-<span class="nc" id="L79">          bind(ps, param, vb, val);</span>
+<span class="nc" id="L79">          bind(stmt, param, vb, val);</span>
 <span class="nc" id="L80">          continue;</span>
         }
       }
 <span class="fc" id="L83">      Function&lt;Object, String&gt; ser0 = config.getSerializer(mapType, key, valType);</span>
 <span class="pc bpc" id="L84" title="1 of 2 branches missed.">      if (ser0 != null) {</span>
 <span class="nc" id="L85">        ValueBinder vb = new ValueBinder&lt;&gt;(SET_STRING, ser0);</span>
-<span class="nc" id="L86">        bind(ps, param, vb, val);</span>
+<span class="nc" id="L86">        bind(stmt, param, vb, val);</span>
 <span class="nc" id="L87">        continue;</span>
       }
 <span class="fc" id="L89">      Function&lt;Object, byte[]&gt; ser1 = config.getBinarySerializer(mapType, key, valType);</span>
 <span class="pc bpc" id="L90" title="1 of 2 branches missed.">      if (ser1 != null) {</span>
 <span class="nc" id="L91">        ValueBinder vb = new ValueBinder&lt;&gt;(SET_BYTES, ser1);</span>
-<span class="nc" id="L92">        bind(ps, param, vb, val);</span>
+<span class="nc" id="L92">        bind(stmt, param, vb, val);</span>
 <span class="nc" id="L93">        continue;</span>
       }
 <span class="fc" id="L95">      ValueBinderFactory factory = ValueBinderFactory.getInstance();</span>
 <span class="fc" id="L96">      ValueBinder vb = factory.getDefaultBinder(valType);</span>
-<span class="fc" id="L97">      bind(ps, param, vb, val);</span>
+<span class="fc" id="L97">      bind(stmt, param, vb, val);</span>
 <span class="fc" id="L98">    }</span>
 <span class="fc" id="L99">  }</span>
 
   @SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
-  private static void bind(PreparedStatement ps,
+  private static void bind(PreparedStatement stmt,
         NamedParameter param,
         ValueBinder vb,
         Object val) throws Throwable {
@@ -112,7 +112,7 @@ public final class MapBinder {
 <span class="fc" id="L112">        LOG.trace(&quot;==&gt; Parameter \&quot;{}\&quot;: {}&quot;, key, output);</span>
       }
     }
-<span class="fc" id="L115">    param.positions().forEachThrowing(i -&gt; vb.bind(ps, i, output));</span>
+<span class="fc" id="L115">    param.positions().forEachThrowing(i -&gt; vb.bind(stmt, i, output));</span>
 <span class="fc" id="L116">  }</span>
 
 }
