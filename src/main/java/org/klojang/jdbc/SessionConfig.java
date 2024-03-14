@@ -85,8 +85,8 @@ public interface SessionConfig {
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map} that
    *       will receive the value from the {@code ResultSet}. Note that when writing to a
    *       {@code Map} (using a {@link MapExtractor}), this argument will always be
-   *       {@code HashMap.class} because that happens to be the type of {@code Map} that a
-   *       {@link MapExtractor} creates.
+   *       {@code Map.class} irrespective of the exact type of the {@code Map} returned by
+   *       the {@code MapExtractor}.
    * @param propertyName the name of the bean property, record component, or map key
    *       that will receive the value from the {@code ResultSet}
    * @param propertyType the type of the values for which to specify a
@@ -141,8 +141,7 @@ public interface SessionConfig {
    * returns {@code false}, meaning that by default <i>Klojang JDBC</i> will save enums as
    * ints. More precisely: enums will be <i>bound</i> using
    * {@code preparedStatement.setInt(paramIndex, myEnum.ordinal())}. The target column
-   * may
-   * <i>still</i> be a {@code VARCHAR} column since most databases will easily convert
+   * may <i>still</i> be a {@code VARCHAR} column since most databases will easily convert
    * integers to strings when needed. Whichever option you choose, the reverse process
    * &#8212; converting {@code ResultSet} values to enums &#8212; will always work
    * correctly, without requiring additional configuration. You may ignore any or all

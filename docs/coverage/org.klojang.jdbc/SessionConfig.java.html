@@ -85,8 +85,8 @@ public interface SessionConfig {
    * @param beanType the type of the JavaBean, {@code record}, or {@code Map} that
    *       will receive the value from the {@code ResultSet}. Note that when writing to a
    *       {@code Map} (using a {@link MapExtractor}), this argument will always be
-   *       {@code HashMap.class} because that happens to be the type of {@code Map} that a
-   *       {@link MapExtractor} creates.
+   *       {@code Map.class} irrespective of the exact type of the {@code Map} returned by
+   *       the {@code MapExtractor}.
    * @param propertyName the name of the bean property, record component, or map key
    *       that will receive the value from the {@code ResultSet}
    * @param propertyType the type of the values for which to specify a
@@ -141,8 +141,7 @@ public interface SessionConfig {
    * returns {@code false}, meaning that by default &lt;i&gt;Klojang JDBC&lt;/i&gt; will save enums as
    * ints. More precisely: enums will be &lt;i&gt;bound&lt;/i&gt; using
    * {@code preparedStatement.setInt(paramIndex, myEnum.ordinal())}. The target column
-   * may
-   * &lt;i&gt;still&lt;/i&gt; be a {@code VARCHAR} column since most databases will easily convert
+   * may &lt;i&gt;still&lt;/i&gt; be a {@code VARCHAR} column since most databases will easily convert
    * integers to strings when needed. Whichever option you choose, the reverse process
    * &amp;#8212; converting {@code ResultSet} values to enums &amp;#8212; will always work
    * correctly, without requiring additional configuration. You may ignore any or all
@@ -164,7 +163,7 @@ public interface SessionConfig {
   default boolean saveEnumAsString(Class&lt;?&gt; beanType,
         String enumProperty,
         Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="nc" id="L167">    return false;</span>
+<span class="nc" id="L166">    return false;</span>
   }
 
   /**
@@ -196,7 +195,7 @@ public interface SessionConfig {
   default DateTimeFormatter getDateTimeFormatter(Class&lt;?&gt; beanType,
         String dateTimeProperty,
         Class&lt;? extends TemporalAccessor&gt; dateTimeType) {
-<span class="nc" id="L199">    return null;</span>
+<span class="nc" id="L198">    return null;</span>
   }
 
   /**
@@ -240,7 +239,7 @@ public interface SessionConfig {
   default Function&lt;Object, String&gt; getSerializer(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L243">    return null;</span>
+<span class="fc" id="L242">    return null;</span>
   }
 
   /**
@@ -277,7 +276,7 @@ public interface SessionConfig {
   default Function&lt;Object, byte[]&gt; getBinarySerializer(Class&lt;?&gt; beanType,
         String propertyName,
         Class&lt;?&gt; propertyType) {
-<span class="fc" id="L280">    return null;</span>
+<span class="fc" id="L279">    return null;</span>
   }
 
   /**
@@ -293,7 +292,7 @@ public interface SessionConfig {
    *       components, or map keys to column names
    */
   default NameMapper getPropertyToColumnMapper() {
-<span class="fc" id="L296">    return camelCaseToSnakeUpperCase();</span>
+<span class="fc" id="L295">    return camelCaseToSnakeUpperCase();</span>
   }
 
   /**
@@ -309,7 +308,7 @@ public interface SessionConfig {
    *       properties, record components, or map keys
    */
   default NameMapper getColumnToPropertyMapper() {
-<span class="fc" id="L312">    return snakeCaseToCamelCase();</span>
+<span class="fc" id="L311">    return snakeCaseToCamelCase();</span>
   }
 
   /**
@@ -322,8 +321,8 @@ public interface SessionConfig {
    *       property-to-column mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withPropertyToColumnMapper(NameMapper mapper) {
-<span class="fc" id="L325">    return new SessionConfig() {</span>
-<span class="fc" id="L326">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
+<span class="fc" id="L324">    return new SessionConfig() {</span>
+<span class="fc" id="L325">      public NameMapper getPropertyToColumnMapper() { return mapper; }</span>
     };
   }
 
@@ -337,8 +336,8 @@ public interface SessionConfig {
    *       column-to-property mapper set to the specified {@code NameMapper}.
    */
   default SessionConfig withColumnToPropertyMapper(NameMapper mapper) {
-<span class="nc" id="L340">    return new SessionConfig() {</span>
-<span class="nc" id="L341">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
+<span class="nc" id="L339">    return new SessionConfig() {</span>
+<span class="nc" id="L340">      public NameMapper getColumnToPropertyMapper() { return mapper; }</span>
     };
   }
 
@@ -351,10 +350,10 @@ public interface SessionConfig {
    * @see NameMapper#AS_IS
    */
   default SessionConfig withNamesMappedAsIs() {
-<span class="nc" id="L354">    return new SessionConfig() {</span>
-<span class="nc" id="L355">      public NameMapper getPropertyToColumnMapper() { return NameMapper.AS_IS; }</span>
+<span class="nc" id="L353">    return new SessionConfig() {</span>
+<span class="nc" id="L354">      public NameMapper getPropertyToColumnMapper() { return NameMapper.AS_IS; }</span>
 
-<span class="nc" id="L357">      public NameMapper getColumnToPropertyMapper() { return NameMapper.AS_IS; }</span>
+<span class="nc" id="L356">      public NameMapper getColumnToPropertyMapper() { return NameMapper.AS_IS; }</span>
     };
   }
 
@@ -377,8 +376,8 @@ public interface SessionConfig {
    *       camelCaseToSnakeLowerCase()} name mapper
    */
   default SessionConfig withLowerCaseColumnNames() {
-<span class="nc" id="L380">    return new SessionConfig() {</span>
-<span class="nc" id="L381">      public NameMapper getPropertyToColumnMapper() { return camelCaseToSnakeLowerCase(); }</span>
+<span class="nc" id="L379">    return new SessionConfig() {</span>
+<span class="nc" id="L380">      public NameMapper getPropertyToColumnMapper() { return camelCaseToSnakeLowerCase(); }</span>
     };
   }
 
@@ -390,11 +389,11 @@ public interface SessionConfig {
    *       will be saved by calling {@code toString()} on them.
    */
   default SessionConfig withEnumsSavedAsStrings() {
-<span class="fc" id="L393">    return new SessionConfig() {</span>
+<span class="fc" id="L392">    return new SessionConfig() {</span>
       public boolean saveEnumAsString(Class&lt;?&gt; beanType,
             String enumProperty,
             Class&lt;? extends Enum&lt;?&gt;&gt; enumType) {
-<span class="fc" id="L397">        return true;</span>
+<span class="fc" id="L396">        return true;</span>
       }
     };
   }
