@@ -14,13 +14,13 @@ import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.BatchQuery.QueryId;
 
 /**
- * Functions as the cleaner function for the QueryCache. Treat it as though it were a
+ * Functions as the cleaner function for the LiveQueryCache. Treat it as though it were a
  * private static inner class of QueryCache. Do _not_ instantiate it and do _not_ use it
- * directly. Always go via the QueryCache.
+ * directly. Always go via the LiveQueryCache.
  */
-final class QueryCacheManager implements Runnable {
+final class LiveQueryBroker implements Runnable {
 
-  private static final Logger LOG = LoggerFactory.getLogger(QueryCacheManager.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LiveQueryBroker.class);
   private static final long CHECK_INTERVAL = 2 * 60 * 1000; // every 2 minutes
 
   private final Map<QueryId, LiveQuery> cache = new HashMap<>();

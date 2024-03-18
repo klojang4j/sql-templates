@@ -41,10 +41,8 @@ import static org.klojang.jdbc.x.Strings.QUERY;
  * <p>Instead, simply write:
  *
  * <blockquote><pre>{@code
- * @SuppressWarnings("resource")
  * Connection con = ...;
  * SQLSession session = SQL.staticSQL("SELECT * FROM PERSON").session(con);
- * @SuppressWarnings("resource")
  * SQLQuery query = session.prepareQuery();
  * QueryId queryId = BatchQuery.pin(query);
  * BatchQuery<Person> batchQuery = new BatchQuery<>(queryId, Person.class);
@@ -109,7 +107,7 @@ public final class BatchQuery<T> {
         boolean closeConnection) {
     Check.notNull(query, QUERY);
     Check.notNull(stayAliveTime, "stayAliveTime");
-    QueryCache cache = QueryCache.getInstance();
+    LiveQueryCache cache = LiveQueryCache.getInstance();
     return cache.addQuery(query, stayAliveTime.getSeconds(), closeConnection);
   }
 
@@ -119,7 +117,7 @@ public final class BatchQuery<T> {
    * {@link #nextBatch(int) nextBatch()} will cause a {@link DatabaseException}.
    */
   public static void terminateAll() {
-    QueryCache.getInstance().terminateAll();
+    LiveQueryCache.getInstance().terminateAll();
   }
 
 
@@ -149,7 +147,7 @@ public final class BatchQuery<T> {
    */
   public BatchQuery(QueryId queryId, Class<T> clazz) {
     this.queryId = queryId;
-    SQLQuery query = QueryCache.getInstance().getSQLQuery(queryId);
+    SQLQuery query = LiveQueryCache.getInstance().getSQLQuery(queryId);
     factory = query.getSession().getSQL().getBeanExtractorFactory(clazz);
   }
 
@@ -165,7 +163,7 @@ public final class BatchQuery<T> {
    */
   public BatchQuery(QueryId queryId, Class<T> clazz, Supplier<T> beanSupplier) {
     this.queryId = queryId;
-    SQLQuery query = QueryCache.getInstance().getSQLQuery(queryId);
+    SQLQuery query = LiveQueryCache.getInstance().getSQLQuery(queryId);
     factory = query.getSession().getSQL().getBeanExtractorFactory(clazz, beanSupplier);
   }
 
@@ -182,7 +180,7 @@ public final class BatchQuery<T> {
   @SuppressWarnings("unchecked")
   public BatchQuery(QueryId queryId) {
     this.queryId = queryId;
-    SQLQuery query = QueryCache.getInstance().getSQLQuery(queryId);
+    SQLQuery query = LiveQueryCache.getInstance().getSQLQuery(queryId);
     factory = (ExtractorFactory<T>) query.getSession().getSQL().getMapExtractorFactory();
   }
 
@@ -197,7 +195,7 @@ public final class BatchQuery<T> {
    * @return the next batch of records, converted into instances of type {@code <T>}
    */
   public List<T> nextBatch(int batchSize) {
-    ResultSet rs = QueryCache.getInstance().getResultSet(queryId);
+    ResultSet rs = LiveQueryCache.getInstance().getResultSet(queryId);
     BeanExtractor<T> extractor = factory.getExtractor(rs);
     List<T> beans = extractor.extract(batchSize);
     if (extractor.isEmpty()) {
@@ -216,7 +214,7 @@ public final class BatchQuery<T> {
    * long after requests for new batches have stopped coming in.
    */
   public void terminate() {
-    QueryCache.getInstance().terminate(queryId);
+    LiveQueryCache.getInstance().terminate(queryId);
   }
 
   /**

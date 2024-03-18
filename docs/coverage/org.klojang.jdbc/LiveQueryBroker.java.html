@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QueryCacheManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">QueryCacheManager.java</span></div><h1>QueryCacheManager.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LiveQueryBroker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Klojang JDBC</a> &gt; <a href="index.source.html" class="el_package">org.klojang.jdbc</a> &gt; <span class="el_source">LiveQueryBroker.java</span></div><h1>LiveQueryBroker.java</h1><pre class="source lang-java linenums">package org.klojang.jdbc;
 
 import org.klojang.jdbc.x.Err;
 import org.klojang.jdbc.x.Utils;
@@ -14,13 +14,13 @@ import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.BatchQuery.QueryId;
 
 /**
- * Functions as the cleaner function for the QueryCache. Treat it as though it were a
+ * Functions as the cleaner function for the LiveQueryCache. Treat it as though it were a
  * private static inner class of QueryCache. Do _not_ instantiate it and do _not_ use it
- * directly. Always go via the QueryCache.
+ * directly. Always go via the LiveQueryCache.
  */
-<span class="nc" id="L21">final class QueryCacheManager implements Runnable {</span>
+<span class="nc" id="L21">final class LiveQueryBroker implements Runnable {</span>
 
-<span class="nc" id="L23">  private static final Logger LOG = LoggerFactory.getLogger(QueryCacheManager.class);</span>
+<span class="nc" id="L23">  private static final Logger LOG = LoggerFactory.getLogger(LiveQueryBroker.class);</span>
   private static final long CHECK_INTERVAL = 2 * 60 * 1000; // every 2 minutes
 
 <span class="nc" id="L26">  private final Map&lt;QueryId, LiveQuery&gt; cache = new HashMap&lt;&gt;();</span>

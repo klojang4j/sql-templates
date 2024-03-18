@@ -54,6 +54,7 @@ final class LiveQuery {
     }
   }
 
+  // Same as terminate(), just without the logging niceness
   void kill() {
     try {
       query.close();
