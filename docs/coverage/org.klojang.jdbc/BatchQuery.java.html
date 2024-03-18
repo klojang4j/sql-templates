@@ -107,17 +107,17 @@ public final class BatchQuery&lt;T&gt; {
         boolean closeConnection) {
 <span class="nc" id="L108">    Check.notNull(query, QUERY);</span>
 <span class="nc" id="L109">    Check.notNull(stayAliveTime, &quot;stayAliveTime&quot;);</span>
-<span class="nc" id="L110">    LiveQueryCache cache = LiveQueryCache.getInstance();</span>
-<span class="nc" id="L111">    return cache.addQuery(query, stayAliveTime.getSeconds(), closeConnection);</span>
+<span class="nc" id="L110">    LiveQueryBroker broker = LiveQueryBroker.getInstance();</span>
+<span class="nc" id="L111">    return broker.register(query, stayAliveTime.getSeconds(), closeConnection);</span>
   }
 
   /**
    * Terminates and unpins all {@link SQLQuery} objects. All {@code BatchQuery} objects
-   * instantiated before calling this method will effectively become unusable. Calls to
+   * instantiated before calling this method will become unusable. Calls to
    * {@link #nextBatch(int) nextBatch()} will cause a {@link DatabaseException}.
    */
   public static void terminateAll() {
-<span class="nc" id="L120">    LiveQueryCache.getInstance().terminateAll();</span>
+<span class="nc" id="L120">    LiveQueryBroker.getInstance().terminateAll();</span>
 <span class="nc" id="L121">  }</span>
 
 
@@ -147,7 +147,7 @@ public final class BatchQuery&lt;T&gt; {
    */
 <span class="nc" id="L148">  public BatchQuery(QueryId queryId, Class&lt;T&gt; clazz) {</span>
 <span class="nc" id="L149">    this.queryId = queryId;</span>
-<span class="nc" id="L150">    SQLQuery query = LiveQueryCache.getInstance().getSQLQuery(queryId);</span>
+<span class="nc" id="L150">    SQLQuery query = LiveQueryBroker.getInstance().getQuery(queryId);</span>
 <span class="nc" id="L151">    factory = query.getSession().getSQL().getBeanExtractorFactory(clazz);</span>
 <span class="nc" id="L152">  }</span>
 
@@ -163,7 +163,7 @@ public final class BatchQuery&lt;T&gt; {
    */
 <span class="nc" id="L164">  public BatchQuery(QueryId queryId, Class&lt;T&gt; clazz, Supplier&lt;T&gt; beanSupplier) {</span>
 <span class="nc" id="L165">    this.queryId = queryId;</span>
-<span class="nc" id="L166">    SQLQuery query = LiveQueryCache.getInstance().getSQLQuery(queryId);</span>
+<span class="nc" id="L166">    SQLQuery query = LiveQueryBroker.getInstance().getQuery(queryId);</span>
 <span class="nc" id="L167">    factory = query.getSession().getSQL().getBeanExtractorFactory(clazz, beanSupplier);</span>
 <span class="nc" id="L168">  }</span>
 
@@ -180,7 +180,7 @@ public final class BatchQuery&lt;T&gt; {
   @SuppressWarnings(&quot;unchecked&quot;)
 <span class="nc" id="L181">  public BatchQuery(QueryId queryId) {</span>
 <span class="nc" id="L182">    this.queryId = queryId;</span>
-<span class="nc" id="L183">    SQLQuery query = LiveQueryCache.getInstance().getSQLQuery(queryId);</span>
+<span class="nc" id="L183">    SQLQuery query = LiveQueryBroker.getInstance().getQuery(queryId);</span>
 <span class="nc" id="L184">    factory = (ExtractorFactory&lt;T&gt;) query.getSession().getSQL().getMapExtractorFactory();</span>
 <span class="nc" id="L185">  }</span>
 
@@ -195,7 +195,7 @@ public final class BatchQuery&lt;T&gt; {
    * @return the next batch of records, converted into instances of type {@code &lt;T&gt;}
    */
   public List&lt;T&gt; nextBatch(int batchSize) {
-<span class="nc" id="L198">    ResultSet rs = LiveQueryCache.getInstance().getResultSet(queryId);</span>
+<span class="nc" id="L198">    ResultSet rs = LiveQueryBroker.getInstance().getResultSet(queryId);</span>
 <span class="nc" id="L199">    BeanExtractor&lt;T&gt; extractor = factory.getExtractor(rs);</span>
 <span class="nc" id="L200">    List&lt;T&gt; beans = extractor.extract(batchSize);</span>
 <span class="nc bnc" id="L201" title="All 2 branches missed.">    if (extractor.isEmpty()) {</span>
@@ -214,7 +214,7 @@ public final class BatchQuery&lt;T&gt; {
    * long after requests for new batches have stopped coming in.
    */
   public void terminate() {
-<span class="nc" id="L217">    LiveQueryCache.getInstance().terminate(queryId);</span>
+<span class="nc" id="L217">    LiveQueryBroker.getInstance().terminate(queryId);</span>
 <span class="nc" id="L218">  }</span>
 
   /**

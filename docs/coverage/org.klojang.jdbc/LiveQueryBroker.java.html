@@ -9,19 +9,19 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.System.identityHashCode;
 import static org.klojang.check.CommonChecks.keyIn;
 import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.BatchQuery.QueryId;
 
-/**
- * Functions as the cleaner function for the LiveQueryCache. Treat it as though it were a
- * private static inner class of QueryCache. Do _not_ instantiate it and do _not_ use it
- * directly. Always go via the LiveQueryCache.
- */
-<span class="nc" id="L21">final class LiveQueryBroker implements Runnable {</span>
+<span class="nc" id="L17">final class LiveQueryBroker {</span>
 
-<span class="nc" id="L23">  private static final Logger LOG = LoggerFactory.getLogger(LiveQueryBroker.class);</span>
+<span class="nc" id="L19">  private static final Logger LOG = LoggerFactory.getLogger(LiveQueryBroker.class);</span>
   private static final long CHECK_INTERVAL = 2 * 60 * 1000; // every 2 minutes
+<span class="nc" id="L21">  private static final LiveQueryBroker INSTANCE = new LiveQueryBroker();</span>
+
+<span class="nc" id="L23">  static LiveQueryBroker getInstance() { return INSTANCE; }</span>
+
 
 <span class="nc" id="L26">  private final Map&lt;QueryId, LiveQuery&gt; cache = new HashMap&lt;&gt;();</span>
 
@@ -35,7 +35,7 @@ import static org.klojang.jdbc.BatchQuery.QueryId;
     }
   }
 
-  SQLQuery getSQLQuery(QueryId id) {
+  SQLQuery getQuery(QueryId id) {
 <span class="nc" id="L39">    synchronized (cache) {</span>
 <span class="nc" id="L40">      LiveQuery query = cache.get(id);</span>
 <span class="nc" id="L41">      Utils.check(query).is(notNull(), Err.STALE_QUERY, id);</span>
@@ -43,85 +43,82 @@ import static org.klojang.jdbc.BatchQuery.QueryId;
     }
   }
 
-  void add(QueryId id, LiveQuery query) {
-<span class="nc" id="L47">    synchronized (cache) {</span>
-<span class="nc" id="L48">      Utils.check(id).isNot(keyIn(), cache, &quot;query already registered (id={})&quot;, id);</span>
-<span class="nc" id="L49">      LOG.trace(&quot;Registering query (id={})&quot;, id);</span>
-<span class="nc" id="L50">      cache.put(id, query);</span>
-<span class="nc bnc" id="L51" title="All 2 branches missed.">      if (cleaner == null) {</span>
-<span class="nc" id="L52">        startCleaning();</span>
+  QueryId register(SQLQuery query, long stayAliveSeconds, boolean closeConnection) {
+<span class="nc" id="L47">    var hash = identityHashCode(query.getResultSet());</span>
+<span class="nc" id="L48">    var id = QueryId.of(String.valueOf(hash));</span>
+<span class="nc" id="L49">    var liveQuery = new LiveQuery(query, stayAliveSeconds, closeConnection);</span>
+<span class="nc" id="L50">    synchronized (cache) {</span>
+<span class="nc" id="L51">      Utils.check(id).isNot(keyIn(), cache, &quot;query already registered (id={})&quot;, id);</span>
+<span class="nc" id="L52">      LOG.trace(&quot;Registering query (id={})&quot;, id);</span>
+<span class="nc" id="L53">      cache.put(id, liveQuery);</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">      if (cleaner == null) {</span>
+<span class="nc" id="L55">        startCleaning();</span>
       }
-<span class="nc" id="L54">    }</span>
-<span class="nc" id="L55">  }</span>
+<span class="nc" id="L57">    }</span>
+<span class="nc" id="L58">    return id;</span>
+  }
 
   void terminate(QueryId id) {
-<span class="nc" id="L58">    synchronized (cache) {</span>
-<span class="nc" id="L59">      LiveQuery query = cache.remove(id);</span>
-<span class="nc bnc" id="L60" title="All 2 branches missed.">      if (query != null) {</span>
-<span class="nc" id="L61">        query.terminate(id);</span>
-<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (cache.isEmpty()) {</span>
-<span class="nc" id="L63">          stopCleaning();</span>
+<span class="nc" id="L62">    synchronized (cache) {</span>
+<span class="nc" id="L63">      LiveQuery query = cache.remove(id);</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">      if (query != null) {</span>
+<span class="nc" id="L65">        query.terminate(id);</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (cache.isEmpty()) {</span>
+<span class="nc" id="L67">          stopCleaning();</span>
         }
       }
-<span class="nc" id="L66">    }</span>
-<span class="nc" id="L67">  }</span>
+<span class="nc" id="L70">    }</span>
+<span class="nc" id="L71">  }</span>
 
   void terminateAll() {
-<span class="nc" id="L70">    stopCleaning();</span>
-<span class="nc" id="L71">    synchronized (cache) {</span>
-<span class="nc" id="L72">      LOG.trace(&quot;Terminating all queries&quot;);</span>
-<span class="nc" id="L73">      cache.forEach((id, query) -&gt; query.terminate(id));</span>
-<span class="nc" id="L74">      cache.clear();</span>
-<span class="nc" id="L75">    }</span>
-<span class="nc" id="L76">  }</span>
-
-  @Override
-  public void run() {
-<span class="nc" id="L80">    stopCleaning();</span>
-<span class="nc" id="L81">    cache.values().forEach(LiveQuery::kill);</span>
-<span class="nc" id="L82">    cache.clear();</span>
-<span class="nc" id="L83">  }</span>
+<span class="nc" id="L74">    stopCleaning();</span>
+<span class="nc" id="L75">    synchronized (cache) {</span>
+<span class="nc" id="L76">      LOG.trace(&quot;Terminating all queries&quot;);</span>
+<span class="nc" id="L77">      cache.forEach((id, query) -&gt; query.terminate(id));</span>
+<span class="nc" id="L78">      cache.clear();</span>
+<span class="nc" id="L79">    }</span>
+<span class="nc" id="L80">  }</span>
 
   private void startCleaning() {
-<span class="nc" id="L86">    cleaner = Thread.ofVirtual().start(this::removeStaleQueries);</span>
-<span class="nc" id="L87">  }</span>
+<span class="nc" id="L83">    cleaner = Thread.ofVirtual().start(this::removeStaleQueries);</span>
+<span class="nc" id="L84">  }</span>
 
   private void stopCleaning() {
-<span class="nc bnc" id="L90" title="All 2 branches missed.">    if (cleaner != null) {</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">    if (cleaner != null) {</span>
       try {
-<span class="nc" id="L92">        cleaner.interrupt();</span>
+<span class="nc" id="L89">        cleaner.interrupt();</span>
       } finally {
-<span class="nc" id="L94">        cleaner = null;</span>
+<span class="nc" id="L91">        cleaner = null;</span>
       }
     }
-<span class="nc" id="L97">  }</span>
+<span class="nc" id="L94">  }</span>
 
   private void removeStaleQueries() {
     while (true) {
       try {
-<span class="nc" id="L102">        Thread.sleep(CHECK_INTERVAL);</span>
-<span class="nc" id="L103">      } catch (InterruptedException e) {</span>
-<span class="nc" id="L104">        LOG.trace(&quot;Aborting staleness check&quot;);</span>
-<span class="nc" id="L105">        cleaner = null;</span>
-<span class="nc" id="L106">        break;</span>
-<span class="nc" id="L107">      }</span>
-<span class="nc" id="L108">      synchronized (cache) {</span>
-<span class="nc" id="L109">        var iterator = cache.entrySet().iterator();</span>
-<span class="nc bnc" id="L110" title="All 2 branches missed.">        while (iterator.hasNext()) {</span>
-<span class="nc" id="L111">          var entry = iterator.next();</span>
-<span class="nc" id="L112">          var id = entry.getKey();</span>
-<span class="nc" id="L113">          var query = entry.getValue();</span>
-<span class="nc bnc" id="L114" title="All 2 branches missed.">          if (query.isStale()) {</span>
-<span class="nc" id="L115">            query.terminate(id);</span>
-<span class="nc" id="L116">            iterator.remove();</span>
+<span class="nc" id="L99">        Thread.sleep(CHECK_INTERVAL);</span>
+<span class="nc" id="L100">      } catch (InterruptedException e) {</span>
+<span class="nc" id="L101">        LOG.trace(&quot;Aborting staleness check&quot;);</span>
+<span class="nc" id="L102">        cleaner = null;</span>
+<span class="nc" id="L103">        break;</span>
+<span class="nc" id="L104">      }</span>
+<span class="nc" id="L105">      synchronized (cache) {</span>
+<span class="nc" id="L106">        var iterator = cache.entrySet().iterator();</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        while (iterator.hasNext()) {</span>
+<span class="nc" id="L108">          var entry = iterator.next();</span>
+<span class="nc" id="L109">          var id = entry.getKey();</span>
+<span class="nc" id="L110">          var query = entry.getValue();</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">          if (query.isStale()) {</span>
+<span class="nc" id="L112">            query.terminate(id);</span>
+<span class="nc" id="L113">            iterator.remove();</span>
           }
-<span class="nc" id="L118">        }</span>
-<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (cache.isEmpty()) {</span>
-<span class="nc" id="L120">          cleaner = null;</span>
-<span class="nc" id="L121">          break;</span>
+<span class="nc" id="L115">        }</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (cache.isEmpty()) {</span>
+<span class="nc" id="L117">          cleaner = null;</span>
+<span class="nc" id="L118">          break;</span>
         }
-<span class="nc" id="L123">      }</span>
+<span class="nc" id="L120">      }</span>
     }
-<span class="nc" id="L125">  }</span>
+<span class="nc" id="L122">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -107,17 +107,17 @@ public final class BatchQuery<T> {
         boolean closeConnection) {
     Check.notNull(query, QUERY);
     Check.notNull(stayAliveTime, "stayAliveTime");
-    LiveQueryCache cache = LiveQueryCache.getInstance();
-    return cache.addQuery(query, stayAliveTime.getSeconds(), closeConnection);
+    LiveQueryBroker broker = LiveQueryBroker.getInstance();
+    return broker.register(query, stayAliveTime.getSeconds(), closeConnection);
   }
 
   /**
    * Terminates and unpins all {@link SQLQuery} objects. All {@code BatchQuery} objects
-   * instantiated before calling this method will effectively become unusable. Calls to
+   * instantiated before calling this method will become unusable. Calls to
    * {@link #nextBatch(int) nextBatch()} will cause a {@link DatabaseException}.
    */
   public static void terminateAll() {
-    LiveQueryCache.getInstance().terminateAll();
+    LiveQueryBroker.getInstance().terminateAll();
   }
 
 
@@ -147,7 +147,7 @@ public final class BatchQuery<T> {
    */
   public BatchQuery(QueryId queryId, Class<T> clazz) {
     this.queryId = queryId;
-    SQLQuery query = LiveQueryCache.getInstance().getSQLQuery(queryId);
+    SQLQuery query = LiveQueryBroker.getInstance().getQuery(queryId);
     factory = query.getSession().getSQL().getBeanExtractorFactory(clazz);
   }
 
@@ -163,7 +163,7 @@ public final class BatchQuery<T> {
    */
   public BatchQuery(QueryId queryId, Class<T> clazz, Supplier<T> beanSupplier) {
     this.queryId = queryId;
-    SQLQuery query = LiveQueryCache.getInstance().getSQLQuery(queryId);
+    SQLQuery query = LiveQueryBroker.getInstance().getQuery(queryId);
     factory = query.getSession().getSQL().getBeanExtractorFactory(clazz, beanSupplier);
   }
 
@@ -180,7 +180,7 @@ public final class BatchQuery<T> {
   @SuppressWarnings("unchecked")
   public BatchQuery(QueryId queryId) {
     this.queryId = queryId;
-    SQLQuery query = LiveQueryCache.getInstance().getSQLQuery(queryId);
+    SQLQuery query = LiveQueryBroker.getInstance().getQuery(queryId);
     factory = (ExtractorFactory<T>) query.getSession().getSQL().getMapExtractorFactory();
   }
 
@@ -195,7 +195,7 @@ public final class BatchQuery<T> {
    * @return the next batch of records, converted into instances of type {@code <T>}
    */
   public List<T> nextBatch(int batchSize) {
-    ResultSet rs = LiveQueryCache.getInstance().getResultSet(queryId);
+    ResultSet rs = LiveQueryBroker.getInstance().getResultSet(queryId);
     BeanExtractor<T> extractor = factory.getExtractor(rs);
     List<T> beans = extractor.extract(batchSize);
     if (extractor.isEmpty()) {
@@ -214,7 +214,7 @@ public final class BatchQuery<T> {
    * long after requests for new batches have stopped coming in.
    */
   public void terminate() {
-    LiveQueryCache.getInstance().terminate(queryId);
+    LiveQueryBroker.getInstance().terminate(queryId);
   }
 
   /**

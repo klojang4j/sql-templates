@@ -9,19 +9,19 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.System.identityHashCode;
 import static org.klojang.check.CommonChecks.keyIn;
 import static org.klojang.check.CommonChecks.notNull;
 import static org.klojang.jdbc.BatchQuery.QueryId;
 
-/**
- * Functions as the cleaner function for the LiveQueryCache. Treat it as though it were a
- * private static inner class of QueryCache. Do _not_ instantiate it and do _not_ use it
- * directly. Always go via the LiveQueryCache.
- */
-final class LiveQueryBroker implements Runnable {
+final class LiveQueryBroker {
 
   private static final Logger LOG = LoggerFactory.getLogger(LiveQueryBroker.class);
   private static final long CHECK_INTERVAL = 2 * 60 * 1000; // every 2 minutes
+  private static final LiveQueryBroker INSTANCE = new LiveQueryBroker();
+
+  static LiveQueryBroker getInstance() { return INSTANCE; }
+
 
   private final Map<QueryId, LiveQuery> cache = new HashMap<>();
 
@@ -35,7 +35,7 @@ final class LiveQueryBroker implements Runnable {
     }
   }
 
-  SQLQuery getSQLQuery(QueryId id) {
+  SQLQuery getQuery(QueryId id) {
     synchronized (cache) {
       LiveQuery query = cache.get(id);
       Utils.check(query).is(notNull(), Err.STALE_QUERY, id);
@@ -43,15 +43,19 @@ final class LiveQueryBroker implements Runnable {
     }
   }
 
-  void add(QueryId id, LiveQuery query) {
+  QueryId register(SQLQuery query, long stayAliveSeconds, boolean closeConnection) {
+    var hash = identityHashCode(query.getResultSet());
+    var id = QueryId.of(String.valueOf(hash));
+    var liveQuery = new LiveQuery(query, stayAliveSeconds, closeConnection);
     synchronized (cache) {
       Utils.check(id).isNot(keyIn(), cache, "query already registered (id={})", id);
       LOG.trace("Registering query (id={})", id);
-      cache.put(id, query);
+      cache.put(id, liveQuery);
       if (cleaner == null) {
         startCleaning();
       }
     }
+    return id;
   }
 
   void terminate(QueryId id) {
@@ -73,13 +77,6 @@ final class LiveQueryBroker implements Runnable {
       cache.forEach((id, query) -> query.terminate(id));
       cache.clear();
     }
-  }
-
-  @Override
-  public void run() {
-    stopCleaning();
-    cache.values().forEach(LiveQuery::kill);
-    cache.clear();
   }
 
   private void startCleaning() {

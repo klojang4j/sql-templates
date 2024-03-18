@@ -7,24 +7,24 @@ import java.sql.ResultSet;
 import java.time.Instant;
 
 import static org.klojang.jdbc.BatchQuery.QueryId;
+import static org.klojang.jdbc.x.Utils.CENTRAL_CLEANER;
 
 final class LiveQuery {
 
   private static final Logger LOG = LoggerFactory.getLogger(LiveQuery.class);
 
-  private final SQLQuery query;
+  private final QueryContainer query;
   private final long stayAliveSeconds;
-  private final boolean closeConnection;
 
   long lastRequested;
 
   LiveQuery(SQLQuery query,
         long stayAliveSeconds,
         boolean closeConnection) {
-    this.query = query;
+    this.query = new QueryContainer(query, closeConnection);
     this.stayAliveSeconds = stayAliveSeconds;
-    this.closeConnection = closeConnection;
     this.lastRequested = Instant.now().getEpochSecond();
+    CENTRAL_CLEANER.register(this, this.query);
   }
 
   boolean isStale() {
@@ -34,35 +34,54 @@ final class LiveQuery {
 
   ResultSet getResultSet() {
     lastRequested = Instant.now().getEpochSecond();
-    return query.getResultSet();
+    return query.get().getResultSet();
   }
 
   SQLQuery getSQLQuery() {
-    return query;
+    return query.get();
   }
 
   void terminate(QueryId id) {
-    LOG.trace("Terminating query (id={})", id);
-    try {
-      query.close();
-      if (closeConnection) {
-        LOG.trace("Closing connection for query (id={})", id);
-        query.getSession().getConnection().close();
-      }
-    } catch (Throwable t) {
-      LOG.error(t.toString(), t);
-    }
+    query.terminate(id);
   }
 
-  // Same as terminate(), just without the logging niceness
-  void kill() {
-    try {
-      query.close();
-      if (closeConnection) {
-        query.getSession().getConnection().close();
-      }
-    } catch (Throwable t) {
-      // ...
+
+  private static class QueryContainer implements Runnable {
+
+    private final SQLQuery query;
+    private final boolean closeConnection;
+
+    QueryContainer(SQLQuery query, boolean closeConnection) {
+      this.query = query;
+      this.closeConnection = closeConnection;
     }
+
+    @Override
+    public void run() {
+      try {
+        query.close();
+        if (closeConnection) {
+          query.getSession().getConnection().close();
+        }
+      } catch (Throwable t) {
+        // ...
+      }
+    }
+
+    SQLQuery get() { return query; }
+
+    void terminate(QueryId id) {
+      LOG.trace("Terminating query (id={})", id);
+      try {
+        query.close();
+        if (closeConnection) {
+          LOG.trace("Closing connection for query (id={})", id);
+          query.getSession().getConnection().close();
+        }
+      } catch (Throwable t) {
+        LOG.error(t.toString(), t);
+      }
+    }
+
   }
 }
