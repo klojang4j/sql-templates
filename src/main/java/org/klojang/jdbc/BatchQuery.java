@@ -22,6 +22,16 @@ import static org.klojang.jdbc.x.Strings.QUERY;
  * or forcibly terminated, the thread will itself be terminated (until a new persistent
  * query comes into existence).
  *
+ * <p>This class is aimed at avoiding the cost of "deep scrolling", whereby with
+ * each request the query is re-executed and "windowed" using the LIMIT clause
+ * ({@code LIMIT 0, 1000} ... {@code LIMIT 1000, 1000} ... {@code LIMIT 2000, 1000} ...
+ * etc.). This tends to be very expensive. How expensive exactly depends on many factors,
+ * but with large tables, using {@code BatchQuery} to avoid deep scrolling may increase
+ * performance by one or two orders of magnitude. The larger the table, and the more
+ * complex the query, the more you will benefit from using the {@code BatchQuery} class.
+ * Typically, it does not make much sense to use the {@code BatchQuery} class for result
+ * sets containing fewer than a million or so rows.
+ *
  * <p>Since the point is to keep the query alive across multiple requests, you may
  * have to suppress a (good) habit of always setting up try-with-resources blocks for
  * {@link AutoCloseable} objects (the JDBC {@link java.sql.Connection Connection} and the
