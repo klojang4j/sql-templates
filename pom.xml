@@ -7,16 +7,14 @@
 
     <groupId>org.klojang</groupId>
     <artifactId>klojang-jdbc</artifactId>
-    <version>1.1.5</version>
+    <version>1.1.6</version>
     <packaging>jar</packaging>
 
     <name>Klojang JDBC</name>
     <description>
-        A light-touch, non-intrusive JDBC extensions library that builds on Klojang Templates
-        to provide parametrization of parts of SQL that cannot be parametrized with JDBC
-        alone.
+        A light-touch, non-intrusive JDBC extensions library.
     </description>
-    <url>https://klojang4j.github.io/klojng-jdbc/</url>
+    <url>https://klojang4j.github.io/klojang-jdbc/</url>
 
     <licenses>
         <license>
@@ -40,9 +38,9 @@
     </organization>
 
     <scm>
-        <connection>scm:git:https://github.com/klojang4j/klojng-jdbc.git</connection>
-        <developerConnection>scm:git:https://github.com/klojang4j/klojng-jdbc.git</developerConnection>
-        <url>https://github.com/klojang4j/klojng-jdbc</url>
+        <connection>scm:git:https://github.com/klojang4j/klojang-jdbc.git</connection>
+        <developerConnection>scm:git:https://github.com/klojang4j/klojang-jdbc.git</developerConnection>
+        <url>https://github.com/klojang4j/klojang-jdbc</url>
     </scm>
 
     <distributionManagement>
@@ -353,7 +351,7 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-            <!--plugin>
+            <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
                 <version>${owasp-plugin.version}</version>
@@ -369,7 +367,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin-->
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
