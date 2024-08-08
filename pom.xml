@@ -7,7 +7,7 @@
 
     <groupId>org.klojang</groupId>
     <artifactId>klojang-jdbc</artifactId>
-    <version>1.1.6</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
 
     <name>Klojang JDBC</name>
@@ -89,7 +89,7 @@
         <klojang-collections.version>2.0.9</klojang-collections.version>
         <klojang-convert.version>1.0.8</klojang-convert.version>
         <klojang-invoke.version>2.0.4</klojang-invoke.version>
-        <klojang-templates.version>1.0.10</klojang-templates.version>
+        <klojang-templates.version>1.2.0</klojang-templates.version>
 
         <commons-text.version>1.11.0</commons-text.version>
         <apache-httpclient.version>4.5.14</apache-httpclient.version>
@@ -351,7 +351,7 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-            <plugin>
+            <!--plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
                 <version>${owasp-plugin.version}</version>
@@ -367,7 +367,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin-->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>

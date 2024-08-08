@@ -240,7 +240,7 @@ public sealed interface SQL permits AbstractSQL {
    *       <i>Klojang Templates</i> variables
    */
   static SQL simple(SessionConfig config, Class<?> clazz, String sqlFile) {
-    return SQLCache.get(clazz, sqlFile, SQL::simple);
+    return SQLCache.get(clazz, sqlFile, config, SQL::simple);
   }
 
   /**
